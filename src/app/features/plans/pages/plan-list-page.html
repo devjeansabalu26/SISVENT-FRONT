@@ -1,0 +1,38 @@
+<app-page-header title="Planes SISVENT" description="Administración de planes comerciales de la plataforma">
+  <a class="primary" routerLink="/app/plans/new"><span class="material-icons">add</span>Nuevo plan</a>
+</app-page-header>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showRemove]="false"
+  editLabel="Editar plan"
+  emptyMessage="No hay planes registrados."
+  (edit)="edit($event)"
+/>
+
+<section class="matrix surface-card">
+  <h2>Comparación de funcionalidades</h2>
+  <div class="matrix__scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Funcionalidad</th>
+          <th>Esencial</th>
+          <th>Negocio</th>
+          <th>Profesional</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of featureMatrix; track row.feature) {
+          <tr>
+            <td>{{ row.feature }}</td>
+            <td>{{ row.essential }}</td>
+            <td>{{ row.business }}</td>
+            <td>{{ row.professional }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

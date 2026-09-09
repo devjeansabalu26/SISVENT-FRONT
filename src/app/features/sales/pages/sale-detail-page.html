@@ -1,0 +1,75 @@
+<app-page-header [title]="'Venta ' + sale.number" description="Detalle de la operación de venta">
+  <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Historial</a>
+  <a class="ghost" [routerLink]="['/app/sales', sale.id, 'comprobante']"><span class="material-icons">receipt_long</span>Ver comprobante</a>
+  @if (sale.status === 'COMPLETADA') {
+    <button type="button" class="ghost danger" (click)="annul()"><span class="material-icons">block</span>Anular venta</button>
+  }
+</app-page-header>
+
+<div class="summary surface-card">
+  <div><span class="code">{{ sale.dateTime }}</span><h2>{{ sale.number }}</h2></div>
+  <app-status-chip [value]="sale.status" [label]="sale.status" />
+</div>
+
+<section class="surface-card">
+  <h3>Detalle de items</h3>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>P. unitario</th><th>Descuento</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        @for (line of sale.lines; track line.sku) {
+          <tr>
+            <td>{{ line.productName }}</td>
+            <td>{{ line.sku }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
+            <td>S/ {{ line.discount.toFixed(2) }}</td>
+            <td>S/ {{ (line.quantity * line.unitPrice - line.discount).toFixed(2) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="cards">
+  <section class="surface-card">
+    <h3>Resumen financiero</h3>
+    <dl>
+      <div><dt>Subtotal</dt><dd>S/ {{ sale.subtotal.toFixed(2) }}</dd></div>
+      <div><dt>IGV (18%)</dt><dd>S/ {{ sale.tax.toFixed(2) }}</dd></div>
+      <div><dt>Total</dt><dd>S/ {{ sale.total.toFixed(2) }}</dd></div>
+      <div><dt>Método de pago</dt><dd>{{ sale.paymentMethod }}</dd></div>
+      <div><dt>Monto recibido</dt><dd>S/ {{ sale.amountReceived.toFixed(2) }}</dd></div>
+      <div><dt>Vuelto</dt><dd>S/ {{ sale.change.toFixed(2) }}</dd></div>
+    </dl>
+  </section>
+  <section class="surface-card">
+    <h3>Información de venta</h3>
+    <dl>
+      <div><dt>Vendedor</dt><dd>{{ sale.seller }}</dd></div>
+      <div><dt>Local</dt><dd>{{ sale.branch }}</dd></div>
+      <div><dt>Terminal</dt><dd>{{ sale.terminal }}</dd></div>
+      <div><dt>Turno</dt><dd>{{ sale.shift }}</dd></div>
+    </dl>
+  </section>
+  <section class="surface-card">
+    <h3>Información de cliente</h3>
+    <dl>
+      <div><dt>Nombre</dt><dd>{{ sale.customerName }}</dd></div>
+      <div><dt>Documento</dt><dd>{{ sale.customerDocument }}</dd></div>
+      <div><dt>Correo</dt><dd>{{ sale.customerEmail }}</dd></div>
+      <div><dt>Teléfono</dt><dd>{{ sale.customerPhone }}</dd></div>
+    </dl>
+  </section>
+  <section class="surface-card">
+    <h3>Historial de eventos</h3>
+    <ul class="timeline">
+      @for (event of sale.events; track event.time) {
+        <li><span>{{ event.time }}</span>{{ event.description }}</li>
+      }
+    </ul>
+  </section>
+</div>

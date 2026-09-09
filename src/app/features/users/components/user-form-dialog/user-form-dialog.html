@@ -1,0 +1,12 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="save()">
+  <header><span class="material-icons">person_add</span><div><h2>{{ user ? 'Editar usuario' : 'Nuevo usuario' }}</h2><p>Define sus datos y nivel de acceso</p></div></header>
+  <div class="fields">
+    <label class="wide">Nombre completo<input formControlName="fullName" placeholder="Nombres y apellidos" /></label>
+    <label>Correo electrónico<input type="email" formControlName="email" placeholder="usuario@empresa.com" /></label>
+    <label>Documento<input inputmode="numeric" formControlName="document" placeholder="DNI o documento" /></label>
+    <label>Rol<select formControlName="role">@for (role of roles; track role) {<option [value]="role">{{ role }}</option>}</select></label>
+    <label>Sucursal<select formControlName="branch"><option>Principal</option><option>Tienda Centro</option></select></label>
+    <label>Estado<select formControlName="status"><option value="ACTIVE">Activo</option><option value="INACTIVE">Inactivo</option></select></label>
+  </div>
+  <footer><button type="button" (click)="cancel()">Cancelar</button><button type="submit" class="primary">Guardar usuario</button></footer>
+</form>

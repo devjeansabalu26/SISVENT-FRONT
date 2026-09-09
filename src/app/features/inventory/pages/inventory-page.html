@@ -1,0 +1,13 @@
+<app-page-header title="Inventario" description="Control de existencias por local">
+  <a class="ghost" routerLink="/app/inventory/movements"><span class="material-icons">swap_vert</span>Ver movimientos</a>
+</app-page-header>
+<section class="metrics">
+  <article><span class="material-icons">inventory_2</span><div><small>Unidades disponibles</small><strong>{{ totalUnits() }}</strong></div></article>
+  <article class="warning"><span class="material-icons">warning_amber</span><div><small>Stock bajo</small><strong>{{ lowStock() }}</strong></div></article>
+  <article class="danger"><span class="material-icons">remove_shopping_cart</span><div><small>Sin stock</small><strong>{{ outOfStock() }}</strong></div></article>
+</section>
+<section class="filters">
+  <label><span class="material-icons">search</span><input #query (input)="filter(query.value, status.value)" placeholder="Buscar por SKU o producto" /></label>
+  <select #status (change)="filter(query.value, status.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="AVAILABLE">Disponible</option><option value="LOW_STOCK">Stock bajo</option><option value="OUT_OF_STOCK">Sin stock</option></select>
+</section>
+<app-data-table [columns]="columns" [rows]="rows()" [showRemove]="false" editLabel="Ajustar stock" emptyMessage="No hay productos que coincidan con los filtros." (edit)="adjust($event)" />

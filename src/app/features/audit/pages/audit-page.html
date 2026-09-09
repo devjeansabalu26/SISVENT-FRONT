@@ -1,0 +1,27 @@
+<app-page-header title="Auditoría de actividades" description="Registro de operaciones y eventos de seguridad del sistema">
+  <button type="button" class="primary" (click)="exportHistory()">
+    <span class="material-icons">download</span>Exportar historial
+  </button>
+</app-page-header>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #search (input)="query.set(search.value)" placeholder="Buscar usuario, acción, IP…" />
+  </label>
+  <select #resultFilter (change)="result.set(resultFilter.value)" aria-label="Filtrar por nivel">
+    <option value="">Todos los niveles</option>
+    <option value="SUCCESS">Info</option>
+    <option value="WARNING">Warning</option>
+    <option value="ERROR">Error</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showRemove]="false"
+  editLabel="Ver detalle"
+  editIcon="visibility"
+  (edit)="view($event)"
+/>

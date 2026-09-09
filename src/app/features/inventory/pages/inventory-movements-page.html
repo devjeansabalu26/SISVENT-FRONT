@@ -1,0 +1,30 @@
+<app-page-header title="Movimientos de inventario" description="Trazabilidad completa de entradas y salidas" />
+
+<div class="kpi-grid">
+  <app-kpi-card label="Movimientos hoy" [value]="rows().length" icon="swap_vert" tone="primary" />
+  <app-kpi-card label="Entradas" [value]="entries()" icon="south_west" tone="success" />
+  <app-kpi-card label="Salidas" [value]="exits()" icon="north_east" tone="danger" />
+  <app-kpi-card label="Ajustes" [value]="adjustments()" icon="tune" tone="warning" />
+</div>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #box (input)="search.set(box.value)" placeholder="Buscar producto o SKU…" />
+  </label>
+  <select #type aria-label="Tipo" (change)="typeFilter.set(type.value)">
+    <option value="">Tipo: todos</option>
+    <option>Entrada</option>
+    <option>Salida</option>
+    <option>Ajuste</option>
+    <option>Transferencia</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showEdit]="false"
+  [showRemove]="false"
+  emptyMessage="No hay movimientos en el periodo."
+/>

@@ -1,0 +1,71 @@
+<app-page-header title="Configuración de empresa" description="Parámetros fiscales, preferencias e impresión del sistema" />
+
+<nav class="tabs" aria-label="Secciones de configuración">
+  <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
+  <button type="button" [class.active]="activeTab() === 'billing'" (click)="activeTab.set('billing')">Facturación</button>
+  <button type="button" [class.active]="activeTab() === 'notifications'" (click)="activeTab.set('notifications')">
+    Notificaciones
+  </button>
+  <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Seguridad</button>
+</nav>
+
+@if (activeTab() === 'general') {
+  @if (loading()) {
+    <section class="state">Cargando configuración…</section>
+  } @else if (loadError()) {
+    <section class="state">
+      <p>No se pudo cargar la configuración.</p>
+      <button type="button" (click)="load()">Reintentar</button>
+    </section>
+  } @else {
+    <form class="settings" [formGroup]="form" (ngSubmit)="save()">
+      <fieldset>
+        <legend>Preferencias regionales</legend>
+        <label>
+          Código de moneda (ISO 4217)
+          <input formControlName="currencyCode" maxlength="3" autocapitalize="characters" placeholder="PEN" />
+          @if (form.controls.currencyCode.touched && form.controls.currencyCode.invalid) {
+            <small class="hint">Debe tener 3 letras, por ejemplo PEN o USD.</small>
+          }
+        </label>
+        <label>
+          Idioma del sistema
+          <input formControlName="locale" placeholder="es-PE" />
+        </label>
+        <label>
+          Zona horaria (IANA)
+          <input formControlName="timezone" placeholder="America/Lima" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Punto de venta (POS) e inventario</legend>
+        <label class="check">
+          <input type="checkbox" formControlName="strictStockControl" />
+          Control estricto de stock (bloquea ventas sin existencias)
+        </label>
+        <label class="check">
+          <input type="checkbox" formControlName="lowStockAlertEnabled" />
+          Alertas de stock bajo
+        </label>
+        <label class="check">
+          <input type="checkbox" formControlName="notifyManualAdjustment" />
+          Notificar ajustes manuales de inventario
+        </label>
+      </fieldset>
+
+      <footer>
+        <button type="submit" class="primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : 'Guardar configuración' }}
+        </button>
+      </footer>
+    </form>
+  }
+} @else {
+  <section class="state">
+    <p>
+      Esta sección del diseño (series de boletas/facturas, régimen tributario, canales de notificación, políticas de
+      seguridad) se habilitará cuando exista el endpoint correspondiente en el backend.
+    </p>
+  </section>
+}

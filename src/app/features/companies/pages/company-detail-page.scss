@@ -1,0 +1,7 @@
+.ghost.danger {
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-border));
+}
+.page-header__actions {
+  flex-wrap: wrap;
+}

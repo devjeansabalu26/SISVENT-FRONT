@@ -1,0 +1,31 @@
+<app-page-header title="Marcas" description="Gestiona las marcas de tus productos">
+  @if (canManage()) {
+    <button type="button" class="primary" (click)="create()">
+      <span class="material-icons">add</span>Nueva marca
+    </button>
+  }
+</app-page-header>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #box (input)="search.set(box.value)" placeholder="Buscar marcas…" />
+  </label>
+  <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
+    <option value="">Todos los estados</option>
+    <option value="ACTIVE">Activa</option>
+    <option value="INACTIVE">Inactiva</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showEdit]="canManage()"
+  [showRemove]="canManage()"
+  editLabel="Editar marca"
+  removeLabel="Desactivar marca"
+  emptyMessage="No hay marcas registradas."
+  (edit)="edit($event)"
+  (remove)="remove($event)"
+/>

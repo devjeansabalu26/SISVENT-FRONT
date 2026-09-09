@@ -1,0 +1,7 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="save()">
+  <header><span class="material-icons">inventory</span><div><h2>Ajustar inventario</h2><p>{{ item.productName }} · Stock actual: {{ item.stock }}</p></div></header>
+  <label>Tipo de movimiento<select formControlName="type"><option value="IN">Entrada</option><option value="OUT">Salida</option><option value="ADJUSTMENT">Ajuste manual</option></select></label>
+  <label>Cantidad<input type="number" min="1" formControlName="quantity" /></label>
+  <label>Motivo<textarea rows="3" formControlName="reason" placeholder="Describe el motivo del movimiento"></textarea></label>
+  <footer><button type="button" (click)="cancel()">Cancelar</button><button type="submit" class="primary">Guardar movimiento</button></footer>
+</form>

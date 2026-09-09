@@ -1,0 +1,27 @@
+<section class="dialog">
+  <header>
+    <span class="material-icons" [class.danger]="data.destructive">{{
+      data.destructive ? 'delete_outline' : 'help_outline'
+    }}</span>
+    <h2>{{ data.title }}</h2>
+  </header>
+  <p>{{ data.message }}</p>
+  @if (data.acknowledgeLabel) {
+    <label class="ack">
+      <input type="checkbox" [checked]="acknowledged()" (change)="acknowledged.set($any($event.target).checked)" />
+      <span>{{ data.acknowledgeLabel }}</span>
+    </label>
+  }
+  <footer>
+    <button type="button" (click)="close(false)">{{ data.cancelLabel ?? 'Cancelar' }}</button>
+    <button
+      type="button"
+      class="confirm"
+      [class.confirm--danger]="data.destructive"
+      [disabled]="!!data.acknowledgeLabel && !acknowledged()"
+      (click)="close(true)"
+    >
+      {{ data.confirmLabel ?? 'Confirmar' }}
+    </button>
+  </footer>
+</section>

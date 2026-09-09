@@ -1,0 +1,91 @@
+.current {
+  margin-bottom: var(--space-lg);
+}
+.current__head h2 {
+  margin: 0 0 4px;
+}
+.usage {
+  display: grid;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+.usage__label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: var(--font-size-sm);
+}
+.usage__track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+  overflow: hidden;
+}
+.usage__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+.section-title {
+  margin: var(--space-lg) 0 var(--space-md);
+}
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.plan-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.plan-card--current {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.plan-card header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plan-card .tag {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+.plan-card__price {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+.plan-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.plan-card button {
+  margin-top: 4px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.plan-card button[disabled] {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-secondary);
+  cursor: default;
+}

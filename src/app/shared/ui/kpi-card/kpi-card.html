@@ -1,0 +1,18 @@
+<article class="kpi" [attr.data-tone]="tone()">
+  <div class="kpi__head">
+    <span class="kpi__label">{{ label() }}</span>
+    @if (icon()) {
+      <span class="kpi__icon material-icons" aria-hidden="true">{{ icon() }}</span>
+    }
+  </div>
+  <strong class="kpi__value">{{ value() }}</strong>
+  @if (delta()) {
+    <p class="kpi__delta" [attr.data-trend]="trend()">
+      <span class="material-icons" aria-hidden="true">{{ trendIcon() }}</span>
+      <span>{{ delta() }}</span>
+      @if (deltaCaption()) {
+        <small>{{ deltaCaption() }}</small>
+      }
+    </p>
+  }
+</article>

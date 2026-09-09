@@ -1,0 +1,21 @@
+@use 'styles/theme';
+@use 'styles/typography';
+@use 'styles/utilities';
+@use 'styles/material-overrides';
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

@@ -1,0 +1,52 @@
+<app-page-header
+  title="Abastecimiento inteligente"
+  description="Optimización automatizada basada en tiempos de entrega y ritmo de ventas"
+>
+  <a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nueva orden</a>
+</app-page-header>
+
+<p class="banner">
+  <span class="material-icons">warning</span>
+  Atención requerida: 8 productos críticos presentan un tiempo de cobertura menor a 3 días. Se recomienda generar
+  órdenes de compra sugeridas.
+</p>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Monitoreados" value="284" icon="visibility" tone="primary" />
+  <app-kpi-card label="En riesgo" value="8" icon="error_outline" tone="danger" />
+  <app-kpi-card label="Cobertura promedio" value="18d" icon="event_available" tone="info" />
+  <app-kpi-card label="Rotación alta" value="45" icon="trending_up" trend="up" delta="+12% mes" tone="success" />
+  <app-kpi-card label="Recomendaciones" value="12" icon="lightbulb" tone="warning" />
+</div>
+
+<section class="surface-card coverage">
+  <div class="coverage__head">
+    <h2>Resumen de cobertura</h2>
+    <a routerLink="/app/replenishment/stockout-risk" class="link">Ver detalle</a>
+  </div>
+  @for (bar of coverage; track bar.label) {
+    <div class="coverage__row" [attr.data-tone]="bar.tone">
+      <span>{{ bar.label }}</span>
+      <strong>{{ bar.count }} productos</strong>
+    </div>
+  }
+</section>
+
+<section class="surface-card">
+  <div class="coverage__head">
+    <h2>Compras sugeridas (IA)</h2>
+    <button type="button" class="link" (click)="processAll()">Procesar todo</button>
+  </div>
+  <ul class="suggestions">
+    @for (item of suggestions; track item.id) {
+      <li>
+        <div><strong>{{ item.product }}</strong><small>{{ item.supplier }}</small></div>
+        <span>{{ item.quantity }}</span>
+        <span class="tag" [attr.data-priority]="item.priority">{{ item.priority }}</span>
+      </li>
+    }
+  </ul>
+</section>
+
+<h2 class="section-title">Productos críticos requeridos</h2>
+<app-data-table [columns]="columns" [rows]="criticalRows" [showEdit]="false" [showRemove]="false" />

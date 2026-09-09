@@ -1,0 +1,117 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin: 0 0 var(--space-md);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.banner .material-icons {
+  color: var(--color-warning);
+}
+.section-title {
+  margin: var(--space-lg) 0 var(--space-md);
+}
+.coverage {
+  margin-bottom: var(--space-md);
+}
+.coverage__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+.coverage__head h2 {
+  margin: 0;
+}
+.link {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.coverage__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.coverage__row:last-child {
+  border-bottom: 0;
+}
+.coverage__row[data-tone='success'] strong {
+  color: var(--color-success);
+}
+.coverage__row[data-tone='warning'] strong {
+  color: var(--color-warning);
+}
+.coverage__row[data-tone='danger'] strong {
+  color: var(--color-error);
+}
+.suggestions {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.suggestions li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.suggestions li > div {
+  flex: 1;
+  display: grid;
+}
+.suggestions small {
+  color: var(--color-text-muted);
+}
+.tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+.tag[data-priority='Crítica'] {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 12%, white);
+}
+.tag[data-priority='Alta'] {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 16%, white);
+}
+.tag[data-priority='Media'] {
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 12%, white);
+}
+.abc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+.abc-cards article {
+  display: grid;
+  gap: 4px;
+}
+.abc-cards small {
+  color: var(--color-text-muted);
+}
+.abc-share {
+  margin: 6px 0 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

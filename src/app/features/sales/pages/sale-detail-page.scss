@@ -1,0 +1,24 @@
+.ghost.danger {
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-border));
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.timeline {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.timeline li {
+  display: flex;
+  gap: 12px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.timeline li span {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}

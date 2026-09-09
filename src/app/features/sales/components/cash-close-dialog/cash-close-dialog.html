@@ -1,0 +1,39 @@
+<section class="dialog">
+  <header>
+    <span class="material-icons">point_of_sale</span>
+    <div>
+      <h2>Cierre de caja</h2>
+      <p>Turno 12 (ventas del día)</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <dl class="expected">
+      <div><dt>Sistema · total esperado</dt><dd>S/ {{ expectedTotal.toFixed(2) }}</dd></div>
+      <div><dt>— Efectivo esperado</dt><dd>S/ {{ expectedCash.toFixed(2) }}</dd></div>
+      <div><dt>— Tarjeta / transferencia</dt><dd>S/ {{ expectedCard.toFixed(2) }}</dd></div>
+    </dl>
+    <label class="wide"
+      >Efectivo real en caja (S/)
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        [value]="countedCash()"
+        (input)="countedCash.set(+$any($event.target).value)"
+      />
+    </label>
+    <p class="difference" [class.difference--ok]="difference() === 0">
+      Diferencia: S/ {{ difference().toFixed(2) }} {{ difference() === 0 ? 'Ok' : '' }}
+    </p>
+    <label class="wide"
+      >Observaciones
+      <textarea [value]="notes()" (input)="notes.set($any($event.target).value)" placeholder="Ningún descuadre reportado…"></textarea>
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="button" class="primary" (click)="confirm()">Confirmar cierre</button>
+  </footer>
+</section>

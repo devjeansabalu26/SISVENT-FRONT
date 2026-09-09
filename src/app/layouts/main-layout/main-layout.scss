@@ -1,0 +1,7 @@
+.main-layout {
+  min-height: 100dvh;
+  background: var(--color-background);
+}
+.main-layout__workspace { min-height: 100dvh; margin-left: 240px; }
+main { padding: 28px; }
+@media (max-width: 900px) { .main-layout__workspace { margin-left: 0; } main { padding: 20px 16px; } }

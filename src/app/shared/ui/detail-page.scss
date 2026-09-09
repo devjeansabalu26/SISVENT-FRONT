@@ -1,0 +1,126 @@
+/* Shared layout for feature detail pages (Figma detail/summary screens). */
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ghost .material-icons {
+  font-size: 18px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.summary h2 {
+  margin: 4px 0 0;
+}
+.summary .code {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.tabs button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-md);
+}
+.surface-card h3 {
+  margin: 0 0 var(--space-md);
+}
+
+dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+dl > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+dd {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-align: right;
+}
+
+.module-block {
+  margin-bottom: var(--space-md);
+}
+.module-block ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+th,
+td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+}
+thead th {
+  border-top: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xxs);
+  text-transform: uppercase;
+}
+.muted {
+  color: var(--color-text-muted);
+}

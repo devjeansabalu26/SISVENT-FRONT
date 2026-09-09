@@ -1,0 +1,26 @@
+<app-page-header
+  title="Riesgo de agotamiento"
+  description="Predicción de quiebre de stock basada en análisis estadístico y estacionalidad"
+/>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Riesgo crítico" value="8" icon="report" tone="danger" />
+  <app-kpi-card label="Moderado" value="14" icon="warning" tone="warning" />
+  <app-kpi-card label="Óptimo" value="192" icon="check_circle" tone="success" />
+  <app-kpi-card label="Exceso de stock" value="70" icon="inventory" tone="info" />
+</div>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input placeholder="Buscar producto…" />
+  </label>
+  <select #risk aria-label="Riesgo" (change)="riskFilter.set(risk.value)">
+    <option value="">Riesgo: todos</option>
+    <option>Crítico</option>
+    <option>Moderado</option>
+    <option>Óptimo</option>
+  </select>
+</section>
+
+<app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />

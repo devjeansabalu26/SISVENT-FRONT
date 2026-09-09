@@ -1,0 +1,40 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="confirm()">
+  <header>
+    <span class="material-icons">swap_horiz</span>
+    <div>
+      <h2>Cambiar plan de empresa</h2>
+      <p>{{ data.companyName }} · Plan actual: {{ data.currentPlan }}</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <label class="wide"
+      >Nuevo plan
+      <select formControlName="newPlan">
+        @for (plan of plans; track plan) {
+          <option [value]="plan">{{ plan }}</option>
+        }
+      </select>
+    </label>
+    <label class="wide"
+      >Fecha efectiva
+      <input type="date" formControlName="effectiveDate" />
+      @if (form.controls.effectiveDate.touched && form.controls.effectiveDate.invalid) {
+        <small class="hint">Indica la fecha efectiva.</small>
+      }
+    </label>
+    <label class="wide"
+      >Motivo del cambio
+      <textarea formControlName="reason" placeholder="Justificación para el cambio de facturación…"></textarea>
+      @if (form.controls.reason.touched && form.controls.reason.invalid) {
+        <small class="hint">Describe el motivo (mínimo 5 caracteres).</small>
+      }
+    </label>
+    <p class="muted">El cambio de plan puede afectar funcionalidades activas inmediatamente.</p>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="primary">Confirmar cambio</button>
+  </footer>
+</form>

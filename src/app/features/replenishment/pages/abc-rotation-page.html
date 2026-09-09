@@ -1,0 +1,18 @@
+<app-page-header
+  title="Rotación y clasificación ABC"
+  description="Análisis de rotación vs. margen bruto de contribución — últimos 30 días"
+/>
+
+<div class="abc-cards">
+  @for (klass of classes; track klass.name) {
+    <article class="surface-card">
+      <strong>{{ klass.name }}</strong>
+      <small>{{ klass.label }}</small>
+      <p class="abc-share">{{ klass.share }}</p>
+      <span class="muted">{{ klass.count }} productos en esta categoría</span>
+    </article>
+  }
+</div>
+
+<h2 class="section-title">Detalle del inventario por categoría</h2>
+<app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />

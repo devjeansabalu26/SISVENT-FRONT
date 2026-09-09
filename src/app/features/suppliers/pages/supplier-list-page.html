@@ -1,0 +1,42 @@
+<app-page-header title="Proveedores" description="Gestión de proveedores y compras">
+  @if (canManage()) {
+    <a class="primary" routerLink="/app/suppliers/new"><span class="material-icons">add</span>Nuevo proveedor</a>
+  }
+</app-page-header>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Total proveedores" [value]="totalSuppliers()" icon="local_shipping" tone="primary" />
+  <app-kpi-card label="Activos" [value]="activeSuppliers()" icon="check_circle" tone="success" />
+  <app-kpi-card label="Compras del mes" [value]="'S/ ' + monthPurchases().toLocaleString('es-PE')" icon="payments" tone="info" />
+  <app-kpi-card label="Deuda pendiente" value="S/ 8,200" icon="account_balance_wallet" tone="warning" />
+</div>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #box (input)="search.set(box.value)" placeholder="Buscar RUC, razón social, rubro…" />
+  </label>
+  <select #sector aria-label="Rubro" (change)="sectorFilter.set(sector.value)">
+    <option value="">Rubro: todos</option>
+    @for (option of sectors(); track option) {
+      <option [value]="option">{{ option }}</option>
+    }
+  </select>
+  <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
+    <option value="">Estado: todos</option>
+    <option value="ACTIVE">Activo</option>
+    <option value="INACTIVE">Inactivo</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showEdit]="canManage()"
+  [showRemove]="canManage()"
+  editLabel="Editar proveedor"
+  removeLabel="Deshabilitar proveedor"
+  emptyMessage="No hay proveedores registrados."
+  (edit)="edit($event)"
+  (remove)="remove($event)"
+/>

@@ -1,0 +1,71 @@
+.success {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(420px, calc(100vw - 40px));
+  padding: 28px 24px;
+  text-align: center;
+}
+.success__icon {
+  font-size: 48px;
+  color: var(--color-success);
+}
+.success h2 {
+  margin: 4px 0 0;
+}
+.success p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.success dl {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 16px 0 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+.success dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.success dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.success dd {
+  margin: 0;
+  font-weight: 600;
+}
+.success footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.success button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+.success .ghost {
+  border: 1px solid var(--color-border);
+  background: white;
+  color: var(--color-text-secondary);
+}
+.success .primary {
+  border: 0;
+  background: var(--color-primary);
+  color: white;
+}
+.success .material-icons {
+  font-size: 18px;
+}

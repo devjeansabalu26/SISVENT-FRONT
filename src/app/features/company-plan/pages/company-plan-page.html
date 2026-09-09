@@ -1,0 +1,51 @@
+<app-page-header title="Mi plan" description="Detalles de tu suscripción actual y opciones de escalamiento" />
+
+<section class="surface-card current">
+  <div class="current__head">
+    <div>
+      <h2>Plan Negocio</h2>
+      <p class="muted">S/ 60.00 / mes · Estado: Activo · Vigencia: 01/09/2026 – 01/09/2027</p>
+    </div>
+  </div>
+  <div class="usage">
+    @for (bar of usage; track bar.label) {
+      <div class="usage__row">
+        <div class="usage__label"><span>{{ bar.label }}</span><strong>{{ bar.detail }}</strong></div>
+        <div class="usage__track"><span class="usage__fill" [style.width.%]="bar.percent"></span></div>
+      </div>
+    }
+  </div>
+</section>
+
+<h3 class="section-title">Planes disponibles</h3>
+<div class="plan-grid">
+  @for (plan of plans; track plan.name) {
+    <article class="plan-card" [class.plan-card--current]="plan.current">
+      <header>
+        <strong>{{ plan.name }}</strong>
+        @if (plan.current) { <span class="tag">Actual</span> }
+      </header>
+      <p class="plan-card__price">{{ plan.price }}</p>
+      <ul>
+        @for (feature of plan.features; track feature) {
+          <li>{{ feature }}</li>
+        }
+      </ul>
+      <button type="button" [disabled]="plan.current" (click)="requestChange(plan)">{{ plan.cta }}</button>
+    </article>
+  }
+</div>
+
+<section class="surface-card">
+  <h3>Historial de cambios de plan</h3>
+  <table>
+    <thead>
+      <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Motivo del cambio</th></tr>
+    </thead>
+    <tbody>
+      @for (row of history; track row.date) {
+        <tr><td>{{ row.date }}</td><td>{{ row.from }}</td><td>{{ row.to }}</td><td>{{ row.reason }}</td></tr>
+      }
+    </tbody>
+  </table>
+</section>

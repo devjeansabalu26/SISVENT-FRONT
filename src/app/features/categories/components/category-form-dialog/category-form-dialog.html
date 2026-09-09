@@ -1,0 +1,32 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="save()">
+  <header>
+    <span class="material-icons">sell</span>
+    <div>
+      <h2>{{ category ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+      <p>Las categorías son únicas dentro de tu empresa</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <label class="wide">
+      Nombre
+      <input formControlName="name" maxlength="150" placeholder="Ej. Bebidas" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="hint">El nombre es obligatorio (máximo 150 caracteres).</small>
+      }
+    </label>
+    <label class="wide">
+      Descripción (opcional)
+      <textarea formControlName="description" maxlength="400" rows="3" placeholder="Detalle breve"></textarea>
+    </label>
+    <label class="check">
+      <input type="checkbox" formControlName="isActive" />
+      Categoría activa
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="primary">{{ category ? 'Guardar cambios' : 'Crear categoría' }}</button>
+  </footer>
+</form>

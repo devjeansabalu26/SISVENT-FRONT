@@ -1,0 +1,1 @@
+export interface ProductListItem { readonly id:string; readonly sku:string; readonly name:string; readonly category:string; readonly brand:string; readonly price:number; readonly status:'ACTIVE'|'INACTIVE'; readonly stock:number; }

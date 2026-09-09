@@ -1,0 +1,1 @@
+export interface CustomerListItem { readonly id:string; readonly type:'PERSON'|'COMPANY'; readonly name:string; readonly document:string; readonly email:string; readonly phone:string; readonly purchases:number; readonly lastPurchase:string; readonly status:'ACTIVE'|'INACTIVE'; }

@@ -1,0 +1,83 @@
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header
+    [title]="isEdit ? 'Editar plan' : 'Nuevo plan'"
+    description="Tarifas, limitaciones de recursos y módulos habilitados para los clientes"
+  />
+
+  <div class="form-grid">
+    <div class="column">
+      <section class="card">
+        <h2>1. Información básica</h2>
+        <div class="fields">
+          <label
+            >Código de plan *
+            <input formControlName="code" placeholder="PLAN-004" />
+            @if (form.controls.code.touched && form.controls.code.invalid) {
+              <span class="error">El código es obligatorio.</span>
+            }
+          </label>
+          <label
+            >Nombre comercial del plan *
+            <input formControlName="name" placeholder="Ej. Corporativo Avanzado" />
+          </label>
+          <label class="full"
+            >Descripción pública
+            <textarea formControlName="description" placeholder="Para medianas y grandes empresas…"></textarea>
+          </label>
+          <label class="full">
+            <span><input type="checkbox" formControlName="isActive" /> Estado activo</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. Esquema de precios</h2>
+        <div class="fields">
+          <label
+            >Precio mensual base (S/) *
+            <input type="number" formControlName="price" min="0" step="0.01" />
+          </label>
+          <label
+            >Frecuencia de facturación
+            <select formControlName="billing">
+              <option>Mensual</option>
+              <option>Anual</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3. Limitaciones de recursos</h2>
+        <div class="fields three">
+          <label>Límite de vendedores * <input type="number" formControlName="sellerLimit" min="1" /></label>
+          <label>Límite de locales / almacenes * <input type="number" formControlName="localLimit" min="1" /></label>
+          <label>Límite de productos <input type="number" formControlName="productLimit" min="0" [attr.disabled]="form.controls.unlimitedProducts.value ? '' : null" /></label>
+          <label class="full">
+            <span><input type="checkbox" formControlName="unlimitedProducts" /> Habilitar productos ilimitados</span>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <div class="column">
+      <section class="card">
+        <h2>4. Módulos y funcionalidades incluidas</h2>
+        <div class="modules" formArrayName="modules">
+          @for (name of moduleNames; track name; let i = $index) {
+            <label class="module">
+              <input type="checkbox" [formControlName]="i" />
+              <span>{{ name }}</span>
+            </label>
+          }
+        </div>
+        <p class="note">Recuerda publicar los cambios para hacerlos visibles.</p>
+      </section>
+    </div>
+  </div>
+
+  <footer class="actions">
+    <a routerLink="/app/plans">Cancelar</a>
+    <button class="primary" type="submit">{{ isEdit ? 'Guardar cambios' : 'Crear plan' }}</button>
+  </footer>
+</form>

@@ -1,0 +1,148 @@
+/* Shared styling for compact form dialogs (Figma "STANDARD DIALOG MODAL"). */
+.dialog {
+  display: grid;
+  width: min(560px, calc(100vw - 40px));
+  gap: 20px;
+  padding: 24px;
+}
+.dialog header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dialog header > span {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.dialog h2,
+.dialog p {
+  margin: 0;
+}
+.dialog header p {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.fields {
+  display: grid;
+  gap: 16px;
+}
+.fields.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.fields label.wide {
+  grid-column: 1 / -1;
+}
+label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+label.check {
+  grid-auto-flow: column;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+input:not([type='checkbox']):not([type='radio']),
+select,
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  background: var(--color-surface);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary-soft);
+}
+textarea {
+  resize: vertical;
+}
+.hint {
+  color: #b91c1c;
+  font-weight: 500;
+}
+.muted {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+.expected {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+.expected > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.expected dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.expected dd {
+  margin: 0;
+  font-weight: 600;
+}
+.difference {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-warning);
+}
+.difference--ok {
+  color: var(--color-success);
+}
+.password {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.password code {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.04em;
+}
+.password button {
+  padding: 10px 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+footer button {
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  cursor: pointer;
+}
+footer .primary {
+  border-color: var(--color-primary);
+  color: white;
+  background: var(--color-primary);
+}

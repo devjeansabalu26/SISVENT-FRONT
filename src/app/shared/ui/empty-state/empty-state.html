@@ -1,0 +1,14 @@
+<section class="empty">
+  <span class="empty__icon material-icons" aria-hidden="true">{{ icon() }}</span>
+  <h3>{{ title() }}</h3>
+  @if (description()) {
+    <p>{{ description() }}</p>
+  }
+  <div class="empty__action">
+    <ng-content>
+      @if (actionLabel()) {
+        <button type="button" class="empty__cta" (click)="action.emit()">{{ actionLabel() }}</button>
+      }
+    </ng-content>
+  </div>
+</section>

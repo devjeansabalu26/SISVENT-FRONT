@@ -1,0 +1,25 @@
+.mat-mdc-snack-bar-container {
+  &.notification--success {
+    --mat-snack-bar-container-color: #067647;
+  }
+
+  &.notification--error {
+    --mat-snack-bar-container-color: #b42318;
+  }
+
+  &.notification--warning {
+    --mat-snack-bar-container-color: #b54708;
+  }
+
+  &.notification--info {
+    --mat-snack-bar-container-color: #175cd3;
+  }
+
+  &.notification--plan-limit {
+    --mat-snack-bar-container-color: #6941c6;
+  }
+
+  &.notification--permission-blocked {
+    --mat-snack-bar-container-color: #475569;
+  }
+}

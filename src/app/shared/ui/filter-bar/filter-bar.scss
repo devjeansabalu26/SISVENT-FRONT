@@ -1,0 +1,73 @@
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-smd);
+  padding: var(--space-smd);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.filter-bar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1 1 240px;
+  height: 40px;
+  padding: 0 var(--space-smd);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+}
+.filter-bar__search .material-icons {
+  color: var(--color-text-disabled);
+  font-size: 18px;
+}
+.filter-bar__search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  background: transparent;
+}
+.filter-bar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-smd);
+}
+.filter-bar__controls ::ng-deep select,
+.filter-bar__controls ::ng-deep input {
+  height: 40px;
+  padding: 0 var(--space-smd);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  background: white;
+}
+.filter-bar__actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+.filter-bar__actions button {
+  height: 40px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-bar__actions .ghost {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: white;
+}
+.filter-bar__actions .primary {
+  border: 0;
+  color: white;
+  background: var(--color-primary);
+}
+.filter-bar__actions .primary:hover {
+  background: var(--color-primary-hover);
+}

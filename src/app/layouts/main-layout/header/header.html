@@ -1,0 +1,9 @@
+<header>
+  <button type="button" class="menu" (click)="menuToggle.emit()" aria-label="Abrir navegación"><span class="material-icons">menu</span></button>
+  <div class="crumb">{{ company()?.commercialName ?? 'SISVENT' }} <span>/</span> Panel</div>
+  <div class="user">
+    <button type="button" aria-label="Notificaciones"><span class="material-icons">notifications_none</span></button>
+    <div><strong>{{ user()?.displayName ?? 'Usuario SISVENT' }}</strong><small>{{ user()?.role ?? 'Sin sesión' }}</small></div>
+    <button type="button" class="logout" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión"><span class="material-icons">logout</span></button>
+  </div>
+</header>

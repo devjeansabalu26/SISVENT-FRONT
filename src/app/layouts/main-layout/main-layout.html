@@ -1,0 +1,4 @@
+<div class="main-layout">
+  <app-sidebar [compact]="navigationClosed()" (navigate)="closeNavigation()" />
+  <section class="main-layout__workspace"><app-header (menuToggle)="toggleNavigation()" /><main><router-outlet /></main></section>
+</div>

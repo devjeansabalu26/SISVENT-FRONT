@@ -1,0 +1,1 @@
+export interface SaleListItem { readonly id:string; readonly number:string; readonly date:string; readonly customer:string; readonly seller:string; readonly branch:string; readonly payment:string; readonly total:number; readonly status:'COMPLETADA'|'ANULADA'; }

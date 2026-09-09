@@ -1,0 +1,88 @@
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header
+    [title]="isEdit ? 'Editar proveedor' : 'Nuevo proveedor'"
+    description="Datos de identificación, contacto y condiciones del proveedor"
+  />
+
+  <section class="card">
+    <h2>Identificación</h2>
+    <div class="fields three">
+      <label
+        >Tipo documento *
+        <select formControlName="documentType">
+          <option>RUC</option>
+          <option>DNI</option>
+          <option>CE</option>
+        </select>
+      </label>
+      <label
+        >Número de documento *
+        <input formControlName="taxId" />
+        @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
+          <span class="error">Ingresa un documento válido.</span>
+        }
+      </label>
+      <label>Rubro <input formControlName="sector" placeholder="Tecnología" /></label>
+      <label
+        >Razón social *
+        <input formControlName="legalName" />
+        @if (form.controls.legalName.touched && form.controls.legalName.invalid) {
+          <span class="error">La razón social es obligatoria.</span>
+        }
+      </label>
+      <label>Nombre comercial <input formControlName="commercialName" /></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Contacto</h2>
+    <div class="fields three">
+      <label
+        >Nombre de contacto *
+        <input formControlName="contactName" />
+        @if (form.controls.contactName.touched && form.controls.contactName.invalid) {
+          <span class="error">Indica una persona de contacto.</span>
+        }
+      </label>
+      <label>Teléfono <input formControlName="phone" /></label>
+      <label
+        >Correo electrónico *
+        <input type="email" formControlName="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <span class="error">Ingresa un correo válido.</span>
+        }
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Dirección</h2>
+    <div class="fields three">
+      <label class="full"
+        >Dirección *
+        <input formControlName="address" placeholder="Av. Industrial 456" />
+        @if (form.controls.address.touched && form.controls.address.invalid) {
+          <span class="error">La dirección es obligatoria.</span>
+        }
+      </label>
+      <label>Ciudad <input formControlName="city" /></label>
+      <label>Departamento <input formControlName="region" /></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Información adicional</h2>
+    <label
+      >Observaciones
+      <textarea formControlName="notes" placeholder="Condiciones de pago, plazos de entrega…"></textarea>
+    </label>
+    <label class="switch">
+      <span><input type="checkbox" formControlName="isActive" /> Habilitado para compras e ingresos</span>
+    </label>
+  </section>
+
+  <footer class="actions">
+    <a routerLink="/app/suppliers">Cancelar</a>
+    <button class="primary" type="submit">Guardar proveedor</button>
+  </footer>
+</form>

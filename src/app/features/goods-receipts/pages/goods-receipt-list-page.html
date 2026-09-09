@@ -1,0 +1,33 @@
+<app-page-header title="Ingresos de mercadería" description="Registro de compras y recepción de productos">
+  <a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nuevo ingreso</a>
+</app-page-header>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Ingresos del mes" [value]="monthCount()" icon="move_to_inbox" tone="primary" />
+  <app-kpi-card label="Productos recibidos" [value]="totalUnits() + ' u.'" icon="inventory_2" tone="info" />
+  <app-kpi-card label="Valor total" [value]="'S/ ' + totalValue().toLocaleString('es-PE')" icon="payments" tone="success" />
+  <app-kpi-card label="Pendientes" [value]="pending()" icon="pending_actions" tone="warning" />
+</div>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #box (input)="search.set(box.value)" placeholder="Buscar por código o proveedor…" />
+  </label>
+  <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
+    <option value="">Estado: todos</option>
+    <option>Completado</option>
+    <option>Pendiente</option>
+    <option>Anulado</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [showRemove]="false"
+  editLabel="Ver detalle"
+  editIcon="visibility"
+  emptyMessage="No hay ingresos registrados."
+  (edit)="open($event)"
+/>

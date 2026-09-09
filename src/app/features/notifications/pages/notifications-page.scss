@@ -1,0 +1,137 @@
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ghost .material-icons {
+  font-size: 18px;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.tabs .count {
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+  font-size: var(--font-size-xxs);
+}
+.tabs button.active .count {
+  background: white;
+}
+.feed {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.note {
+  display: flex;
+  gap: 12px;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.note--unread {
+  border-left: 3px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary-soft) 60%, white);
+}
+.badge {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.badge[data-priority='ALTA'] {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 12%, white);
+}
+.badge[data-priority='MEDIA'] {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 16%, white);
+}
+.badge[data-priority='INFO'] {
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 12%, white);
+}
+.badge[data-priority='SISTEMA'] {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+}
+.note__body {
+  flex: 1;
+}
+.note__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.note__head small {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.note__body p {
+  margin: 4px 0 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.note__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.note__meta .chip {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+}
+.note__meta .link {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.empty {
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--color-text-muted);
+}

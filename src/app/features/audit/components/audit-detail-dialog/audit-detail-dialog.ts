@@ -1,0 +1,2 @@
+import{ChangeDetectionStrategy,Component,inject}from'@angular/core';import{MAT_DIALOG_DATA,MatDialogModule,MatDialogRef}from'@angular/material/dialog';import{AuditEvent}from'../../models/audit-event.model';
+@Component({selector:'app-audit-detail-dialog',imports:[MatDialogModule],templateUrl:'./audit-detail-dialog.html',styleUrl:'./audit-detail-dialog.scss',changeDetection:ChangeDetectionStrategy.OnPush})export class AuditDetailDialog{readonly event=inject<AuditEvent>(MAT_DIALOG_DATA);private readonly ref=inject(MatDialogRef<AuditDetailDialog>);close():void{this.ref.close()}}

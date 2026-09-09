@@ -1,0 +1,39 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="save()">
+  <header>
+    <span class="material-icons">store</span>
+    <div>
+      <h2>{{ local ? 'Editar local' : 'Nuevo local' }}</h2>
+      <p>Punto de venta autorizado de tu empresa</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <label class="wide">
+      Nombre del local
+      <input formControlName="name" placeholder="Ej. Local Centro" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="hint">El nombre es obligatorio.</small>
+      }
+    </label>
+    <label class="wide">
+      Dirección
+      <input formControlName="address" placeholder="Av. Arequipa 1234, Miraflores, Lima" />
+      @if (form.controls.address.touched && form.controls.address.invalid) {
+        <small class="hint">La dirección es obligatoria.</small>
+      }
+    </label>
+    <label class="wide">
+      Teléfono
+      <input formControlName="phone" placeholder="01-4567890" />
+    </label>
+    <label class="check">
+      <input type="checkbox" formControlName="isActive" />
+      Local activo
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="primary">{{ local ? 'Guardar cambios' : 'Habilitar local' }}</button>
+  </footer>
+</form>

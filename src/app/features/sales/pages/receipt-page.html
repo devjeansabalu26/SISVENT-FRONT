@@ -1,0 +1,64 @@
+<div class="control-bar">
+  <button type="button" class="ghost" (click)="back()"><span class="material-icons">arrow_back</span>Volver a ventas</button>
+  <span class="control-bar__title">Vista previa de comprobante</span>
+  <div class="control-bar__actions">
+    <button type="button" class="ghost" (click)="sendEmail()"><span class="material-icons">mail</span>Enviar por correo</button>
+    <button type="button" class="ghost" (click)="downloadPdf()"><span class="material-icons">picture_as_pdf</span>Descargar PDF</button>
+    <button type="button" class="primary" (click)="print()"><span class="material-icons">print</span>Imprimir</button>
+  </div>
+</div>
+
+<article class="receipt">
+  <header class="receipt__head">
+    <div>
+      <strong>Comercial Andina S.A.C.</strong>
+      <p>RUC: 20601234567</p>
+      <p>Av. Arequipa 1234 Miraflores Lima</p>
+      <p>Tel: 01-4567890</p>
+    </div>
+    <div class="receipt__doc">
+      <span>R.U.C. 20601234567</span>
+      <strong>BOLETA DE VENTA</strong>
+      <span>B001 - N° 0000892</span>
+    </div>
+  </header>
+
+  <section class="receipt__meta">
+    <div><span>Fecha emisión:</span> {{ sale.dateTime }}</div>
+    <div><span>Local:</span> {{ sale.branch }}</div>
+    <div><span>Cliente:</span> {{ sale.customerName }}</div>
+    <div><span>Documento:</span> {{ sale.customerDocument }}</div>
+  </section>
+
+  <table class="receipt__lines">
+    <thead>
+      <tr><th>Cant.</th><th>Descripción</th><th>P. unitario</th><th>Subtotal</th></tr>
+    </thead>
+    <tbody>
+      @for (line of sale.lines; track line.sku) {
+        <tr>
+          <td>{{ line.quantity }}</td>
+          <td>{{ line.productName }}</td>
+          <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
+          <td>S/ {{ (line.quantity * line.unitPrice).toFixed(2) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <section class="receipt__totals">
+    <div><span>Método:</span> {{ sale.paymentMethod }}</div>
+    <div><span>Recibido:</span> S/ {{ sale.amountReceived.toFixed(2) }}</div>
+    <div><span>Vuelto:</span> S/ {{ sale.change.toFixed(2) }}</div>
+    <div class="sep"></div>
+    <div><span>Subtotal:</span> S/ {{ sale.subtotal.toFixed(2) }}</div>
+    <div><span>IGV (18%):</span> S/ {{ sale.tax.toFixed(2) }}</div>
+    <div class="grand"><span>TOTAL:</span> S/ {{ sale.total.toFixed(2) }}</div>
+  </section>
+
+  <footer class="receipt__foot">
+    <p>¡Gracias por su compra!</p>
+    <p>Vendedor: {{ sale.seller }} · Impreso: {{ issuedAt }}</p>
+    <p class="muted">Representación impresa de la Boleta de Venta Electrónica.</p>
+  </footer>
+</article>

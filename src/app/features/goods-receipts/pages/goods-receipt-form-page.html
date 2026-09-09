@@ -1,0 +1,81 @@
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header title="Nuevo ingreso de mercadería" description="Registro de compra y recepción de productos" />
+
+  <section class="card">
+    <h2>Datos del documento de ingreso</h2>
+    <div class="fields three">
+      <label>Fecha de registro * <input formControlName="date" /></label>
+      <label
+        >Local / almacén *
+        <select formControlName="warehouse">
+          <option>Tienda Principal</option>
+          <option>Local Norte</option>
+          <option>Local Sur</option>
+        </select>
+      </label>
+      <label
+        >Proveedor *
+        <input formControlName="supplier" placeholder="Distribuidora Central S.A.C." />
+        @if (form.controls.supplier.touched && form.controls.supplier.invalid) {
+          <span class="error">Selecciona un proveedor.</span>
+        }
+      </label>
+      <label
+        >Tipo documento *
+        <select formControlName="documentType">
+          <option>Factura</option>
+          <option>Boleta</option>
+          <option>Guía de remisión</option>
+        </select>
+      </label>
+      <label
+        >Número documento *
+        <input formControlName="documentNumber" placeholder="F001-00245" />
+        @if (form.controls.documentNumber.touched && form.controls.documentNumber.invalid) {
+          <span class="error">Indica el número de documento.</span>
+        }
+      </label>
+      <label class="full">Observaciones <textarea formControlName="notes"></textarea></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="lines-head">
+      <h2>Productos a ingresar</h2>
+      <button type="button" class="add" (click)="addLine()"><span class="material-icons">add</span>Agregar producto</button>
+    </div>
+    <div class="lines-scroll">
+      <table class="lines" formArrayName="lines">
+        <thead>
+          <tr><th>Producto</th><th>Código / SKU</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (line of lines.controls; track line; let i = $index) {
+            <tr [formGroupName]="i">
+              <td><input formControlName="productName" placeholder="Nombre del producto" /></td>
+              <td><input formControlName="sku" placeholder="SKU-000" /></td>
+              <td><input type="number" min="1" formControlName="quantity" (input)="recalc()" /></td>
+              <td><input type="number" min="0" step="0.01" formControlName="unitCost" (input)="recalc()" /></td>
+              <td class="subtotal">S/ {{ (line.controls.quantity.value * line.controls.unitCost.value).toFixed(2) }}</td>
+              <td>
+                <button type="button" class="remove" (click)="removeLine(i)" aria-label="Eliminar fila">
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="totals">
+      <span>Total productos: {{ totals().count }}</span>
+      <span>Total unidades: {{ totals().units }}</span>
+      <strong>Costo total: S/ {{ totals().cost.toFixed(2) }}</strong>
+    </div>
+  </section>
+
+  <footer class="actions">
+    <a routerLink="/app/goods-receipts">Cancelar</a>
+    <button class="primary" type="submit">Confirmar ingreso</button>
+  </footer>
+</form>

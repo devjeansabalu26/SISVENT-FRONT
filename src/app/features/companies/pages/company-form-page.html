@@ -1,0 +1,91 @@
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header
+    [title]="isEdit ? 'Editar empresa' : 'Nueva empresa'"
+    description="Datos comerciales, administrador maestro, vigencia e identidad visual"
+  />
+
+  @if (!isEdit) {
+    <ol class="steps">
+      @for (step of steps; track step; let i = $index) {
+        <li><span>{{ i + 1 }}</span>{{ step }}</li>
+      }
+    </ol>
+  }
+
+  <section class="card">
+    <h2>1. Datos de la empresa</h2>
+    <div class="fields">
+      <label
+        >Nombre comercial *
+        <input formControlName="commercialName" placeholder="Ej. TechStore Perú" />
+        @if (form.controls.commercialName.touched && form.controls.commercialName.invalid) {
+          <span class="error">Obligatorio.</span>
+        }
+      </label>
+      <label>Razón social * <input formControlName="legalName" placeholder="Ej. Importaciones Tecnológicas S.A.C." /></label>
+      <label
+        >RUC / documento *
+        <input formControlName="taxId" placeholder="20512345678" />
+        @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
+          <span class="error">11 dígitos.</span>
+        }
+      </label>
+      <label>Rubro / descripción <input formControlName="sector" /></label>
+      <label>Teléfono de la empresa <input formControlName="companyPhone" placeholder="+51 999 999 999" /></label>
+      <label
+        >Correo de contacto *
+        <input type="email" formControlName="companyEmail" placeholder="contacto@empresa.pe" />
+      </label>
+      <label class="full">Dirección legal * <input formControlName="legalAddress" placeholder="Calle, Av. o Jr. con numeración y distrito" /></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Administrador principal</h2>
+    <div class="fields three">
+      <label>Nombres * <input formControlName="adminFirstName" /></label>
+      <label>Apellidos * <input formControlName="adminLastName" /></label>
+      <label>Correo del administrador * <input type="email" formControlName="adminEmail" /></label>
+      <label>Usuario de acceso * <input formControlName="adminUser" placeholder="cmendoza.admin" /></label>
+      <label>Teléfono <input formControlName="adminPhone" /></label>
+      <label>Documento (DNI/CE) * <input formControlName="adminDocument" /></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Configuración de vigencia y contrato</h2>
+    <div class="fields three">
+      <label>Fecha inicio vigencia * <input formControlName="startDate" placeholder="dd/mm/aaaa" /></label>
+      <label>Fecha de vencimiento * <input formControlName="expiration" placeholder="dd/mm/aaaa" /></label>
+      <label
+        >Estado inicial *
+        <select formControlName="initialStatus">
+          <option value="ACTIVA">Activa</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="SUSPENDIDA">Suspendida</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. Personalización e identidad visual</h2>
+    <div class="fields three">
+      <label
+        >Esquema predefinido
+        <select formControlName="colorTemplate">
+          @for (template of colorTemplates; track template) {
+            <option [value]="template">{{ template }}</option>
+          }
+        </select>
+      </label>
+      <label>Color primario <input type="color" formControlName="primaryColor" /></label>
+      <label>Color acento <input type="color" formControlName="accentColor" /></label>
+    </div>
+  </section>
+
+  <footer class="actions">
+    <a routerLink="/app/companies">Cancelar</a>
+    <button class="primary" type="submit">{{ isEdit ? 'Guardar cambios' : 'Crear empresa' }}</button>
+  </footer>
+</form>

@@ -1,0 +1,37 @@
+<form class="dialog" [formGroup]="form" (ngSubmit)="save()">
+  <header>
+    <span class="material-icons">branding_watermark</span>
+    <div>
+      <h2>{{ brand ? 'Editar marca' : 'Nueva marca' }}</h2>
+      <p>Las marcas se asocian a los productos de tu catálogo</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <label class="wide">
+      Nombre
+      <input formControlName="name" maxlength="120" placeholder="Ej. Logitech" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="hint">El nombre es obligatorio (máximo 120 caracteres).</small>
+      }
+    </label>
+    <label class="wide">
+      Descripción
+      <textarea formControlName="description" maxlength="300" rows="3" placeholder="Periféricos y accesorios gaming"></textarea>
+    </label>
+    <label class="wide">
+      Categorías asociadas
+      <input formControlName="categories" placeholder="Tecnología, Gaming" />
+      <small class="muted">Separadas por coma.</small>
+    </label>
+    <label class="check">
+      <input type="checkbox" formControlName="isActive" />
+      Marca activa
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="primary">{{ brand ? 'Guardar cambios' : 'Crear marca' }}</button>
+  </footer>
+</form>

@@ -1,0 +1,104 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.tabs button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.state {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+  padding: 48px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.settings {
+  display: grid;
+  gap: 24px;
+  max-width: 640px;
+}
+
+fieldset {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+legend {
+  padding: 0 8px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+label.check {
+  grid-auto-flow: column;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+input:not([type='checkbox']) {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+}
+
+.hint {
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primary {
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--color-primary);
+  font-weight: 600;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+}

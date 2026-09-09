@@ -1,0 +1,109 @@
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.plan-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 0 0 var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.plan-note .material-icons {
+  color: var(--color-primary);
+  font-size: 18px;
+}
+.local-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-md);
+}
+.local-card {
+  display: grid;
+  gap: 10px;
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.local-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.local-card h3 {
+  margin: 0;
+}
+.local-card small {
+  color: var(--color-text-muted);
+}
+.local-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.local-card__row .material-icons {
+  color: var(--color-text-muted);
+  font-size: 18px;
+}
+.local-card footer {
+  margin-top: 4px;
+}
+.local-card footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+.local-card footer button .material-icons {
+  font-size: 16px;
+}
+.local-add {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 180px;
+  padding: var(--space-lg);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text-muted);
+  text-align: center;
+  cursor: pointer;
+}
+.local-add .material-icons {
+  color: var(--color-primary);
+  font-size: 32px;
+}
+.local-add span {
+  max-width: 30ch;
+  font-size: var(--font-size-xs);
+}

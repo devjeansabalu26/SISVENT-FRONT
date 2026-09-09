@@ -1,0 +1,71 @@
+<app-page-header [title]="'Plan ' + plan.name" description="Detalle del plan comercial">
+  <a class="ghost" [routerLink]="['/app/plans', plan.id, 'edit']"><span class="material-icons">edit</span>Editar plan</a>
+</app-page-header>
+
+<div class="summary surface-card">
+  <div>
+    <span class="code">{{ plan.code }}</span>
+    <h2>Plan {{ plan.name }}</h2>
+  </div>
+  <app-status-chip [value]="plan.status" [label]="plan.status" />
+</div>
+
+<nav class="tabs">
+  <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
+  <button type="button" [class.active]="activeTab() === 'companies'" (click)="activeTab.set('companies')">
+    Empresas asignadas ({{ plan.companyCount }})
+  </button>
+  <button type="button" [class.active]="activeTab() === 'history'" (click)="activeTab.set('history')">
+    Historial de cambios
+  </button>
+</nav>
+
+@switch (activeTab()) {
+  @case ('general') {
+    <div class="cards">
+      <section class="surface-card">
+        <h3>Límites configurados</h3>
+        <dl>
+          <div><dt>Precio mensual actual</dt><dd>S/ {{ plan.price.toFixed(2) }}</dd></div>
+          <div><dt>Locales físicos máximos</dt><dd>{{ plan.localLimit }}</dd></div>
+          <div><dt>Vendedores habilitados</dt><dd>{{ plan.sellerLimit }}</dd></div>
+          <div><dt>Productos registrables</dt><dd>Ilimitados</dd></div>
+          <div><dt>Empresas utilizando el plan</dt><dd>{{ plan.companyCount }} cuentas</dd></div>
+        </dl>
+      </section>
+      <section class="surface-card">
+        <h3>Estructura de módulos</h3>
+        @for (block of modules; track block.group) {
+          <div class="module-block">
+            <strong>{{ block.group }}</strong>
+            <ul>
+              @for (item of block.items; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+    </div>
+  }
+  @case ('companies') {
+    <section class="surface-card">
+      <p class="muted">{{ plan.companyCount }} empresas usan actualmente este plan. El listado detallado se conecta al backend cuando el endpoint esté disponible.</p>
+    </section>
+  }
+  @case ('history') {
+    <section class="surface-card">
+      <h3>Historial de precios de suscripción</h3>
+      <table>
+        <thead>
+          <tr><th>Fecha de cambio</th><th>Precio anterior</th><th>Precio nuevo</th><th>Usuario responsable</th></tr>
+        </thead>
+        <tbody>
+          @for (row of priceHistory; track row.date) {
+            <tr><td>{{ row.date }}</td><td>{{ row.previous }}</td><td>{{ row.next }}</td><td>{{ row.user }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+}

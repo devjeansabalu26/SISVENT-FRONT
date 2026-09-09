@@ -1,0 +1,54 @@
+<app-page-header title="Mi empresa" [description]="'Información y configuración de ' + commercialName">
+  <button type="button" class="ghost" (click)="edit()"><span class="material-icons">edit</span>Editar información</button>
+</app-page-header>
+
+<div class="cards">
+  <section class="surface-card">
+    <h3>Identidad comercial</h3>
+    <dl>
+      @for (field of identity; track field.label) {
+        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+      }
+    </dl>
+  </section>
+
+  <section class="surface-card">
+    <h3>Contacto principal</h3>
+    <dl>
+      @for (field of contact; track field.label) {
+        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+      }
+    </dl>
+  </section>
+
+  <section class="surface-card">
+    <h3>Dirección fiscal / principal</h3>
+    <dl>
+      @for (field of address; track field.label) {
+        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+      }
+    </dl>
+  </section>
+
+  <section class="surface-card">
+    <h3>Datos fiscales</h3>
+    <dl>
+      @for (field of fiscal; track field.label) {
+        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+      }
+    </dl>
+  </section>
+
+  <section class="surface-card">
+    <h3>Identidad visual</h3>
+    <p class="muted">Logotipo: JPG, PNG o PNG transparente. Máx. 2MB. Dimensión sugerida 200×200px.</p>
+    <div class="swatches">
+      @for (color of brandColors; track color.label) {
+        <div class="swatch">
+          <span class="swatch__chip" [style.background]="color.value"></span>
+          <div><strong>{{ color.label }}</strong><small>{{ color.value }}</small></div>
+        </div>
+      }
+    </div>
+  </section>
+</div>

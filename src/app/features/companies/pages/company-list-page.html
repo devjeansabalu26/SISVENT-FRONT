@@ -1,0 +1,37 @@
+<app-page-header title="Empresas" description="Administración de cuentas empresariales">
+  <a class="primary" routerLink="/app/companies/new"><span class="material-icons">add</span>Nueva empresa</a>
+</app-page-header>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Total cuentas" [value]="total() + ' empresas'" icon="business" tone="primary" />
+  <app-kpi-card label="Suscripciones activas" [value]="activeCount() + ' licencias'" icon="verified" tone="success" />
+</div>
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #search (input)="this.search.set(search.value)" placeholder="Buscar empresa…" />
+  </label>
+  <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
+    <option value="">Todos los estados</option>
+    <option>ACTIVA</option>
+    <option>POR VENCER</option>
+    <option>VENCIDA</option>
+    <option>SUSPENDIDA</option>
+    <option>PENDIENTE</option>
+  </select>
+  <input type="date" aria-label="Fecha de creación" />
+  <input type="date" aria-label="Vencimiento desde" />
+  <button type="button">Filtrar</button>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  editLabel="Ver empresa"
+  editIcon="visibility"
+  removeLabel="Suspender"
+  removeIcon="block"
+  (edit)="open($event)"
+  (remove)="edit($event)"
+/>

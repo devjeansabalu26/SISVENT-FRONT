@@ -1,0 +1,17 @@
+<section class="filter-bar">
+  @if (showSearch()) {
+    <label class="filter-bar__search">
+      <span class="material-icons" aria-hidden="true">search</span>
+      <input #search type="search" [placeholder]="searchPlaceholder()" (input)="this.search.emit(search.value)" />
+    </label>
+  }
+  <div class="filter-bar__controls">
+    <ng-content />
+  </div>
+  @if (showActions()) {
+    <div class="filter-bar__actions">
+      <button type="button" class="ghost" (click)="clear.emit()">Limpiar</button>
+      <button type="button" class="primary" (click)="apply.emit()">Filtrar</button>
+    </div>
+  }
+</section>

@@ -1,0 +1,161 @@
+@switch (role()) {
+  @case ('SUPERADMIN') {
+    <app-page-header title="Dashboard" description="Vista general de la plataforma de administración SISVENT" />
+
+    <div class="kpi-grid">
+      <app-kpi-card label="Total empresas" value="24" icon="business" tone="primary" />
+      <app-kpi-card label="Activas" value="18" icon="check_circle" tone="success" />
+      <app-kpi-card label="Por vencer" value="3" icon="schedule" tone="warning" />
+      <app-kpi-card label="Vencidas" value="2" icon="event_busy" tone="danger" />
+      <app-kpi-card label="Suspendidas" value="1" icon="block" tone="danger" />
+      <app-kpi-card label="Nuevas del mes" value="4" icon="add_business" tone="info" />
+      <app-kpi-card label="Usuarios activos" value="156" icon="groups" tone="primary" />
+    </div>
+
+    <div class="grid-2">
+      <section class="surface-card">
+        <div class="card-head">
+          <h2>Empresas recientes</h2>
+          <a routerLink="/app/companies" class="link">Ver todas</a>
+        </div>
+        <table>
+          <thead><tr><th>Empresa</th><th>Administrador</th><th>Fecha alta</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (row of superadminCompanies; track row.id) {
+              <tr>
+                <td><strong>{{ row.primary }}</strong><br /><small>{{ row.secondary }}</small></td>
+                <td>{{ row.meta }}</td>
+                <td>{{ row.value }}</td>
+                <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="surface-card">
+        <h2>Próximos vencimientos</h2>
+        <ul class="list">
+          @for (row of superadminExpiring; track row.id) {
+            <li>
+              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
+              <span class="warn">{{ row.value }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+
+    <section class="surface-card">
+      <h2>Actividad reciente</h2>
+      <ul class="activity">
+        @for (item of superadminActivity; track item.text) {
+          <li>
+            <span class="material-icons">history</span>
+            <div><p>{{ item.text }}</p><small>{{ item.by }} · {{ item.when }}</small></div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @case ('VENDEDOR') {
+    <app-page-header [title]="'¡Bienvenido, ' + displayName() + '!'" [description]="companyName()" />
+
+    <div class="kpi-grid">
+      <app-kpi-card label="Ventas hoy" value="8 operaciones" icon="receipt_long" tone="primary" />
+      <app-kpi-card label="Importe hoy" value="S/ 1,245.00" icon="payments" tone="success" />
+      <app-kpi-card label="Última venta" value="hace 15 min" icon="schedule" tone="info" />
+      <app-kpi-card label="Clientes atendidos" value="6 clientes" icon="groups" tone="warning" />
+    </div>
+
+    <section class="surface-card quick">
+      <h2>Operaciones rápidas</h2>
+      <div class="quick-grid">
+        <a routerLink="/app/pos" class="quick-card"><span class="material-icons">point_of_sale</span><strong>Nueva venta (F1)</strong><small>Genera boletas y facturas</small></a>
+        <a routerLink="/app/customers" class="quick-card"><span class="material-icons">person_search</span><strong>Buscar / registrar cliente</strong><small>Por DNI o RUC</small></a>
+        <a routerLink="/app/products" class="quick-card"><span class="material-icons">inventory_2</span><strong>Consultar stock</strong><small>Disponibilidad y precios</small></a>
+        <a routerLink="/app/sales" class="quick-card"><span class="material-icons">print</span><strong>Mis ventas recientes</strong><small>Reimprimir comprobantes</small></a>
+      </div>
+    </section>
+
+    <section class="surface-card">
+      <div class="card-head">
+        <h2>Últimas ventas realizadas (hoy)</h2>
+        <a routerLink="/app/sales" class="link">Ver todo el historial</a>
+      </div>
+      <table>
+        <thead><tr><th>Nro documento</th><th>Hora</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+        <tbody>
+          @for (row of vendorSales; track row.id) {
+            <tr>
+              <td>{{ row.secondary }}</td>
+              <td>{{ row.meta }}</td>
+              <td>{{ row.primary }}</td>
+              <td>{{ row.value }}</td>
+              <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  @default {
+    <app-page-header title="Dashboard" [description]="'Vista general de ' + companyName()" />
+
+    <div class="kpi-grid">
+      <app-kpi-card label="Ventas del día" value="S/ 4,580" icon="point_of_sale" trend="up" delta="+12%" tone="success" />
+      <app-kpi-card label="Ventas del periodo" value="S/ 32,450" icon="calendar_month" tone="primary" />
+      <app-kpi-card label="Operaciones" value="47" icon="receipt_long" tone="info" />
+      <app-kpi-card label="Productos" value="284" icon="inventory_2" tone="primary" />
+      <app-kpi-card label="Clientes" value="156" icon="groups" tone="info" />
+      <app-kpi-card label="Stock bajo" value="8" icon="warning" tone="warning" />
+      <app-kpi-card label="Locales activos" value="3" icon="store" tone="primary" />
+    </div>
+
+    <div class="grid-2">
+      <section class="surface-card">
+        <div class="card-head">
+          <h2>Ventas recientes</h2>
+          <a routerLink="/app/sales" class="link">Ver todas</a>
+        </div>
+        <table>
+          <thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (row of adminSales; track row.id) {
+              <tr>
+                <td>{{ row.secondary }}</td>
+                <td>{{ row.meta }}</td>
+                <td>{{ row.primary }}</td>
+                <td>{{ row.value }}</td>
+                <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="surface-card">
+        <h2>Top productos</h2>
+        <ul class="list">
+          @for (row of adminTopProducts; track row.id) {
+            <li>
+              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
+              <span>{{ row.value }}</span>
+            </li>
+          }
+        </ul>
+        <h2 class="mt">Alertas de stock bajo</h2>
+        <ul class="list">
+          @for (row of adminLowStock; track row.id) {
+            <li>
+              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
+              <span class="warn">{{ row.value }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  }
+}

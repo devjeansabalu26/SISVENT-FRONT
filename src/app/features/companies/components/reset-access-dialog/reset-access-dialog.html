@@ -1,0 +1,29 @@
+<section class="dialog">
+  <header>
+    <span class="material-icons">key</span>
+    <div>
+      <h2>Restablecer acceso</h2>
+      <p>Usuario: {{ data.username }} · {{ data.companyName }}</p>
+    </div>
+  </header>
+
+  <div class="fields">
+    <label class="wide"
+      >Nueva contraseña autogenerada
+      <div class="password">
+        <code>{{ password() }}</code>
+        <button type="button" (click)="copy()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
+      </div>
+    </label>
+    <label class="check">
+      <input type="checkbox" [checked]="forceChange()" (change)="forceChange.set($any($event.target).checked)" />
+      Forzar cambio en el siguiente inicio de sesión
+    </label>
+    <p class="muted">La contraseña solo se mostrará una vez. Cópiela antes de guardar.</p>
+  </div>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button type="button" class="primary" (click)="confirm()">Restablecer</button>
+  </footer>
+</section>

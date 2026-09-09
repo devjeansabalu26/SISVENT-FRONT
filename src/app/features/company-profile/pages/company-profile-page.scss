@@ -1,0 +1,19 @@
+.swatches {
+  display: grid;
+  gap: 12px;
+}
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.swatch__chip {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.swatch small {
+  display: block;
+  color: var(--color-text-muted);
+}

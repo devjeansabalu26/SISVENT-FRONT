@@ -1,0 +1,11 @@
+.table-scroll {
+  overflow-x: auto;
+}
+.audit {
+  margin: var(--space-md) 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}

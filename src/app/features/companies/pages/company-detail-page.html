@@ -1,0 +1,79 @@
+<app-page-header [title]="company.commercialName" description="Panel de control de la cuenta empresarial">
+  <a class="ghost" [routerLink]="['/app/companies', company.id, 'edit']"><span class="material-icons">edit</span>Editar empresa</a>
+  <button type="button" class="ghost" (click)="changePlan()"><span class="material-icons">swap_horiz</span>Cambiar plan</button>
+  <button type="button" class="ghost" (click)="resetAccess()"><span class="material-icons">key</span>Restablecer</button>
+  <button type="button" class="ghost danger" (click)="suspend()"><span class="material-icons">block</span>Suspender acceso</button>
+</app-page-header>
+
+<div class="summary surface-card">
+  <div>
+    <span class="code">RUC: {{ company.taxId }} · Plan Negocio</span>
+    <h2>{{ company.legalName }}</h2>
+  </div>
+  <app-status-chip [value]="company.status" [label]="company.status" />
+</div>
+
+<div class="kpi-grid">
+  <app-kpi-card label="Locales activos" [value]="company.branches" icon="store" tone="primary" />
+  <app-kpi-card label="Vendedores registrados" [value]="company.users" icon="badge" tone="info" />
+  <app-kpi-card label="Catálogo de productos" value="284" icon="inventory_2" tone="success" />
+  <app-kpi-card label="Clientes registrados" value="156" icon="groups" tone="warning" />
+</div>
+
+<nav class="tabs">
+  <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
+  <button type="button" [class.active]="activeTab() === 'plan'" (click)="activeTab.set('plan')">Cuenta / plan</button>
+  <button type="button" [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Usuarios</button>
+  <button type="button" [class.active]="activeTab() === 'locales'" (click)="activeTab.set('locales')">Locales</button>
+</nav>
+
+@switch (activeTab()) {
+  @case ('general') {
+    <div class="cards">
+      <section class="surface-card">
+        <h3>Identidad de empresa</h3>
+        <dl>
+          @for (field of identity; track field.label) {
+            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+          }
+        </dl>
+      </section>
+      <section class="surface-card">
+        <h3>Contacto y dirección</h3>
+        <dl>
+          @for (field of contact; track field.label) {
+            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+          }
+        </dl>
+      </section>
+      <section class="surface-card">
+        <h3>Vigencia de contrato</h3>
+        <dl>
+          @for (field of contract; track field.label) {
+            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+          }
+        </dl>
+      </section>
+      <section class="surface-card">
+        <h3>Últimos accesos</h3>
+        <table>
+          <thead><tr><th>Fecha</th><th>IP</th><th>Resultado</th></tr></thead>
+          <tbody>
+            @for (row of access; track row.date) {
+              <tr><td>{{ row.date }}</td><td>{{ row.ip }}</td><td>{{ row.result }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+  }
+  @case ('plan') {
+    <section class="surface-card"><p class="muted">Plan Negocio (S/ 60.00 / mes). Vigencia {{ company.startDate }} – {{ company.expiration }}. La gestión de plan se conecta al backend cuando el endpoint esté disponible.</p></section>
+  }
+  @case ('users') {
+    <section class="surface-card"><p class="muted">{{ company.users }} usuarios registrados en esta empresa. El listado detallado usa el módulo Usuarios globales.</p></section>
+  }
+  @case ('locales') {
+    <section class="surface-card"><p class="muted">{{ company.branches }} locales activos. El detalle de cajas y direcciones se conecta al backend cuando el endpoint esté disponible.</p></section>
+  }
+}

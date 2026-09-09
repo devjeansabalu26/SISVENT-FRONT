@@ -1,0 +1,85 @@
+.dialog {
+  display: grid;
+  width: min(560px, calc(100vw - 40px));
+  gap: 20px;
+  padding: 24px;
+}
+.dialog header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dialog header > span {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+h2,
+p {
+  margin: 0;
+}
+header p {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.fields {
+  display: grid;
+  gap: 16px;
+}
+label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+label.check {
+  grid-auto-flow: column;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+input:not([type='checkbox']),
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  background: var(--color-surface);
+}
+input:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary-soft);
+}
+textarea {
+  resize: vertical;
+}
+.hint {
+  color: #b91c1c;
+  font-weight: 500;
+}
+.muted {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+button {
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+.primary {
+  border-color: var(--color-primary);
+  color: white;
+  background: var(--color-primary);
+}

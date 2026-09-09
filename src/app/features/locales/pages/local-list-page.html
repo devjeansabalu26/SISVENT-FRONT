@@ -1,0 +1,39 @@
+<app-page-header title="Locales" description="Gestiona los puntos de venta autorizados de tu empresa">
+  <button type="button" class="primary" [disabled]="!canAdd()" (click)="create()">
+    <span class="material-icons">add</span>Nuevo local
+  </button>
+</app-page-header>
+
+<p class="plan-note">
+  <span class="material-icons">info</span>
+  Límites de tu plan {{ planLimit.planName }}: <strong>{{ locals().length }} de {{ planLimit.total }}</strong> locales
+  utilizados @if (remaining() > 0) { · tienes {{ remaining() }} disponible(s) }
+</p>
+
+<div class="local-grid">
+  @for (local of locals(); track local.id) {
+    <article class="local-card">
+      <header>
+        <div>
+          <h3>{{ local.name }}</h3>
+          <small>ID: {{ local.code }}</small>
+        </div>
+        <app-status-chip [value]="local.status" [label]="local.status" />
+      </header>
+      <p class="local-card__row"><span class="material-icons">location_on</span>{{ local.address }}</p>
+      <p class="local-card__row"><span class="material-icons">call</span>{{ local.phone }}</p>
+      <p class="local-card__row"><span class="material-icons">group</span>{{ local.sellerCount }} vendedor(es) asignado(s)</p>
+      <footer>
+        <button type="button" (click)="edit(local)"><span class="material-icons">edit</span>Editar datos</button>
+      </footer>
+    </article>
+  }
+
+  @if (canAdd()) {
+    <button type="button" class="local-add" (click)="create()">
+      <span class="material-icons">add_business</span>
+      <strong>Agregar nuevo local</strong>
+      <span>Tienes {{ remaining() }} cupo(s) disponible(s) en tu plan {{ planLimit.planName }}.</span>
+    </button>
+  }
+</div>
