@@ -1,14 +1,14 @@
 <app-page-header
   title="Sin movimiento y exceso"
-  description="Plan de acción para inventario inactivo y sobrestock — últimos 30 días"
+  description="Identificación de capital inmovilizado y acciones correctivas — últimos 30 días"
 />
 
 <div class="kpi-grid">
-  <app-kpi-card label="Productos sin movimiento" value="18" icon="hourglass_empty" tone="warning" />
-  <app-kpi-card label="Valor inmovilizado" value="S/ 4,250" icon="lock" tone="danger" />
-  <app-kpi-card label="Productos en exceso" value="12" icon="inventory_2" tone="info" />
-  <app-kpi-card label="Valor de sobrestock" value="S/ 2,800" icon="savings" tone="warning" />
+  @for (kpi of kpis; track kpi.label) {
+    <app-kpi-card [label]="kpi.label" [value]="kpi.value" [icon]="kpi.icon" [tone]="kpi.tone" [caption]="kpi.hint" />
+  }
 </div>
 
 <h2 class="section-title">Plan de acción de inventario inactivo</h2>
+<p class="muted">Artículos que superan los 80 días recomendados de almacenamiento sin transacciones registradas.</p>
 <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />

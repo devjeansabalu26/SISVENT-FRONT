@@ -1,30 +1,31 @@
-export type SupplierStatus = 'ACTIVE' | 'INACTIVE';
-
-export interface SupplierListItem {
+/** Mirrors SupplierResponse from /api/v1/suppliers. */
+export interface Supplier {
   readonly id: string;
-  readonly taxId: string;
-  readonly legalName: string;
-  readonly commercialName: string;
-  readonly sector: string;
-  readonly contactName: string;
-  readonly phone: string;
-  readonly totalPurchases: number;
-  readonly lastPurchase: string;
-  readonly status: SupplierStatus;
+  readonly taxDocument: string | null;
+  readonly businessName: string;
+  readonly contactName: string | null;
+  readonly phone: string | null;
+  readonly email: string | null;
+  readonly address: string | null;
+  readonly notes: string | null;
+  readonly isActive: boolean;
+  readonly version: number;
+}
+
+export interface SupplierPage {
+  readonly items: readonly Supplier[];
+  readonly pageNumber: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
 }
 
 export interface SupplierFormValue {
-  readonly documentType: string;
-  readonly taxId: string;
-  readonly legalName: string;
-  readonly commercialName: string;
-  readonly sector: string;
-  readonly contactName: string;
-  readonly phone: string;
-  readonly email: string;
-  readonly address: string;
-  readonly city: string;
-  readonly region: string;
-  readonly notes: string;
+  readonly taxDocument: string | null;
+  readonly businessName: string;
+  readonly contactName: string | null;
+  readonly phone: string | null;
+  readonly email: string | null;
+  readonly address: string | null;
+  readonly notes: string | null;
   readonly isActive: boolean;
 }

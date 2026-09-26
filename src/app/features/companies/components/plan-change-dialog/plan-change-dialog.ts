@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { PlanApiService } from '../../../plans/data-access/plan-api.service';
+import { Plan } from '../../../plans/models/plan.model';
 
 export interface PlanChangeData {
   readonly companyName: string;
@@ -8,8 +10,10 @@ export interface PlanChangeData {
 }
 
 export interface PlanChangeResult {
-  readonly newPlan: string;
-  readonly effectiveDate: string;
+  readonly planId: string;
+  readonly contractedPrice: number;
+  readonly startDate: string;
+  readonly endDate: string;
   readonly reason: string;
 }
 
@@ -20,17 +24,31 @@ export interface PlanChangeResult {
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlanChangeDialog {
+export class PlanChangeDialog implements OnInit {
   readonly data = inject<PlanChangeData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<PlanChangeDialog, PlanChangeResult | undefined>);
+  private readonly planApi = inject(PlanApiService);
 
-  readonly plans = ['Plan Esencial (S/ 40.00)', 'Plan Negocio (S/ 60.00)', 'Plan Profesional (S/ 120.00)'];
+  readonly plans = signal<readonly Plan[]>([]);
 
   readonly form = new FormGroup({
-    newPlan: new FormControl(this.plans[2], { nonNullable: true, validators: [Validators.required] }),
-    effectiveDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    planId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    contractedPrice: new FormControl(0, { nonNullable: true, validators: [Validators.min(0)] }),
+    startDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    endDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     reason: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(5)] }),
   });
+
+  ngOnInit(): void {
+    this.planApi.list().subscribe((plans) => {
+      this.plans.set(plans);
+      const first = plans[0];
+      if (first) {
+        this.form.controls.planId.setValue(first.id);
+        this.form.controls.contractedPrice.setValue(first.currentPrice ?? 0);
+      }
+    });
+  }
 
   cancel(): void {
     this.dialogRef.close();

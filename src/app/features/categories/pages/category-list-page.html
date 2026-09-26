@@ -11,17 +11,54 @@
     <span class="material-icons">search</span>
     <input #box (input)="search.set(box.value)" placeholder="Buscar categoría…" />
   </label>
+  <div class="view-toggle" role="group" aria-label="Vista">
+    <button type="button" [class.active]="view() === 'cards'" (click)="setView('cards')" aria-label="Vista de tarjetas">
+      <span class="material-icons">grid_view</span>
+    </button>
+    <button type="button" [class.active]="view() === 'table'" (click)="setView('table')" aria-label="Vista de tabla">
+      <span class="material-icons">table_rows</span>
+    </button>
+  </div>
 </section>
 
-<app-data-table
-  [columns]="columns"
-  [rows]="rows()"
-  [loading]="loading()"
-  [showEdit]="canManage()"
-  [showRemove]="canManage()"
-  editLabel="Editar categoría"
-  removeLabel="Desactivar categoría"
-  emptyMessage="No hay categorías registradas."
-  (edit)="edit($event)"
-  (remove)="remove($event)"
-/>
+@if (view() === 'cards') {
+  @if (loading()) {
+    <p class="muted">Cargando categorías…</p>
+  } @else if (!rows().length) {
+    <p class="muted">No hay categorías registradas.</p>
+  } @else {
+    <div class="category-grid">
+      @for (category of rows(); track category.id) {
+        <article class="category-card" [class.category-card--inactive]="!category.isActive">
+          <header>
+            <span class="category-card__icon material-icons">category</span>
+            <app-status-chip [value]="category.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="category.isActive ? 'ACTIVE' : 'INACTIVE'" />
+          </header>
+          <h3>{{ category.name }}</h3>
+          <p>{{ category.description || 'Sin descripción' }}</p>
+          @if (canManage()) {
+            <footer>
+              <button type="button" (click)="edit(category)"><span class="material-icons">edit</span>Editar</button>
+              @if (category.isActive) {
+                <button type="button" class="danger" (click)="remove(category)"><span class="material-icons">block</span>Desactivar</button>
+              }
+            </footer>
+          }
+        </article>
+      }
+    </div>
+  }
+} @else {
+  <app-data-table
+    [columns]="columns"
+    [rows]="rows()"
+    [loading]="loading()"
+    [showEdit]="canManage()"
+    [showRemove]="canManage()"
+    editLabel="Editar categoría"
+    removeLabel="Desactivar categoría"
+    emptyMessage="No hay categorías registradas."
+    (edit)="edit($event)"
+    (remove)="remove($event)"
+  />
+}

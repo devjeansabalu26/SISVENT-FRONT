@@ -2,72 +2,94 @@
   @case ('SUPERADMIN') {
     <app-page-header title="Dashboard" description="Vista general de la plataforma de administración SISVENT" />
 
-    <div class="kpi-grid">
-      <app-kpi-card label="Total empresas" value="24" icon="business" tone="primary" />
-      <app-kpi-card label="Activas" value="18" icon="check_circle" tone="success" />
-      <app-kpi-card label="Por vencer" value="3" icon="schedule" tone="warning" />
-      <app-kpi-card label="Vencidas" value="2" icon="event_busy" tone="danger" />
-      <app-kpi-card label="Suspendidas" value="1" icon="block" tone="danger" />
-      <app-kpi-card label="Nuevas del mes" value="4" icon="add_business" tone="info" />
-      <app-kpi-card label="Usuarios activos" value="156" icon="groups" tone="primary" />
-    </div>
+    @if (platform(); as platform) {
+      <div class="kpi-grid">
+        <app-kpi-card label="Total empresas" [value]="platform.summary.totalCompanies" icon="business" tone="primary" />
+        <app-kpi-card label="Activas" [value]="platform.summary.active" icon="check_circle" tone="success" />
+        <app-kpi-card label="Por vencer" [value]="platform.summary.expiring" icon="schedule" tone="warning" />
+        <app-kpi-card label="Vencidas" [value]="platform.summary.expired" icon="event_busy" tone="danger" />
+        <app-kpi-card label="Suspendidas" [value]="platform.summary.suspended" icon="block" tone="danger" />
+        <app-kpi-card label="Nuevas del mes" [value]="platform.summary.newThisMonth" icon="add_business" tone="info" />
+        <app-kpi-card label="Usuarios activos" [value]="platform.summary.activeUsers" icon="groups" tone="primary" />
+      </div>
 
-    <div class="grid-2">
-      <section class="surface-card">
-        <div class="card-head">
-          <h2>Empresas recientes</h2>
-          <a routerLink="/app/companies" class="link">Ver todas</a>
-        </div>
-        <table>
-          <thead><tr><th>Empresa</th><th>Administrador</th><th>Fecha alta</th><th>Estado</th></tr></thead>
-          <tbody>
-            @for (row of superadminCompanies; track row.id) {
-              <tr>
-                <td><strong>{{ row.primary }}</strong><br /><small>{{ row.secondary }}</small></td>
-                <td>{{ row.meta }}</td>
-                <td>{{ row.value }}</td>
-                <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
-              </tr>
+      <div class="grid-2">
+        <section class="surface-card">
+          <div class="card-head">
+            <h2>Empresas recientes</h2>
+            <a routerLink="/app/companies" class="link">Ver todas</a>
+          </div>
+          <table>
+            <thead><tr><th>Empresa</th><th>Administrador</th><th>Fecha alta</th><th>Estado</th></tr></thead>
+            <tbody>
+              @for (row of platform.recentCompanies; track row.id) {
+                <tr>
+                  <td><strong>{{ row.tradeName }}</strong></td>
+                  <td>{{ row.administratorName ?? '—' }}</td>
+                  <td>{{ row.createdAt | date: 'mediumDate' }}</td>
+                  <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+
+        <section class="surface-card">
+          <h2>Próximos vencimientos</h2>
+          <ul class="list">
+            @for (row of platform.upcomingExpirations; track row.companyId) {
+              <li>
+                <div><strong>{{ row.tradeName }}</strong><small>{{ row.planName ?? 'Sin plan' }}</small></div>
+                <span class="warn">Expira en {{ row.daysRemaining }} días</span>
+              </li>
             }
-          </tbody>
-        </table>
-      </section>
+          </ul>
+        </section>
+      </div>
 
-      <section class="surface-card">
-        <h2>Próximos vencimientos</h2>
-        <ul class="list">
-          @for (row of superadminExpiring; track row.id) {
-            <li>
-              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
-              <span class="warn">{{ row.value }}</span>
-            </li>
-          }
-        </ul>
-      </section>
-    </div>
+      <div class="grid-2">
+        <section class="surface-card">
+          <h2>Actividad reciente</h2>
+          <ul class="activity scroll">
+            @for (item of platform.recentActivity; track item.at) {
+              <li>
+                <span class="material-icons">history</span>
+                <div><p>{{ item.action }} · {{ item.entityName }} @if (item.companyName) { ({{ item.companyName }}) }</p><small>{{ item.actorName ?? 'Sistema' }} · {{ item.at | date: 'short' }}</small></div>
+              </li>
+            }
+            @if (!platform.recentActivity.length) {
+              <li class="empty"><small>Sin actividad registrada.</small></li>
+            }
+          </ul>
+        </section>
 
-    <section class="surface-card">
-      <h2>Actividad reciente</h2>
-      <ul class="activity">
-        @for (item of superadminActivity; track item.text) {
-          <li>
-            <span class="material-icons">history</span>
-            <div><p>{{ item.text }}</p><small>{{ item.by }} · {{ item.when }}</small></div>
-          </li>
-        }
-      </ul>
-    </section>
+        <section class="surface-card">
+          <h2>Acciones rápidas</h2>
+          <div class="quick-grid stack">
+            <a routerLink="/app/companies/new" class="quick-card"><span class="material-icons">add_business</span><strong>Nueva empresa</strong><small>Alta de cuenta empresarial</small></a>
+            <a routerLink="/app/companies" class="quick-card"><span class="material-icons">business</span><strong>Empresas</strong><small>Gestionar cuentas y estado</small></a>
+            <a routerLink="/app/plans" class="quick-card"><span class="material-icons">sell</span><strong>Planes y precios</strong><small>Matriz de funcionalidades</small></a>
+            <a routerLink="/app/users" class="quick-card"><span class="material-icons">groups</span><strong>Usuarios globales</strong><small>Administradores por empresa</small></a>
+            <a routerLink="/app/audit" class="quick-card"><span class="material-icons">verified_user</span><strong>Auditoría</strong><small>Bitácora de la plataforma</small></a>
+          </div>
+        </section>
+      </div>
+    } @else if (loading()) {
+      <p class="muted">Cargando dashboard…</p>
+    }
   }
 
   @case ('VENDEDOR') {
     <app-page-header [title]="'¡Bienvenido, ' + displayName() + '!'" [description]="companyName()" />
 
-    <div class="kpi-grid">
-      <app-kpi-card label="Ventas hoy" value="8 operaciones" icon="receipt_long" tone="primary" />
-      <app-kpi-card label="Importe hoy" value="S/ 1,245.00" icon="payments" tone="success" />
-      <app-kpi-card label="Última venta" value="hace 15 min" icon="schedule" tone="info" />
-      <app-kpi-card label="Clientes atendidos" value="6 clientes" icon="groups" tone="warning" />
-    </div>
+    @if (seller(); as seller) {
+      <div class="kpi-grid">
+        <app-kpi-card label="Ventas hoy" [value]="seller.salesToday + ' operaciones'" icon="receipt_long" tone="primary" />
+        <app-kpi-card label="Importe hoy" [value]="'S/ ' + seller.amountToday.toFixed(2)" icon="payments" tone="success" />
+        <app-kpi-card label="Última venta" [value]="(seller.lastSaleAt ? (seller.lastSaleAt | date: 'short') : null) ?? 'Sin ventas'" icon="schedule" tone="info" />
+        <app-kpi-card label="Clientes atendidos" [value]="seller.clientsToday + ' clientes'" icon="groups" tone="warning" />
+      </div>
+    }
 
     <section class="surface-card quick">
       <h2>Operaciones rápidas</h2>
@@ -79,83 +101,177 @@
       </div>
     </section>
 
-    <section class="surface-card">
-      <div class="card-head">
-        <h2>Últimas ventas realizadas (hoy)</h2>
-        <a routerLink="/app/sales" class="link">Ver todo el historial</a>
-      </div>
-      <table>
-        <thead><tr><th>Nro documento</th><th>Hora</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
-        <tbody>
-          @for (row of vendorSales; track row.id) {
-            <tr>
-              <td>{{ row.secondary }}</td>
-              <td>{{ row.meta }}</td>
-              <td>{{ row.primary }}</td>
-              <td>{{ row.value }}</td>
-              <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </section>
-  }
-
-  @default {
-    <app-page-header title="Dashboard" [description]="'Vista general de ' + companyName()" />
-
-    <div class="kpi-grid">
-      <app-kpi-card label="Ventas del día" value="S/ 4,580" icon="point_of_sale" trend="up" delta="+12%" tone="success" />
-      <app-kpi-card label="Ventas del periodo" value="S/ 32,450" icon="calendar_month" tone="primary" />
-      <app-kpi-card label="Operaciones" value="47" icon="receipt_long" tone="info" />
-      <app-kpi-card label="Productos" value="284" icon="inventory_2" tone="primary" />
-      <app-kpi-card label="Clientes" value="156" icon="groups" tone="info" />
-      <app-kpi-card label="Stock bajo" value="8" icon="warning" tone="warning" />
-      <app-kpi-card label="Locales activos" value="3" icon="store" tone="primary" />
-    </div>
-
-    <div class="grid-2">
+    @if (seller(); as seller) {
       <section class="surface-card">
         <div class="card-head">
-          <h2>Ventas recientes</h2>
-          <a routerLink="/app/sales" class="link">Ver todas</a>
+          <h2>Últimas ventas realizadas</h2>
+          <a routerLink="/app/sales" class="link">Ver todo el historial</a>
         </div>
         <table>
-          <thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <thead><tr><th>Nro documento</th><th>Hora</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
           <tbody>
-            @for (row of adminSales; track row.id) {
+            @for (row of seller.recentSales; track row.saleNumber) {
               <tr>
-                <td>{{ row.secondary }}</td>
-                <td>{{ row.meta }}</td>
-                <td>{{ row.primary }}</td>
-                <td>{{ row.value }}</td>
+                <td>{{ row.saleNumber }}</td>
+                <td>{{ row.saleDate | date: 'shortTime' }}</td>
+                <td>{{ row.clientName ?? 'Cliente general' }}</td>
+                <td>S/ {{ row.total.toFixed(2) }}</td>
                 <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
               </tr>
             }
           </tbody>
         </table>
       </section>
+    }
+  }
 
-      <section class="surface-card">
-        <h2>Top productos</h2>
-        <ul class="list">
-          @for (row of adminTopProducts; track row.id) {
-            <li>
-              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
-              <span>{{ row.value }}</span>
-            </li>
+  @default {
+    <app-page-header title="Dashboard" [description]="'Vista general de ' + companyName()">
+      <button type="button" class="ghost" (click)="sync()" [disabled]="syncing()">
+        <span class="material-icons">{{ syncing() ? 'hourglass_top' : 'sync' }}</span>{{ syncing() ? 'Sincronizando…' : 'Sincronizar' }}
+      </button>
+    </app-page-header>
+
+    <section class="filters dashboard-filters">
+      <label>
+        Fecha
+        <select #dateFilter [value]="datePreset()" (change)="onDatePresetChange(dateFilter.value)">
+          @for (preset of dateRangePresets; track preset) {
+            <option [value]="preset">{{ dateRangeLabel[preset] }}</option>
           }
-        </ul>
-        <h2 class="mt">Alertas de stock bajo</h2>
-        <ul class="list">
-          @for (row of adminLowStock; track row.id) {
-            <li>
-              <div><strong>{{ row.primary }}</strong><small>{{ row.secondary }}</small></div>
-              <span class="warn">{{ row.value }}</span>
-            </li>
+        </select>
+      </label>
+      <label>
+        Local
+        <select #storeFilter [value]="storeId()" (change)="onStoreChange(storeFilter.value)">
+          <option value="">Todos los locales</option>
+          @for (store of stores(); track store.id) {
+            <option [value]="store.id">{{ store.name }}</option>
           }
-        </ul>
-      </section>
-    </div>
+        </select>
+      </label>
+      <label>
+        Vendedor
+        <select #sellerFilter [value]="sellerId()" (change)="onSellerChange(sellerFilter.value)">
+          <option value="">Todos los vendedores</option>
+          @for (s of sellers(); track s.id) {
+            <option [value]="s.id">{{ s.fullName }}</option>
+          }
+        </select>
+      </label>
+    </section>
+
+    @if (admin(); as admin) {
+      <div class="kpi-grid">
+        <app-kpi-card label="Ventas del día" [value]="'S/ ' + admin.salesTodayAmount.toFixed(2)" icon="point_of_sale" [trend]="admin.salesTodayDeltaPercent && admin.salesTodayDeltaPercent >= 0 ? 'up' : 'down'" [delta]="admin.salesTodayDeltaPercent != null ? (admin.salesTodayDeltaPercent.toFixed(1) + '%') : undefined" tone="success" />
+        <app-kpi-card label="Ventas del período" [value]="'S/ ' + admin.salesPeriodAmount.toFixed(2)" icon="calendar_month" tone="primary" />
+        <app-kpi-card label="Operaciones" [value]="admin.operationsPeriod" icon="receipt_long" tone="info" />
+        <app-kpi-card label="Productos" [value]="admin.activeProducts" icon="inventory_2" tone="primary" />
+        <app-kpi-card label="Clientes" [value]="admin.activeClients" icon="groups" tone="info" />
+        <app-kpi-card label="Stock bajo" [value]="admin.lowStockCount" icon="warning" [tone]="admin.lowStockCount > 0 ? 'warning' : 'default'" />
+        <app-kpi-card label="Locales activos" [value]="admin.activeStores" icon="store" tone="primary" />
+      </div>
+
+      <div class="grid-2">
+        <section class="surface-card">
+          <div class="card-head">
+            <h2>Ventas recientes</h2>
+            <a routerLink="/app/sales" class="link">Ver todas</a>
+          </div>
+          @if (admin.recentSales.length) {
+            <table>
+              <thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+              <tbody>
+                @for (row of admin.recentSales; track row.saleNumber) {
+                  <tr>
+                    <td>{{ row.saleNumber }}</td>
+                    <td>{{ row.saleDate | date: 'short' }}</td>
+                    <td>{{ row.clientName ?? 'Cliente general' }}</td>
+                    <td>S/ {{ row.total.toFixed(2) }}</td>
+                    <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="muted">No hay ventas registradas para el período seleccionado.</p>
+          }
+        </section>
+
+        <section class="chart-card">
+          <header><h2>Evolución de ventas</h2></header>
+          @if (admin.salesEvolution.length) {
+            <div class="chart" role="img" aria-label="Evolución de ventas del período">
+              @for (point of admin.salesEvolution; track point.date) {
+                <div class="bar-column">
+                  <span class="amount">S/ {{ (point.amount / 1000).toFixed(1) }}k</span>
+                  <div class="bar" [style.--bar-height.%]="(point.amount / maxSalesEvolution()) * 100"></div>
+                  <small>{{ point.date | date: 'shortDate' }}</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">No hay información de ventas disponible.</p>
+          }
+        </section>
+      </div>
+
+      <div class="grid-2">
+        <section class="surface-card">
+          <h2>Ventas por categoría</h2>
+          @if (admin.salesByCategory.length) {
+            <ul class="shares">
+              @for (item of admin.salesByCategory; track item.categoryName) {
+                <li>
+                  <div class="shares__label"><span>{{ item.categoryName }}</span><strong>S/ {{ item.amount.toFixed(2) }}</strong></div>
+                  <div class="shares__track"><span class="shares__fill" [style.width.%]="categoryPercent(item.amount)"></span></div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">No hay información de ventas disponible.</p>
+          }
+        </section>
+
+        <section class="surface-card">
+          <h2>Top productos</h2>
+          @if (admin.topProducts.length) {
+            <ul class="list">
+              @for (row of admin.topProducts; track row.sku) {
+                <li>
+                  <div><strong>{{ row.name }}</strong><small>{{ row.units }} u. vendidos</small></div>
+                  <span>S/ {{ row.revenue.toFixed(2) }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">No hay productos vendidos en este período.</p>
+          }
+          <h2 class="mt">Alertas de stock bajo</h2>
+          @if (admin.lowStockAlerts.length) {
+            <ul class="list">
+              @for (row of admin.lowStockAlerts; track row.productName + row.storeName) {
+                <li>
+                  <div><strong>{{ row.productName }}</strong><small>{{ row.storeName }}</small></div>
+                  <span class="warn">{{ row.currentStock }} unidades</span>
+                </li>
+              }
+            </ul>
+            @if (admin.lowStockCount > admin.lowStockAlerts.length) {
+              <a routerLink="/app/inventory" class="link">Ver inventario</a>
+            }
+          } @else {
+            <p class="muted">No existen alertas de stock bajo.</p>
+          }
+        </section>
+      </div>
+    } @else if (loading()) {
+      <div class="kpi-grid">
+        @for (i of [1, 2, 3, 4, 5, 6, 7]; track i) {
+          <div class="skeleton skeleton--kpi"></div>
+        }
+      </div>
+      <p class="muted">Cargando dashboard…</p>
+    }
   }
 }

@@ -1,15 +1,23 @@
-export type MovementType = 'Entrada' | 'Salida' | 'Ajuste' | 'Transferencia';
-
+/** Mirrors MovementItem from GET /api/v1/inventory/movements. */
 export interface InventoryMovement {
   readonly id: string;
+  readonly createdAt: string;
   readonly code: string;
-  readonly dateTime: string;
-  readonly type: MovementType;
+  readonly movementType: string;
   readonly productName: string;
   readonly sku: string;
-  readonly quantity: number;
-  readonly previousStock: number;
-  readonly newStock: number;
-  readonly reference: string;
-  readonly user: string;
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly quantityDelta: number;
+  readonly stockBefore: number;
+  readonly stockAfter: number;
+  readonly reason: string | null;
+  readonly originType: string | null;
+}
+
+export interface MovementPage {
+  readonly items: readonly InventoryMovement[];
+  readonly pageNumber: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
 }

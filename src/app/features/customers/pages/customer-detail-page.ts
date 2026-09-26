@@ -1,41 +1,45 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
-import { CUSTOMER_MOCK } from '../data-access/customer.mock';
-import { CustomerListItem } from '../models/customer.model';
-
-interface CustomerSale {
-  readonly number: string;
-  readonly date: string;
-  readonly products: string;
-  readonly total: string;
-  readonly seller: string;
-  readonly status: string;
-}
+import { CustomerApiService } from '../data-access/customer-api.service';
+import { CustomerDetail } from '../models/customer.model';
 
 @Component({
   selector: 'app-customer-detail-page',
-  imports: [PageHeader, StatusChip, KpiCard, RouterLink],
+  imports: [PageHeader, StatusChip, KpiCard, RouterLink, DatePipe],
   templateUrl: './customer-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './customer-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerDetailPage {
-  private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
-  readonly customer: CustomerListItem = CUSTOMER_MOCK.find((item) => item.id === this.id) ?? CUSTOMER_MOCK[0];
+export class CustomerDetailPage implements OnInit {
+  private readonly api = inject(CustomerApiService);
+  private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
 
-  readonly personal: readonly { label: string; value: string }[] = [
-    { label: 'Documento de identidad', value: this.customer.document },
-    { label: 'Teléfono móvil', value: this.customer.phone },
-    { label: 'Correo electrónico', value: this.customer.email },
-    { label: 'Dirección fiscal', value: 'Av. Arequipa 1234, Dpto 402, Lima, Lima' },
-  ];
+  readonly loading = signal(true);
+  readonly customer = signal<CustomerDetail | null>(null);
 
-  readonly sales: readonly CustomerSale[] = [
-    { number: 'V-1024', date: '15/03/2024', products: 'Audífonos Bluetooth Pro (x1), Cable USB-C (x2)', total: 'S/ 139.90', seller: 'Carlos V.', status: 'Entregado' },
-    { number: 'V-0988', date: '02/03/2024', products: 'Teclado Mecánico Redragon (x1)', total: 'S/ 159.00', seller: 'Ana M.', status: 'Entregado' },
-    { number: 'V-0912', date: '18/02/2024', products: 'Mouse Inalámbrico Logitech (x1)', total: 'S/ 45.00', seller: 'Carlos V.', status: 'Entregado' },
-  ];
+  readonly personal = computed(() => {
+    const customer = this.customer();
+    if (!customer) return [];
+    return [
+      { label: 'Documento de identidad', value: `${customer.documentType ?? ''} ${customer.documentNumber ?? ''}`.trim() || '—' },
+      { label: 'Teléfono móvil', value: customer.phone ?? '—' },
+      { label: 'Correo electrónico', value: customer.email ?? '—' },
+      { label: 'Dirección', value: customer.address ?? '—' },
+      { label: 'Observaciones', value: customer.notes ?? '—' },
+    ];
+  });
+
+  ngOnInit(): void {
+    this.api.get(this.id).subscribe({
+      next: (customer) => {
+        this.customer.set(customer);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
 }

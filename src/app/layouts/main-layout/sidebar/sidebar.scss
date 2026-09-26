@@ -9,12 +9,16 @@
   overflow-y: auto;
   color: var(--color-sidebar-text);
   background: var(--color-sidebar-bg);
+  /* Derivado del fondo real (default o el secondaryColor de la empresa vía ThemeService), no de un
+     token fijo aparte: así el hover/activo siempre combina con el color que esté puesto ahora mismo. */
+  --sidebar-hover: color-mix(in srgb, var(--color-sidebar-bg) 82%, white 18%);
   transition: transform 180ms ease;
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: var(--space-lg);
   color: white;
   text-decoration: none;
   font-size: var(--font-size-md);
@@ -22,19 +26,32 @@
 }
 .brand__mark {
   display: grid;
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: var(--radius-md);
   background: var(--color-primary);
+  color: var(--color-on-primary, white);
+  font-size: var(--font-size-lg);
 }
-.company {
-  margin: var(--space-smd) 0 var(--space-lg);
+.brand__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.2;
+}
+.brand__info strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.brand__role {
   color: var(--color-sidebar-active);
   font-size: var(--font-size-xxs);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 nav {
   display: grid;
@@ -64,11 +81,11 @@ nav a {
 }
 nav a:hover {
   color: white;
-  background: var(--color-sidebar-hover);
+  background: var(--sidebar-hover);
 }
 nav a.active {
   color: white;
-  background: var(--color-sidebar-hover);
+  background: var(--sidebar-hover);
   box-shadow: inset 3px 0 0 var(--color-sidebar-active);
 }
 .material-icons {

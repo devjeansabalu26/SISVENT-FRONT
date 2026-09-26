@@ -1,1 +1,18 @@
-@use '../../../shared/ui/list-page';.filters{grid-template-columns:minmax(260px,2fr) minmax(180px,1fr)}@media(max-width:650px){.filters{grid-template-columns:1fr}}
+@use '../../../shared/ui/list-page';
+
+.filters {
+  grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(150px, 1fr));
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}

@@ -19,6 +19,8 @@ export class KpiCard {
   readonly icon = input<string>();
   readonly delta = input<string>();
   readonly deltaCaption = input<string>();
+  /** Texto descriptivo bajo el valor cuando la tarjeta no muestra variación. */
+  readonly caption = input<string>();
   readonly trend = input<KpiTrend>('flat');
   readonly tone = input<KpiTone>('default');
 

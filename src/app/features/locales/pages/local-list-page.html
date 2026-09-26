@@ -6,8 +6,12 @@
 
 <p class="plan-note">
   <span class="material-icons">info</span>
-  Límites de tu plan {{ planLimit.planName }}: <strong>{{ locals().length }} de {{ planLimit.total }}</strong> locales
-  utilizados @if (remaining() > 0) { · tienes {{ remaining() }} disponible(s) }
+  @if (planLimit().total != null) {
+    Límites de tu plan {{ planLimit().planName }}: <strong>{{ locals().length }} de {{ planLimit().total }}</strong> locales
+    utilizados @if (remaining() && remaining()! > 0) { · tienes {{ remaining() }} disponible(s) }
+  } @else {
+    Tu plan {{ planLimit().planName }} no tiene límite de locales.
+  }
 </p>
 
 <div class="local-grid">
@@ -18,13 +22,16 @@
           <h3>{{ local.name }}</h3>
           <small>ID: {{ local.code }}</small>
         </div>
-        <app-status-chip [value]="local.status" [label]="local.status" />
+        <app-status-chip [value]="local.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="local.isActive ? 'ACTIVE' : 'INACTIVE'" />
       </header>
-      <p class="local-card__row"><span class="material-icons">location_on</span>{{ local.address }}</p>
-      <p class="local-card__row"><span class="material-icons">call</span>{{ local.phone }}</p>
+      <p class="local-card__row"><span class="material-icons">location_on</span>{{ local.address || 'Sin dirección' }}</p>
+      <p class="local-card__row"><span class="material-icons">call</span>{{ local.phone || 'Sin teléfono' }}</p>
       <p class="local-card__row"><span class="material-icons">group</span>{{ local.sellerCount }} vendedor(es) asignado(s)</p>
       <footer>
         <button type="button" (click)="edit(local)"><span class="material-icons">edit</span>Editar datos</button>
+        <button type="button" (click)="toggleStatus(local)">
+          <span class="material-icons">{{ local.isActive ? 'block' : 'check_circle' }}</span>{{ local.isActive ? 'Desactivar' : 'Activar' }}
+        </button>
       </footer>
     </article>
   }
@@ -33,7 +40,10 @@
     <button type="button" class="local-add" (click)="create()">
       <span class="material-icons">add_business</span>
       <strong>Agregar nuevo local</strong>
-      <span>Tienes {{ remaining() }} cupo(s) disponible(s) en tu plan {{ planLimit.planName }}.</span>
+      <span>
+        @if (remaining() != null) { Tienes {{ remaining() }} cupo(s) disponible(s) en tu plan {{ planLimit().planName }}. }
+        @else { Tu plan {{ planLimit().planName }} permite locales ilimitados. }
+      </span>
     </button>
   }
 </div>

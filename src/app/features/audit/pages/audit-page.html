@@ -1,27 +1,48 @@
 <app-page-header title="Auditoría de actividades" description="Registro de operaciones y eventos de seguridad del sistema">
-  <button type="button" class="primary" (click)="exportHistory()">
-    <span class="material-icons">download</span>Exportar historial
+  <button type="button" class="primary" (click)="exportHistory()" [disabled]="exporting()">
+    <span class="material-icons">download</span>{{ exporting() ? 'Exportando…' : 'Exportar historial' }}
   </button>
 </app-page-header>
 
 <section class="filters">
   <label>
     <span class="material-icons">search</span>
-    <input #search (input)="query.set(search.value)" placeholder="Buscar usuario, acción, IP…" />
+    <input #search (input)="onSearch(search.value)" placeholder="Buscar usuario, acción, IP…" />
   </label>
-  <select #resultFilter (change)="result.set(resultFilter.value)" aria-label="Filtrar por nivel">
+  <select #resultFilter (change)="onLevelChange(resultFilter.value)" aria-label="Filtrar por nivel">
     <option value="">Todos los niveles</option>
-    <option value="SUCCESS">Info</option>
+    <option value="INFO">Info</option>
     <option value="WARNING">Warning</option>
     <option value="ERROR">Error</option>
   </select>
+  @if (isSuperadmin) {
+    <select #companyFilter (change)="onCompanyChange(companyFilter.value)" aria-label="Filtrar por empresa">
+      <option value="">Todas las empresas</option>
+      @for (company of companies(); track company.id) {
+        <option [value]="company.id">{{ company.name }}</option>
+      }
+    </select>
+  }
+  <input #fromDate type="date" (change)="onFromChange(fromDate.value)" aria-label="Fecha desde" />
+  <input #toDate type="date" (change)="onToChange(toDate.value)" aria-label="Fecha hasta" />
 </section>
 
 <app-data-table
   [columns]="columns"
   [rows]="rows()"
+  [loading]="loading()"
   [showRemove]="false"
+  [showFooter]="false"
   editLabel="Ver detalle"
   editIcon="visibility"
+  emptyMessage="No se encontraron eventos con los filtros aplicados."
   (edit)="view($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="registros"
+  (pageChange)="goToPage($event)"
 />

@@ -1,0 +1,36 @@
+@if (loading()) {
+  <p class="muted">Cargando locales…</p>
+} @else if (stores(); as data) {
+  <div class="kpi-grid">
+    <app-kpi-card label="Total locales" [value]="data.totalStores" icon="store" tone="primary" />
+    <app-kpi-card label="Locales activos" [value]="data.activeStores" icon="check_circle" tone="success" />
+    <app-kpi-card label="Locales inactivos" [value]="data.inactiveStores" icon="cancel" tone="warning" />
+    <app-kpi-card label="Usuarios con actividad reciente" [value]="data.recentlyActiveUsers" icon="wifi" tone="info" />
+  </div>
+
+  <section class="surface-card">
+    <table>
+      <thead>
+        <tr><th>Código</th><th>Local</th><th>Dirección</th><th>Usuarios</th><th>Vendedores</th><th>Estado</th><th>Última actividad</th></tr>
+      </thead>
+      <tbody>
+        @for (store of data.items; track store.id) {
+          <tr>
+            <td>{{ store.code }}</td>
+            <td>{{ store.name }}</td>
+            <td>{{ store.address ?? '—' }}</td>
+            <td>{{ store.userCount }}</td>
+            <td>{{ store.vendorCount }}</td>
+            <td>{{ store.isActive ? 'Activo' : 'Inactivo' }}</td>
+            <td>{{ store.lastActivityAt | dateTime }}</td>
+          </tr>
+        }
+        @if (!data.items.length) {
+          <tr><td colspan="7" class="muted">No hay locales registrados.</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+} @else {
+  <p class="muted">No se pudieron cargar los locales de la empresa.</p>
+}

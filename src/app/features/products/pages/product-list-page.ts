@@ -1,32 +1,164 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
-import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { UserContextService } from '../../../core/context/user-context/user-context.service';
+import { NotificationService } from '../../../core/notifications/notification.service';
+import { BrandApiService } from '../../brands/data-access/brand-api.service';
+import { CategoryApiService } from '../../categories/data-access/category-api.service';
+import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
+import { productStatusReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { PRODUCT_MOCK } from '../data-access/product.mock';
-import { ProductListItem } from '../models/product.model';
+import { Paginator } from '../../../shared/ui/paginator/paginator';
+import { ProductApiService } from '../data-access/product-api.service';
+import { Product } from '../models/product.model';
 
-@Component({ selector:'app-product-list-page', imports:[FormsModule,DataTable,PageHeader,RouterLink], templateUrl:'./product-list-page.html', styleUrl:'../../../shared/ui/list-page.scss', changeDetection:ChangeDetectionStrategy.OnPush })
-export class ProductListPage {
+@Component({
+  selector: 'app-product-list-page',
+  imports: [FormsModule, DataTable, PageHeader, Paginator, RouterLink],
+  templateUrl: './product-list-page.html',
+  styleUrls: ['../../../shared/ui/list-page.scss', './product-list-page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ProductListPage implements OnInit {
+  private readonly api = inject(ProductApiService);
+  private readonly categoryApi = inject(CategoryApiService);
+  private readonly brandApi = inject(BrandApiService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
-  readonly query = signal('');
+  private readonly notifications = inject(NotificationService);
 
-  open(product: ProductListItem): void { void this.router.navigate(['/app/products', product.id]); }
-  readonly rows = signal(PRODUCT_MOCK);
-  readonly columns: readonly DataTableColumn<ProductListItem>[] = [
-    {key:'sku',label:'SKU',value:r=>r.sku},{key:'name',label:'Producto',value:r=>r.name},
-    {key:'category',label:'Categoría',value:r=>r.category},{key:'brand',label:'Marca',value:r=>r.brand},
-    {key:'price',label:'Precio',value:r=>`S/ ${r.price.toFixed(2)}`},{key:'status',label:'Estado',value:r=>r.status,type:'status'},
-    {key:'stock',label:'Stock',value:r=>r.stock},
+  readonly loading = signal(false);
+  /** Figma `vendedor-productos`: el vendedor consulta el catálogo en solo lectura. */
+  readonly isSeller = inject(UserContextService).user()?.role === 'VENDEDOR';
+
+  // Filtros: se aplican server-side solo al presionar "Filtrar" (o "Limpiar"), no en cada tecleo/cambio.
+  readonly search = signal('');
+  readonly categoryFilter = signal('');
+  readonly brandFilter = signal('');
+  readonly statusFilter = signal('');
+  readonly lowStockOnly = signal(false);
+
+  readonly pageNumber = signal(1);
+  readonly pageSize = 10;
+  readonly total = signal(0);
+  readonly rows = signal<readonly Product[]>([]);
+
+  readonly categories = signal<readonly { id: string; name: string }[]>([]);
+  readonly brands = signal<readonly { id: string; name: string }[]>([]);
+
+  readonly columns: readonly DataTableColumn<Product>[] = [
+    { key: 'sku', label: 'SKU', value: (r) => r.sku },
+    { key: 'name', label: 'Producto', value: (r) => r.name },
+    { key: 'category', label: 'Categoría', value: (r) => r.categoryName ?? '—' },
+    { key: 'brand', label: 'Marca', value: (r) => r.brandName ?? '—' },
+    { key: 'price', label: 'Precio', value: (r) => `S/ ${r.salePrice.toFixed(2)}` },
+    { key: 'status', label: 'Estado', value: (r) => (r.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
+    { key: 'stock', label: 'Stock', value: (r) => (r.lowStock ? `⚠ ${r.totalStock}` : `${r.totalStock}`) },
   ];
-  filter(value:string):void { this.query.set(value); const q=value.toLowerCase(); this.rows.set(PRODUCT_MOCK.filter(p=>`${p.sku} ${p.name}`.toLowerCase().includes(q))); }
-  remove(product:ProductListItem):void {
-    this.dialog.open(ConfirmDialog,{data:{title:'Eliminar producto',message:`Se eliminará permanentemente ${product.name}. Esta acción no se puede deshacer.`,confirmLabel:'Eliminar',destructive:true}})
-      .afterClosed().pipe(filter(Boolean)).subscribe(()=>this.rows.update(rows=>rows.filter(row=>row.id!==product.id)));
+
+  ngOnInit(): void {
+    this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(page.items));
+    this.brandApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.brands.set(page.items));
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.api
+      .list({
+        pageNumber: this.pageNumber(),
+        pageSize: this.pageSize,
+        search: this.search().trim() || undefined,
+        categoryId: this.categoryFilter() || undefined,
+        brandId: this.brandFilter() || undefined,
+        isActive: this.statusFilter() ? this.statusFilter() === 'ACTIVE' : undefined,
+        lowStock: this.lowStockOnly() || undefined,
+      })
+      .subscribe({
+        next: (page) => {
+          this.rows.set(page.items);
+          this.total.set(page.totalCount);
+          this.loading.set(false);
+        },
+        error: (cause: unknown) => {
+          this.loading.set(false);
+          this.notifications.show(this.messageFor(cause, 'No se pudieron cargar los productos.'), 'error');
+        },
+      });
+  }
+
+  /** Chips de categoría (vista vendedor): filtran al instante. */
+  selectCategory(categoryId: string): void {
+    this.categoryFilter.set(categoryId);
+    this.applyFilters();
+  }
+
+  /** Aplica los filtros vigentes desde página 1 (botón "Filtrar"). */
+  applyFilters(): void {
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  /** Resetea todos los filtros y vuelve a página 1 (botón "Limpiar"). */
+  clearFilters(): void {
+    this.search.set('');
+    this.categoryFilter.set('');
+    this.brandFilter.set('');
+    this.statusFilter.set('');
+    this.lowStockOnly.set(false);
+    this.pageNumber.set(1);
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    this.pageNumber.set(page);
+    this.load();
+  }
+
+  view(product: Product): void {
+    void this.router.navigate(['/app/products', product.id]);
+  }
+
+  edit(product: Product): void {
+    void this.router.navigate(['/app/products', product.id, 'edit']);
+  }
+
+  onMenuAction(event: { action: string; row: Product }): void {
+    if (event.action === 'toggle') this.toggle(event.row);
+  }
+
+  private toggle(product: Product): void {
+    const deactivate = product.isActive;
+    this.dialog
+      .open(ReviewDialog, { data: productStatusReview(product, deactivate) })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        const request = deactivate ? this.api.deactivate(product.id, product.version) : this.api.activate(product.id, product.version);
+        request.subscribe({
+          next: () => {
+            this.notifications.show(`Producto ${deactivate ? 'desactivado' : 'activado'}.`, 'success');
+            this.load();
+          },
+          error: (cause: unknown) => {
+            this.notifications.show(this.messageFor(cause, `No se pudo ${deactivate ? 'desactivar' : 'activar'} el producto.`), 'error');
+            if (cause instanceof AppHttpError && cause.status === 409) this.load();
+          },
+        });
+      });
+  }
+
+  private messageFor(cause: unknown, fallback: string): string {
+    if (cause instanceof AppHttpError) {
+      if (cause.status === 409) return 'Conflicto: el registro cambió. Se recargó la lista.';
+      if (cause.status === 403) return 'No tienes permiso para gestionar productos.';
+      if (cause.status === 400) return 'Revisa los filtros ingresados.';
+    }
+    return fallback;
   }
 }

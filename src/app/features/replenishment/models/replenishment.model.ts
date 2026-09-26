@@ -41,3 +41,22 @@ export interface StagnantProduct {
   readonly cause: string;
   readonly suggestedAction: string;
 }
+
+/** Resumen por clase ABC (Figma `screen-abc`). */
+export interface AbcClassSummary {
+  readonly name: AbcClass;
+  readonly label: string;
+  readonly description: string;
+  /** % del valor de inventario que concentra la clase. */
+  readonly valueShare: number;
+  readonly items: number;
+}
+
+/** KPI de inventario inmovilizado (Figma `screen-stagnant`). */
+export interface StagnantKpi {
+  readonly label: string;
+  readonly value: string;
+  readonly hint: string;
+  readonly icon: string;
+  readonly tone: 'primary' | 'success' | 'warning' | 'danger' | 'info';
+}

@@ -115,3 +115,40 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
+
+.suggestions .why {
+  display: inline-grid;
+  place-items: center;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  background: none;
+  cursor: pointer;
+}
+.suggestions .why:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.abc-card {
+  display: grid;
+  gap: 6px;
+}
+.abc-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.abc-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+}
+.abc-progress span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}

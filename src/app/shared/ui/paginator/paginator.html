@@ -1,0 +1,30 @@
+<div class="paginator">
+  <span class="paginator__summary">
+    Mostrando {{ from() }}-{{ to() }} de {{ total() | number }} {{ itemNoun() }}
+  </span>
+
+  @if (totalPages() > 1) {
+    <nav class="paginator__pages" aria-label="Paginación">
+      <button type="button" class="paginator__nav" [disabled]="disabled() || pageNumber() <= 1" (click)="go(pageNumber() - 1)" aria-label="Página anterior">
+        <span class="material-icons">chevron_left</span>
+      </button>
+      @for (token of tokens(); track $index) {
+        @if (token.kind === 'gap') {
+          <span class="paginator__gap">…</span>
+        } @else {
+          <button
+            type="button"
+            class="paginator__page"
+            [class.is-active]="token.value === pageNumber()"
+            [attr.aria-current]="token.value === pageNumber() ? 'page' : null"
+            [disabled]="disabled()"
+            (click)="go(token.value)"
+          >{{ token.value }}</button>
+        }
+      }
+      <button type="button" class="paginator__nav" [disabled]="disabled() || pageNumber() >= totalPages()" (click)="go(pageNumber() + 1)" aria-label="Página siguiente">
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </nav>
+  }
+</div>

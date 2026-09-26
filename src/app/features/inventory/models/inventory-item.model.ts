@@ -1,21 +1,35 @@
 export type StockStatus = 'AVAILABLE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
-export interface InventoryItem {
+/** Mirrors StockItem from GET /api/v1/inventory/stock, plus a synthetic `id` for the data table. */
+export interface StockRow {
   readonly id: string;
+  readonly productId: string;
   readonly sku: string;
   readonly productName: string;
-  readonly category: string;
-  readonly warehouse: string;
-  readonly stock: number;
-  readonly minimumStock: number;
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly currentStock: number;
+  readonly minStock: number;
+  readonly maxStock: number | null;
   readonly status: StockStatus;
+  readonly updatedAt: string;
+  readonly version: number;
 }
 
-export type StockMovementType = 'IN' | 'OUT' | 'ADJUSTMENT';
+export interface StockPage {
+  readonly items: readonly StockRow[];
+  readonly pageNumber: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}
 
-export interface StockAdjustment {
-  readonly itemId: string;
-  readonly type: StockMovementType;
+export type StockAdjustmentType = 'In' | 'Out' | 'Set';
+
+export interface StockAdjustmentRequest {
+  readonly storeId: string;
+  readonly productId: string;
+  readonly type: StockAdjustmentType;
   readonly quantity: number;
+  readonly minStock: number | null;
   readonly reason: string;
 }

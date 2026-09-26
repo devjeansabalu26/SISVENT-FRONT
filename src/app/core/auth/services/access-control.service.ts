@@ -10,12 +10,20 @@ export class AccessControlService {
   private readonly users = inject(UserContextService);
   private readonly companies = inject(CompanyContextService);
 
-  canAccess(requirement: { roles?: readonly AppRole[]; permissions?: readonly AppPermission[]; plans?: readonly CompanyPlan[] }): boolean {
+  canAccess(requirement: {
+    roles?: readonly AppRole[];
+    permissions?: readonly AppPermission[];
+    plans?: readonly CompanyPlan[];
+    /** Códigos de features reales del plan vigente (plan_features/features), p.ej. 'PRODUCTS'. */
+    features?: readonly string[];
+  }): boolean {
     const user = this.users.user();
     if (!user) return false;
     if (requirement.roles?.length && !requirement.roles.includes(user.role)) return false;
     if (requirement.permissions?.length && !requirement.permissions.every((permission) => user.permissions.includes(permission))) return false;
-    const plan = this.companies.company()?.plan;
-    return !requirement.plans?.length || (!!plan && requirement.plans.includes(plan));
+    const company = this.companies.company();
+    if (requirement.plans?.length && !(company && requirement.plans.includes(company.plan))) return false;
+    if (requirement.features?.length && !requirement.features.every((feature) => company?.features.includes(feature))) return false;
+    return true;
   }
 }

@@ -1,3 +1,63 @@
+@use '../../../shared/ui/list-page';
+@use '../../../shared/ui/mini-charts';
+
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ghost .material-icons {
+  font-size: 18px;
+}
+
+.dashboard-filters {
+  grid-template-columns: repeat(3, minmax(180px, 260px));
+  justify-content: start;
+}
+.dashboard-filters label {
+  display: grid;
+  height: auto;
+  padding: 0;
+  border: 0;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.chart-card {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.chart-card h2 {
+  margin: 0 0 var(--space-md);
+  font-size: var(--font-size-md);
+}
+
+.skeleton {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--color-surface-secondary) 25%, var(--color-border) 37%, var(--color-surface-secondary) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+.skeleton--kpi {
+  height: 92px;
+}
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -82,6 +142,23 @@ td small {
   margin: 0;
   list-style: none;
 }
+/* Keeps a long feed from stretching the page; the list scrolls inside its card. */
+.activity.scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: var(--space-sm);
+  scrollbar-width: thin;
+}
+.activity.scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.activity.scroll::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+.activity .empty {
+  color: var(--color-text-muted);
+}
 .activity li {
   display: flex;
   gap: 12px;
@@ -101,6 +178,14 @@ td small {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
+}
+/* Right-rail variant: always one column so the card stays narrow. */
+.quick-grid.stack {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.quick-grid.stack .quick-card {
+  padding: var(--space-smd);
 }
 .quick-card {
   display: grid;

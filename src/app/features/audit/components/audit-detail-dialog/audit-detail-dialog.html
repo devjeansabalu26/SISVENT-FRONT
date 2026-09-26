@@ -1,1 +1,27 @@
-<section class="dialog"><header><span class="material-icons">manage_search</span><div><h2>Detalle de auditoría</h2><p>{{event.id}} · {{event.date}}</p></div></header><dl><div><dt>Usuario</dt><dd>{{event.user}} ({{event.role}})</dd></div><div><dt>Empresa</dt><dd>{{event.company}}</dd></div><div><dt>Módulo</dt><dd>{{event.module}}</dd></div><div><dt>Acción</dt><dd>{{event.action}}</dd></div><div><dt>Dirección IP</dt><dd>{{event.ip}}</dd></div><div class="wide"><dt>Detalle</dt><dd>{{event.detail}}</dd></div></dl><footer><button type="button" (click)="close()">Cerrar</button></footer></section>
+<section class="dialog review">
+  <header>
+    <span class="material-icons">manage_search</span>
+    <div class="review__title"><h2>Detalle de auditoría</h2></div>
+    <small class="review__code">{{ code }}</small>
+  </header>
+
+  <dl class="review__meta">
+    <div><dt>Fecha / hora</dt><dd>{{ event.createdAt | dateTime }}</dd></div>
+    <div><dt>Actor</dt><dd>{{ event.actorName ?? '—' }}</dd></div>
+    <div><dt>Rol</dt><dd>{{ role }}</dd></div>
+    @if (event.companyName !== undefined) {
+      <div><dt>Empresa</dt><dd>{{ event.companyName ?? 'Plataforma' }}</dd></div>
+    }
+    <div><dt>Módulo</dt><dd>{{ module }}</dd></div>
+    <div><dt>Acción</dt><dd>{{ action }}</dd></div>
+    <div><dt>Entidad</dt><dd>{{ event.entityId ?? '—' }}</dd></div>
+    <div><dt>Dirección IP</dt><dd>{{ event.ipAddress ?? '—' }}</dd></div>
+  </dl>
+
+  <div class="review__chips">
+    <small>Detalle del cambio / motivo</small>
+    <p class="detail">{{ event.detail ?? 'Sin detalle registrado.' }}</p>
+  </div>
+
+  <footer><button type="button" class="primary" (click)="close()">Cerrar</button></footer>
+</section>

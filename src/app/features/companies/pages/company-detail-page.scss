@@ -5,3 +5,12 @@
 .page-header__actions {
   flex-wrap: wrap;
 }
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  vertical-align: middle;
+}

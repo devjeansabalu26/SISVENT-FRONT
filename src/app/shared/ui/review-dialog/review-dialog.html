@@ -1,0 +1,121 @@
+<section class="dialog review" [class.review--danger]="data.destructive">
+  <header>
+    <span class="material-icons">{{ data.icon }}</span>
+    <div class="review__title">
+      <h2>{{ data.title }}</h2>
+    </div>
+    @if (data.code) {
+      <small class="review__code">{{ data.code }}</small>
+    }
+  </header>
+
+  @if (data.intro) {
+    <p class="review__intro">{{ data.intro }}</p>
+  }
+
+  @if (data.meta?.length) {
+    <dl class="review__meta">
+      @for (item of data.meta; track item.label) {
+        <div>
+          <dt>{{ item.label }}</dt>
+          <dd>{{ item.value }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @if (data.transition; as transition) {
+    <div class="review__transition">
+      <div>
+        <small>{{ transition.fromLabel }}</small>
+        <app-status-chip [value]="transition.from" [label]="transition.from" />
+      </div>
+      <span class="material-icons">arrow_forward</span>
+      <div>
+        <small>{{ transition.toLabel }}</small>
+        <app-status-chip [value]="transition.to" [label]="transition.to" />
+      </div>
+    </div>
+  }
+
+  @if (data.kpis?.length) {
+    <div class="review__kpis">
+      @for (kpi of data.kpis; track kpi.label) {
+        <div>
+          <small>{{ kpi.label }}</small>
+          <strong>{{ kpi.value }}</strong>
+        </div>
+      }
+    </div>
+  }
+
+  @if (data.diff; as diff) {
+    @if (diff.rows.length) {
+      <table class="review__diff">
+        <thead>
+          <tr>
+            <th>{{ headers[0] }}</th>
+            <th>{{ headers[1] }}</th>
+            <th>{{ headers[2] }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of diff.rows; track row.field) {
+            <tr>
+              <td>{{ row.field }}</td>
+              <td class="before">{{ row.before }}</td>
+              <td class="after">{{ row.after }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <p class="muted">No hay cambios respecto a los valores guardados.</p>
+    }
+  }
+
+  @for (group of data.chipGroups ?? []; track group.label) {
+    <div class="review__chips">
+      <small>{{ group.label }}</small>
+      @if (group.items.length) {
+        <div>
+          @for (item of group.items; track item) {
+            <span class="review__chip" [attr.data-tone]="group.tone ?? 'info'">{{ item }}</span>
+          }
+        </div>
+      } @else {
+        <p class="muted">{{ group.empty ?? 'Ninguno' }}</p>
+      }
+    </div>
+  }
+
+  @if (data.banner; as banner) {
+    <p class="review__banner" [attr.data-tone]="banner.tone">
+      <span class="material-icons">{{ bannerIcon[banner.tone] }}</span>
+      {{ banner.text }}
+    </p>
+  }
+
+  @if (data.note) {
+    <p class="muted review__note">{{ data.note }}</p>
+  }
+
+  @if (data.reason; as reasonConfig) {
+    <label
+      >{{ reasonConfig.label }} *
+      <textarea [formControl]="reason" [placeholder]="reasonConfig.placeholder ?? ''"></textarea>
+      @if (reason.touched && reason.invalid) {
+        <small class="hint">Describe el motivo (mínimo {{ reasonMinLength }} caracteres).</small>
+      }
+    </label>
+  }
+
+  <footer>
+    @if (data.cancelLabel !== null) {
+      <button type="button" (click)="close(false)">{{ data.cancelLabel ?? 'Cancelar' }}</button>
+    }
+    <button type="button" class="primary" [class.danger]="data.destructive" (click)="close(true)">
+      {{ data.confirmLabel }}
+    </button>
+  </footer>
+</section>

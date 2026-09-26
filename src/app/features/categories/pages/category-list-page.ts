@@ -8,13 +8,25 @@ import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog'
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
+import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { CategoryFormDialog } from '../components/category-form-dialog/category-form-dialog';
 import { CategoryApiService } from '../data-access/category-api.service';
 import { Category, CategoryFormValue } from '../models/category.model';
 
+type CategoryView = 'cards' | 'table';
+const VIEW_STORAGE_KEY = 'sisvent.categories.view';
+
+function readStoredView(): CategoryView {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === 'table' ? 'table' : 'cards';
+  } catch {
+    return 'cards';
+  }
+}
+
 @Component({
   selector: 'app-category-list-page',
-  imports: [DataTable, PageHeader],
+  imports: [DataTable, PageHeader, StatusChip],
   templateUrl: './category-list-page.html',
   styleUrl: './category-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +40,9 @@ export class CategoryListPage implements OnInit {
   readonly loading = signal(false);
   readonly search = signal('');
   private readonly categories = signal<readonly Category[]>([]);
+
+  /** Figma `ad-categorias` presenta tarjetas; la tabla queda como vista alternativa (se recuerda por navegador). */
+  readonly view = signal<CategoryView>(readStoredView());
 
   readonly canManage = computed(() => this.userContext.user()?.role === 'ADMIN');
 
@@ -44,6 +59,15 @@ export class CategoryListPage implements OnInit {
     { key: 'description', label: 'Descripción', value: (row) => row.description ?? '—' },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
+
+  setView(view: CategoryView): void {
+    this.view.set(view);
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, view);
+    } catch {
+      // Almacenamiento no disponible (modo privado): la preferencia solo dura la sesión.
+    }
+  }
 
   ngOnInit(): void {
     this.load();

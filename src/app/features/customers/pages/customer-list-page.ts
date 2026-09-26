@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { CUSTOMER_MOCK } from '../data-access/customer.mock';
-import { CustomerListItem } from '../models/customer.model';
+import { CustomerApiService } from '../data-access/customer-api.service';
+import { Customer, CustomerSummary } from '../models/customer.model';
 
 @Component({
   selector: 'app-customer-list-page',
@@ -13,35 +14,60 @@ import { CustomerListItem } from '../models/customer.model';
   styleUrl: './customer-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerListPage {
+export class CustomerListPage implements OnInit {
+  private readonly api = inject(CustomerApiService);
   private readonly router = inject(Router);
+
+  /** Figma `ve-clientes-operacion`: el vendedor selecciona el cliente para iniciar una venta. */
+  readonly isSeller = inject(UserContextService).user()?.role === 'VENDEDOR';
+  readonly loading = signal(false);
   readonly search = signal('');
-  private readonly customers = signal(CUSTOMER_MOCK);
+  readonly summary = signal<CustomerSummary | null>(null);
+  private readonly customers = signal<readonly Customer[]>([]);
 
   readonly rows = computed(() => {
     const term = this.search().trim().toLowerCase();
     if (!term) return this.customers();
     return this.customers().filter((customer) =>
-      `${customer.name} ${customer.document} ${customer.email}`.toLowerCase().includes(term),
+      `${customer.displayName} ${customer.documentNumber ?? ''} ${customer.email ?? ''}`.toLowerCase().includes(term),
     );
   });
 
-  readonly columns: readonly DataTableColumn<CustomerListItem>[] = [
+  readonly columns: readonly DataTableColumn<Customer>[] = [
     { key: 'type', label: 'Tipo', value: (row) => (row.type === 'PERSON' ? 'Persona' : 'Empresa') },
-    { key: 'name', label: 'Nombre / Razón social', value: (row) => row.name },
-    { key: 'document', label: 'Documento', value: (row) => row.document },
-    { key: 'email', label: 'Correo', value: (row) => row.email },
-    { key: 'phone', label: 'Teléfono', value: (row) => row.phone },
-    { key: 'purchases', label: 'Compras total', value: (row) => `S/ ${row.purchases.toFixed(2)}` },
-    { key: 'last', label: 'Última compra', value: (row) => row.lastPurchase },
-    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
+    { key: 'name', label: 'Nombre / Razón social', value: (row) => row.displayName },
+    { key: 'document', label: 'Documento', value: (row) => `${row.documentType ?? ''} ${row.documentNumber ?? ''}`.trim() || '—' },
+    { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
+    { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
+    { key: 'purchases', label: 'Compras total', value: (row) => `S/ ${row.totalPurchases.toFixed(2)}` },
+    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
 
-  open(customer: CustomerListItem): void {
+  ngOnInit(): void {
+    this.api.summary().subscribe((summary) => this.summary.set(summary));
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.api.list({ pageSize: 100 }).subscribe({
+      next: (page) => {
+        this.customers.set(page.items);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  open(customer: Customer): void {
     void this.router.navigate(['/app/customers', customer.id]);
   }
 
-  edit(customer: CustomerListItem): void {
+  selectForSale(customer: Customer): void {
+    void this.router.navigate(['/app/pos'], { queryParams: { clientId: customer.id } });
+  }
+
+  edit(customer: Customer): void {
     void this.router.navigate(['/app/customers', customer.id, 'edit']);
   }
 }

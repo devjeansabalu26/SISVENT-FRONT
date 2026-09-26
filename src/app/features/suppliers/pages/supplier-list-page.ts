@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { SUPPLIER_MOCK } from '../data-access/supplier.mock';
-import { SupplierListItem } from '../models/supplier.model';
+import { SupplierApiService } from '../data-access/supplier-api.service';
+import { Supplier } from '../models/supplier.model';
 
 @Component({
   selector: 'app-supplier-list-page',
@@ -19,60 +20,72 @@ import { SupplierListItem } from '../models/supplier.model';
   styleUrl: '../../../shared/ui/list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SupplierListPage {
+export class SupplierListPage implements OnInit {
+  private readonly api = inject(SupplierApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
-  private readonly router = inject(Router);
   private readonly userContext = inject(UserContextService);
+  private readonly router = inject(Router);
 
+  readonly loading = signal(false);
   readonly search = signal('');
-  readonly sectorFilter = signal('');
   readonly statusFilter = signal('');
-  private readonly suppliers = signal<readonly SupplierListItem[]>(SUPPLIER_MOCK);
+  private readonly suppliers = signal<readonly Supplier[]>([]);
 
   readonly canManage = computed(() => this.userContext.user()?.role === 'ADMIN');
 
-  readonly sectors = computed(() => [...new Set(this.suppliers().map((item) => item.sector))].sort());
-
   readonly rows = computed(() => {
     const term = this.search().trim().toLowerCase();
-    const sector = this.sectorFilter();
     const status = this.statusFilter();
     return this.suppliers().filter((item) => {
       const matchesTerm =
-        !term || `${item.taxId} ${item.legalName} ${item.commercialName} ${item.sector}`.toLowerCase().includes(term);
-      return matchesTerm && (!sector || item.sector === sector) && (!status || item.status === status);
+        !term || `${item.taxDocument ?? ''} ${item.businessName} ${item.contactName ?? ''}`.toLowerCase().includes(term);
+      const matchesStatus = !status || (status === 'ACTIVE' ? item.isActive : !item.isActive);
+      return matchesTerm && matchesStatus;
     });
   });
 
   readonly totalSuppliers = computed(() => this.suppliers().length);
-  readonly activeSuppliers = computed(() => this.suppliers().filter((item) => item.status === 'ACTIVE').length);
-  readonly monthPurchases = computed(() =>
-    this.suppliers().reduce((total, item) => total + item.totalPurchases, 0),
-  );
+  readonly activeSuppliers = computed(() => this.suppliers().filter((item) => item.isActive).length);
 
-  readonly columns: readonly DataTableColumn<SupplierListItem>[] = [
-    { key: 'taxId', label: 'RUC', value: (row) => row.taxId },
-    { key: 'legalName', label: 'Razón social', value: (row) => row.legalName },
-    { key: 'commercialName', label: 'N. comercial', value: (row) => row.commercialName },
-    { key: 'sector', label: 'Rubro', value: (row) => row.sector },
-    { key: 'contactName', label: 'Contacto', value: (row) => row.contactName },
-    { key: 'phone', label: 'Teléfono', value: (row) => row.phone },
-    { key: 'totalPurchases', label: 'Compras total', value: (row) => `S/ ${row.totalPurchases.toLocaleString('es-PE')}` },
-    { key: 'lastPurchase', label: 'Última compra', value: (row) => row.lastPurchase },
-    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
+  readonly columns: readonly DataTableColumn<Supplier>[] = [
+    { key: 'taxDocument', label: 'RUC / Documento', value: (row) => row.taxDocument ?? '—' },
+    { key: 'businessName', label: 'Razón social', value: (row) => row.businessName },
+    { key: 'contactName', label: 'Contacto', value: (row) => row.contactName ?? '—' },
+    { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
+    { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
+    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
 
-  edit(supplier: SupplierListItem): void {
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.api.list({ pageSize: 100 }).subscribe({
+      next: (page) => {
+        this.suppliers.set(page.items);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  edit(supplier: Supplier): void {
     void this.router.navigate(['/app/suppliers', supplier.id, 'edit']);
   }
 
-  remove(supplier: SupplierListItem): void {
+  remove(supplier: Supplier): void {
+    if (!supplier.isActive) {
+      this.notifications.show('El proveedor ya está inactivo.', 'info');
+      return;
+    }
     this.dialog
       .open(ConfirmDialog, {
         data: {
           title: 'Deshabilitar proveedor',
-          message: `"${supplier.legalName}" dejará de estar disponible para nuevos ingresos de mercadería.`,
+          message: `"${supplier.businessName}" dejará de estar disponible para nuevos ingresos de mercadería.`,
           confirmLabel: 'Deshabilitar',
           destructive: true,
         },
@@ -80,10 +93,21 @@ export class SupplierListPage {
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => {
-        this.suppliers.update((rows) =>
-          rows.map((row) => (row.id === supplier.id ? { ...row, status: 'INACTIVE' as const } : row)),
-        );
-        this.notifications.show('Proveedor deshabilitado.', 'success');
+        this.api.deactivate(supplier.id, supplier.version).subscribe({
+          next: () => {
+            this.notifications.show('Proveedor deshabilitado.', 'success');
+            this.load();
+          },
+          error: (cause: unknown) => {
+            this.notifications.show(
+              cause instanceof AppHttpError && cause.status === 409
+                ? 'Conflicto: el registro cambió. Se recargó la lista.'
+                : 'No se pudo deshabilitar el proveedor.',
+              'error',
+            );
+            this.load();
+          },
+        });
       });
   }
 }

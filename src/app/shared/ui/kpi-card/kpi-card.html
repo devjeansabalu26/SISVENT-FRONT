@@ -14,5 +14,7 @@
         <small>{{ deltaCaption() }}</small>
       }
     </p>
+  } @else if (caption()) {
+    <small class="kpi__caption">{{ caption() }}</small>
   }
 </article>

@@ -1,7 +1,45 @@
-<app-page-header title="Usuarios" description="Administra accesos, roles y sucursales"><button type="button" class="primary" (click)="create()"><span class="material-icons">person_add</span>Nuevo usuario</button></app-page-header>
+<app-page-header title="Usuarios" description="Administra accesos, roles y locales">
+  <button type="button" class="primary" (click)="create()"><span class="material-icons">person_add</span>Nuevo usuario</button>
+</app-page-header>
+
+@if (limits(); as limits) {
+  <p class="plan-note">
+    <span class="material-icons">info</span>
+    Plan {{ limits.planName ?? '—' }}: vendedores {{ limits.sellersUsed }}/{{ limits.sellersMax ?? '∞' }} · administradores {{ limits.adminsUsed }}/{{ limits.adminsMax ?? '∞' }}
+  </p>
+}
+
 <section class="filters">
-  <label><span class="material-icons">search</span><input #search (input)="query.set(search.value)" placeholder="Buscar usuario, correo o documento" /></label>
-  <select #roleFilter (change)="role.set(roleFilter.value)" aria-label="Filtrar por rol"><option value="">Todos los roles</option><option value="SUPERADMIN">Superadmin</option><option value="ADMIN">Administrador</option><option value="VENDEDOR">Vendedor</option></select>
-  <select #statusFilter (change)="status.set(statusFilter.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="ACTIVE">Activo</option><option value="INACTIVE">Inactivo</option></select>
+  <label><span class="material-icons">search</span><input #search (input)="onSearch(search.value)" placeholder="Buscar usuario, correo o documento" /></label>
+  <select #roleFilter (change)="onRoleChange(roleFilter.value)" aria-label="Filtrar por rol"><option value="">Todos los roles</option><option value="ADMIN">Administrador</option><option value="VENDEDOR">Vendedor</option></select>
+  <select #statusFilter (change)="onStatusChange(statusFilter.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="ACTIVE">Activo</option><option value="INACTIVE">Inactivo</option></select>
 </section>
-<app-data-table [columns]="columns" [rows]="rows()" editLabel="Editar usuario" removeLabel="Cambiar estado" removeIcon="power_settings_new" emptyMessage="No se encontraron usuarios." (edit)="edit($event)" (remove)="toggle($event)" />
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [showView]="true"
+  [showEdit]="!isSuperadmin"
+  [showKey]="true"
+  [showRemove]="false"
+  [showFooter]="false"
+  [menuActions]="menuActions"
+  viewLabel="Ver detalle"
+  editLabel="Editar usuario"
+  keyLabel="Gestión / cambio de contraseña"
+  menuLabel="Más opciones"
+  emptyMessage="No se encontraron usuarios."
+  (view)="view($event)"
+  (edit)="edit($event)"
+  (key)="changePassword($event)"
+  (menuAction)="onMenuAction($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="usuarios"
+  (pageChange)="goToPage($event)"
+/>

@@ -19,10 +19,11 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
   { label: 'Ventas', icon: 'point_of_sale', route: '/app/sales', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesView] },
   { label: 'Clientes', icon: 'badge', route: '/app/customers', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.customersView] },
 
-  // Catálogo — ADMIN / VENDEDOR
-  { label: 'Productos', icon: 'inventory_2', route: '/app/products', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.productsView] },
-  { label: 'Categorías', icon: 'category', route: '/app/categories', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.categoriesView] },
-  { label: 'Marcas', icon: 'branding_watermark', route: '/app/brands', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.brandsView] },
+  // Catálogo — ADMIN / VENDEDOR. requiredFeature refleja plan_features reales (ver bd.sql §12): un plan
+  // sin ese feature no ve la opción, y la ruta/el backend la rechazan igual si se entra por URL directa.
+  { label: 'Productos', icon: 'inventory_2', route: '/app/products', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.productsView], requiredFeature: 'PRODUCTS' },
+  { label: 'Categorías', icon: 'category', route: '/app/categories', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.categoriesView], requiredFeature: 'CATEGORIES' },
+  { label: 'Marcas', icon: 'branding_watermark', route: '/app/brands', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.brandsView], requiredFeature: 'BRANDS' },
 
   // Almacén — ADMIN
   { label: 'Inventario', icon: 'warehouse', route: '/app/inventory', group: 'Almacén', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.inventoryView], plans: ['PRO', 'BUSINESS'] },

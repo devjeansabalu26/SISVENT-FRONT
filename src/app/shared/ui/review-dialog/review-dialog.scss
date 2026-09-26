@@ -1,0 +1,178 @@
+/* Secciones del diálogo genérico de revisión (catálogos de modales Figma: radio 12px, cabecera con código). */
+.review {
+  width: min(600px, calc(100vw - 40px));
+  border-radius: var(--radius-lg);
+}
+.review__title {
+  flex: 1;
+}
+.review__code {
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: var(--color-surface-secondary);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.review--danger header > span {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 12%, white);
+}
+.review__intro {
+  color: var(--color-text-secondary);
+}
+
+.review__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+.review__meta dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.review__meta dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.review__transition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.review__transition > div {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.review__transition small,
+.review__kpis small,
+.review__chips small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.review__transition .material-icons {
+  color: var(--color-text-muted);
+}
+
+.review__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+.review__kpis > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.review__kpis strong {
+  font-size: var(--font-size-lg);
+}
+
+.review__diff {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+.review__diff th {
+  padding: 8px 10px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+}
+.review__diff td {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-border);
+  overflow-wrap: anywhere;
+}
+.review__diff td:first-child {
+  font-weight: 600;
+}
+.review__diff .before {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.review__diff .after {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.review__chips {
+  display: grid;
+  gap: 8px;
+}
+.review__chips > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.review__chip {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.review__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+.review__banner .material-icons {
+  font-size: 20px;
+}
+
+.review__chip[data-tone='info'],
+.review__banner[data-tone='info'] {
+  color: var(--color-info);
+  background: color-mix(in srgb, var(--color-info) 10%, white);
+}
+.review__chip[data-tone='success'],
+.review__banner[data-tone='success'] {
+  color: #047857;
+  background: color-mix(in srgb, var(--color-success) 12%, white);
+}
+.review__chip[data-tone='warning'],
+.review__banner[data-tone='warning'] {
+  color: #b45309;
+  background: color-mix(in srgb, var(--color-warning) 14%, white);
+}
+.review__chip[data-tone='danger'],
+.review__banner[data-tone='danger'] {
+  color: #b91c1c;
+  background: color-mix(in srgb, var(--color-error) 10%, white);
+}
+
+footer .primary.danger {
+  border-color: var(--color-error);
+  background: var(--color-error);
+}
+
+@media (max-width: 520px) {
+  .review__transition {
+    gap: 12px;
+  }
+}

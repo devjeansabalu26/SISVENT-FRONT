@@ -1,79 +1,166 @@
-<app-page-header [title]="company.commercialName" description="Panel de control de la cuenta empresarial">
-  <a class="ghost" [routerLink]="['/app/companies', company.id, 'edit']"><span class="material-icons">edit</span>Editar empresa</a>
-  <button type="button" class="ghost" (click)="changePlan()"><span class="material-icons">swap_horiz</span>Cambiar plan</button>
-  <button type="button" class="ghost" (click)="resetAccess()"><span class="material-icons">key</span>Restablecer</button>
-  <button type="button" class="ghost danger" (click)="suspend()"><span class="material-icons">block</span>Suspender acceso</button>
-</app-page-header>
+@if (company(); as company) {
+  <app-page-header [title]="company.tradeName" description="Panel de control de la cuenta empresarial">
+    <a class="ghost" [routerLink]="['/app/companies', company.id, 'edit']"><span class="material-icons">edit</span>Editar empresa</a>
+    <button type="button" class="ghost" (click)="changePlan()"><span class="material-icons">swap_horiz</span>Cambiar plan</button>
+    @if (company.planId && company.planEnd) {
+      <button type="button" class="ghost" (click)="changeValidity()"><span class="material-icons">event</span>Cambiar vigencia</button>
+    }
+    <button type="button" class="ghost" (click)="resetAccess()"><span class="material-icons">key</span>Restablecer acceso admin</button>
+    <button type="button" class="ghost danger" (click)="suspend()"><span class="material-icons">block</span>{{ company.status === 'SUSPENDED' ? 'Reactivar' : 'Suspender' }}</button>
+  </app-page-header>
 
-<div class="summary surface-card">
-  <div>
-    <span class="code">RUC: {{ company.taxId }} · Plan Negocio</span>
-    <h2>{{ company.legalName }}</h2>
+  <div class="summary surface-card">
+    <div>
+      <span class="code">RUC: {{ company.taxDocument }} · Plan {{ company.planName ?? 'Sin plan' }}</span>
+      <h2>{{ company.legalName ?? company.tradeName }}</h2>
+    </div>
+    <app-status-chip [value]="company.effectiveStatus" [label]="company.effectiveStatus" />
   </div>
-  <app-status-chip [value]="company.status" [label]="company.status" />
-</div>
 
-<div class="kpi-grid">
-  <app-kpi-card label="Locales activos" [value]="company.branches" icon="store" tone="primary" />
-  <app-kpi-card label="Vendedores registrados" [value]="company.users" icon="badge" tone="info" />
-  <app-kpi-card label="Catálogo de productos" value="284" icon="inventory_2" tone="success" />
-  <app-kpi-card label="Clientes registrados" value="156" icon="groups" tone="warning" />
-</div>
+  <div class="kpi-grid">
+    <app-kpi-card label="Locales activos" [value]="company.storeCount" icon="store" tone="primary" />
+    <app-kpi-card label="Vendedores activos" [value]="company.vendorCount" icon="badge" tone="info" />
+    <app-kpi-card label="Catálogo de productos" [value]="company.productCount" icon="inventory_2" tone="success" />
+    <app-kpi-card label="Clientes registrados" [value]="company.clientCount" icon="groups" tone="warning" />
+  </div>
 
-<nav class="tabs">
-  <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
-  <button type="button" [class.active]="activeTab() === 'plan'" (click)="activeTab.set('plan')">Cuenta / plan</button>
-  <button type="button" [class.active]="activeTab() === 'users'" (click)="activeTab.set('users')">Usuarios</button>
-  <button type="button" [class.active]="activeTab() === 'locales'" (click)="activeTab.set('locales')">Locales</button>
-</nav>
+  <nav class="tabs">
+    <button type="button" [class.active]="activeTab() === 'general'" (click)="setTab('general')">General</button>
+    <button type="button" [class.active]="activeTab() === 'plan'" (click)="setTab('plan')">Cuenta / Plan</button>
+    <button type="button" [class.active]="activeTab() === 'users'" (click)="setTab('users')">Usuarios</button>
+    <button type="button" [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">Locales</button>
+    <button type="button" [class.active]="activeTab() === 'summary'" (click)="setTab('summary')">Resumen</button>
+    <button type="button" [class.active]="activeTab() === 'history'" (click)="setTab('history')">Historial</button>
+  </nav>
 
-@switch (activeTab()) {
-  @case ('general') {
-    <div class="cards">
-      <section class="surface-card">
-        <h3>Identidad de empresa</h3>
-        <dl>
-          @for (field of identity; track field.label) {
-            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+  <!-- General: diseño sin cambios. Se muestra/oculta con [hidden] (no @switch) para que el resto de tabs
+       pueda quedar montado en segundo plano y conservar su estado al volver a ellos. -->
+  <div [hidden]="activeTab() !== 'general'">
+      <div class="cards">
+        <section class="surface-card">
+          <h3>Identidad de empresa</h3>
+          <dl>
+            <div><dt>Nombre comercial</dt><dd>{{ company.tradeName }}</dd></div>
+            <div><dt>Razón social</dt><dd>{{ company.legalName ?? '—' }}</dd></div>
+            <div><dt>RUC</dt><dd>{{ company.taxDocument }}</dd></div>
+            <div><dt>Rubro</dt><dd>{{ company.businessType ?? '—' }}</dd></div>
+          </dl>
+        </section>
+        <section class="surface-card">
+          <h3>Administrador principal</h3>
+          <dl>
+            <div><dt>Nombre</dt><dd>{{ company.administratorName ?? '—' }}</dd></div>
+            <div><dt>Correo</dt><dd>{{ company.administratorEmail ?? '—' }}</dd></div>
+            <div><dt>Teléfono</dt><dd>{{ company.administratorPhone ?? '—' }}</dd></div>
+            <div><dt>Documento</dt><dd>{{ company.administratorDocument ?? '—' }}</dd></div>
+          </dl>
+        </section>
+        <section class="surface-card">
+          <h3>Contacto corporativo</h3>
+          <dl>
+            <div><dt>Teléfono</dt><dd>{{ company.phone ?? '—' }}</dd></div>
+            <div><dt>Correo</dt><dd>{{ company.email ?? '—' }}</dd></div>
+          </dl>
+        </section>
+        <section class="surface-card">
+          <h3>Vigencia de contrato</h3>
+          <dl>
+            <div><dt>Inicio de vigencia</dt><dd>{{ company.planStart | shortDate }}</dd></div>
+            <div><dt>Vencimiento</dt><dd>{{ company.planEnd | shortDate }}</dd></div>
+            <div><dt>Días restantes</dt><dd>{{ company.daysRemaining }} días</dd></div>
+          </dl>
+        </section>
+        <section class="surface-card">
+          <h3>Dirección principal</h3>
+          <dl>
+            <div><dt>Dirección</dt><dd>{{ company.address ?? '—' }}</dd></div>
+            <div><dt>Local principal</dt><dd>{{ company.firstStoreName ?? '—' }}</dd></div>
+          </dl>
+        </section>
+        <section class="surface-card">
+          <h3>Identidad visual de la app</h3>
+          @if (company.primaryColor || company.secondaryColor || company.accentColor || company.backgroundColor) {
+            <dl>
+              @if (company.primaryColor) {
+                <div><dt>Color primario</dt><dd><span class="swatch" [style.background]="company.primaryColor"></span>{{ company.primaryColor }}</dd></div>
+              }
+              @if (company.secondaryColor) {
+                <div><dt>Color secundario</dt><dd><span class="swatch" [style.background]="company.secondaryColor"></span>{{ company.secondaryColor }}</dd></div>
+              }
+              @if (company.accentColor) {
+                <div><dt>Color de acento</dt><dd><span class="swatch" [style.background]="company.accentColor"></span>{{ company.accentColor }}</dd></div>
+              }
+              @if (company.backgroundColor) {
+                <div><dt>Color de fondo</dt><dd><span class="swatch" [style.background]="company.backgroundColor"></span>{{ company.backgroundColor }}</dd></div>
+              }
+            </dl>
+          } @else {
+            <p class="muted">Esta empresa no tiene una identidad visual configurada.</p>
           }
-        </dl>
-      </section>
-      <section class="surface-card">
-        <h3>Contacto y dirección</h3>
-        <dl>
-          @for (field of contact; track field.label) {
-            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        </section>
+        <section class="surface-card">
+          <h3>Grupo de permisos asignados</h3>
+          @if (permissionGroups().length) {
+            <div class="feature-groups">
+              @for (group of permissionGroups(); track group.domain) {
+                <div class="feature-group">
+                  <h4>{{ group.domain }}</h4>
+                  <ul>
+                    @for (item of group.items; track item.code) {
+                      <li>✓ {{ item.name }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">No hay información de permisos disponible todavía para esta empresa.</p>
           }
-        </dl>
-      </section>
-      <section class="surface-card">
-        <h3>Vigencia de contrato</h3>
-        <dl>
-          @for (field of contract; track field.label) {
-            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-          }
-        </dl>
-      </section>
-      <section class="surface-card">
-        <h3>Últimos accesos</h3>
-        <table>
-          <thead><tr><th>Fecha</th><th>IP</th><th>Resultado</th></tr></thead>
-          <tbody>
-            @for (row of access; track row.date) {
-              <tr><td>{{ row.date }}</td><td>{{ row.ip }}</td><td>{{ row.result }}</td></tr>
-            }
-          </tbody>
-        </table>
-      </section>
+        </section>
+        <section class="surface-card">
+          <h3>Últimos accesos</h3>
+          <table>
+            <thead><tr><th>Fecha</th><th>IP</th><th>Resultado</th></tr></thead>
+            <tbody>
+              @for (row of company.recentAccess; track row.at) {
+                <tr><td>{{ row.at | dateTime }}</td><td>{{ row.ip ?? '—' }}</td><td>{{ row.result }}</td></tr>
+              }
+              @if (!company.recentAccess.length) {
+                <tr><td colspan="3" class="muted">Sin accesos registrados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      </div>
+  </div>
+
+  @if (activatedTabs().has('plan')) {
+    <div [hidden]="activeTab() !== 'plan'">
+      <app-company-plan-tab [companyId]="company.id" />
     </div>
   }
-  @case ('plan') {
-    <section class="surface-card"><p class="muted">Plan Negocio (S/ 60.00 / mes). Vigencia {{ company.startDate }} – {{ company.expiration }}. La gestión de plan se conecta al backend cuando el endpoint esté disponible.</p></section>
+  @if (activatedTabs().has('users')) {
+    <div [hidden]="activeTab() !== 'users'">
+      <app-company-users-tab [companyId]="company.id" />
+    </div>
   }
-  @case ('users') {
-    <section class="surface-card"><p class="muted">{{ company.users }} usuarios registrados en esta empresa. El listado detallado usa el módulo Usuarios globales.</p></section>
+  @if (activatedTabs().has('stores')) {
+    <div [hidden]="activeTab() !== 'stores'">
+      <app-company-stores-tab [companyId]="company.id" />
+    </div>
   }
-  @case ('locales') {
-    <section class="surface-card"><p class="muted">{{ company.branches }} locales activos. El detalle de cajas y direcciones se conecta al backend cuando el endpoint esté disponible.</p></section>
+  @if (activatedTabs().has('summary')) {
+    <div [hidden]="activeTab() !== 'summary'">
+      <app-company-summary-tab [companyId]="company.id" />
+    </div>
   }
+  @if (activatedTabs().has('history')) {
+    <div [hidden]="activeTab() !== 'history'">
+      <app-company-history-tab [companyId]="company.id" />
+    </div>
+  }
+} @else if (loading()) {
+  <p class="muted">Cargando empresa…</p>
+} @else {
+  <p class="muted">No se encontró la empresa.</p>
 }

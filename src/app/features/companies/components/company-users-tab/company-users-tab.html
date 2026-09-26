@@ -1,0 +1,46 @@
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #search (input)="onSearch(search.value)" placeholder="Buscar usuario, correo…" />
+  </label>
+  <select #roleFilter (change)="role.set(roleFilter.value); onFilterChange()" aria-label="Filtrar por rol">
+    <option value="">Todos los roles</option>
+    <option value="ADMIN">Administrador</option>
+    <option value="VENDEDOR">Vendedor</option>
+  </select>
+  <select #storeFilter (change)="storeId.set(storeFilter.value); onFilterChange()" aria-label="Filtrar por local">
+    <option value="">Todos los locales</option>
+    @for (store of stores(); track store.id) {
+      <option [value]="store.id">{{ store.name }}</option>
+    }
+  </select>
+  <select #statusFilter (change)="status.set(statusFilter.value); onFilterChange()" aria-label="Filtrar por estado">
+    <option value="">Todos los estados</option>
+    <option value="ACTIVE">Activo</option>
+    <option value="INACTIVE">Inactivo</option>
+  </select>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [showView]="true"
+  [showEdit]="false"
+  [showRemove]="false"
+  [menuActions]="[
+    { id: 'toggle', label: 'Activar / desactivar', icon: 'power_settings_new' },
+    { id: 'reset', label: 'Restablecer acceso', icon: 'vpn_key' },
+  ]"
+  emptyMessage="No hay usuarios registrados para esta empresa."
+  (view)="view($event)"
+  (menuAction)="onMenuAction($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="usuarios"
+  (pageChange)="goToPage($event)"
+/>

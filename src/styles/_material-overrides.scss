@@ -1,3 +1,52 @@
+// Row overflow menu (app-data-table "Más opciones"). The app ships no Angular Material
+// theme, so the panel + items are styled here against the design-system tokens.
+.mat-mdc-menu-panel.mat-mdc-menu-panel {
+  min-width: 200px;
+  max-width: 320px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg, 0 12px 32px rgb(15 23 42 / 18%));
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-content {
+  padding: 6px;
+}
+
+.mat-mdc-menu-panel button.mat-mdc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mat-mdc-menu-panel button.mat-mdc-menu-item:hover,
+.mat-mdc-menu-panel button.mat-mdc-menu-item.cdk-focused {
+  background: var(--color-surface-secondary);
+}
+
+.mat-mdc-menu-panel button.mat-mdc-menu-item .material-icons {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.mat-mdc-menu-panel button.mat-mdc-menu-item.danger {
+  color: var(--color-danger);
+}
+
+.mat-mdc-menu-panel button.mat-mdc-menu-item.danger .material-icons {
+  color: var(--color-danger);
+}
+
 .mat-mdc-snack-bar-container {
   &.notification--success {
     --mat-snack-bar-container-color: #067647;

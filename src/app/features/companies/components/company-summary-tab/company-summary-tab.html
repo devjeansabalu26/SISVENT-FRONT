@@ -1,0 +1,62 @@
+@if (loading()) {
+  <p class="muted">Cargando resumen…</p>
+} @else if (overview(); as data) {
+  <div class="kpi-grid">
+    <app-kpi-card label="Locales" [value]="data.storeCount" icon="store" tone="primary" />
+    <app-kpi-card label="Usuarios" [value]="data.userCount" icon="badge" tone="info" />
+    <app-kpi-card label="Vendedores" [value]="data.vendorCount" icon="groups" tone="info" />
+    <app-kpi-card label="Productos" [value]="data.productCount" icon="inventory_2" tone="success" />
+    <app-kpi-card label="Clientes" [value]="data.clientCount" icon="people" tone="success" />
+    <app-kpi-card label="Ventas" [value]="data.salesCount" icon="point_of_sale" tone="warning" />
+    <app-kpi-card label="Monto vendido" [value]="'S/ ' + data.salesAmount.toFixed(2)" icon="payments" tone="warning" />
+    <app-kpi-card label="Stock total" [value]="data.totalStockUnits" icon="inventory" tone="default" />
+  </div>
+
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Estado de la cuenta</h3>
+      <dl>
+        <div><dt>Estado</dt><dd><app-status-chip [value]="data.effectiveStatus" [label]="data.effectiveStatus" /></dd></div>
+        <div><dt>Plan</dt><dd>{{ data.planName ?? 'Sin plan' }}</dd></div>
+        <div><dt>Vencimiento</dt><dd>{{ data.planEnd | shortDate }}</dd></div>
+        <div><dt>Días restantes</dt><dd>{{ data.daysRemaining }} días</dd></div>
+        <div><dt>Productos con stock bajo</dt><dd>{{ data.lowStockCount }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="surface-card">
+      <h3>Uso del plan</h3>
+      @if (data.planUsage.length) {
+        <dl>
+          @for (usage of data.planUsage; track usage.code) {
+            <div><dt>{{ usage.label }}</dt><dd>{{ usage.used }} / {{ usage.max != null ? usage.max : 'Ilimitado' }}</dd></div>
+          }
+        </dl>
+      } @else {
+        <p class="muted">Sin límites de plan configurados.</p>
+      }
+    </section>
+
+    <section class="surface-card wide">
+      <h3>Actividad reciente</h3>
+      <table>
+        <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th></tr></thead>
+        <tbody>
+          @for (event of data.recentActivity; track event.id) {
+            <tr>
+              <td>{{ event.createdAt | dateTime }}</td>
+              <td>{{ event.actorName ?? '—' }}</td>
+              <td>{{ friendlyAction(event.action) }}</td>
+              <td>{{ friendlyEntity(event.entityName) }}</td>
+            </tr>
+          }
+          @if (!data.recentActivity.length) {
+            <tr><td colspan="4" class="muted">Sin actividad reciente registrada.</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+} @else {
+  <p class="muted">No se pudo cargar el resumen de la empresa.</p>
+}

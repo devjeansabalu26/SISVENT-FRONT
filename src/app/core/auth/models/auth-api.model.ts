@@ -5,6 +5,20 @@ export interface LoginCredentials {
   readonly password: string;
 }
 
+/** Empresa del usuario autenticado (ADMIN/VENDEDOR): nombre, plan vigente, features habilitadas por
+ * ese plan y el theme visual guardado. `null` para SUPERADMIN (no pertenece a ninguna empresa). */
+export interface SessionCompany {
+  readonly id: string;
+  readonly tradeName: string;
+  readonly planCode: string | null;
+  readonly planName: string | null;
+  readonly features: readonly string[];
+  readonly primaryColor: string | null;
+  readonly secondaryColor: string | null;
+  readonly accentColor: string | null;
+  readonly backgroundColor: string | null;
+}
+
 /** Session user as returned by the backend (login payload and /me body). */
 export interface SessionUser {
   readonly id: string;
@@ -14,6 +28,7 @@ export interface SessionUser {
   readonly role: string;
   readonly companyId: string | null;
   readonly storeId: string | null;
+  readonly company: SessionCompany | null;
 }
 
 export interface LoginResult {

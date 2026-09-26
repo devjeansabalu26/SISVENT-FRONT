@@ -1,9 +1,11 @@
 export interface SaleDetailLine {
-  readonly productName: string;
+  readonly productId: string;
   readonly sku: string;
+  readonly productName: string;
   readonly quantity: number;
   readonly unitPrice: number;
-  readonly discount: number;
+  readonly discountAmount: number;
+  readonly subtotal: number;
 }
 
 export interface SaleEvent {
@@ -11,25 +13,23 @@ export interface SaleEvent {
   readonly description: string;
 }
 
+/** Mirrors SaleDetailResponse from GET /api/v1/sales/{id} and POST /api/v1/pos/sales. */
 export interface SaleDetail {
   readonly id: string;
-  readonly number: string;
-  readonly status: 'COMPLETADA' | 'ANULADA';
-  readonly dateTime: string;
-  readonly lines: readonly SaleDetailLine[];
-  readonly subtotal: number;
-  readonly tax: number;
-  readonly total: number;
+  readonly saleNumber: string;
+  readonly status: 'CONFIRMED' | 'CANCELLED';
+  readonly saleDate: string;
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly clientId: string | null;
+  readonly clientName: string | null;
+  readonly sellerName: string;
   readonly paymentMethod: string;
-  readonly amountReceived: number;
-  readonly change: number;
-  readonly seller: string;
-  readonly branch: string;
-  readonly terminal: string;
-  readonly shift: string;
-  readonly customerName: string;
-  readonly customerDocument: string;
-  readonly customerEmail: string;
-  readonly customerPhone: string;
+  readonly subtotal: number;
+  readonly discountTotal: number;
+  readonly total: number;
+  readonly tax: number;
+  readonly notes: string | null;
+  readonly lines: readonly SaleDetailLine[];
   readonly events: readonly SaleEvent[];
 }

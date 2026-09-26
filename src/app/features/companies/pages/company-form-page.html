@@ -1,91 +1,274 @@
 <form class="form-page" [formGroup]="form" (ngSubmit)="save()">
   <app-page-header
     [title]="isEdit ? 'Editar empresa' : 'Nueva empresa'"
-    description="Datos comerciales, administrador maestro, vigencia e identidad visual"
+    description="Datos comerciales, administrador maestro y vigencia"
   />
 
-  @if (!isEdit) {
-    <ol class="steps">
-      @for (step of steps; track step; let i = $index) {
-        <li><span>{{ i + 1 }}</span>{{ step }}</li>
-      }
-    </ol>
-  }
+  <ol class="steps">
+    @for (step of steps; track step; let i = $index) {
+      <li [class.completed]="stepsCompleted()[i]"><span>{{ i + 1 }}</span>{{ step }}</li>
+    }
+  </ol>
 
   <section class="card">
     <h2>1. Datos de la empresa</h2>
     <div class="fields">
       <label
         >Nombre comercial *
-        <input formControlName="commercialName" placeholder="Ej. TechStore Perú" />
-        @if (form.controls.commercialName.touched && form.controls.commercialName.invalid) {
+        <input formControlName="tradeName" placeholder="Ej. TechStore Perú" />
+        @if (form.controls.tradeName.touched && form.controls.tradeName.invalid) {
           <span class="error">Obligatorio.</span>
         }
       </label>
       <label>Razón social * <input formControlName="legalName" placeholder="Ej. Importaciones Tecnológicas S.A.C." /></label>
-      <label
-        >RUC / documento *
-        <input formControlName="taxId" placeholder="20512345678" />
-        @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
-          <span class="error">11 dígitos.</span>
-        }
-      </label>
-      <label>Rubro / descripción <input formControlName="sector" /></label>
+      @if (!isEdit) {
+        <label
+          >RUC *
+          <input formControlName="taxId" placeholder="20512345678" />
+          @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
+            <span class="error">11 dígitos.</span>
+          }
+        </label>
+      }
+      <label>Rubro / descripción <input formControlName="businessType" /></label>
       <label>Teléfono de la empresa <input formControlName="companyPhone" placeholder="+51 999 999 999" /></label>
       <label
         >Correo de contacto *
         <input type="email" formControlName="companyEmail" placeholder="contacto@empresa.pe" />
       </label>
       <label class="full">Dirección legal * <input formControlName="legalAddress" placeholder="Calle, Av. o Jr. con numeración y distrito" /></label>
+      <label class="full">Notas internas <textarea formControlName="internalNotes"></textarea></label>
     </div>
   </section>
 
   <section class="card">
     <h2>2. Administrador principal</h2>
     <div class="fields three">
-      <label>Nombres * <input formControlName="adminFirstName" /></label>
-      <label>Apellidos * <input formControlName="adminLastName" /></label>
-      <label>Correo del administrador * <input type="email" formControlName="adminEmail" /></label>
-      <label>Usuario de acceso * <input formControlName="adminUser" placeholder="cmendoza.admin" /></label>
-      <label>Teléfono <input formControlName="adminPhone" /></label>
-      <label>Documento (DNI/CE) * <input formControlName="adminDocument" /></label>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>3. Configuración de vigencia y contrato</h2>
-    <div class="fields three">
-      <label>Fecha inicio vigencia * <input formControlName="startDate" placeholder="dd/mm/aaaa" /></label>
-      <label>Fecha de vencimiento * <input formControlName="expiration" placeholder="dd/mm/aaaa" /></label>
       <label
-        >Estado inicial *
-        <select formControlName="initialStatus">
-          <option value="ACTIVA">Activa</option>
-          <option value="PENDIENTE">Pendiente</option>
-          <option value="SUSPENDIDA">Suspendida</option>
-        </select>
+        >Nombres *
+        <input formControlName="adminFirstName" />
+        @if (form.controls.adminFirstName.touched && form.controls.adminFirstName.invalid) {
+          <span class="error">Obligatorio.</span>
+        }
       </label>
+      <label
+        >Apellidos *
+        <input formControlName="adminLastName" />
+        @if (form.controls.adminLastName.touched && form.controls.adminLastName.invalid) {
+          <span class="error">Obligatorio.</span>
+        }
+      </label>
+      <label
+        >Correo del administrador *
+        <input type="email" formControlName="adminEmail" [readonly]="isEdit" />
+        @if (isEdit) {
+          <span class="note">El correo de acceso se cambia desde "Restablecer acceso admin".</span>
+        }
+      </label>
+      @if (!isEdit) {
+        <label
+          >Contraseña temporal *
+          <span class="password-input">
+            <input
+              [type]="showAdminPassword() ? 'text' : 'password'"
+              formControlName="adminPassword"
+              placeholder="Mínimo 10 caracteres"
+              autocomplete="new-password"
+            />
+            <button type="button" (click)="showAdminPassword.set(!showAdminPassword())">
+              {{ showAdminPassword() ? 'Ocultar' : 'Ver' }}
+            </button>
+          </span>
+          @if (form.controls.adminPassword.touched && form.controls.adminPassword.invalid) {
+            <span class="error">Mínimo 10 caracteres.</span>
+          }
+        </label>
+      }
+      <label>Teléfono <input formControlName="adminPhone" /></label>
+      <label>Documento (DNI/CE) <input formControlName="adminDocument" /></label>
     </div>
   </section>
 
   <section class="card">
-    <h2>4. Personalización e identidad visual</h2>
+    <h2>3. Plan y vigencia</h2>
     <div class="fields three">
       <label
-        >Esquema predefinido
-        <select formControlName="colorTemplate">
-          @for (template of colorTemplates; track template) {
-            <option [value]="template">{{ template }}</option>
+        >Plan *
+        <select formControlName="planId">
+          @for (plan of plans(); track plan.id) {
+            <option [value]="plan.id">{{ plan.name }} @if (plan.currentPrice != null) { (S/ {{ plan.currentPrice.toFixed(2) }}) }</option>
           }
         </select>
       </label>
-      <label>Color primario <input type="color" formControlName="primaryColor" /></label>
-      <label>Color acento <input type="color" formControlName="accentColor" /></label>
+      <label>Precio contratado <input type="number" step="0.01" formControlName="contractedPrice" /></label>
+      @if (!isEdit) {
+        <label
+          >Estado inicial *
+          <select formControlName="initialStatus">
+            <option value="ACTIVE">Activa</option>
+            <option value="INACTIVE">Inactiva</option>
+          </select>
+        </label>
+      }
+      <label>Fecha inicio vigencia * <input type="date" formControlName="startDate" /></label>
+      <label>Fecha de vencimiento * <input type="date" formControlName="endDate" /></label>
+      <label
+        >{{ isEdit ? 'Local principal' : 'Local inicial' }} *
+        <input formControlName="firstStoreName" />
+        @if (form.controls.firstStoreName.touched && form.controls.firstStoreName.invalid) {
+          <span class="error">Obligatorio.</span>
+        }
+      </label>
     </div>
+    @if (isEdit) {
+      <p class="note">El estado de la empresa se gestiona con las acciones Suspender / Reactivar. Editar el plan aquí actualiza el período vigente sin generar historial; usa "Cambiar plan" para una migración auditada.</p>
+    }
   </section>
+
+  <section class="card theme">
+    <h2>4. Identidad visual</h2>
+
+      <div class="theme-block">
+        <h3>Esquemas Predefinidos (Templates)</h3>
+        <div class="preset-grid" role="radiogroup" aria-label="Esquemas de color predefinidos">
+          @for (preset of themePresets; track preset.id) {
+            <button
+              type="button"
+              class="preset"
+              role="radio"
+              [class.selected]="selectedPresetId() === preset.id"
+              [attr.aria-checked]="selectedPresetId() === preset.id"
+              (click)="selectPreset(preset)"
+            >
+              <span class="preset-check" aria-hidden="true">✓</span>
+              <span class="preset-name">{{ preset.name }}</span>
+              <span class="preset-swatches" aria-hidden="true">
+                <span class="chip" [style.background-color]="preset.primaryColor"></span>
+                <span class="chip" [style.background-color]="preset.secondaryColor"></span>
+                <span class="chip" [style.background-color]="preset.backgroundColor"></span>
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="theme-block">
+        <h3>Personalización manual</h3>
+        <div class="color-fields">
+          <label>
+            Primary Color
+            <span class="color-input">
+              <input
+                type="color"
+                [value]="form.controls.primaryColor.value"
+                (input)="onColorPick('primaryColor', $event)"
+                aria-label="Selector de color primario"
+              />
+              <input
+                type="text"
+                formControlName="primaryColor"
+                [maxlength]="hexMaxLength"
+                spellcheck="false"
+                autocomplete="off"
+                (input)="onHexInput('primaryColor', $event)"
+              />
+            </span>
+            @if (form.controls.primaryColor.touched && form.controls.primaryColor.hasError('hexColor')) {
+              <span class="error">Formato inválido. Usa #RRGGBB.</span>
+            }
+          </label>
+
+          <label>
+            Secondary / Accent
+            <span class="color-input">
+              <input
+                type="color"
+                [value]="form.controls.secondaryColor.value"
+                (input)="onColorPick('secondaryColor', $event)"
+                aria-label="Selector de color secundario"
+              />
+              <input
+                type="text"
+                formControlName="secondaryColor"
+                [maxlength]="hexMaxLength"
+                spellcheck="false"
+                autocomplete="off"
+                (input)="onHexInput('secondaryColor', $event)"
+              />
+            </span>
+            @if (form.controls.secondaryColor.touched && form.controls.secondaryColor.hasError('hexColor')) {
+              <span class="error">Formato inválido. Usa #RRGGBB.</span>
+            }
+          </label>
+
+          <label>
+            App Background
+            <span class="color-input">
+              <input
+                type="color"
+                [value]="form.controls.backgroundColor.value"
+                (input)="onColorPick('backgroundColor', $event)"
+                aria-label="Selector de color de fondo"
+              />
+              <input
+                type="text"
+                formControlName="backgroundColor"
+                [maxlength]="hexMaxLength"
+                spellcheck="false"
+                autocomplete="off"
+                (input)="onHexInput('backgroundColor', $event)"
+              />
+            </span>
+            @if (form.controls.backgroundColor.touched && form.controls.backgroundColor.hasError('hexColor')) {
+              <span class="error">Formato inválido. Usa #RRGGBB.</span>
+            }
+          </label>
+        </div>
+      </div>
+
+      <div class="theme-block">
+        <h3>Live Theme Preview Mockup</h3>
+        <div
+          class="theme-preview"
+          [style.background-color]="themePreview().backgroundColor"
+          [style.--pv-primary]="themePreview().primaryColor"
+          [style.--pv-secondary]="themePreview().secondaryColor"
+          [style.--pv-accent]="themePreview().accentColor"
+          [style.--pv-background]="themePreview().backgroundColor"
+        >
+          <aside class="pv-sidebar">
+            <span class="pv-brand">SISVENT</span>
+            <span class="pv-nav pv-nav--active">Dashboard</span>
+            <span class="pv-nav">Ventas</span>
+            <span class="pv-nav">Inventario</span>
+          </aside>
+          <div class="pv-content">
+            <div class="pv-topbar">
+              <span class="pv-title">Panel General</span>
+              <span class="pv-dot"></span>
+            </div>
+            <div class="pv-cards">
+              <div class="pv-card">
+                <span class="pv-card-label">Ventas Totales</span>
+                <span class="pv-card-value">S/ 4,500</span>
+              </div>
+              <div class="pv-card">
+                <span class="pv-card-label">Usuarios</span>
+                <span class="pv-card-value">12</span>
+              </div>
+            </div>
+            <div class="pv-search">
+              <span class="pv-field">Buscar producto…</span>
+              <span class="pv-btn">Consultar</span>
+            </div>
+          </div>
+        </div>
+        <p class="note">Los colores solo se aplican a esta vista previa; el tema real se guarda con la empresa.</p>
+      </div>
+    </section>
 
   <footer class="actions">
     <a routerLink="/app/companies">Cancelar</a>
-    <button class="primary" type="submit">{{ isEdit ? 'Guardar cambios' : 'Crear empresa' }}</button>
+    <button class="primary" type="submit" [disabled]="saving()">{{ isEdit ? 'Guardar cambios' : 'Crear empresa' }}</button>
   </footer>
 </form>

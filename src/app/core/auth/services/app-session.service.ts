@@ -79,18 +79,24 @@ export class AppSessionService {
       branchId: user.storeId ?? undefined,
     });
 
-    if (user.companyId) {
-      // Company name/plan are not exposed by /auth/me yet; the backend enforces
-      // the real plan on every request. See AUTH.md §E / §M.
+    if (user.companyId && user.company) {
       this.companies.set({
         companyId: user.companyId,
-        commercialName: 'Mi empresa',
-        plan: 'BUSINESS',
+        commercialName: user.company.tradeName,
+        plan: user.company.planCode ?? '',
+        features: user.company.features,
+      });
+      this.theme.applyCompanyTheme({
+        primary: user.company.primaryColor,
+        secondary: user.company.secondaryColor,
+        accent: user.company.accentColor,
+        background: user.company.backgroundColor,
       });
     } else {
+      // SUPERADMIN (o una empresa sin contexto todavía resuelto): sin tenant, sin theme propio —
+      // se usa el theme por defecto de SISVENT (fallback real, no un tema "de otra empresa" residual).
       this.companies.clear();
+      this.theme.reset();
     }
-
-    this.theme.reset();
   }
 }

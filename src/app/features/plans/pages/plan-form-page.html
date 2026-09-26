@@ -1,83 +1,109 @@
 <form class="form-page" [formGroup]="form" (ngSubmit)="save()">
   <app-page-header
     [title]="isEdit ? 'Editar plan' : 'Nuevo plan'"
-    description="Tarifas, limitaciones de recursos y módulos habilitados para los clientes"
+    description="Establece las tarifas, limitaciones de recursos y módulos habilitados para los clientes"
   />
 
   <div class="form-grid">
-    <div class="column">
-      <section class="card">
-        <h2>1. Información básica</h2>
+    <!-- Columna izquierda: un único formulario integrado, secciones separadas por divisores. -->
+    <section class="card form-card">
+      <div class="form-section">
+        <div class="section-head">
+          <h2>1. Información básica</h2>
+          <p class="hint">Identificador único y nombre público del plan comercial.</p>
+        </div>
         <div class="fields">
           <label
             >Código de plan *
-            <input formControlName="code" placeholder="PLAN-004" />
+            <input formControlName="code" placeholder="BUSINESS" />
             @if (form.controls.code.touched && form.controls.code.invalid) {
               <span class="error">El código es obligatorio.</span>
             }
           </label>
           <label
             >Nombre comercial del plan *
-            <input formControlName="name" placeholder="Ej. Corporativo Avanzado" />
+            <input formControlName="name" placeholder="Ej. Negocio" />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="error">El nombre es obligatorio.</span>
+            }
           </label>
           <label class="full"
             >Descripción pública
             <textarea formControlName="description" placeholder="Para medianas y grandes empresas…"></textarea>
           </label>
-          <label class="full">
-            <span><input type="checkbox" formControlName="isActive" /> Estado activo</span>
-          </label>
+          <div class="full switch-field">
+            <span class="switch">
+              <input type="checkbox" id="isActive" formControlName="isActive" />
+              <span class="track"></span>
+            </span>
+            <label for="isActive">Estado activo</label>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section class="card">
-        <h2>2. Esquema de precios</h2>
+      <div class="form-section">
+        <div class="section-head">
+          <h2>2. Esquema de precios</h2>
+          <p class="hint">Define la moneda y facturación mensual base del plan.</p>
+        </div>
         <div class="fields">
           <label
-            >Precio mensual base (S/) *
-            <input type="number" formControlName="price" min="0" step="0.01" />
+            >Precio mensual base (S/ PEN) *
+            <input type="number" formControlName="currentPrice" min="0" step="0.01" />
           </label>
           <label
             >Frecuencia de facturación
-            <select formControlName="billing">
+            <select disabled>
               <option>Mensual</option>
-              <option>Anual</option>
             </select>
           </label>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>3. Limitaciones de recursos</h2>
-        <div class="fields three">
-          <label>Límite de vendedores * <input type="number" formControlName="sellerLimit" min="1" /></label>
-          <label>Límite de locales / almacenes * <input type="number" formControlName="localLimit" min="1" /></label>
-          <label>Límite de productos <input type="number" formControlName="productLimit" min="0" [attr.disabled]="form.controls.unlimitedProducts.value ? '' : null" /></label>
-          <label class="full">
-            <span><input type="checkbox" formControlName="unlimitedProducts" /> Habilitar productos ilimitados</span>
-          </label>
-        </div>
-      </section>
-    </div>
-
-    <div class="column">
-      <section class="card">
-        <h2>4. Módulos y funcionalidades incluidas</h2>
-        <div class="modules" formArrayName="modules">
-          @for (name of moduleNames; track name; let i = $index) {
-            <label class="module">
-              <input type="checkbox" [formControlName]="i" />
-              <span>{{ name }}</span>
+          @if (isEdit) {
+            <label class="full"
+              >Motivo del cambio de precio
+              <input formControlName="priceChangeReason" placeholder="Solo si cambiaste el precio" />
             </label>
           }
         </div>
-        <p class="note">Recuerda publicar los cambios para hacerlos visibles.</p>
-      </section>
-    </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-head">
+          <h2>3. Limitaciones de recursos</h2>
+          <p class="hint">Topes máximos que restringen el aprovisionamiento.</p>
+        </div>
+        <div class="fields three">
+          <label>Administradores máx. <input type="number" formControlName="maxAdmins" min="0" /></label>
+          <label>Vendedores máx. <input type="number" formControlName="maxSellers" min="0" /></label>
+          <label>Locales / almacenes máx. <input type="number" formControlName="maxStores" min="0" /></label>
+          <p class="muted full">Deja un campo vacío para un límite ilimitado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Columna derecha: funcionalidades como checkboxes, agrupadas por dominio. -->
+    <section class="card features-card">
+      <h2>4. Funcionalidades incluidas</h2>
+      <p class="hint">Módulos que quedan habilitados para las empresas con este plan.</p>
+      <div class="modules" formArrayName="features">
+        @for (group of featureGroups(); track group.domain) {
+          <div class="feature-group">
+            <p class="feature-group__title">{{ group.domain }}</p>
+            @for (item of group.items; track item.option.code) {
+              <label class="module">
+                <input type="checkbox" [formControlName]="item.index" />
+                <span>{{ item.option.name }}</span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+    </section>
   </div>
 
   <footer class="actions">
     <a routerLink="/app/plans">Cancelar</a>
-    <button class="primary" type="submit">{{ isEdit ? 'Guardar cambios' : 'Crear plan' }}</button>
+    <button class="primary" type="submit" [disabled]="saving() || form.invalid">
+      {{ isEdit ? 'Guardar cambios' : 'Crear plan' }}
+    </button>
   </footer>
 </form>

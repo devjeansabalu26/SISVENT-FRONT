@@ -1,9 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-
-const EXPECTED_TOTAL = 2450;
-const EXPECTED_CASH = 1800;
-const EXPECTED_CARD = 650;
+import { SaleApiService } from '../../data-access/sale-api.service';
 
 @Component({
   selector: 'app-cash-close-dialog',
@@ -12,17 +9,37 @@ const EXPECTED_CARD = 650;
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CashCloseDialog {
+export class CashCloseDialog implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<CashCloseDialog, boolean>);
+  private readonly api = inject(SaleApiService);
 
-  readonly expectedTotal = EXPECTED_TOTAL;
-  readonly expectedCash = EXPECTED_CASH;
-  readonly expectedCard = EXPECTED_CARD;
+  readonly loading = signal(true);
+  readonly expectedTotal = signal(0);
+  readonly expectedCash = signal(0);
+  readonly expectedOther = signal(0);
 
-  readonly countedCash = signal(EXPECTED_CASH);
+  readonly countedCash = signal(0);
   readonly notes = signal('');
 
-  readonly difference = computed(() => this.countedCash() - EXPECTED_CASH);
+  readonly difference = computed(() => this.countedCash() - this.expectedCash());
+
+  ngOnInit(): void {
+    const today = new Date();
+    const from = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+    const to = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
+    this.api.list({ pageSize: 100, from, to, status: 'CONFIRMED' }).subscribe({
+      next: (page) => {
+        const cash = page.items.filter((item) => item.paymentMethod === 'Efectivo' || item.paymentMethod === 'CASH');
+        const cashTotal = cash.reduce((sum, item) => sum + item.total, 0);
+        this.expectedCash.set(cashTotal);
+        this.expectedTotal.set(page.periodTotals.totalAmount);
+        this.expectedOther.set(page.periodTotals.totalAmount - cashTotal);
+        this.countedCash.set(cashTotal);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
 
   cancel(): void {
     this.dialogRef.close(false);

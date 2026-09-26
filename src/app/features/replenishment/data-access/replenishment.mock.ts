@@ -1,7 +1,10 @@
+import { ParetoPoint } from '../components/pareto-chart/pareto-chart';
 import {
+  AbcClassSummary,
   AbcProduct,
   CriticalProduct,
   PurchaseSuggestion,
+  StagnantKpi,
   StagnantProduct,
 } from '../models/replenishment.model';
 
@@ -36,4 +39,30 @@ export const STAGNANT_PRODUCT_MOCK: readonly StagnantProduct[] = [
   { id: '3', name: 'Caja de Herramientas Premium', sku: 'SKU-3129', stock: 4, daysWithoutSale: 180, value: 'S/ 800', lastMovement: '12/10/2023', cause: 'Obsolescencia técnica', suggestedAction: 'Dar de baja' },
   { id: '4', name: 'Funda Protectora Silicona iPhone 13', sku: 'SKU-9902', stock: 50, daysWithoutSale: 110, value: 'S/ 1,250', lastMovement: '05/02/2024', cause: 'Exceso de stock', suggestedAction: 'Transferir a tienda B' },
   { id: '5', name: 'Cable Auxiliar Jack 3.5mm 1mt', sku: 'SKU-4410', stock: 180, daysWithoutSale: 150, value: 'S/ 1,800', lastMovement: '24/11/2023', cause: 'Baja demanda', suggestedAction: 'Promoción 2x1' },
+];
+
+export const ABC_CLASS_MOCK: readonly AbcClassSummary[] = [
+  { name: 'Clase A', label: 'Alta rotación', description: 'Productos críticos de alta prioridad. Generan la mayor parte de los ingresos.', valueShare: 80.2, items: 128 },
+  { name: 'Clase B', label: 'Mediana rotación', description: 'Rotación moderada. Requieren control e inventarios preventivos.', valueShare: 14.5, items: 340 },
+  { name: 'Clase C', label: 'Baja rotación', description: 'Rotación muy lenta. Evitar sobrealmacenamiento por costo de tenencia.', valueShare: 5.3, items: 1204 },
+];
+
+/** Curva acumulada coherente con ABC_CLASS_MOCK: 128/1672 ≈ 7.7% de ítems → 80.2% del valor. */
+export const PARETO_CURVE_MOCK: readonly ParetoPoint[] = [
+  { products: 0, value: 0 },
+  { products: 2, value: 38 },
+  { products: 5, value: 66 },
+  { products: 8, value: 80.2 },
+  { products: 15, value: 88 },
+  { products: 28, value: 94.7 },
+  { products: 50, value: 97.6 },
+  { products: 75, value: 99.2 },
+  { products: 100, value: 100 },
+];
+
+export const STAGNANT_KPI_MOCK: readonly StagnantKpi[] = [
+  { label: 'Capital inmovilizado', value: 'S/ 42,800', hint: 'Costo total de stock sin rotar', icon: 'savings', tone: 'danger' },
+  { label: 'Productos inactivos', value: '85 ítems', hint: 'Sin ventas en los últimos 90 días', icon: 'inventory_2', tone: 'warning' },
+  { label: 'Días promedio sin venta', value: '112 días', hint: 'Tiempo promedio de inactividad', icon: 'event_busy', tone: 'info' },
+  { label: 'Exceso de stock est.', value: '320 uds', hint: 'Sobre el stock máximo', icon: 'stacked_bar_chart', tone: 'warning' },
 ];

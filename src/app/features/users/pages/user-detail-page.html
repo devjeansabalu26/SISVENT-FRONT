@@ -1,0 +1,39 @@
+@if (user(); as user) {
+  <app-page-header [title]="user.fullName" description="Detalle del usuario (solo lectura)">
+    <a class="ghost" routerLink="/app/users"><span class="material-icons">arrow_back</span>Usuarios</a>
+    @if (user.editable) {
+      <button type="button" class="ghost" (click)="edit()"><span class="material-icons">edit</span>Editar usuario</button>
+    }
+  </app-page-header>
+
+  <div class="summary surface-card">
+    <div>
+      <span class="code">{{ user.email ?? 'Sin correo' }}</span>
+      <h2>{{ user.fullName }}</h2>
+    </div>
+    <app-status-chip [value]="user.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="user.isActive ? 'ACTIVE' : 'INACTIVE'" />
+  </div>
+
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Datos del usuario</h3>
+      <dl>
+        @for (field of fields(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        }
+      </dl>
+    </section>
+    <section class="surface-card">
+      <h3>Actividad</h3>
+      <dl>
+        <div><dt>Estado</dt><dd>{{ user.isActive ? 'Activo' : 'Inactivo' }}</dd></div>
+        <div><dt>Última actividad</dt><dd>{{ user.lastActivityAt ? (user.lastActivityAt | date: 'medium') : 'Sin registro' }}</dd></div>
+        <div><dt>Registrado</dt><dd>{{ user.createdAt ? (user.createdAt | date: 'medium') : '—' }}</dd></div>
+      </dl>
+    </section>
+  </div>
+} @else if (loading()) {
+  <p class="muted">Cargando usuario…</p>
+} @else {
+  <p class="muted">No se encontró el usuario.</p>
+}

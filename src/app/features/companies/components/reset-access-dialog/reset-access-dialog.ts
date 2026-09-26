@@ -1,30 +1,46 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { NotificationService } from '../../../../core/notifications/notification.service';
+import { PlatformUserApiService } from '../../../users/data-access/platform-user-api.service';
 
 export interface ResetAccessData {
+  readonly profileId: string;
   readonly username: string;
   readonly companyName: string;
-}
-
-function generatePassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!$%&*';
-  return Array.from({ length: 11 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 @Component({
   selector: 'app-reset-access-dialog',
   imports: [MatDialogModule],
   templateUrl: './reset-access-dialog.html',
-  styleUrl: '../../../../shared/forms/dialog-form.scss',
+  styleUrls: ['../../../../shared/forms/dialog-form.scss', '../../../../shared/ui/review-dialog/review-dialog.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResetAccessDialog {
+export class ResetAccessDialog implements OnInit {
   readonly data = inject<ResetAccessData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<ResetAccessDialog, boolean>);
+  private readonly api = inject(PlatformUserApiService);
+  private readonly notifications = inject(NotificationService);
 
-  readonly password = signal(generatePassword());
+  readonly loading = signal(true);
+  readonly password = signal('');
   readonly forceChange = signal(true);
   readonly copied = signal(false);
+
+  ngOnInit(): void {
+    this.api.resetAccess(this.data.profileId).subscribe({
+      next: (response) => {
+        this.password.set(response.temporaryPassword);
+        this.forceChange.set(response.forceChange);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.notifications.show('No se pudo restablecer el acceso.', 'error');
+        this.dialogRef.close(false);
+      },
+    });
+  }
 
   async copy(): Promise<void> {
     try {

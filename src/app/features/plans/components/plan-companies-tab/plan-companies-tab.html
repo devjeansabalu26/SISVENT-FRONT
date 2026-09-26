@@ -1,0 +1,19 @@
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [showView]="true"
+  [showEdit]="false"
+  [showRemove]="false"
+  viewLabel="Ver empresa"
+  emptyMessage="Ninguna empresa está usando este plan actualmente."
+  (view)="view($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="empresas"
+  (pageChange)="goToPage($event)"
+/>

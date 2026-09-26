@@ -1,29 +1,48 @@
-<section class="dialog">
+<section class="dialog review">
   <header>
     <span class="material-icons">key</span>
-    <div>
-      <h2>Restablecer acceso</h2>
-      <p>Usuario: {{ data.username }} · {{ data.companyName }}</p>
+    <div class="review__title">
+      <h2>{{ loading() ? 'Restablecer acceso' : 'Contraseña restablecida' }}</h2>
+      <p>{{ data.companyName }}</p>
     </div>
+    <small class="review__code">MOD-SA-16</small>
   </header>
 
-  <div class="fields">
-    <label class="wide"
-      >Nueva contraseña autogenerada
-      <div class="password">
-        <code>{{ password() }}</code>
-        <button type="button" (click)="copy()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
-      </div>
-    </label>
-    <label class="check">
-      <input type="checkbox" [checked]="forceChange()" (change)="forceChange.set($any($event.target).checked)" />
-      Forzar cambio en el siguiente inicio de sesión
-    </label>
-    <p class="muted">La contraseña solo se mostrará una vez. Cópiela antes de guardar.</p>
-  </div>
+  @if (loading()) {
+    <p class="muted">Generando nueva contraseña…</p>
+  } @else {
+    <p class="review__banner" data-tone="success">
+      <span class="material-icons">check_circle</span>Las credenciales de acceso temporal han sido generadas con éxito.
+    </p>
+
+    <dl class="review__meta">
+      <div><dt>Usuario</dt><dd>{{ data.username }}</dd></div>
+    </dl>
+
+    <div class="fields">
+      <label class="wide"
+        >Contraseña nueva
+        <div class="password">
+          <code>{{ password() }}</code>
+          <button type="button" (click)="copy()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
+        </div>
+      </label>
+      @if (forceChange()) {
+        <p class="muted">El usuario deberá cambiarla en su próximo inicio de sesión.</p>
+      }
+    </div>
+
+    <p class="review__banner" data-tone="warning">
+      <span class="material-icons">shield</span>
+      Esta contraseña no podrá consultarse nuevamente. Por favor, cópiela ahora y guárdela en un lugar seguro.
+    </p>
+  }
 
   <footer>
-    <button type="button" (click)="cancel()">Cancelar</button>
-    <button type="button" class="primary" (click)="confirm()">Restablecer</button>
+    @if (!loading()) {
+      <button type="button" class="primary" (click)="confirm()">Cerrar</button>
+    } @else {
+      <button type="button" (click)="cancel()">Cancelar</button>
+    }
   </footer>
 </section>

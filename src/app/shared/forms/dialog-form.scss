@@ -143,6 +143,6 @@ footer button {
 }
 footer .primary {
   border-color: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary, white);
   background: var(--color-primary);
 }

@@ -4,38 +4,38 @@
   <section class="card">
     <h2>Datos del documento de ingreso</h2>
     <div class="fields three">
-      <label>Fecha de registro * <input formControlName="date" /></label>
       <label
         >Local / almacén *
-        <select formControlName="warehouse">
-          <option>Tienda Principal</option>
-          <option>Local Norte</option>
-          <option>Local Sur</option>
+        <select formControlName="storeId">
+          <option value="">Seleccionar</option>
+          @for (store of stores(); track store.id) {
+            <option [value]="store.id">{{ store.name }}</option>
+          }
         </select>
-      </label>
-      <label
-        >Proveedor *
-        <input formControlName="supplier" placeholder="Distribuidora Central S.A.C." />
-        @if (form.controls.supplier.touched && form.controls.supplier.invalid) {
-          <span class="error">Selecciona un proveedor.</span>
+        @if (form.controls.storeId.touched && form.controls.storeId.invalid) {
+          <span class="error">Selecciona un local.</span>
         }
       </label>
       <label
-        >Tipo documento *
+        >Proveedor
+        <select formControlName="supplierId">
+          <option value="">Sin proveedor</option>
+          @for (supplier of suppliers(); track supplier.id) {
+            <option [value]="supplier.id">{{ supplier.businessName }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >Tipo documento
         <select formControlName="documentType">
           <option>Factura</option>
           <option>Boleta</option>
           <option>Guía de remisión</option>
         </select>
       </label>
-      <label
-        >Número documento *
-        <input formControlName="documentNumber" placeholder="F001-00245" />
-        @if (form.controls.documentNumber.touched && form.controls.documentNumber.invalid) {
-          <span class="error">Indica el número de documento.</span>
-        }
-      </label>
+      <label>Número documento <input formControlName="documentNumber" placeholder="F001-00245" /></label>
       <label class="full">Observaciones <textarea formControlName="notes"></textarea></label>
+      <label class="check"><input type="checkbox" formControlName="updateReferenceCost" /> Actualizar costo de referencia de los productos</label>
     </div>
   </section>
 
@@ -47,14 +47,20 @@
     <div class="lines-scroll">
       <table class="lines" formArrayName="lines">
         <thead>
-          <tr><th>Producto</th><th>Código / SKU</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th><th></th></tr>
+          <tr><th>Producto</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th><th></th></tr>
         </thead>
         <tbody>
           @for (line of lines.controls; track line; let i = $index) {
             <tr [formGroupName]="i">
-              <td><input formControlName="productName" placeholder="Nombre del producto" /></td>
-              <td><input formControlName="sku" placeholder="SKU-000" /></td>
-              <td><input type="number" min="1" formControlName="quantity" (input)="recalc()" /></td>
+              <td>
+                <select formControlName="productId">
+                  <option value="">Seleccionar</option>
+                  @for (product of products(); track product.id) {
+                    <option [value]="product.id">{{ product.sku }} · {{ product.name }}</option>
+                  }
+                </select>
+              </td>
+              <td><input type="number" min="0" step="0.001" formControlName="quantity" (input)="recalc()" /></td>
               <td><input type="number" min="0" step="0.01" formControlName="unitCost" (input)="recalc()" /></td>
               <td class="subtotal">S/ {{ (line.controls.quantity.value * line.controls.unitCost.value).toFixed(2) }}</td>
               <td>
@@ -75,7 +81,7 @@
   </section>
 
   <footer class="actions">
-    <a routerLink="/app/goods-receipts">Cancelar</a>
-    <button class="primary" type="submit">Confirmar ingreso</button>
+    <button type="button" (click)="cancel()">Cancelar</button>
+    <button class="primary" type="submit" [disabled]="saving()">Confirmar ingreso</button>
   </footer>
 </form>

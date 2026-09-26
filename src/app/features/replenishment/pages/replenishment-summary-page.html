@@ -43,6 +43,11 @@
         <div><strong>{{ item.product }}</strong><small>{{ item.supplier }}</small></div>
         <span>{{ item.quantity }}</span>
         <span class="tag" [attr.data-priority]="item.priority">{{ item.priority }}</span>
+        @if (recommendationInputs[item.id]) {
+          <button type="button" class="why" (click)="explain(item)" aria-label="Ver explicación de la recomendación" title="¿Por qué?">
+            <span class="material-icons">help_outline</span>
+          </button>
+        }
       </li>
     }
   </ul>

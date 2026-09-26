@@ -1,1 +1,130 @@
-<form class="form-page" [formGroup]="form" (ngSubmit)="save()"><app-page-header [title]="isEdit ? 'Editar producto' : 'Nuevo producto'" description="Información comercial y de inventario del producto"/><div class="form-grid"><div class="column"><section class="card"><h2>Información básica</h2><div class="fields"><label class="full">Nombre del producto *<input formControlName="name" placeholder="Ej. Mouse Gamer RGB Pro"/>@if(form.controls.name.touched&&form.controls.name.invalid){<span class="error">El nombre es obligatorio.</span>}</label><label class="full">Descripción<textarea formControlName="description"></textarea></label><label>SKU *<input formControlName="sku"/></label><label>Código de barras<input formControlName="barcode"/></label></div></section><section class="card"><h2>Categorización</h2><div class="fields"><label>Categoría *<select formControlName="category"><option value="">Seleccionar</option><option>Tecnología</option><option>Accesorios</option></select></label><label>Marca<select formControlName="brand"><option value="">Seleccionar</option><option>Logitech</option><option>Sony</option></select></label></div></section><section class="card"><h2>Precios</h2><div class="fields three"><label>Precio compra<input type="number" formControlName="purchasePrice"/></label><label>Precio venta *<input type="number" formControlName="salePrice"/></label><label>Margen<input [value]="margin+'%'" disabled/></label></div></section></div><div class="column"><section class="card"><h2>Inventario inicial</h2><label>Cantidad inicial *<input type="number" formControlName="stock"/></label><label>Stock mínimo<input type="number" formControlName="minimumStock"/></label></section><section class="card"><h2>Configuración</h2><label><span><input type="checkbox" formControlName="active"/> Producto activo</span></label></section></div></div><footer class="actions"><a routerLink="/app/products">Cancelar</a><button class="primary" type="submit">{{ isEdit ? 'Guardar cambios' : 'Guardar producto' }}</button></footer></form>
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header [title]="isEdit ? 'Editar producto' : 'Nuevo producto'" description="Información comercial del producto" />
+  <div class="form-grid">
+    <div class="column">
+      <section class="card">
+        <h2>Identificación del producto</h2>
+        <div class="fields">
+          <label class="full">Nombre *
+            <input formControlName="name" placeholder="Ej. Mouse Gamer RGB Pro" />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="error">El nombre es obligatorio.</span>
+            }
+          </label>
+          <label>SKU @if (isEdit) { <span>*</span> }
+            <input formControlName="sku" placeholder="Se autogenera si se deja vacío" />
+          </label>
+          <label>Código de barras
+            <input formControlName="barcode" placeholder="Opcional" />
+          </label>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Clasificación</h2>
+        <div class="fields">
+          <label>Categoría
+            <select formControlName="categoryId">
+              <option [ngValue]="null">Sin categoría</option>
+              @for (category of categories(); track category.id) {
+                <option [ngValue]="category.id">{{ category.name }}</option>
+              }
+            </select>
+          </label>
+          <label>Marca
+            <select formControlName="brandId">
+              <option [ngValue]="null">Sin marca</option>
+              @for (brand of brands(); track brand.id) {
+                <option [ngValue]="brand.id">{{ brand.name }}</option>
+              }
+            </select>
+          </label>
+          <label>Unidad de medida
+            <select formControlName="unitId">
+              <option [ngValue]="null">Sin unidad</option>
+              @for (unit of units(); track unit.id) {
+                <option [ngValue]="unit.id">{{ unit.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Precio y finanzas</h2>
+        <div class="fields three">
+          <label>Precio de venta (S/) *
+            <input type="number" step="0.01" formControlName="salePrice" />
+          </label>
+          <label>Costo de compra / referencia (S/)
+            <input type="number" step="0.01" formControlName="referenceCost" />
+          </label>
+          <label>Margen estimado
+            <input [value]="marginPercent + '% (' + marginLabel + ')'" disabled />
+          </label>
+        </div>
+        @if (isEdit) {
+          <div class="fields">
+            <label class="full">Motivo del cambio de precio
+              <input formControlName="priceChangeReason" placeholder="Solo si cambiaste el precio de venta" />
+            </label>
+          </div>
+        }
+      </section>
+      <section class="card">
+        <h2>Información detallada</h2>
+        <label class="full">Descripción del producto
+          <textarea formControlName="description" rows="5"></textarea>
+        </label>
+      </section>
+    </div>
+    <div class="column">
+      @if (!isEdit) {
+        <section class="card">
+          <h2>Control de almacén</h2>
+          <div class="fields">
+            <label>Local
+              <select formControlName="initialStoreId">
+                <option [ngValue]="null">Sin stock inicial</option>
+                @for (store of stores(); track store.id) {
+                  <option [ngValue]="store.id">{{ store.name }}</option>
+                }
+              </select>
+            </label>
+            <label>Stock inicial
+              <input type="number" step="0.001" formControlName="initialStock" [disabled]="!form.controls.initialStoreId.value" />
+            </label>
+            <label>Stock mínimo (alerta)
+              <input type="number" step="0.001" formControlName="minStock" [disabled]="!form.controls.initialStoreId.value" />
+            </label>
+          </div>
+          <p class="muted">Se registra en el local seleccionado al crear el producto. Los ajustes posteriores se hacen desde Inventario.</p>
+        </section>
+      } @else {
+        <section class="card">
+          <h2>Control de almacén</h2>
+          <p class="muted">El stock se gestiona desde Inventario e Ingreso de mercadería, no desde esta pantalla.</p>
+        </section>
+      }
+      <section class="card">
+        <h2>Estado del producto</h2>
+        <label class="switch"><input type="checkbox" formControlName="active" /> Habilitar para transacciones</label>
+      </section>
+      <section class="card">
+        <h2>Imagen de producto</h2>
+        <label class="full">URL de la imagen
+          <input formControlName="imageUrl" placeholder="https://…" />
+        </label>
+        @if (form.controls.imageUrl.value) {
+          <div class="image-preview">
+            <img [src]="form.controls.imageUrl.value" alt="Vista previa del producto" />
+          </div>
+        } @else {
+          <p class="muted">Sin imagen configurada.</p>
+        }
+      </section>
+    </div>
+  </div>
+  <footer class="actions">
+    <a routerLink="/app/products">Cancelar</a>
+    <button class="primary" type="submit" [disabled]="saving()">{{ isEdit ? 'Guardar cambios' : 'Guardar producto' }}</button>
+  </footer>
+</form>

@@ -2,36 +2,47 @@
   <a class="primary" routerLink="/app/companies/new"><span class="material-icons">add</span>Nueva empresa</a>
 </app-page-header>
 
-<div class="kpi-grid">
-  <app-kpi-card label="Total cuentas" [value]="total() + ' empresas'" icon="business" tone="primary" />
-  <app-kpi-card label="Suscripciones activas" [value]="activeCount() + ' licencias'" icon="verified" tone="success" />
-</div>
+@if (summary(); as summary) {
+  <div class="kpi-grid">
+    <app-kpi-card label="Total cuentas" [value]="summary.totalCompanies + ' empresas'" icon="business" tone="primary" />
+    <app-kpi-card label="Activas" [value]="summary.active" icon="verified" tone="success" />
+    <app-kpi-card label="Por vencer" [value]="summary.expiring" icon="schedule" tone="warning" />
+    <app-kpi-card label="Vencidas" [value]="summary.expired" icon="event_busy" tone="danger" />
+    <app-kpi-card label="Suspendidas" [value]="summary.suspended" icon="block" tone="danger" />
+    <app-kpi-card label="Nuevas del mes" [value]="summary.newThisMonth" icon="add_business" tone="info" />
+  </div>
+}
 
 <section class="filters">
   <label>
     <span class="material-icons">search</span>
-    <input #search (input)="this.search.set(search.value)" placeholder="Buscar empresa…" />
+    <input #search (input)="onSearch(search.value)" placeholder="Buscar empresa…" />
   </label>
-  <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
+  <select #status aria-label="Estado" (change)="onStatusChange(status.value)">
     <option value="">Todos los estados</option>
-    <option>ACTIVA</option>
-    <option>POR VENCER</option>
-    <option>VENCIDA</option>
-    <option>SUSPENDIDA</option>
-    <option>PENDIENTE</option>
+    <option value="ACTIVE">Activa</option>
+    <option value="SUSPENDED">Suspendida</option>
+    <option value="INACTIVE">Inactiva</option>
   </select>
-  <input type="date" aria-label="Fecha de creación" />
-  <input type="date" aria-label="Vencimiento desde" />
-  <button type="button">Filtrar</button>
 </section>
 
 <app-data-table
   [columns]="columns"
   [rows]="rows()"
+  [loading]="loading()"
+  [showFooter]="false"
   editLabel="Ver empresa"
   editIcon="visibility"
-  removeLabel="Suspender"
-  removeIcon="block"
+  removeLabel="Editar"
+  removeIcon="edit"
   (edit)="open($event)"
   (remove)="edit($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="empresas"
+  (pageChange)="goToPage($event)"
 />

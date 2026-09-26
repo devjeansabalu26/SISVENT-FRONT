@@ -1,11 +1,11 @@
-<div class="table-wrap">
+<div class="table-wrap" [class.flush-bottom]="!showFooter()">
   @if (loading()) {
     <div class="state">Cargando información…</div>
   } @else if (!rows().length) {
     <div class="state">{{ emptyMessage() }}</div>
   } @else {
     <table>
-      <thead><tr>@for (column of columns(); track column.key) { <th>{{ column.label }}</th> }@if (showEdit() || showRemove()) {<th>Acciones</th>}</tr></thead>
+      <thead><tr>@for (column of columns(); track column.key) { <th>{{ column.label }}</th> }@if (hasActions()) {<th>Acciones</th>}</tr></thead>
       <tbody>
         @for (row of rows(); track row.id) {
           <tr>
@@ -18,11 +18,24 @@
                 }
               </td>
             }
-            @if (showEdit() || showRemove()) {<td class="actions">@if (showEdit()) {<button type="button" (click)="edit.emit(row)" [attr.aria-label]="editLabel()" [title]="editLabel()"><span class="material-icons">{{ editIcon() }}</span></button>}@if (showRemove()) {<button type="button" class="danger" (click)="remove.emit(row)" [attr.aria-label]="removeLabel()" [title]="removeLabel()"><span class="material-icons">{{ removeIcon() }}</span></button>}</td>}
+            @if (hasActions()) {<td class="actions">@if (showView()) {<button type="button" (click)="view.emit(row)" [attr.aria-label]="viewLabel()" [title]="viewLabel()"><span class="material-icons">{{ viewIcon() }}</span></button>}@if (showEdit()) {<button type="button" (click)="edit.emit(row)" [attr.aria-label]="editLabel()" [title]="editLabel()"><span class="material-icons">{{ editIcon() }}</span></button>}@if (showKey()) {<button type="button" (click)="key.emit(row)" [attr.aria-label]="keyLabel()" [title]="keyLabel()"><span class="material-icons">{{ keyIcon() }}</span></button>}@if (showRemove()) {<button type="button" class="danger" (click)="remove.emit(row)" [attr.aria-label]="removeLabel()" [title]="removeLabel()"><span class="material-icons">{{ removeIcon() }}</span></button>}@if (menuActions().length) {<button type="button" [matMenuTriggerFor]="rowMenu" [matMenuTriggerData]="{ row: row }" [attr.aria-label]="menuLabel()" [title]="menuLabel()"><span class="material-icons">{{ menuIcon() }}</span></button>}</td>}
           </tr>
         }
       </tbody>
     </table>
-    <footer>Mostrando {{ rows().length }} registros <div><button type="button">Anterior</button><button type="button">Siguiente</button></div></footer>
+    @if (showFooter()) {
+      <footer>Mostrando {{ rows().length }} registros <div><button type="button">Anterior</button><button type="button">Siguiente</button></div></footer>
+    }
   }
 </div>
+
+<mat-menu #rowMenu="matMenu" xPosition="before">
+  <ng-template matMenuContent let-row="row">
+    @for (item of menuActions(); track item.id) {
+      <button type="button" mat-menu-item [class.danger]="item.danger" (click)="menuAction.emit({ action: item.id, row: row })">
+        @if (item.icon) { <span class="material-icons">{{ item.icon }}</span> }
+        <span>{{ item.label }}</span>
+      </button>
+    }
+  </ng-template>
+</mat-menu>

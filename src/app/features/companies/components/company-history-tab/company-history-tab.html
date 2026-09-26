@@ -1,0 +1,34 @@
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #search (input)="onSearch(search.value)" placeholder="Buscar usuario, acción…" />
+  </label>
+  <select #levelFilter (change)="level.set(levelFilter.value); onFilterChange()" aria-label="Filtrar por nivel">
+    <option value="">Todos los niveles</option>
+    <option value="INFO">Info</option>
+    <option value="WARNING">Warning</option>
+    <option value="ERROR">Error</option>
+  </select>
+  <input #fromDate type="date" (change)="from.set(fromDate.value); onFilterChange()" aria-label="Fecha desde" />
+  <input #toDate type="date" (change)="to.set(toDate.value); onFilterChange()" aria-label="Fecha hasta" />
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [showRemove]="false"
+  [showFooter]="false"
+  editLabel="Ver detalle"
+  editIcon="visibility"
+  emptyMessage="No se encontraron eventos para esta empresa."
+  (edit)="view($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="registros"
+  (pageChange)="goToPage($event)"
+/>

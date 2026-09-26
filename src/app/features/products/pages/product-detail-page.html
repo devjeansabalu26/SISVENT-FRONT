@@ -1,63 +1,72 @@
-<app-page-header [title]="product.name" description="Ficha del producto, precios y movimientos">
-  <a class="ghost" routerLink="/app/products"><span class="material-icons">arrow_back</span>Productos</a>
-  <button type="button" class="ghost" (click)="toggleActive()">
-    <span class="material-icons">{{ product.status === 'ACTIVE' ? 'toggle_off' : 'toggle_on' }}</span>
-    {{ product.status === 'ACTIVE' ? 'Desactivar' : 'Activar' }}
-  </button>
-  <a class="ghost" [routerLink]="['/app/products', product.id, 'edit']"><span class="material-icons">edit</span>Editar producto</a>
-</app-page-header>
+@if (product(); as product) {
+  <app-page-header [title]="product.name" description="Ficha del producto, precios y stock">
+    <a class="ghost" routerLink="/app/products"><span class="material-icons">arrow_back</span>Productos</a>
+    <button type="button" class="ghost" (click)="toggleActive()">
+      <span class="material-icons">{{ product.isActive ? 'toggle_off' : 'toggle_on' }}</span>
+      {{ product.isActive ? 'Desactivar' : 'Activar' }}
+    </button>
+    <a class="ghost" [routerLink]="['/app/products', product.id, 'edit']"><span class="material-icons">edit</span>Editar producto</a>
+  </app-page-header>
 
-<div class="summary surface-card">
-  <div><span class="code">{{ product.sku }}</span><h2>{{ product.name }}</h2></div>
-  <app-status-chip [value]="product.status" [label]="product.status" />
-</div>
+  <div class="summary surface-card">
+    <div><span class="code">{{ product.sku }}</span><h2>{{ product.name }}</h2></div>
+    <app-status-chip [value]="product.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="product.isActive ? 'ACTIVE' : 'INACTIVE'" />
+  </div>
 
-<div class="kpi-grid">
-  <app-kpi-card label="Stock actual" [value]="product.stock + ' u.'" icon="inventory_2" tone="primary" />
-  <app-kpi-card label="Precio de venta" [value]="'S/ ' + product.price.toFixed(2)" icon="sell" tone="success" />
-  <app-kpi-card label="Vendidos este mes" value="23 u." icon="trending_up" trend="up" delta="+12%" tone="info" />
-  <app-kpi-card label="Promedio diario" value="0.8" icon="analytics" tone="warning" />
-</div>
+  <div class="kpi-grid">
+    <app-kpi-card label="Stock actual" [value]="product.totalStock + ' u.'" icon="inventory_2" tone="primary" />
+    <app-kpi-card label="Precio de venta" [value]="'S/ ' + product.salePrice.toFixed(2)" icon="sell" tone="success" />
+    <app-kpi-card label="Stock mínimo" [value]="product.minStock + ' u.'" icon="warning" tone="warning" />
+  </div>
 
-<div class="cards">
-  <section class="surface-card">
-    <h3>Especificaciones generales</h3>
-    <dl>
-      @for (field of specs; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-      }
-    </dl>
-  </section>
-  <section class="surface-card">
-    <h3>Finanzas y precios</h3>
-    <dl>
-      @for (field of finance; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-      }
-    </dl>
-  </section>
-  <section class="surface-card">
-    <h3>Almacén y stock</h3>
-    <dl>
-      @for (field of stock; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-      }
-    </dl>
-  </section>
-  <section class="surface-card">
-    <h3>Movimientos recientes</h3>
-    <table>
-      <thead><tr><th>Fecha</th><th>Tipo</th><th>Cant.</th><th>Ref.</th></tr></thead>
-      <tbody>
-        @for (movement of movements; track movement.date) {
-          <tr>
-            <td>{{ movement.date }}</td>
-            <td>{{ movement.type }}</td>
-            <td>{{ movement.quantity > 0 ? '+' + movement.quantity : movement.quantity }}</td>
-            <td>{{ movement.reference }}</td>
-          </tr>
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Especificaciones generales</h3>
+      <dl>
+        @for (field of specs(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
         }
-      </tbody>
-    </table>
-  </section>
-</div>
+      </dl>
+    </section>
+    <section class="surface-card">
+      <h3>Finanzas y precios</h3>
+      <dl>
+        @for (field of finance(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        }
+      </dl>
+    </section>
+    <section class="surface-card">
+      <h3>Almacén y stock</h3>
+      <dl>
+        @for (field of stock(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        }
+      </dl>
+    </section>
+    <section class="surface-card">
+      <h3>Historial de precios</h3>
+      @if (priceHistory().length) {
+        <table>
+          <thead><tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
+          <tbody>
+            @for (item of priceHistory(); track item.changedAt) {
+              <tr>
+                <td>{{ item.changedAt | date: 'short' }}</td>
+                <td>S/ {{ item.oldPrice.toFixed(2) }}</td>
+                <td>S/ {{ item.newPrice.toFixed(2) }}</td>
+                <td>{{ item.reason || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="muted">Sin cambios de precio registrados.</p>
+      }
+    </section>
+  </div>
+} @else if (loading()) {
+  <p class="muted">Cargando producto…</p>
+} @else {
+  <p class="muted">No se encontró el producto.</p>
+}

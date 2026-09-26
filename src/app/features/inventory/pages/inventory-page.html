@@ -10,4 +10,4 @@
   <label><span class="material-icons">search</span><input #query (input)="filter(query.value, status.value)" placeholder="Buscar por SKU o producto" /></label>
   <select #status (change)="filter(query.value, status.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="AVAILABLE">Disponible</option><option value="LOW_STOCK">Stock bajo</option><option value="OUT_OF_STOCK">Sin stock</option></select>
 </section>
-<app-data-table [columns]="columns" [rows]="rows()" [showRemove]="false" editLabel="Ajustar stock" emptyMessage="No hay productos que coincidan con los filtros." (edit)="adjust($event)" />
+<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="false" editLabel="Ajustar stock" emptyMessage="No hay productos que coincidan con los filtros." (edit)="adjust($event)" />

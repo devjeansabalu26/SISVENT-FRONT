@@ -1,2 +1,26 @@
-export type AuditResult = 'SUCCESS' | 'WARNING' | 'ERROR';
-export interface AuditEvent { readonly id:string; readonly date:string; readonly user:string; readonly role:string; readonly action:string; readonly module:string; readonly company:string; readonly ip:string; readonly result:AuditResult; readonly detail:string; }
+export type AuditLevel = 'INFO' | 'WARNING' | 'ERROR';
+
+/**
+ * Mirrors AuditEntryResponse from GET /api/v1/audit, plus `companyName` which is
+ * only present on the SUPERADMIN cross-company trail (GET /api/v1/platform/audit).
+ */
+export interface AuditEvent {
+  readonly id: string;
+  readonly createdAt: string;
+  readonly actorName: string | null;
+  readonly actorRole: string | null;
+  readonly companyName?: string | null;
+  readonly action: string;
+  readonly entityName: string;
+  readonly entityId: string | null;
+  readonly level: AuditLevel;
+  readonly detail: string | null;
+  readonly ipAddress: string | null;
+}
+
+export interface AuditPage {
+  readonly items: readonly AuditEvent[];
+  readonly pageNumber: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}

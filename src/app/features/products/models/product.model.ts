@@ -1,1 +1,86 @@
-export interface ProductListItem { readonly id:string; readonly sku:string; readonly name:string; readonly category:string; readonly brand:string; readonly price:number; readonly status:'ACTIVE'|'INACTIVE'; readonly stock:number; }
+/** Mirrors ProductListItem from GET /api/v1/products. */
+export interface Product {
+  readonly id: string;
+  readonly sku: string;
+  readonly barcode: string | null;
+  readonly name: string;
+  readonly categoryName: string | null;
+  readonly brandName: string | null;
+  readonly salePrice: number;
+  readonly referenceCost: number | null;
+  readonly isActive: boolean;
+  readonly totalStock: number;
+  readonly lowStock: boolean;
+  readonly version: number;
+}
+
+export interface ProductPage {
+  readonly items: readonly Product[];
+  readonly pageNumber: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+}
+
+/** Mirrors ProductDetailResponse from GET /api/v1/products/{id}. */
+export interface ProductDetail {
+  readonly id: string;
+  readonly sku: string;
+  readonly barcode: string | null;
+  readonly name: string;
+  readonly description: string | null;
+  readonly categoryId: string | null;
+  readonly categoryName: string | null;
+  readonly brandId: string | null;
+  readonly brandName: string | null;
+  readonly unitId: string | null;
+  readonly unitName: string | null;
+  readonly salePrice: number;
+  readonly referenceCost: number | null;
+  readonly imageUrl: string | null;
+  readonly isActive: boolean;
+  readonly totalStock: number;
+  readonly minStock: number;
+  readonly version: number;
+}
+
+export interface ProductPriceHistoryItem {
+  readonly oldPrice: number;
+  readonly newPrice: number;
+  readonly reason: string;
+  readonly changedAt: string;
+}
+
+export interface ProductCreateValue {
+  readonly name: string;
+  readonly sku?: string;
+  readonly barcode?: string | null;
+  readonly description: string | null;
+  readonly categoryId: string | null;
+  readonly brandId: string | null;
+  readonly unitId: string | null;
+  readonly salePrice: number;
+  readonly referenceCost: number | null;
+  readonly imageUrl?: string | null;
+  readonly isActive: boolean;
+  // Stock inicial opcional (solo al crear): si se informan ambos se crea el registro en stock_by_store
+  // + el movimiento INITIAL_STOCK correspondiente.
+  readonly initialStoreId?: string | null;
+  readonly initialStock?: number | null;
+  readonly minStock?: number | null;
+}
+
+export interface ProductUpdateValue {
+  readonly name: string;
+  readonly sku: string;
+  readonly barcode?: string | null;
+  readonly description: string | null;
+  readonly categoryId: string | null;
+  readonly brandId: string | null;
+  readonly unitId: string | null;
+  readonly salePrice: number;
+  readonly referenceCost: number | null;
+  readonly imageUrl?: string | null;
+  readonly isActive: boolean;
+  readonly priceChangeReason?: string;
+  readonly version: number;
+}

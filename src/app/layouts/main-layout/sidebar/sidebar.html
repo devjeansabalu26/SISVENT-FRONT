@@ -1,8 +1,13 @@
 <aside class="sidebar" [class.sidebar--compact]="compact()">
-  <a class="brand" routerLink="/app/dashboard" aria-label="Ir al inicio"
-    ><span class="brand__mark">S</span><strong>SISVENT</strong></a
-  >
-  <div class="company">{{ company()?.commercialName ?? 'SISVENT Multiempresa' }}</div>
+  <a class="brand" routerLink="/app/dashboard" aria-label="Ir al inicio">
+    <span class="brand__mark">{{ brandInitial() }}</span>
+    <span class="brand__info">
+      <strong>{{ brandName() }}</strong>
+      @if (roleLabel()) {
+        <span class="brand__role">{{ roleLabel() }}</span>
+      }
+    </span>
+  </a>
   <nav aria-label="Navegación principal">
     @for (group of groups(); track group.label) {
       @if (group.label) {

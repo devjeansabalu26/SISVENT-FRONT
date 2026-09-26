@@ -1,7 +1,32 @@
 <form class="dialog" [formGroup]="form" (ngSubmit)="save()">
-  <header><span class="material-icons">inventory</span><div><h2>Ajustar inventario</h2><p>{{ item.productName }} · Stock actual: {{ item.stock }}</p></div></header>
-  <label>Tipo de movimiento<select formControlName="type"><option value="IN">Entrada</option><option value="OUT">Salida</option><option value="ADJUSTMENT">Ajuste manual</option></select></label>
-  <label>Cantidad<input type="number" min="1" formControlName="quantity" /></label>
-  <label>Motivo<textarea rows="3" formControlName="reason" placeholder="Describe el motivo del movimiento"></textarea></label>
-  <footer><button type="button" (click)="cancel()">Cancelar</button><button type="submit" class="primary">Guardar movimiento</button></footer>
+  <header>
+    <span class="material-icons">inventory</span>
+    <div class="review__title"><h2>Ajuste de stock</h2></div>
+    <small class="review__code">MOD-AD-16</small>
+  </header>
+
+  <dl class="review__meta">
+    <div><dt>Producto</dt><dd>{{ item.productName }}</dd></div>
+    <div><dt>Local</dt><dd>{{ item.storeName }}</dd></div>
+  </dl>
+
+  <div class="review__kpis">
+    <div><small>Stock anterior</small><strong>{{ item.currentStock }}</strong></div>
+    <div>
+      <small>Resultante</small>
+      <strong [class.negative]="resulting() < 0">{{ resulting() }} und</strong>
+    </div>
+  </div>
+
+  <label>Tipo de ajuste<select formControlName="type"><option value="In">Incremento (+)</option><option value="Out">Disminución (−)</option><option value="Set">Ajuste manual (fijar stock exacto)</option></select></label>
+  <label>Cantidad<input type="number" min="0" step="0.001" formControlName="quantity" /></label>
+  @if (resulting() < 0) {
+    <p class="review__banner" data-tone="danger"><span class="material-icons">report</span>El stock resultante no puede ser negativo.</p>
+  }
+  <label>Motivo *<textarea rows="2" formControlName="reason" placeholder="Ingreso de lote por reposición…"></textarea></label>
+  @if (form.controls.reason.touched && form.controls.reason.invalid) {
+    <small class="hint">Indica el motivo del ajuste.</small>
+  }
+  <label>Observación (opcional)<input formControlName="observation" placeholder="Guía de remisión N°…" /></label>
+  <footer><button type="button" (click)="cancel()">Cancelar</button><button type="submit" class="primary" [disabled]="resulting() < 0">Confirmar ajuste</button></footer>
 </form>

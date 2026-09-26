@@ -1,18 +1,17 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NotificationService } from '../../../core/notifications/notification.service';
+import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import {
-  CATEGORY_SHARE_MOCK,
-  SALES_CHART_MOCK,
-  SALES_REPORT_MOCK,
-  SELLER_SHARE_MOCK,
-  TOP_PRODUCT_MOCK,
-} from '../data-access/sales-report.mock';
-import { SalesReportRow } from '../models/sales-report.model';
+import { SalesReportApiService } from '../data-access/sales-report-api.service';
+import { SalesReport, TopProduct } from '../models/sales-report.model';
+
+type TopProductRow = TopProduct & { readonly id: string };
+
+const PERIOD_DAYS: Readonly<Record<string, number>> = { '30': 30, '90': 90, '180': 180 };
 
 @Component({
   selector: 'app-reports-page',
@@ -21,49 +20,71 @@ import { SalesReportRow } from '../models/sales-report.model';
   styleUrl: './reports-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReportsPage {
+export class ReportsPage implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly notifications = inject(NotificationService);
-  readonly period = signal('6');
-  readonly rows = computed(() => SALES_REPORT_MOCK.slice(-Number(this.period())));
-  readonly chart = computed(() => SALES_CHART_MOCK.slice(-Number(this.period())));
-  readonly maxAmount = computed(() => Math.max(...this.chart().map((point) => point.amount), 1));
-  readonly revenue = computed(() => this.rows().reduce((sum, row) => sum + row.revenue, 0));
-  readonly sales = computed(() => this.rows().reduce((sum, row) => sum + row.salesCount, 0));
-  readonly averageTicket = computed(() => (this.sales() ? this.revenue() / this.sales() : 0));
-  readonly unitsSold = computed(() => this.rows().reduce((sum, row) => sum + row.salesCount * 4, 0));
+  private readonly api = inject(SalesReportApiService);
+  private readonly storeApi = inject(StoreApiService);
 
-  readonly categoryShare = CATEGORY_SHARE_MOCK;
-  readonly sellerShare = SELLER_SHARE_MOCK;
-  readonly topProducts = TOP_PRODUCT_MOCK;
+  readonly loading = signal(false);
+  readonly period = signal('90');
+  readonly storeId = signal('');
+  readonly stores = signal<readonly { id: string; name: string }[]>([]);
+  readonly report = signal<SalesReport | null>(null);
 
-  readonly topProductColumns: readonly DataTableColumn<(typeof TOP_PRODUCT_MOCK)[number]>[] = [
+  readonly maxAmount = computed(() =>
+    Math.max(...(this.report()?.dailySeries.map((point) => point.amount) ?? [0]), 1),
+  );
+
+  readonly topProductColumns: readonly DataTableColumn<TopProductRow>[] = [
     { key: 'rank', label: '#', value: (row) => row.rank },
     { key: 'name', label: 'Producto', value: (row) => row.name },
-    { key: 'category', label: 'Categoría', value: (row) => row.category },
+    { key: 'category', label: 'Categoría', value: (row) => row.category ?? '—' },
     { key: 'units', label: 'Unidades', value: (row) => row.units },
-    { key: 'revenue', label: 'Ingresos', value: (row) => row.revenue },
-    { key: 'margin', label: 'Margen', value: (row) => row.margin },
+    { key: 'revenue', label: 'Ingresos', value: (row) => `S/ ${row.revenue.toFixed(2)}` },
+    { key: 'margin', label: 'Margen', value: (row) => (row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—') },
   ];
 
-  readonly columns: readonly DataTableColumn<SalesReportRow>[] = [
-    { key: 'period', label: 'Periodo', value: (row) => row.period },
-    { key: 'sales', label: 'Ventas', value: (row) => row.salesCount },
-    {
-      key: 'revenue',
-      label: 'Ingresos',
-      value: (row) => `S/ ${row.revenue.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`,
-    },
-    { key: 'ticket', label: 'Ticket promedio', value: (row) => `S/ ${row.averageTicket.toFixed(2)}` },
-    { key: 'seller', label: 'Mejor vendedor', value: (row) => row.topSeller },
-  ];
+  ngOnInit(): void {
+    this.storeApi.list().subscribe((response) => this.stores.set(response.items));
+    this.load();
+  }
+
+  onPeriodChange(value: string): void {
+    this.period.set(value);
+    this.load();
+  }
+
+  onStoreChange(value: string): void {
+    this.storeId.set(value);
+    this.load();
+  }
+
+  load(): void {
+    const days = PERIOD_DAYS[this.period()] ?? 90;
+    const to = new Date();
+    const from = new Date();
+    from.setDate(from.getDate() - days);
+    this.loading.set(true);
+    this.api.get({ from: from.toISOString(), to: to.toISOString(), storeId: this.storeId() || undefined, topCount: 10 }).subscribe({
+      next: (report) => {
+        this.report.set(report);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  readonly topProductRows = computed<readonly TopProductRow[]>(() =>
+    (this.report()?.topProducts ?? []).map((item) => ({ ...item, id: item.sku })),
+  );
 
   exportCsv(): void {
+    const report = this.report();
+    if (!report) return;
     const lines = [
-      'Periodo,Ventas,Ingresos,Ticket promedio,Mejor vendedor',
-      ...this.rows().map(
-        (row) => `${row.period},${row.salesCount},${row.revenue},${row.averageTicket},${row.topSeller}`,
-      ),
+      'Fecha,Monto',
+      ...report.dailySeries.map((point) => `${point.date},${point.amount}`),
     ];
     const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
     const link = this.document.createElement('a');

@@ -1,9 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { AppRole } from '../../../core/auth/constants/app-role.constant';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
+import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { MAIN_NAVIGATION } from '../navigation/navigation.config';
 import { NavigationGroup, NavigationItem } from '../navigation/navigation-item.model';
+
+const ROLE_LABEL: Readonly<Record<AppRole, string>> = {
+  SUPERADMIN: 'Superadministrador',
+  ADMIN: 'Administrador',
+  VENDEDOR: 'Vendedor',
+};
 
 @Component({
   selector: 'app-sidebar',
@@ -17,8 +25,22 @@ export class Sidebar {
   readonly navigate = output<void>();
   readonly company = inject(CompanyContextService).company;
   private readonly access = inject(AccessControlService);
+  private readonly users = inject(UserContextService);
 
-  private readonly items = computed(() => MAIN_NAVIGATION.filter((item) => this.access.canAccess(item)));
+  /** Nombre mostrado arriba del sidebar: la empresa real del usuario, o "SISVENT" para SUPERADMIN
+   * (sin empresa) — nunca un nombre de empresa de ejemplo. */
+  readonly brandName = computed(() => this.company()?.commercialName ?? 'SISVENT');
+  readonly brandInitial = computed(() => this.brandName().trim().charAt(0).toUpperCase() || 'S');
+  readonly roleLabel = computed(() => {
+    const role = this.users.user()?.role;
+    return role ? ROLE_LABEL[role] : '';
+  });
+
+  private readonly items = computed(() =>
+    MAIN_NAVIGATION.filter((item) =>
+      this.access.canAccess({ ...item, features: item.requiredFeature ? [item.requiredFeature] : undefined }),
+    ),
+  );
 
   /** Groups visible items by their `group` label, preserving first-seen order. */
   readonly groups = computed<readonly NavigationGroup[]>(() => {

@@ -1,57 +1,59 @@
-<app-page-header [title]="'Ingreso ' + receipt.code" description="Detalle y kárdex del ingreso de mercadería">
-  <a class="ghost" routerLink="/app/goods-receipts"><span class="material-icons">arrow_back</span>Volver</a>
-  <button type="button" class="ghost"><span class="material-icons">print</span>Imprimir comprobante</button>
-</app-page-header>
+@if (receipt(); as receipt) {
+  <app-page-header [title]="'Ingreso ' + receipt.receiptNumber" description="Detalle y kárdex del ingreso de mercadería">
+    <a class="ghost" routerLink="/app/goods-receipts"><span class="material-icons">arrow_back</span>Volver</a>
+  </app-page-header>
 
-<div class="summary surface-card">
-  <div><span class="code">{{ receipt.documentType }} · Nº {{ receipt.documentNumber }}</span><h2>{{ receipt.supplier }}</h2></div>
-  <app-status-chip [value]="receipt.status" [label]="receipt.status" />
-</div>
-
-<div class="cards">
-  <section class="surface-card">
-    <h3>Cabecera</h3>
-    <dl>
-      <div><dt>Fecha</dt><dd>{{ receipt.date }} · {{ receipt.time }}</dd></div>
-      <div><dt>Proveedor</dt><dd>{{ receipt.supplier }} (RUC {{ receipt.supplierTaxId }})</dd></div>
-      <div><dt>Documento referencia</dt><dd>{{ receipt.documentType }} Nº {{ receipt.documentNumber }}</dd></div>
-      <div><dt>Local destino</dt><dd>{{ receipt.warehouse }}</dd></div>
-      <div><dt>Usuario receptor</dt><dd>{{ receipt.receivedBy }}</dd></div>
-    </dl>
-  </section>
-  <section class="surface-card">
-    <h3>Resumen</h3>
-    <dl>
-      <div><dt>Items totales</dt><dd>{{ receipt.lines.length }}</dd></div>
-      <div><dt>Unidades registradas</dt><dd>{{ totalUnits }}</dd></div>
-      <div><dt>Costo de operación</dt><dd>S/ {{ receipt.totalValue.toLocaleString('es-PE', { minimumFractionDigits: 2 }) }}</dd></div>
-    </dl>
-    <p class="muted">{{ receipt.notes }}</p>
-  </section>
-</div>
-
-<section class="surface-card">
-  <h3>Kárdex de movimiento detallado</h3>
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th><th>Trazabilidad stock</th></tr>
-      </thead>
-      <tbody>
-        @for (line of receipt.lines; track line.sku) {
-          <tr>
-            <td>{{ line.productName }}</td>
-            <td>{{ line.sku }}</td>
-            <td>{{ line.quantity }}</td>
-            <td>S/ {{ line.unitCost.toFixed(2) }}</td>
-            <td>S/ {{ (line.quantity * line.unitCost).toFixed(2) }}</td>
-            <td>{{ line.previousStock }} → {{ line.newStock }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+  <div class="summary surface-card">
+    <div><span class="code">{{ receipt.documentType }} · Nº {{ receipt.documentNumber }}</span><h2>{{ receipt.supplierName ?? 'Sin proveedor' }}</h2></div>
+    <app-status-chip [value]="receipt.status" [label]="receipt.status" />
   </div>
-  <p class="audit">
-    Auditoría: ingreso procesado con éxito por {{ receipt.receivedBy }} el {{ receipt.date }} a las {{ receipt.time }}.
-  </p>
-</section>
+
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Cabecera</h3>
+      <dl>
+        <div><dt>Fecha</dt><dd>{{ receipt.receiptDate | date: 'medium' }}</dd></div>
+        <div><dt>Proveedor</dt><dd>{{ receipt.supplierName ?? '—' }} @if (receipt.supplierTaxDocument) { (RUC {{ receipt.supplierTaxDocument }}) }</dd></div>
+        <div><dt>Documento referencia</dt><dd>{{ receipt.documentType ?? '—' }} Nº {{ receipt.documentNumber ?? '—' }}</dd></div>
+        <div><dt>Local destino</dt><dd>{{ receipt.storeName }}</dd></div>
+        <div><dt>Usuario receptor</dt><dd>{{ receipt.receivedBy }}</dd></div>
+      </dl>
+    </section>
+    <section class="surface-card">
+      <h3>Resumen</h3>
+      <dl>
+        <div><dt>Items totales</dt><dd>{{ receipt.itemCount }}</dd></div>
+        <div><dt>Unidades registradas</dt><dd>{{ receipt.totalUnits }}</dd></div>
+        <div><dt>Costo de operación</dt><dd>S/ {{ receipt.totalCost.toLocaleString('es-PE', { minimumFractionDigits: 2 }) }}</dd></div>
+      </dl>
+      <p class="muted">{{ receipt.notes }}</p>
+    </section>
+  </div>
+
+  <section class="surface-card">
+    <h3>Kárdex de movimiento detallado</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th><th>Trazabilidad stock</th></tr>
+        </thead>
+        <tbody>
+          @for (line of receipt.lines; track line.productId) {
+            <tr>
+              <td>{{ line.productName }}</td>
+              <td>{{ line.sku }}</td>
+              <td>{{ line.quantity }}</td>
+              <td>S/ {{ line.unitCost.toFixed(2) }}</td>
+              <td>S/ {{ line.subtotal.toFixed(2) }}</td>
+              <td>{{ line.stockBefore ?? '—' }} → {{ line.stockAfter ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+} @else if (loading()) {
+  <p class="muted">Cargando ingreso…</p>
+} @else {
+  <p class="muted">No se encontró el ingreso.</p>
+}

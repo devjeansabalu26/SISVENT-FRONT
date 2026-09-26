@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { AuthApiService } from '../../../../core/auth/services/auth-api.service';
 import { AppSessionService } from '../../../../core/auth/services/app-session.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
-import { AppHttpError } from '../../../../core/http/models/app-http-error.model';
+import { AlertBanner } from '../../../../shared/ui/alert-banner/alert-banner';
+import { LoginAlert, loginAlertFor } from './login-alert';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, AlertBanner],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +21,7 @@ export class LoginPage {
 
   readonly hidePassword = signal(true);
   readonly submitting = signal(false);
-  readonly error = signal<string | null>(null);
+  readonly error = signal<LoginAlert | null>(null);
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -51,25 +52,20 @@ export class LoginPage {
           this.session.start(result);
         } catch {
           this.submitting.set(false);
-          this.error.set('No se pudo iniciar la sesión con esta cuenta.');
+          this.error.set({
+            tone: 'error',
+            icon: 'error_outline',
+            title: 'No se pudo iniciar la sesión',
+            message: 'La cuenta no tiene un perfil válido para ingresar.',
+          });
           return;
         }
         void this.router.navigateByUrl('/app/dashboard');
       },
       error: (cause: unknown) => {
         this.submitting.set(false);
-        this.error.set(this.messageFor(cause));
+        this.error.set(loginAlertFor(cause));
       },
     });
-  }
-
-  private messageFor(cause: unknown): string {
-    if (cause instanceof AppHttpError) {
-      if (cause.status === 401) return 'Usuario o contraseña incorrectos.';
-      if (cause.status === 403) return 'Tu cuenta no está habilitada para ingresar.';
-      if (cause.status === 429) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
-      if (cause.kind === 'network') return 'No fue posible conectar con el servidor.';
-    }
-    return 'No se pudo iniciar sesión. Inténtalo nuevamente.';
   }
 }

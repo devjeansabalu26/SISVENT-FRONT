@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { ABC_PRODUCT_MOCK } from '../data-access/replenishment.mock';
+import { ParetoChart } from '../components/pareto-chart/pareto-chart';
+import { ABC_CLASS_MOCK, ABC_PRODUCT_MOCK, PARETO_CURVE_MOCK } from '../data-access/replenishment.mock';
 import { AbcProduct } from '../models/replenishment.model';
 
 @Component({
   selector: 'app-abc-rotation-page',
-  imports: [DataTable, PageHeader],
+  imports: [DataTable, PageHeader, ParetoChart],
   templateUrl: './abc-rotation-page.html',
   styleUrls: ['../../../shared/ui/list-page.scss', './replenishment.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,11 +16,9 @@ import { AbcProduct } from '../models/replenishment.model';
 export class AbcRotationPage {
   readonly rows = signal<readonly AbcProduct[]>(ABC_PRODUCT_MOCK);
 
-  readonly classes: readonly { readonly name: string; readonly label: string; readonly share: string; readonly count: number }[] = [
-    { name: 'Clase A', label: 'Alta rotación', share: '78%', count: 45 },
-    { name: 'Clase B', label: 'Media rotación', share: '17%', count: 89 },
-    { name: 'Clase C', label: 'Baja rotación', share: '5%', count: 150 },
-  ];
+  readonly classes = ABC_CLASS_MOCK;
+  readonly paretoCurve = PARETO_CURVE_MOCK;
+  readonly totalItems = ABC_CLASS_MOCK.reduce((sum, klass) => sum + klass.items, 0);
 
   readonly columns: readonly DataTableColumn<AbcProduct>[] = [
     { key: 'name', label: 'Producto', value: (row) => row.name },

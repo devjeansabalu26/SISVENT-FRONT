@@ -5,34 +5,40 @@
 <app-data-table
   [columns]="columns"
   [rows]="rows()"
+  [loading]="loading()"
+  [showView]="true"
   [showRemove]="false"
+  viewLabel="Ver detalle"
   editLabel="Editar plan"
   emptyMessage="No hay planes registrados."
+  (view)="open($event)"
   (edit)="edit($event)"
 />
 
-<section class="matrix surface-card">
-  <h2>Comparación de funcionalidades</h2>
-  <div class="matrix__scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>Funcionalidad</th>
-          <th>Esencial</th>
-          <th>Negocio</th>
-          <th>Profesional</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of featureMatrix; track row.feature) {
+@if (featureMatrix(); as matrix) {
+  <section class="matrix surface-card">
+    <h2>Comparación de funcionalidades</h2>
+    <div class="matrix__scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ row.feature }}</td>
-            <td>{{ row.essential }}</td>
-            <td>{{ row.business }}</td>
-            <td>{{ row.professional }}</td>
+            <th>Funcionalidad</th>
+            @for (code of matrix.planCodes; track code) {
+              <th>{{ code }}</th>
+            }
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</section>
+        </thead>
+        <tbody>
+          @for (row of matrix.rows; track row.featureCode) {
+            <tr>
+              <td>{{ row.featureName }}</td>
+              @for (cell of row.plans; track cell.planCode) {
+                <td>{{ cell.enabled ? '✓' : '—' }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

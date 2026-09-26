@@ -5,7 +5,9 @@ import { AccessControlService } from '../services/access-control.service';
 
 export const planGuard: CanActivateFn = (route) => {
   const plans = (route.data['plans'] ?? []) as readonly CompanyPlan[];
-  return inject(AccessControlService).canAccess({ plans })
+  const requiredFeature = route.data['requiredFeature'] as string | undefined;
+  const features = requiredFeature ? [requiredFeature] : undefined;
+  return inject(AccessControlService).canAccess({ plans, features })
     ? true
     : inject(Router).createUrlTree(['/403']);
 };

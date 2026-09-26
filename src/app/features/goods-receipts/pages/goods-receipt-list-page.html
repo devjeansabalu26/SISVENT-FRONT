@@ -3,10 +3,10 @@
 </app-page-header>
 
 <div class="kpi-grid">
-  <app-kpi-card label="Ingresos del mes" [value]="monthCount()" icon="move_to_inbox" tone="primary" />
-  <app-kpi-card label="Productos recibidos" [value]="totalUnits() + ' u.'" icon="inventory_2" tone="info" />
-  <app-kpi-card label="Valor total" [value]="'S/ ' + totalValue().toLocaleString('es-PE')" icon="payments" tone="success" />
-  <app-kpi-card label="Pendientes" [value]="pending()" icon="pending_actions" tone="warning" />
+  <app-kpi-card label="Ingresos del mes" [value]="summary()?.monthCount ?? '—'" icon="move_to_inbox" tone="primary" />
+  <app-kpi-card label="Unidades recibidas" [value]="(summary()?.unitsReceived ?? 0) + ' u.'" icon="inventory_2" tone="info" />
+  <app-kpi-card label="Valor total" [value]="'S/ ' + (summary()?.totalValue ?? 0).toLocaleString('es-PE')" icon="payments" tone="success" />
+  <app-kpi-card label="Pendientes" [value]="summary()?.pending ?? '—'" icon="pending_actions" tone="warning" />
 </div>
 
 <section class="filters">
@@ -16,15 +16,16 @@
   </label>
   <select #status aria-label="Estado" (change)="statusFilter.set(status.value)">
     <option value="">Estado: todos</option>
-    <option>Completado</option>
-    <option>Pendiente</option>
-    <option>Anulado</option>
+    <option value="CONFIRMED">Confirmado</option>
+    <option value="DRAFT">Borrador</option>
+    <option value="CANCELLED">Anulado</option>
   </select>
 </section>
 
 <app-data-table
   [columns]="columns"
   [rows]="rows()"
+  [loading]="loading()"
   [showRemove]="false"
   editLabel="Ver detalle"
   editIcon="visibility"

@@ -5,14 +5,27 @@
 
 <div class="abc-cards">
   @for (klass of classes; track klass.name) {
-    <article class="surface-card">
-      <strong>{{ klass.name }}</strong>
+    <article class="surface-card abc-card">
+      <div class="abc-card__top">
+        <strong>{{ klass.name }}</strong>
+        <span class="muted">{{ klass.valueShare }}% del valor</span>
+      </div>
       <small>{{ klass.label }}</small>
-      <p class="abc-share">{{ klass.share }}</p>
-      <span class="muted">{{ klass.count }} productos en esta categoría</span>
+      <p class="abc-share">{{ klass.valueShare }}%</p>
+      <span class="muted">{{ klass.description }}</span>
+      <div class="abc-progress" [attr.aria-label]="klass.items + ' ítems'">
+        <span [style.width.%]="(klass.items / totalItems) * 100"></span>
+      </div>
+      <span class="muted">{{ klass.items.toLocaleString('es-PE') }} ítems · {{ ((klass.items / totalItems) * 100).toFixed(0) }}% del catálogo</span>
     </article>
   }
 </div>
+
+<section class="surface-card">
+  <h2 class="section-title">Curva de acumulación de Pareto (ABC)</h2>
+  <p class="muted">Valor acumulado del inventario según el volumen de productos.</p>
+  <app-pareto-chart [points]="paretoCurve" />
+</section>
 
 <h2 class="section-title">Detalle del inventario por categoría</h2>
 <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />

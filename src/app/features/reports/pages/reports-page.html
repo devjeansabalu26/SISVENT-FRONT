@@ -1,5 +1,5 @@
 <app-page-header title="Reportes" description="Análisis y métricas clave del rendimiento de tu negocio">
-  <button type="button" class="primary" (click)="exportCsv()">
+  <button type="button" class="primary" (click)="exportCsv()" [disabled]="!report()">
     <span class="material-icons">download</span>Exportar CSV
   </button>
 </app-page-header>
@@ -7,106 +7,107 @@
 <section class="filters">
   <label
     >Periodo
-    <select #periodFilter (change)="period.set(periodFilter.value)">
-      <option value="3">Últimos 3 meses</option>
-      <option value="6" selected>Últimos 6 meses</option>
+    <select #periodFilter (change)="onPeriodChange(periodFilter.value)">
+      <option value="30">Últimos 30 días</option>
+      <option value="90" selected>Últimos 90 días</option>
+      <option value="180">Últimos 180 días</option>
     </select>
   </label>
   <label
-    >Sucursal
-    <select>
-      <option>Todas las sucursales</option>
-      <option>Principal</option>
-      <option>Tienda Centro</option>
+    >Local
+    <select #storeFilter (change)="onStoreChange(storeFilter.value)">
+      <option value="">Todos los locales</option>
+      @for (store of stores(); track store.id) {
+        <option [value]="store.id">{{ store.name }}</option>
+      }
     </select>
   </label>
 </section>
 
-<div class="kpi-grid">
-  <app-kpi-card
-    label="Ventas totales"
-    [value]="'S/ ' + revenue().toLocaleString('es-PE')"
-    icon="payments"
-    trend="up"
-    delta="+12.5%"
-    deltaCaption="vs mes anterior"
-    tone="success"
-  />
-  <app-kpi-card
-    label="Transacciones"
-    [value]="sales()"
-    icon="receipt_long"
-    trend="up"
-    delta="+8.3%"
-    deltaCaption="vs mes anterior"
-    tone="primary"
-  />
-  <app-kpi-card
-    label="Ticket promedio"
-    [value]="'S/ ' + averageTicket().toFixed(2)"
-    icon="monitoring"
-    trend="up"
-    delta="+3.8%"
-    deltaCaption="vs mes anterior"
-    tone="info"
-  />
-  <app-kpi-card
-    label="Productos vendidos"
-    [value]="unitsSold().toLocaleString('es-PE')"
-    icon="inventory_2"
-    trend="up"
-    delta="+15.2%"
-    deltaCaption="vs mes anterior"
-    tone="warning"
-  />
-</div>
-
-<section class="chart-card">
-  <header>
-    <div><h2>Ventas por día (tendencia)</h2><p>Ingresos del periodo seleccionado</p></div>
-  </header>
-  <div class="chart" role="img" aria-label="Gráfico de ingresos mensuales">
-    @for (point of chart(); track point.label) {
-      <div class="bar-column">
-        <span class="amount">S/ {{ (point.amount / 1000).toFixed(1) }}k</span>
-        <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
-        <small>{{ point.label }}</small>
-      </div>
-    }
+@if (report(); as report) {
+  <div class="kpi-grid">
+    <app-kpi-card
+      label="Ventas totales"
+      [value]="'S/ ' + report.totalSales.value.toLocaleString('es-PE')"
+      icon="payments"
+      [trend]="report.totalSales.deltaPercent && report.totalSales.deltaPercent >= 0 ? 'up' : 'down'"
+      [delta]="report.totalSales.deltaPercent != null ? (report.totalSales.deltaPercent.toFixed(1) + '%') : undefined"
+      deltaCaption="vs periodo anterior"
+      tone="success"
+    />
+    <app-kpi-card
+      label="Transacciones"
+      [value]="report.transactions.value"
+      icon="receipt_long"
+      [trend]="report.transactions.deltaPercent && report.transactions.deltaPercent >= 0 ? 'up' : 'down'"
+      [delta]="report.transactions.deltaPercent != null ? (report.transactions.deltaPercent.toFixed(1) + '%') : undefined"
+      deltaCaption="vs periodo anterior"
+      tone="primary"
+    />
+    <app-kpi-card
+      label="Ticket promedio"
+      [value]="'S/ ' + report.averageTicket.value.toFixed(2)"
+      icon="monitoring"
+      [trend]="report.averageTicket.deltaPercent && report.averageTicket.deltaPercent >= 0 ? 'up' : 'down'"
+      [delta]="report.averageTicket.deltaPercent != null ? (report.averageTicket.deltaPercent.toFixed(1) + '%') : undefined"
+      deltaCaption="vs periodo anterior"
+      tone="info"
+    />
+    <app-kpi-card
+      label="Productos vendidos"
+      [value]="report.unitsSold.value.toLocaleString('es-PE')"
+      icon="inventory_2"
+      [trend]="report.unitsSold.deltaPercent && report.unitsSold.deltaPercent >= 0 ? 'up' : 'down'"
+      [delta]="report.unitsSold.deltaPercent != null ? (report.unitsSold.deltaPercent.toFixed(1) + '%') : undefined"
+      deltaCaption="vs periodo anterior"
+      tone="warning"
+    />
   </div>
-</section>
 
-<div class="split">
   <section class="chart-card">
-    <h2>Ventas por categoría</h2>
-    <ul class="shares">
-      @for (item of categoryShare; track item.name) {
-        <li>
-          <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.percent }}%</strong></div>
-          <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
-        </li>
+    <header>
+      <div><h2>Ventas por día (tendencia)</h2><p>Ingresos del periodo seleccionado</p></div>
+    </header>
+    <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
+      @for (point of report.dailySeries; track point.date) {
+        <div class="bar-column">
+          <span class="amount">S/ {{ (point.amount / 1000).toFixed(1) }}k</span>
+          <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
+          <small>{{ point.date }}</small>
+        </div>
       }
-    </ul>
+    </div>
   </section>
-  <section class="chart-card">
-    <h2>Ventas por vendedor</h2>
-    <ul class="shares">
-      @for (item of sellerShare; track item.name) {
-        <li>
-          <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.amount }} ({{ item.percent }}%)</strong></div>
-          <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
-        </li>
-      }
-    </ul>
+
+  <div class="split">
+    <section class="chart-card">
+      <h2>Ventas por categoría</h2>
+      <ul class="shares">
+        @for (item of report.byCategory; track item.name) {
+          <li>
+            <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.percent.toFixed(1) }}%</strong></div>
+            <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
+          </li>
+        }
+      </ul>
+    </section>
+    <section class="chart-card">
+      <h2>Ventas por vendedor</h2>
+      <ul class="shares">
+        @for (item of report.bySeller; track item.name) {
+          <li>
+            <div class="shares__label"><span>{{ item.name }}</span><strong>S/ {{ item.amount.toFixed(2) }} ({{ item.percent.toFixed(1) }}%)</strong></div>
+            <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+
+  <section class="detail">
+    <h2>Top productos</h2>
+    <app-data-table [columns]="topProductColumns" [rows]="topProductRows()" [showEdit]="false" [showRemove]="false" />
   </section>
-</div>
-
-<section class="detail">
-  <h2>Top productos</h2>
-  <app-data-table [columns]="topProductColumns" [rows]="topProducts" [showEdit]="false" [showRemove]="false" />
-</section>
-
-<section class="detail">
-  <h2>Detalle por periodo</h2>
-  <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />
-</section>
+} @else if (loading()) {
+  <p class="muted">Cargando reporte…</p>
+}

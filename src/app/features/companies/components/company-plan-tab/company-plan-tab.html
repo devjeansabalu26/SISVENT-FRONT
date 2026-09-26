@@ -1,0 +1,79 @@
+@if (loading()) {
+  <p class="muted">Cargando plan…</p>
+} @else if (plan(); as plan) {
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Plan contratado</h3>
+      <dl>
+        <div><dt>Código del plan</dt><dd>{{ plan.planCode ?? '—' }}</dd></div>
+        <div><dt>Nombre del plan</dt><dd>{{ plan.planName ?? 'Sin plan' }}</dd></div>
+        <div><dt>Precio actual del plan</dt><dd>{{ plan.currentPrice != null ? ('S/ ' + plan.currentPrice.toFixed(2)) : '—' }}</dd></div>
+        <div><dt>Precio contratado</dt><dd>{{ plan.contractedPrice != null ? ('S/ ' + plan.contractedPrice.toFixed(2)) : '—' }}</dd></div>
+        <div><dt>Estado de la suscripción</dt><dd><app-status-chip [value]="plan.effectiveStatus" [label]="plan.effectiveStatus" /></dd></div>
+        <div><dt>Fecha inicio</dt><dd>{{ plan.planStart | shortDate }}</dd></div>
+        <div><dt>Fecha vencimiento</dt><dd>{{ plan.planEnd | shortDate }}</dd></div>
+        <div><dt>Días restantes</dt><dd>{{ plan.daysRemaining }} días</dd></div>
+      </dl>
+    </section>
+
+    <section class="surface-card">
+      <h3>Límites del plan</h3>
+      @if (plan.limits.length) {
+        <dl>
+          @for (limit of plan.limits; track limit.code) {
+            <div><dt>{{ limitLabel(limit.code, limit.description) }}</dt><dd>{{ limit.value != null ? limit.value : 'Ilimitado' }}</dd></div>
+          }
+        </dl>
+      } @else {
+        <p class="muted">Esta empresa no tiene un plan con límites configurados.</p>
+      }
+    </section>
+
+    <section class="surface-card wide">
+      <h3>Funcionalidades incluidas</h3>
+      @if (featureGroups().length) {
+        <div class="feature-groups">
+          @for (group of featureGroups(); track group.domain) {
+            <div class="feature-group">
+              <h4>{{ group.domain }}</h4>
+              <ul>
+                @for (item of group.items; track item.code) {
+                  <li>✓ {{ item.name }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="muted">Esta empresa no tiene funcionalidades habilitadas por su plan.</p>
+      }
+    </section>
+
+    <section class="surface-card wide">
+      <h3>Historial de cambios de plan</h3>
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Precio anterior</th><th>Precio nuevo</th><th>Responsable</th><th>Motivo</th></tr>
+        </thead>
+        <tbody>
+          @for (row of plan.history; track row.changedAt) {
+            <tr>
+              <td>{{ row.changedAt | dateTime }}</td>
+              <td>{{ row.previousPlanName ?? 'Alta inicial' }}</td>
+              <td>{{ row.newPlanName }}</td>
+              <td>{{ row.previousPrice != null ? ('S/ ' + row.previousPrice.toFixed(2)) : '—' }}</td>
+              <td>S/ {{ row.newPrice.toFixed(2) }}</td>
+              <td>{{ row.actorName ?? '—' }}</td>
+              <td>{{ row.reason ?? '—' }}</td>
+            </tr>
+          }
+          @if (!plan.history.length) {
+            <tr><td colspan="7" class="muted">Sin cambios de plan registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+} @else {
+  <p class="muted">No se pudo cargar el plan de la empresa.</p>
+}

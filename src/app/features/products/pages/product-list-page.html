@@ -1,1 +1,76 @@
-<app-page-header title="Productos" description="Gestión del catálogo de productos"><a class="primary" routerLink="/app/products/new"><span class="material-icons">add</span>Nuevo producto</a></app-page-header><section class="filters"><label><span class="material-icons">search</span><input #search (input)="filter(search.value)" placeholder="Buscar por código o nombre…" /></label><select aria-label="Categoría"><option>Categoría</option></select><select aria-label="Marca"><option>Marca</option></select><select aria-label="Estado"><option>Estado</option></select><button type="button">Filtrar</button></section><app-data-table [columns]="columns" [rows]="rows()" editLabel="Ver producto" editIcon="visibility" (edit)="open($event)" (remove)="remove($event)" />
+<app-page-header title="Productos" [description]="isSeller ? 'Consulta de precios y stock del catálogo' : 'Gestión del catálogo de productos'">
+  @if (!isSeller) {
+    <a class="primary" routerLink="/app/products/new"><span class="material-icons">add</span>Nuevo producto</a>
+  }
+</app-page-header>
+
+@if (isSeller) {
+  <p class="readonly-banner">
+    <span class="material-icons">lock</span>
+    Estás en modo solo lectura: puedes consultar productos, pero no editar precios ni stock.
+  </p>
+  <div class="category-chips" role="group" aria-label="Filtrar por categoría">
+    <button type="button" [class.active]="!categoryFilter()" (click)="selectCategory('')">Todas</button>
+    @for (category of categories(); track category.id) {
+      <button type="button" [class.active]="categoryFilter() === category.id" (click)="selectCategory(category.id)">{{ category.name }}</button>
+    }
+  </div>
+}
+
+<section class="filters">
+  <label>
+    <span class="material-icons">search</span>
+    <input #searchBox [value]="search()" (input)="search.set(searchBox.value)" (keyup.enter)="applyFilters()" placeholder="Buscar por código o nombre…" />
+  </label>
+  <select aria-label="Categoría" [value]="categoryFilter()" (change)="categoryFilter.set($any($event.target).value)">
+    <option value="">Categoría</option>
+    @for (category of categories(); track category.id) {
+      <option [value]="category.id">{{ category.name }}</option>
+    }
+  </select>
+  <select aria-label="Marca" [value]="brandFilter()" (change)="brandFilter.set($any($event.target).value)">
+    <option value="">Marca</option>
+    @for (brand of brands(); track brand.id) {
+      <option [value]="brand.id">{{ brand.name }}</option>
+    }
+  </select>
+  <select aria-label="Estado" [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+    <option value="">Estado</option>
+    <option value="ACTIVE">Activo</option>
+    <option value="INACTIVE">Inactivo</option>
+  </select>
+</section>
+
+<section class="low-stock-row">
+  <label class="switch">
+    <input type="checkbox" [checked]="lowStockOnly()" (change)="lowStockOnly.set($any($event.target).checked)" />
+    Stock bajo
+  </label>
+  <div class="spacer"></div>
+  <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>
+  <button type="button" class="primary" (click)="applyFilters()">Filtrar</button>
+</section>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [loading]="loading()"
+  [showView]="true"
+  viewLabel="Ver producto"
+  editLabel="Editar producto"
+  [showEdit]="!isSeller"
+  [menuActions]="isSeller ? [] : [{ id: 'toggle', label: 'Activar / desactivar', icon: 'power_settings_new' }]"
+  [showRemove]="false"
+  emptyMessage="No se encontraron productos."
+  (view)="view($event)"
+  (edit)="edit($event)"
+  (menuAction)="onMenuAction($event)"
+/>
+<app-paginator
+  [pageNumber]="pageNumber()"
+  [pageSize]="pageSize"
+  [total]="total()"
+  [disabled]="loading()"
+  itemNoun="productos"
+  (pageChange)="goToPage($event)"
+/>

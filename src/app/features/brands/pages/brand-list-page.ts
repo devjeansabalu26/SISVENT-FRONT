@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { BrandFormDialog } from '../components/brand-form-dialog/brand-form-dialog';
-import { BRAND_MOCK } from '../data-access/brand.mock';
-import { BrandFormValue, BrandListItem } from '../models/brand.model';
+import { BrandApiService } from '../data-access/brand-api.service';
+import { Brand, BrandFormValue } from '../models/brand.model';
 
 @Component({
   selector: 'app-brand-list-page',
@@ -18,14 +19,16 @@ import { BrandFormValue, BrandListItem } from '../models/brand.model';
   styleUrl: '../../../shared/ui/list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BrandListPage {
+export class BrandListPage implements OnInit {
+  private readonly api = inject(BrandApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly userContext = inject(UserContextService);
 
+  readonly loading = signal(false);
   readonly search = signal('');
   readonly statusFilter = signal('');
-  private readonly brands = signal<readonly BrandListItem[]>(BRAND_MOCK);
+  private readonly brands = signal<readonly Brand[]>([]);
 
   readonly canManage = computed(() => this.userContext.user()?.role === 'ADMIN');
 
@@ -33,29 +36,49 @@ export class BrandListPage {
     const term = this.search().trim().toLowerCase();
     const status = this.statusFilter();
     return this.brands().filter((brand) => {
-      const matchesTerm = !term || `${brand.name} ${brand.description}`.toLowerCase().includes(term);
-      const matchesStatus = !status || brand.status === status;
+      const matchesTerm = !term || `${brand.name} ${brand.description ?? ''}`.toLowerCase().includes(term);
+      const matchesStatus = !status || (status === 'ACTIVE' ? brand.isActive : !brand.isActive);
       return matchesTerm && matchesStatus;
     });
   });
 
-  readonly columns: readonly DataTableColumn<BrandListItem>[] = [
+  readonly columns: readonly DataTableColumn<Brand>[] = [
     { key: 'name', label: 'Nombre', value: (row) => row.name },
-    { key: 'description', label: 'Descripción', value: (row) => row.description || '—' },
-    { key: 'categories', label: 'Categorías', value: (row) => row.categories.join(', ') || '—' },
-    { key: 'productCount', label: 'Productos', value: (row) => row.productCount },
-    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
+    { key: 'description', label: 'Descripción', value: (row) => row.description ?? '—' },
+    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.api.list({ pageSize: 100 }).subscribe({
+      next: (page) => {
+        this.brands.set(page.items);
+        this.loading.set(false);
+      },
+      error: (cause: unknown) => {
+        this.loading.set(false);
+        this.notifications.show(this.messageFor(cause, 'No se pudieron cargar las marcas.'), 'error');
+      },
+    });
+  }
 
   create(): void {
     this.openForm(null);
   }
 
-  edit(brand: BrandListItem): void {
+  edit(brand: Brand): void {
     this.openForm(brand);
   }
 
-  remove(brand: BrandListItem): void {
+  remove(brand: Brand): void {
+    if (!brand.isActive) {
+      this.notifications.show('La marca ya está inactiva.', 'info');
+      return;
+    }
     this.dialog
       .open(ConfirmDialog, {
         data: {
@@ -68,41 +91,50 @@ export class BrandListPage {
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => {
-        this.brands.update((rows) =>
-          rows.map((row) => (row.id === brand.id ? { ...row, status: 'INACTIVE' as const } : row)),
-        );
-        this.notifications.show('Marca desactivada.', 'success');
+        this.api.deactivate(brand.id, brand.version).subscribe({
+          next: () => {
+            this.notifications.show('Marca desactivada.', 'success');
+            this.load();
+          },
+          error: (cause: unknown) => {
+            this.notifications.show(this.messageFor(cause, 'No se pudo desactivar la marca.'), 'error');
+            if (cause instanceof AppHttpError && cause.status === 409) this.load();
+          },
+        });
       });
   }
 
-  private openForm(brand: BrandListItem | null): void {
+  private openForm(brand: Brand | null): void {
     this.dialog
-      .open<BrandFormDialog, BrandListItem | null, BrandFormValue>(BrandFormDialog, { data: brand })
+      .open<BrandFormDialog, Brand | null, BrandFormValue>(BrandFormDialog, { data: brand })
       .afterClosed()
       .subscribe((value) => {
         if (!value) return;
-        if (brand) {
-          this.brands.update((rows) =>
-            rows.map((row) =>
-              row.id === brand.id
-                ? { ...row, name: value.name, description: value.description, categories: value.categories, status: value.isActive ? 'ACTIVE' : 'INACTIVE' }
-                : row,
-            ),
-          );
-        } else {
-          this.brands.update((rows) => [
-            {
-              id: crypto.randomUUID(),
-              name: value.name,
-              description: value.description,
-              categories: value.categories,
-              productCount: 0,
-              status: value.isActive ? 'ACTIVE' : 'INACTIVE',
-            },
-            ...rows,
-          ]);
-        }
-        this.notifications.show(`Marca ${brand ? 'actualizada' : 'creada'}.`, 'success');
+        const request = brand
+          ? this.api.update(brand.id, { ...value, version: brand.version })
+          : this.api.create(value);
+        request.subscribe({
+          next: () => {
+            this.notifications.show(`Marca ${brand ? 'actualizada' : 'creada'}.`, 'success');
+            this.load();
+          },
+          error: (cause: unknown) => {
+            this.notifications.show(
+              this.messageFor(cause, `No se pudo ${brand ? 'actualizar' : 'crear'} la marca.`),
+              'error',
+            );
+            if (cause instanceof AppHttpError && cause.status === 409) this.load();
+          },
+        });
       });
+  }
+
+  private messageFor(cause: unknown, fallback: string): string {
+    if (cause instanceof AppHttpError) {
+      if (cause.status === 409) return 'Conflicto: el registro cambió o el nombre ya existe. Se recargó la lista.';
+      if (cause.status === 403) return 'No tienes permiso para gestionar marcas.';
+      if (cause.status === 400) return 'Revisa los datos ingresados.';
+    }
+    return fallback;
   }
 }

@@ -11,6 +11,8 @@ export interface NavigationItem {
   readonly roles?: readonly AppRole[];
   readonly permissions?: readonly AppPermission[];
   readonly plans?: readonly CompanyPlan[];
+  /** Código de feature real del plan vigente (plan_features/features) requerido para ver este item. */
+  readonly requiredFeature?: string;
   readonly children?: readonly NavigationItem[];
 }
 
