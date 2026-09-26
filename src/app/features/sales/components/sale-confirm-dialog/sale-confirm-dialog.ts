@@ -13,6 +13,8 @@ export interface SaleConfirmData {
   readonly lines: readonly SaleConfirmLine[];
   readonly discount: number;
   readonly paymentMethod: string;
+  /** Un resumen por pago: monto, recibido/vuelto, voucher o n.º de operación. */
+  readonly paymentDetails?: readonly string[];
 }
 
 /** Figma `mod-confirmar-venta` (MOD-AD-18): último vistazo al carrito antes de registrar la venta. */
@@ -30,23 +32,28 @@ export interface SaleConfirmData {
       <dl class="review__meta">
         <div><dt>Cliente</dt><dd>{{ data.customer }}</dd></div>
         <div><dt>Método de pago</dt><dd>{{ data.paymentMethod }}</dd></div>
+        @for (detail of data.paymentDetails ?? []; track $index) {
+          <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>
+        }
       </dl>
 
-      <table class="review__diff">
-        <thead>
-          <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr>
-        </thead>
-        <tbody>
-          @for (line of data.lines; track line.name) {
-            <tr>
-              <td>{{ line.name }}</td>
-              <td>{{ line.quantity }}</td>
-              <td>{{ soles(line.unitPrice) }}</td>
-              <td>{{ soles(line.unitPrice * line.quantity) }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="review__diff">
+          <thead>
+            <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr>
+          </thead>
+          <tbody>
+            @for (line of data.lines; track line.name) {
+              <tr>
+                <td>{{ line.name }}</td>
+                <td>{{ line.quantity }}</td>
+                <td>{{ soles(line.unitPrice) }}</td>
+                <td>{{ soles(line.unitPrice * line.quantity) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <dl class="expected">
         <div><dt>Subtotal</dt><dd>{{ soles(subtotal) }}</dd></div>

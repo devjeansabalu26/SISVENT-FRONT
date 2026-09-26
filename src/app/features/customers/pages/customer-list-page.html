@@ -5,5 +5,15 @@
   <article><span>Nuevos este mes</span><strong>{{ summary()?.newThisMonth ?? '—' }}</strong><i class="material-icons">person_add_alt</i></article>
   <article><span>Compras promedio</span><strong>S/ {{ (summary()?.averagePurchases ?? 0).toFixed(2) }}</strong><i class="material-icons">shopping_cart</i></article>
 </section>
-<section class="filters"><label><span class="material-icons">search</span><input #searchBox (input)="search.set(searchBox.value)" placeholder="Buscar por nombre, documento o correo…" /></label></section>
-<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showKey]="isSeller" keyLabel="Seleccionar para venta" keyIcon="add_shopping_cart" (key)="selectForSale($event)" editLabel="Ver cliente" editIcon="visibility" removeLabel="Editar cliente" removeIcon="edit" (edit)="open($event)" (remove)="edit($event)" />
+<section class="filters"><label><span class="material-icons">search</span><input #searchBox [value]="search()" (input)="search.set(searchBox.value)" placeholder="Buscar por nombre, documento o correo…" /></label></section>
+<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showKey]="isSeller" keyLabel="Seleccionar para venta" keyIcon="add_shopping_cart" (key)="selectForSale($event)" editLabel="Ver cliente" editIcon="visibility" removeLabel="Editar cliente" removeIcon="edit" (edit)="open($event)" (remove)="edit($event)" [customEmpty]="true">
+  @if (search().trim()) {
+    <app-empty-state tableEmpty flush icon="search_off" title="Sin resultados de búsqueda"
+      description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."
+      actionLabel="Limpiar filtros" (action)="clearFilters()" />
+  } @else {
+    <app-empty-state tableEmpty flush icon="groups" title="No se encontraron clientes"
+      description="Tu lista de clientes está vacía. Registra clientes para aplicar descuentos y guardar su historial."
+      actionLabel="Registrar cliente" (action)="create()" />
+  }
+</app-data-table>

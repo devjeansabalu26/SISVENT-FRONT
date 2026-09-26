@@ -135,3 +135,14 @@
   text-align: center;
   color: var(--color-text-muted);
 }
+.state {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  padding: 48px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  text-align: center;
+}

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
@@ -10,7 +10,9 @@ import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { SaleApiService } from '../data-access/sale-api.service';
+import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { SaleDetail } from '../models/sale-detail.model';
+import { paymentSummary } from '../utils/payment';
 
 @Component({
   selector: 'app-sale-detail-page',
@@ -21,6 +23,8 @@ import { SaleDetail } from '../models/sale-detail.model';
 })
 export class SaleDetailPage implements OnInit {
   private readonly api = inject(SaleApiService);
+  private readonly mailer = inject(ReceiptMailerService);
+  readonly sending = this.mailer.sending;
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
@@ -28,6 +32,14 @@ export class SaleDetailPage implements OnInit {
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);
+  /** Recibido/vuelto, voucher de tarjeta o n.º de operación; null en ventas anteriores al detalle de pago. */
+  readonly paymentDetails = computed(() => (this.sale()?.payments ?? []).map((payment) => paymentSummary(payment)));
+
+  /** Envía el comprobante en PDF al correo del cliente (o al que se indique en el diálogo). */
+  sendReceipt(): void {
+    const sale = this.sale();
+    if (sale) this.mailer.send(sale);
+  }
 
   ngOnInit(): void {
     this.load();

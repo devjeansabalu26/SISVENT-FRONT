@@ -29,8 +29,11 @@ export class CashCloseDialog implements OnInit {
     const to = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
     this.api.list({ pageSize: 100, from, to, status: 'CONFIRMED' }).subscribe({
       next: (page) => {
-        const cash = page.items.filter((item) => item.paymentMethod === 'Efectivo' || item.paymentMethod === 'CASH');
-        const cashTotal = cash.reduce((sum, item) => sum + item.total, 0);
+        // Con pagos mixtos (tarjeta + efectivo) solo cuenta la parte cobrada en efectivo.
+        const cashTotal = page.items.reduce(
+          (sum, item) => sum + (item.cashAmount ?? (item.paymentMethod === 'Efectivo' ? item.total : 0)),
+          0,
+        );
         this.expectedCash.set(cashTotal);
         this.expectedTotal.set(page.periodTotals.totalAmount);
         this.expectedOther.set(page.periodTotals.totalAmount - cashTotal);

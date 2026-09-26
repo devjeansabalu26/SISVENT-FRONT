@@ -6,6 +6,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 import { AUTH_TOKEN_PROVIDER } from './core/auth/constants/auth-token-provider.token';
 import { authInterceptor } from './core/auth/interceptors/auth.interceptor';
@@ -23,5 +24,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, errorInterceptor])),
     { provide: AUTH_TOKEN_PROVIDER, useExisting: TokenStorageService },
     provideAppInitializer(() => inject(AppSessionService).bootstrap()),
+    // Modales: ancho según el contenido de cada diálogo, alto automático y tope en el tamaño de pantalla.
+    {
+      provide: MAT_DIALOG_DEFAULT_OPTIONS,
+      useValue: { ...new MatDialogConfig(), maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' },
+    },
   ],
 };

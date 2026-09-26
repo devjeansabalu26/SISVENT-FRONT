@@ -69,3 +69,14 @@
 .success .material-icons {
   font-size: 18px;
 }
+.change {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 10%, white);
+  text-align: center;
+}
+.change strong {
+  font-size: 20px;
+}

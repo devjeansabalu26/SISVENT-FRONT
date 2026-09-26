@@ -1,3 +1,5 @@
+import { SalePayment } from './payment.model';
+
 export interface SaleDetailLine {
   readonly productId: string;
   readonly sku: string;
@@ -32,4 +34,10 @@ export interface SaleDetail {
   readonly notes: string | null;
   readonly lines: readonly SaleDetailLine[];
   readonly events: readonly SaleEvent[];
+  /** Pagos de la venta (uno o varios métodos). */
+  readonly payments?: readonly SalePayment[];
+  /** Vuelto total entregado (solo efectivo). */
+  readonly changeAmount?: number;
+  /** Correo del cliente: destinatario por defecto al enviar el comprobante. */
+  readonly clientEmail?: string | null;
 }

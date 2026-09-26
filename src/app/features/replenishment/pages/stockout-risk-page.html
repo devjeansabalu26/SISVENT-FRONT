@@ -1,26 +1,36 @@
 <app-page-header
   title="Riesgo de agotamiento"
-  description="Predicción de quiebre de stock basada en análisis estadístico y estacionalidad"
+  description="Predicción de quiebre de stock según el ritmo de ventas de los últimos 30 días"
 />
 
-<div class="kpi-grid">
-  <app-kpi-card label="Riesgo crítico" value="8" icon="report" tone="danger" />
-  <app-kpi-card label="Moderado" value="14" icon="warning" tone="warning" />
-  <app-kpi-card label="Óptimo" value="192" icon="check_circle" tone="success" />
-  <app-kpi-card label="Exceso de stock" value="70" icon="inventory" tone="info" />
-</div>
+@if (state() !== 'ready') {
+  <app-replenishment-load-state [state]="state()" (retry)="load()" />
+} @else if (data(); as risk) {
+  <div class="kpi-grid">
+    <app-kpi-card label="Riesgo crítico" [value]="risk.coverage.critical" icon="report" tone="danger" caption="< 7 días o bajo el mínimo" />
+    <app-kpi-card label="Moderado" [value]="risk.coverage.moderate" icon="warning" tone="warning" caption="7 – 15 días" />
+    <app-kpi-card label="Óptimo" [value]="risk.coverage.sufficient" icon="check_circle" tone="success" caption="> 15 días" />
+    <app-kpi-card label="Sin ventas" [value]="risk.coverage.noSales" icon="inventory" tone="info" [caption]="'En ' + risk.windowDays + ' días'" />
+  </div>
 
-<section class="filters">
-  <label>
-    <span class="material-icons">search</span>
-    <input placeholder="Buscar producto…" />
-  </label>
-  <select #risk aria-label="Riesgo" (change)="riskFilter.set(risk.value)">
-    <option value="">Riesgo: todos</option>
-    <option>Crítico</option>
-    <option>Moderado</option>
-    <option>Óptimo</option>
-  </select>
-</section>
+  <section class="filters">
+    <label>
+      <span class="material-icons">search</span>
+      <input #searchBox [value]="search()" (input)="search.set(searchBox.value)" placeholder="Buscar por SKU o producto…" />
+    </label>
+    <select #riskSelect aria-label="Riesgo" [value]="riskFilter()" (change)="riskFilter.set($any(riskSelect.value))">
+      <option value="">Riesgo: todos</option>
+      @for (option of riskOptions; track option[0]) {
+        <option [value]="option[0]">{{ option[1] }}</option>
+      }
+    </select>
+  </section>
 
-<app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />
+  <app-data-table
+    [columns]="columns"
+    [rows]="rows()"
+    [showEdit]="false"
+    [showRemove]="false"
+    emptyMessage="No hay productos que coincidan con el filtro."
+  />
+}

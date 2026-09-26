@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +12,7 @@ import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { productStatusReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
+import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { ProductApiService } from '../data-access/product-api.service';
@@ -19,7 +20,7 @@ import { Product } from '../models/product.model';
 
 @Component({
   selector: 'app-product-list-page',
-  imports: [FormsModule, DataTable, PageHeader, Paginator, RouterLink],
+  imports: [FormsModule, DataTable, EmptyState, PageHeader, Paginator, RouterLink],
   templateUrl: './product-list-page.html',
   styleUrls: ['../../../shared/ui/list-page.scss', './product-list-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,10 @@ export class ProductListPage implements OnInit {
   readonly brandFilter = signal('');
   readonly statusFilter = signal('');
   readonly lowStockOnly = signal(false);
+  /** Distingue "catálogo vacío" de "sin resultados" en el estado vacío (Figma `empty-states`). */
+  readonly hasFilters = computed(
+    () => !!(this.search().trim() || this.categoryFilter() || this.brandFilter() || this.statusFilter() || this.lowStockOnly()),
+  );
 
   readonly pageNumber = signal(1);
   readonly pageSize = 10;
@@ -105,6 +110,10 @@ export class ProductListPage implements OnInit {
   }
 
   /** Resetea todos los filtros y vuelve a página 1 (botón "Limpiar"). */
+  create(): void {
+    void this.router.navigate(['/app/products/new']);
+  }
+
   clearFilters(): void {
     this.search.set('');
     this.categoryFilter.set('');

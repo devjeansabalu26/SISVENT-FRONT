@@ -6,7 +6,10 @@ export interface Sale {
   readonly clientName: string | null;
   readonly sellerName: string;
   readonly storeName: string;
+  /** "Tarjeta + Efectivo" en pagos mixtos. */
   readonly paymentMethod: string;
+  /** Parte pagada en efectivo (cierre de caja). */
+  readonly cashAmount?: number;
   readonly total: number;
   readonly status: 'CONFIRMED' | 'CANCELLED';
 }

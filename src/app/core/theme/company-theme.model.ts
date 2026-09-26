@@ -14,5 +14,9 @@ export interface CompanyTheme {
   readonly sidebarBg?: string;
   readonly sidebarText?: string;
   readonly sidebarActive?: string;
+  /** Texto del activo/hover y nombre de la empresa (blanco en fondo oscuro, oscuro en fondo claro). */
+  readonly sidebarStrong?: string;
+  /** Fondo del ítem activo/hover, derivado del fondo del sidebar. */
+  readonly sidebarHover?: string;
   readonly onPrimary?: string;
 }

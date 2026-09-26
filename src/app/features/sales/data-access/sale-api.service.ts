@@ -42,6 +42,11 @@ export class SaleApiService {
     return this.http.get<SaleDetail>(`${this.baseUrl}/${id}`);
   }
 
+  /** Envía el comprobante (PDF en base64) por correo; sin `email` se usa el del cliente de la venta. */
+  sendReceipt(id: string, email: string, pdfBase64: string): Observable<{ readonly email: string; readonly sentAt: string }> {
+    return this.http.post<{ readonly email: string; readonly sentAt: string }>(`${this.baseUrl}/${id}/send-receipt`, { email, pdfBase64 });
+  }
+
   cancel(id: string, reason: string): Observable<SaleDetail> {
     return this.http.post<SaleDetail>(`${this.baseUrl}/${id}/cancel`, { reason });
   }

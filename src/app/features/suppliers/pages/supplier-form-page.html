@@ -40,6 +40,14 @@
     <h2>Dirección y notas</h2>
     <div class="fields">
       <label class="full">Dirección <input formControlName="address" placeholder="Av. Industrial 456" /></label>
+      <label>Tiempo de reposición (días)
+        <input type="number" min="1" max="180" formControlName="leadTimeDays" />
+        @if (form.controls.leadTimeDays.touched && form.controls.leadTimeDays.invalid) {
+          <span class="error">Ingresa entre 1 y 180 días.</span>
+        } @else {
+          <span class="note">Días desde el pedido hasta la recepción. Se usa para calcular las compras sugeridas.</span>
+        }
+      </label>
       <label class="full">Observaciones
         <textarea formControlName="notes" placeholder="Condiciones de pago, plazos de entrega…"></textarea>
       </label>

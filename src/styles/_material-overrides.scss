@@ -72,3 +72,19 @@
     --mat-snack-bar-container-color: #475569;
   }
 }
+
+/*
+ * Modales: cada diálogo define su ancho preferido (`.dialog { width: min(…) }`) y el alto crece con el
+ * contenido. Sin tema de Material, el contenedor limitaba el ancho a 560px por defecto y los modales más
+ * anchos quedaban recortados con scroll. Solo se hace scroll interno si el contenido supera la pantalla.
+ */
+.mat-mdc-dialog-panel {
+  --mat-dialog-container-max-width: calc(100vw - 32px);
+  --mat-dialog-container-small-max-width: calc(100vw - 32px);
+  --mat-dialog-container-min-width: 0;
+  max-height: calc(100dvh - 32px);
+}
+
+.mat-mdc-dialog-surface {
+  overflow-x: hidden;
+}

@@ -8,7 +8,8 @@ const EXPIRES_KEY = 'sisvent.access_token_expires';
 /**
  * Holds the JWT access token for the current browser session.
  * Backed by sessionStorage, matching {@link AppSessionService}. An expired
- * token is discarded on read so callers never send a stale credential.
+ * token is discarded on read so callers never send a stale credential; a token
+ * without expiration (expiresAt null) lives until logout.
  */
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService implements AuthTokenProvider {
@@ -26,9 +27,10 @@ export class TokenStorageService implements AuthTokenProvider {
     return token;
   }
 
-  set(token: string, expiresAt: string): void {
+  set(token: string, expiresAt: string | null): void {
     this.storage?.setItem(TOKEN_KEY, token);
-    this.storage?.setItem(EXPIRES_KEY, expiresAt);
+    if (expiresAt) this.storage?.setItem(EXPIRES_KEY, expiresAt);
+    else this.storage?.removeItem(EXPIRES_KEY);
   }
 
   clear(): void {

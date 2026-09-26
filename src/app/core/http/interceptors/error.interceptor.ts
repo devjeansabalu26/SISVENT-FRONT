@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
 import { HttpErrorService } from '../services/http-error.service';
+import { HANDLE_FORBIDDEN_INLINE } from '../http-context.tokens';
 
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthService);
@@ -19,7 +20,7 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
         if (error.status === 401) {
           auth.markUnauthenticated();
           void router.navigateByUrl('/login');
-        } else if (error.status === 403) {
+        } else if (error.status === 403 && !request.context.get(HANDLE_FORBIDDEN_INLINE)) {
           void router.navigateByUrl('/403');
         }
       }

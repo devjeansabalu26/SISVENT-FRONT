@@ -3,8 +3,8 @@
     <button type="button" class="ghost" (click)="back()"><span class="material-icons">arrow_back</span>Volver a ventas</button>
     <span class="control-bar__title">Vista previa de comprobante</span>
     <div class="control-bar__actions">
-      <button type="button" class="ghost" (click)="sendEmail()"><span class="material-icons">mail</span>Enviar por correo</button>
-      <button type="button" class="ghost" (click)="downloadPdf()"><span class="material-icons">picture_as_pdf</span>Descargar PDF</button>
+      <button type="button" class="ghost" [disabled]="sending()" (click)="sendEmail()"><span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar por correo' }}</button>
+      <button type="button" class="ghost" [disabled]="downloading()" (click)="downloadPdf()"><span class="material-icons">picture_as_pdf</span>{{ downloading() ? 'Generando…' : 'Descargar PDF' }}</button>
       <button type="button" class="primary" (click)="print()"><span class="material-icons">print</span>Imprimir</button>
     </div>
   </div>
@@ -12,7 +12,7 @@
   <article class="receipt">
     <header class="receipt__head">
       <div>
-        <strong>SISVENT</strong>
+        <strong>{{ companyName() }}</strong>
         <p>Comprobante interno de venta</p>
       </div>
       <div class="receipt__doc">
@@ -28,24 +28,42 @@
       <div><span>Vendedor:</span> {{ sale.sellerName }}</div>
     </section>
 
-    <table class="receipt__lines">
-      <thead>
-        <tr><th>Cant.</th><th>Descripción</th><th>P. unitario</th><th>Subtotal</th></tr>
-      </thead>
-      <tbody>
-        @for (line of sale.lines; track line.productId) {
-          <tr>
-            <td>{{ line.quantity }}</td>
-            <td>{{ line.productName }}</td>
-            <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
-            <td>S/ {{ line.subtotal.toFixed(2) }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="receipt__lines">
+        <thead>
+          <tr><th>Cant.</th><th>Descripción</th><th>P. unitario</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+          @for (line of sale.lines; track line.productId) {
+            <tr>
+              <td>{{ line.quantity }}</td>
+              <td>{{ line.productName }}</td>
+              <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
+              <td>S/ {{ line.subtotal.toFixed(2) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <section class="receipt__totals">
       <div><span>Método:</span> {{ sale.paymentMethod }}</div>
+      @for (payment of sale.payments ?? []; track $index) {
+        <div><span>{{ payment.methodName }}:</span> S/ {{ payment.amount.toFixed(2) }}</div>
+        @if (payment.amountReceived != null) {
+          <div><span>&nbsp;&nbsp;Recibido:</span> S/ {{ payment.amountReceived.toFixed(2) }}</div>
+          <div><span>&nbsp;&nbsp;Vuelto:</span> S/ {{ (payment.changeAmount ?? 0).toFixed(2) }}</div>
+        }
+        @if (payment.cardBrand) {
+          <div><span>&nbsp;&nbsp;Tarjeta:</span> {{ payment.cardBrand }}@if (payment.cardLast4) { •••• {{ payment.cardLast4 }} }</div>
+        }
+        @if (payment.reference) {
+          <div><span>&nbsp;&nbsp;N.º operación:</span> {{ payment.reference }}</div>
+        }
+        @if (payment.authorizationCode) {
+          <div><span>&nbsp;&nbsp;Autorización:</span> {{ payment.authorizationCode }}</div>
+        }
+      }
       <div class="sep"></div>
       <div><span>Subtotal:</span> S/ {{ sale.subtotal.toFixed(2) }}</div>
       <div><span>Descuento:</span> S/ {{ sale.discountTotal.toFixed(2) }}</div>

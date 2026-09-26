@@ -40,7 +40,22 @@
   <aside class="summary">
     <h2>Resumen de venta</h2><div><span>Subtotal</span><b>S/ {{ subtotal().toFixed(2) }}</b></div><div class="total"><strong>Total a pagar</strong><strong>S/ {{ subtotal().toFixed(2) }}</strong></div>
     <h3>Método de pago</h3>
-    <div class="payments">@for (method of paymentMethods; track method) {<button type="button" [class.active]="payment() === method" (click)="payment.set(method)">{{ paymentLabels[method] }}</button>}</div>
+    @if (paymentMethodsError()) {
+      <p class="pay-error">No se pudieron cargar los métodos de pago. <button type="button" class="link" (click)="loadPaymentMethods()">Reintentar</button></p>
+    } @else if (!paymentMethods().length) {
+      <p class="muted">Cargando métodos de pago…</p>
+    } @else {
+      @if (paymentLines().length <= 1) {
+        <div class="payments">
+          @for (method of paymentMethods(); track method.code) {
+            <button type="button" [class.active]="payment() === method.code" (click)="selectPayment(method.code)">{{ method.name }}</button>
+          }
+        </div>
+      } @else {
+        <p class="muted">Pago mixto: {{ paymentLines().length }} métodos.</p>
+      }
+      <app-pos-payment-panel [methods]="paymentMethods()" [total]="subtotal()" [showErrors]="showPaymentErrors()" [(lines)]="paymentLines" />
+    }
     <button class="confirm" type="button" [disabled]="saving()" (click)="confirm()">CONFIRMAR VENTA</button>
   </aside>
 </div>

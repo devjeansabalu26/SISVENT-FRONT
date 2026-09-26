@@ -2,7 +2,11 @@
   @if (loading()) {
     <div class="state">Cargando información…</div>
   } @else if (!rows().length) {
-    <div class="state">{{ emptyMessage() }}</div>
+    @if (customEmpty()) {
+      <ng-content select="[tableEmpty]" />
+    } @else {
+      <div class="state">{{ emptyMessage() }}</div>
+    }
   } @else {
     <table>
       <thead><tr>@for (column of columns(); track column.key) { <th>{{ column.label }}</th> }@if (hasActions()) {<th>Acciones</th>}</tr></thead>

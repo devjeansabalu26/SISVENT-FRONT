@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { prefersDarkTextOn } from '../../shared/utils/contrast-color';
+import { ensureContrast, mixColors, prefersDarkTextOn } from '../../shared/utils/contrast-color';
 import { CompanyTheme } from './company-theme.model';
 
 const THEME_PROPERTIES: Readonly<Record<keyof CompanyTheme, string>> = {
@@ -17,12 +17,16 @@ const THEME_PROPERTIES: Readonly<Record<keyof CompanyTheme, string>> = {
   sidebarBg: '--color-sidebar-bg',
   sidebarText: '--color-sidebar-text',
   sidebarActive: '--color-sidebar-active',
+  sidebarStrong: '--color-sidebar-strong',
+  sidebarHover: '--color-sidebar-hover-bg',
   onPrimary: '--color-on-primary',
 };
 
 /** Texto oscuro/claro ya existentes en los design tokens (_theme.scss) — no se inventan hex nuevos. */
 const DARK_TEXT = '#334155'; // --color-text-secondary
 const LIGHT_TEXT = '#94a3b8'; // --color-text-disabled / color por defecto del sidebar
+/** Fondo por defecto del sidebar (--color-sidebar-bg en _theme.scss). */
+const DEFAULT_SIDEBAR_BG = '#0f172a';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -57,6 +61,8 @@ export class ThemeService {
   }): void {
     const secondary = colors.secondary ?? undefined;
     const primary = colors.primary ?? undefined;
+    const sidebarBg = secondary ?? DEFAULT_SIDEBAR_BG;
+    const darkSidebar = prefersDarkTextOn(sidebarBg) === false;
 
     this.apply({
       primary,
@@ -64,8 +70,13 @@ export class ThemeService {
       accent: colors.accent ?? undefined,
       background: colors.background ?? undefined,
       sidebarBg: secondary,
-      sidebarActive: primary,
-      sidebarText: secondary ? this.textFor(secondary) : undefined,
+      // El acento del sidebar (ítem activo, rol) es el color de la empresa, aclarado/oscurecido solo lo
+      // necesario para leerse sobre el fondo del sidebar (WCAG AA 4.5:1).
+      sidebarActive: primary ? (ensureContrast(primary, sidebarBg) ?? primary) : undefined,
+      sidebarText: secondary ? (ensureContrast(this.textFor(secondary), secondary) ?? this.textFor(secondary)) : undefined,
+      // Fondo oscuro: igual que el diseño base (blanco + hover aclarado 18 %). Fondo claro: texto oscuro y hover oscurecido.
+      sidebarStrong: darkSidebar ? '#FFFFFF' : '#0F172A',
+      sidebarHover: (darkSidebar ? mixColors(sidebarBg, '#FFFFFF', 0.18) : mixColors(sidebarBg, '#000000', 0.08)) ?? undefined,
       onPrimary: primary ? this.textFor(primary) : undefined,
     });
   }

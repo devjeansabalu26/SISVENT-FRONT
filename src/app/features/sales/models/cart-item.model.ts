@@ -5,4 +5,3 @@ export interface CartItem {
   readonly quantity: number;
 }
 
-export type PaymentMethod = 'CASH' | 'CARD' | 'YAPE' | 'PLIN' | 'TRANSFER';

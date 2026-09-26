@@ -22,5 +22,15 @@
     <button type="button" (click)="load()">Filtrar</button>
   </div>
 </section>
-<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="true" editLabel="Ver detalle" editIcon="visibility" removeLabel="Ver comprobante" removeIcon="receipt_long" (edit)="open($event)" (remove)="receipt($event)" />
+<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="true" editLabel="Ver detalle" editIcon="visibility" removeLabel="Ver comprobante" removeIcon="receipt_long" (edit)="open($event)" (remove)="receipt($event)" [customEmpty]="true">
+  @if (hasFilters()) {
+    <app-empty-state tableEmpty flush icon="search_off" title="Sin resultados de búsqueda"
+      description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."
+      actionLabel="Limpiar filtros" (action)="clearFilters()" />
+  } @else {
+    <app-empty-state tableEmpty flush icon="point_of_sale" title="Sin ventas registradas"
+      description="Las ventas de esta empresa aparecerán aquí una vez que realices tu primera venta."
+      actionLabel="Nueva venta" (action)="newSale()" />
+  }
+</app-data-table>
 <section class="totals"><span>Operaciones: <strong>{{ totals().operationCount }}</strong></span><span>Total ventas: <strong>S/ {{ totals().totalAmount.toFixed(2) }}</strong></span></section>

@@ -9,27 +9,29 @@
   </div>
 
   <section class="surface-card">
-    <table>
-      <thead>
-        <tr><th>Código</th><th>Local</th><th>Dirección</th><th>Usuarios</th><th>Vendedores</th><th>Estado</th><th>Última actividad</th></tr>
-      </thead>
-      <tbody>
-        @for (store of data.items; track store.id) {
-          <tr>
-            <td>{{ store.code }}</td>
-            <td>{{ store.name }}</td>
-            <td>{{ store.address ?? '—' }}</td>
-            <td>{{ store.userCount }}</td>
-            <td>{{ store.vendorCount }}</td>
-            <td>{{ store.isActive ? 'Activo' : 'Inactivo' }}</td>
-            <td>{{ store.lastActivityAt | dateTime }}</td>
-          </tr>
-        }
-        @if (!data.items.length) {
-          <tr><td colspan="7" class="muted">No hay locales registrados.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Local</th><th>Dirección</th><th>Usuarios</th><th>Vendedores</th><th>Estado</th><th>Última actividad</th></tr>
+        </thead>
+        <tbody>
+          @for (store of data.items; track store.id) {
+            <tr>
+              <td>{{ store.code }}</td>
+              <td>{{ store.name }}</td>
+              <td>{{ store.address ?? '—' }}</td>
+              <td>{{ store.userCount }}</td>
+              <td>{{ store.vendorCount }}</td>
+              <td>{{ store.isActive ? 'Activo' : 'Inactivo' }}</td>
+              <td>{{ store.lastActivityAt | dateTime }}</td>
+            </tr>
+          }
+          @if (!data.items.length) {
+            <tr><td colspan="7" class="muted">No hay locales registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 } @else {
   <p class="muted">No se pudieron cargar los locales de la empresa.</p>

@@ -1,4 +1,4 @@
-<section class="empty">
+<section class="empty" [class.empty--flush]="flush()">
   <span class="empty__icon material-icons" aria-hidden="true">{{ icon() }}</span>
   <h3>{{ title() }}</h3>
   @if (description()) {

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, retry, throwError, timer } from 'rxjs';
 import { CompanyContextService } from '../../context/company-context/company-context.service';
 import { UserContextService } from '../../context/user-context/user-context.service';
 import { ThemeService } from '../../theme/theme.service';
@@ -33,10 +33,13 @@ export class AppSessionService {
     }
 
     try {
-      this.applyProfile(await firstValueFrom(this.authApi.me()));
+      this.applyProfile(await firstValueFrom(this.authApi.me().pipe(retry({ count: 5, delay: retryUnlessRejected }))));
       this.auth.markAuthenticated();
-    } catch {
-      this.clear();
+    } catch (cause: unknown) {
+      // Solo un 401/403 invalida la sesión. Si el backend no responde (reinicio, sin red) se conserva el
+      // token: al recargar cuando el backend vuelva, el usuario sigue dentro sin volver a loguearse.
+      if (isRejected(cause)) this.clear();
+      else this.auth.markUnauthenticated();
     }
   }
 
@@ -99,4 +102,15 @@ export class AppSessionService {
       this.theme.reset();
     }
   }
+}
+
+/** 401/403 del backend = token inválido o cuenta sin acceso (no aplica a errores de red o 5xx). */
+function isRejected(cause: unknown): boolean {
+  const status = (cause as { status?: unknown } | null)?.status;
+  return status === 401 || status === 403;
+}
+
+/** Reintenta /me cada 2 s mientras el backend no responda (p. ej. reiniciándose); 401/403 no se reintentan. */
+function retryUnlessRejected(cause: unknown): Observable<number> {
+  return isRejected(cause) ? throwError(() => cause) : timer(2000);
 }

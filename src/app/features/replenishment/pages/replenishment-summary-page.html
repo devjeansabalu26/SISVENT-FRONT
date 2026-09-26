@@ -5,53 +5,74 @@
   <a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nueva orden</a>
 </app-page-header>
 
-<p class="banner">
-  <span class="material-icons">warning</span>
-  Atención requerida: 8 productos críticos presentan un tiempo de cobertura menor a 3 días. Se recomienda generar
-  órdenes de compra sugeridas.
-</p>
-
-<div class="kpi-grid">
-  <app-kpi-card label="Monitoreados" value="284" icon="visibility" tone="primary" />
-  <app-kpi-card label="En riesgo" value="8" icon="error_outline" tone="danger" />
-  <app-kpi-card label="Cobertura promedio" value="18d" icon="event_available" tone="info" />
-  <app-kpi-card label="Rotación alta" value="45" icon="trending_up" trend="up" delta="+12% mes" tone="success" />
-  <app-kpi-card label="Recomendaciones" value="12" icon="lightbulb" tone="warning" />
-</div>
-
-<section class="surface-card coverage">
-  <div class="coverage__head">
-    <h2>Resumen de cobertura</h2>
-    <a routerLink="/app/replenishment/stockout-risk" class="link">Ver detalle</a>
-  </div>
-  @for (bar of coverage; track bar.label) {
-    <div class="coverage__row" [attr.data-tone]="bar.tone">
-      <span>{{ bar.label }}</span>
-      <strong>{{ bar.count }} productos</strong>
-    </div>
+@if (state() !== 'ready') {
+  <app-replenishment-load-state [state]="state()" (retry)="load()" />
+} @else if (data(); as summary) {
+  @if (urgent()) {
+    <p class="banner">
+      <span class="material-icons">warning</span>
+      Atención requerida: {{ urgent() }} {{ urgent() === 1 ? 'producto crítico presenta' : 'productos críticos presentan' }}
+      una cobertura menor a 3 días o están agotados. Se recomienda generar las compras sugeridas.
+    </p>
   }
-</section>
 
-<section class="surface-card">
-  <div class="coverage__head">
-    <h2>Compras sugeridas (IA)</h2>
-    <button type="button" class="link" (click)="processAll()">Procesar todo</button>
+  <div class="kpi-grid">
+    <app-kpi-card label="Monitoreados" [value]="summary.monitored" icon="visibility" tone="primary" />
+    <app-kpi-card label="En riesgo" [value]="summary.atRisk" icon="error_outline" tone="danger" />
+    <app-kpi-card
+      label="Cobertura promedio"
+      [value]="summary.averageCoverageDays === null ? '—' : summary.averageCoverageDays + 'd'"
+      icon="event_available"
+      tone="info"
+    />
+    <app-kpi-card label="Rotación alta" [value]="summary.highRotation" icon="trending_up" tone="success" [caption]="'Últimos ' + summary.windowDays + ' días'" />
+    <app-kpi-card label="Recomendaciones" [value]="summary.recommendations" icon="lightbulb" tone="warning" />
   </div>
-  <ul class="suggestions">
-    @for (item of suggestions; track item.id) {
-      <li>
-        <div><strong>{{ item.product }}</strong><small>{{ item.supplier }}</small></div>
-        <span>{{ item.quantity }}</span>
-        <span class="tag" [attr.data-priority]="item.priority">{{ item.priority }}</span>
-        @if (recommendationInputs[item.id]) {
-          <button type="button" class="why" (click)="explain(item)" aria-label="Ver explicación de la recomendación" title="¿Por qué?">
-            <span class="material-icons">help_outline</span>
-          </button>
-        }
-      </li>
-    }
-  </ul>
-</section>
 
-<h2 class="section-title">Productos críticos requeridos</h2>
-<app-data-table [columns]="columns" [rows]="criticalRows" [showEdit]="false" [showRemove]="false" />
+  <section class="surface-card coverage">
+    <div class="coverage__head">
+      <h2>Resumen de cobertura</h2>
+      <a routerLink="/app/replenishment/stockout-risk" class="link">Ver detalle</a>
+    </div>
+    @for (bar of coverage(); track bar.label) {
+      <div class="coverage__row" [attr.data-tone]="bar.tone">
+        <span>{{ bar.label }}</span>
+        <strong>{{ bar.count }} {{ bar.count === 1 ? 'producto' : 'productos' }}</strong>
+      </div>
+    }
+  </section>
+
+  <section class="surface-card">
+    <div class="coverage__head">
+      <h2>Compras sugeridas</h2>
+      <button type="button" class="link" [disabled]="!summary.suggestions.length" (click)="processAll()">Procesar todo</button>
+    </div>
+    @if (summary.suggestions.length) {
+      <ul class="suggestions">
+        @for (item of summary.suggestions; track item.productId) {
+          <li>
+            <div><strong>{{ item.name }}</strong><small>{{ item.supplierName ?? 'Sin proveedor asignado' }}</small></div>
+            <span>{{ item.suggestedQuantity }} uds</span>
+            @if (item.priority) {
+              <span class="tag" [attr.data-priority]="priorityLabels[item.priority]">{{ priorityLabels[item.priority] }}</span>
+            }
+            <button type="button" class="why" (click)="explain(item)" aria-label="Ver explicación de la recomendación" title="¿Por qué?">
+              <span class="material-icons">help_outline</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">Tu inventario cubre la demanda prevista: no hay compras sugeridas por ahora.</p>
+    }
+  </section>
+
+  <h2 class="section-title">Productos críticos requeridos</h2>
+  <app-data-table
+    [columns]="columns"
+    [rows]="criticalRows()"
+    [showEdit]="false"
+    [showRemove]="false"
+    emptyMessage="No hay productos en riesgo crítico."
+  />
+}

@@ -34,6 +34,10 @@ export class SupplierFormPage implements OnInit {
     address: new FormControl('', { nonNullable: true }),
     notes: new FormControl('', { nonNullable: true }),
     isActive: new FormControl(true, { nonNullable: true }),
+    leadTimeDays: new FormControl(7, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(1), Validators.max(180)],
+    }),
   });
 
   ngOnInit(): void {
@@ -50,6 +54,7 @@ export class SupplierFormPage implements OnInit {
           address: supplier.address ?? '',
           notes: supplier.notes ?? '',
           isActive: supplier.isActive,
+          leadTimeDays: supplier.leadTimeDays ?? 7,
         });
         this.loading.set(false);
       },
@@ -75,6 +80,7 @@ export class SupplierFormPage implements OnInit {
       address: value.address.trim() || null,
       notes: value.notes.trim() || null,
       isActive: value.isActive,
+      leadTimeDays: Number(value.leadTimeDays),
     };
     this.saving.set(true);
     const request = this.existing

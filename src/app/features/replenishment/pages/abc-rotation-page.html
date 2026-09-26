@@ -1,31 +1,49 @@
 <app-page-header
   title="Rotación y clasificación ABC"
-  description="Análisis de rotación vs. margen bruto de contribución — últimos 30 días"
+  description="Análisis de ingresos, rotación y margen bruto por producto"
 />
 
-<div class="abc-cards">
-  @for (klass of classes; track klass.name) {
-    <article class="surface-card abc-card">
-      <div class="abc-card__top">
-        <strong>{{ klass.name }}</strong>
-        <span class="muted">{{ klass.valueShare }}% del valor</span>
-      </div>
-      <small>{{ klass.label }}</small>
-      <p class="abc-share">{{ klass.valueShare }}%</p>
-      <span class="muted">{{ klass.description }}</span>
-      <div class="abc-progress" [attr.aria-label]="klass.items + ' ítems'">
-        <span [style.width.%]="(klass.items / totalItems) * 100"></span>
-      </div>
-      <span class="muted">{{ klass.items.toLocaleString('es-PE') }} ítems · {{ ((klass.items / totalItems) * 100).toFixed(0) }}% del catálogo</span>
-    </article>
-  }
-</div>
+@if (state() !== 'ready') {
+  <app-replenishment-load-state [state]="state()" (retry)="load()" />
+} @else if (data(); as abc) {
+  <p class="muted">
+    Ventas confirmadas de los últimos {{ abc.windowDays }} días · Ingresos totales: <strong>{{ formatSoles(abc.totalRevenue) }}</strong>
+  </p>
 
-<section class="surface-card">
-  <h2 class="section-title">Curva de acumulación de Pareto (ABC)</h2>
-  <p class="muted">Valor acumulado del inventario según el volumen de productos.</p>
-  <app-pareto-chart [points]="paretoCurve" />
-</section>
+  <div class="abc-cards">
+    @for (klass of classes(); track klass.class) {
+      <article class="surface-card abc-card">
+        <div class="abc-card__top">
+          <strong>Clase {{ klass.class }}</strong>
+          <span class="muted">{{ klass.valueShare }}% de ingresos</span>
+        </div>
+        <small>{{ klass.label }}</small>
+        <p class="abc-share">{{ klass.valueShare }}%</p>
+        <span class="muted">{{ klass.description }}</span>
+        <div class="abc-progress" [attr.aria-label]="klass.items + ' ítems'">
+          <span [style.width.%]="itemShare(klass.items)"></span>
+        </div>
+        <span class="muted">{{ klass.items }} {{ klass.items === 1 ? 'ítem' : 'ítems' }} · {{ itemShare(klass.items) }}% del catálogo</span>
+      </article>
+    }
+  </div>
 
-<h2 class="section-title">Detalle del inventario por categoría</h2>
-<app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />
+  <section class="surface-card">
+    <h2 class="section-title">Curva de acumulación de Pareto (ABC)</h2>
+    @if (abc.totalRevenue > 0) {
+      <p class="muted">Ingresos acumulados según el porcentaje de productos, ordenados de mayor a menor venta.</p>
+      <app-pareto-chart [points]="paretoCurve()" />
+    } @else {
+      <p class="muted">Aún no hay ventas confirmadas en el período: la curva aparecerá con las primeras ventas.</p>
+    }
+  </section>
+
+  <h2 class="section-title">Detalle del inventario</h2>
+  <app-data-table
+    [columns]="columns"
+    [rows]="rows()"
+    [showEdit]="false"
+    [showRemove]="false"
+    emptyMessage="No hay productos activos para clasificar."
+  />
+}

@@ -7,6 +7,7 @@ import { UserContextService } from '../../../core/context/user-context/user-cont
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
+import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CashCloseDialog } from '../components/cash-close-dialog/cash-close-dialog';
 import { SaleApiService } from '../data-access/sale-api.service';
@@ -14,7 +15,7 @@ import { Sale, SalesTotals } from '../models/sale.model';
 
 @Component({
   selector: 'app-sale-list-page',
-  imports: [DataTable, PageHeader, FormsModule],
+  imports: [DataTable, EmptyState, PageHeader, FormsModule],
   templateUrl: './sale-list-page.html',
   styleUrl: './sale-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +80,15 @@ export class SaleListPage implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  /** Distingue "sin ventas" de "sin resultados" en el estado vacío (Figma `empty-states`). */
+  hasFilters(): boolean {
+    return !!(this.search.trim() || this.from || this.to || this.paymentMethod || this.status);
+  }
+
+  newSale(): void {
+    void this.router.navigate(['/app/pos']);
   }
 
   clearFilters(): void {

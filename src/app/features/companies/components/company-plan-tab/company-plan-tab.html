@@ -51,27 +51,29 @@
 
     <section class="surface-card wide">
       <h3>Historial de cambios de plan</h3>
-      <table>
-        <thead>
-          <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Precio anterior</th><th>Precio nuevo</th><th>Responsable</th><th>Motivo</th></tr>
-        </thead>
-        <tbody>
-          @for (row of plan.history; track row.changedAt) {
-            <tr>
-              <td>{{ row.changedAt | dateTime }}</td>
-              <td>{{ row.previousPlanName ?? 'Alta inicial' }}</td>
-              <td>{{ row.newPlanName }}</td>
-              <td>{{ row.previousPrice != null ? ('S/ ' + row.previousPrice.toFixed(2)) : '—' }}</td>
-              <td>S/ {{ row.newPrice.toFixed(2) }}</td>
-              <td>{{ row.actorName ?? '—' }}</td>
-              <td>{{ row.reason ?? '—' }}</td>
-            </tr>
-          }
-          @if (!plan.history.length) {
-            <tr><td colspan="7" class="muted">Sin cambios de plan registrados.</td></tr>
-          }
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Precio anterior</th><th>Precio nuevo</th><th>Responsable</th><th>Motivo</th></tr>
+          </thead>
+          <tbody>
+            @for (row of plan.history; track row.changedAt) {
+              <tr>
+                <td>{{ row.changedAt | dateTime }}</td>
+                <td>{{ row.previousPlanName ?? 'Alta inicial' }}</td>
+                <td>{{ row.newPlanName }}</td>
+                <td>{{ row.previousPrice != null ? ('S/ ' + row.previousPrice.toFixed(2)) : '—' }}</td>
+                <td>S/ {{ row.newPrice.toFixed(2) }}</td>
+                <td>{{ row.actorName ?? '—' }}</td>
+                <td>{{ row.reason ?? '—' }}</td>
+              </tr>
+            }
+            @if (!plan.history.length) {
+              <tr><td colspan="7" class="muted">Sin cambios de plan registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 } @else {

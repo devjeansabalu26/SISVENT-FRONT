@@ -33,6 +33,7 @@ export interface SessionUser {
 
 export interface LoginResult {
   readonly accessToken: string;
-  readonly expiresAt: string;
+  /** null = el token no expira (backend sin Jwt:AccessTokenMinutes); la sesión termina con "Cerrar sesión". */
+  readonly expiresAt: string | null;
   readonly user: SessionUser;
 }

@@ -15,19 +15,15 @@ import { ProductApiService } from '../../products/data-access/product-api.servic
 import { SaleConfirmData, SaleConfirmDialog } from '../components/sale-confirm-dialog/sale-confirm-dialog';
 import { SaleSuccessDialog } from '../components/sale-success-dialog/sale-success-dialog';
 import { PosApiService } from '../data-access/pos-api.service';
-import { CartItem, PaymentMethod } from '../models/cart-item.model';
-
-const PAYMENT_LABELS: Readonly<Record<PaymentMethod, string>> = {
-  CASH: 'Efectivo',
-  CARD: 'Tarjeta',
-  YAPE: 'Yape',
-  PLIN: 'Plin',
-  TRANSFER: 'Transferencia',
-};
+import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
+import { PosPaymentPanel } from '../components/pos-payment-panel/pos-payment-panel';
+import { CartItem } from '../models/cart-item.model';
+import { PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../models/payment.model';
+import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../utils/payment';
 
 @Component({
   selector: 'app-pos-page',
-  imports: [],
+  imports: [PosPaymentPanel],
   templateUrl: './pos-page.html',
   styleUrl: './pos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,15 +37,25 @@ export class PosPage implements OnInit {
   private readonly customerApi = inject(CustomerApiService);
   private readonly storeApi = inject(StoreApiService);
   private readonly posApi = inject(PosApiService);
+  private readonly receiptMailer = inject(ReceiptMailerService);
   private readonly userContext = inject(UserContextService);
 
   readonly isAdmin = this.userContext.user()?.role === 'ADMIN';
-  readonly paymentMethods: readonly PaymentMethod[] = ['CASH', 'CARD', 'YAPE', 'PLIN', 'TRANSFER'];
-  readonly paymentLabels = PAYMENT_LABELS;
+  /** Métodos activos de la empresa (GET /pos/payment-methods). */
+  readonly paymentMethods = signal<readonly PaymentMethodOption[]>([]);
+  readonly paymentMethodsError = signal(false);
 
   readonly products = signal<readonly Product[]>([]);
   readonly cart = signal<readonly CartItem[]>([]);
-  readonly payment = signal<PaymentMethod>('CASH');
+  /** Pagos de la venta: uno o varios métodos (p. ej. tarjeta + efectivo). */
+  readonly paymentLines = signal<readonly PaymentDraftLine[]>([]);
+  /** Método del primer pago: lo marcan los botones rápidos cuando hay un solo pago. */
+  readonly payment = computed(() => this.paymentLines()[0]?.methodCode ?? '');
+  /** Los errores del pago se muestran recién al intentar confirmar. */
+  readonly showPaymentErrors = signal(false);
+  readonly selectedMethod = computed(() => this.paymentMethods().find((method) => method.code === this.payment()) ?? null);
+  readonly kindOf = (code: string): PaymentKind => this.paymentMethods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
+  private readonly methodName = (code: string): string => this.paymentMethods().find((method) => method.code === code)?.name ?? code;
   readonly saving = signal(false);
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
@@ -64,6 +70,7 @@ export class PosPage implements OnInit {
 
   ngOnInit(): void {
     this.search('');
+    this.loadPaymentMethods();
     const clientId = this.route.snapshot.queryParamMap.get('clientId');
     if (clientId) {
       this.customerApi.get(clientId).subscribe({
@@ -77,6 +84,23 @@ export class PosPage implements OnInit {
         if (response.items.length) this.selectedStoreId.set(response.items[0].id);
       });
     }
+  }
+
+  loadPaymentMethods(): void {
+    this.paymentMethodsError.set(false);
+    this.posApi.paymentMethods().subscribe({
+      next: (methods) => {
+        this.paymentMethods.set(methods);
+        if (!methods.some((method) => method.code === this.payment())) this.selectPayment(methods[0]?.code ?? '');
+      },
+      error: () => this.paymentMethodsError.set(true),
+    });
+  }
+
+  /** Botones rápidos: un solo pago con el método elegido (limpia los pagos anteriores). */
+  selectPayment(code: string): void {
+    this.paymentLines.set(code ? [newPaymentLine(code)] : []);
+    this.showPaymentErrors.set(false);
   }
 
   search(query: string): void {
@@ -146,6 +170,17 @@ export class PosPage implements OnInit {
       this.notifications.show('Agrega al menos un producto.', 'warning');
       return;
     }
+    if (!this.paymentMethods().length) {
+      this.notifications.show('Tu empresa no tiene métodos de pago habilitados.', 'error');
+      return;
+    }
+    const total = this.subtotal();
+    const error = paymentsError(this.paymentLines(), this.kindOf, total);
+    if (error) {
+      this.showPaymentErrors.set(true);
+      this.notifications.show(error, 'warning');
+      return;
+    }
     const customer = this.selectedCustomer();
     this.dialog
       .open<SaleConfirmDialog, SaleConfirmData, boolean>(SaleConfirmDialog, {
@@ -155,7 +190,8 @@ export class PosPage implements OnInit {
             : 'Cliente general',
           lines: this.cart().map((item) => ({ name: item.product.name, quantity: item.quantity, unitPrice: item.product.salePrice })),
           discount: 0,
-          paymentMethod: PAYMENT_LABELS[this.payment()],
+          paymentMethod: this.paymentLines().map((line) => this.methodName(line.methodCode)).join(' + '),
+          paymentDetails: this.previewPayments(total),
         },
       })
       .afterClosed()
@@ -163,16 +199,39 @@ export class PosPage implements OnInit {
       .subscribe(() => this.register());
   }
 
+  /** Resumen de cada pago antes de confirmar ("Tarjeta S/ 6000.00 · Op. 004512"). */
+  private previewPayments(total: number): readonly string[] {
+    const lines = this.paymentLines();
+    const due = breakdown(lines, this.kindOf, total).due;
+    return toPaymentLines(lines, this.kindOf, total).map((payment) => {
+      const isCash = this.kindOf(payment.method) === 'CASH';
+      return paymentSummary({
+        methodName: this.methodName(payment.method),
+        amount: isCash ? due : payment.amount,
+        amountReceived: isCash ? payment.amountReceived : null,
+        changeAmount: isCash ? Math.max(0, (payment.amountReceived ?? due) - due) : null,
+        reference: payment.reference,
+        authorizationCode: payment.authorizationCode,
+        cardBrand: payment.cardBrand,
+        cardLast4: payment.cardLast4,
+      });
+    });
+  }
+
   private register(): void {
+    const total = this.subtotal();
+    const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
+    if (!payments.length) return;
     this.saving.set(true);
     this.posApi
       .confirm({
         storeId: this.isAdmin ? this.selectedStoreId() : null,
         clientId: this.selectedCustomer()?.id ?? null,
-        paymentMethod: this.payment(),
+        paymentMethod: payments[0].method,
         discountTotal: 0,
         notes: null,
         lines: this.cart().map((item) => ({ productId: item.product.id, quantity: item.quantity, discountAmount: 0 })),
+        payments,
       })
       .subscribe({
         next: (sale) => {
@@ -182,23 +241,33 @@ export class PosPage implements OnInit {
               data: {
                 saleNumber: sale.saleNumber,
                 customer: sale.clientName ?? 'Cliente general',
-                paymentMethod: PAYMENT_LABELS[this.payment()],
+                paymentMethod: sale.paymentMethod,
                 total: sale.total,
+                change: sale.changeAmount ?? breakdown(this.paymentLines(), this.kindOf, total).change,
+                paymentDetails: (sale.payments ?? []).map((payment) => paymentSummary(payment)),
+                clientEmail: sale.clientEmail ?? null,
               },
             })
             .afterClosed()
             .subscribe((action) => {
               this.cart.set([]);
               this.selectedCustomer.set(null);
+              this.selectPayment(this.paymentMethods()[0]?.code ?? '');
               if (action === 'print') void this.router.navigate(['/app/sales', sale.id, 'comprobante']);
               else if (action === 'detail') void this.router.navigate(['/app/sales', sale.id]);
+              // El POS queda listo para la siguiente venta mientras se confirma el destinatario.
+              else if (action === 'email') this.receiptMailer.send(sale);
             });
         },
         error: (cause: unknown) => {
           this.saving.set(false);
+          // El backend explica el motivo en el title (stock insuficiente, monto recibido, n.º de operación…).
+          const title = (cause instanceof AppHttpError
+            ? (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error
+            : undefined);
           const message =
-            cause instanceof AppHttpError && cause.status === 409
-              ? 'Conflicto: revisa el stock o el método de pago seleccionado.'
+            cause instanceof AppHttpError && (cause.status === 400 || cause.status === 409) && typeof title?.title === 'string' && !title.errors
+              ? title.title
               : 'No se pudo registrar la venta.';
           this.notifications.show(message, 'error');
         },

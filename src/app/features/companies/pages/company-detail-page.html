@@ -119,17 +119,19 @@
         </section>
         <section class="surface-card">
           <h3>Últimos accesos</h3>
-          <table>
-            <thead><tr><th>Fecha</th><th>IP</th><th>Resultado</th></tr></thead>
-            <tbody>
-              @for (row of company.recentAccess; track row.at) {
-                <tr><td>{{ row.at | dateTime }}</td><td>{{ row.ip ?? '—' }}</td><td>{{ row.result }}</td></tr>
-              }
-              @if (!company.recentAccess.length) {
-                <tr><td colspan="3" class="muted">Sin accesos registrados.</td></tr>
-              }
-            </tbody>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Fecha</th><th>IP</th><th>Resultado</th></tr></thead>
+              <tbody>
+                @for (row of company.recentAccess; track row.at) {
+                  <tr><td>{{ row.at | dateTime }}</td><td>{{ row.ip ?? '—' }}</td><td>{{ row.result }}</td></tr>
+                }
+                @if (!company.recentAccess.length) {
+                  <tr><td colspan="3" class="muted">Sin accesos registrados.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
   </div>

@@ -1,14 +1,46 @@
 <app-page-header
   title="Sin movimiento y exceso"
-  description="Identificación de capital inmovilizado y acciones correctivas — últimos 30 días"
+  description="Identificación de capital inmovilizado y acciones correctivas"
 />
 
-<div class="kpi-grid">
-  @for (kpi of kpis; track kpi.label) {
-    <app-kpi-card [label]="kpi.label" [value]="kpi.value" [icon]="kpi.icon" [tone]="kpi.tone" [caption]="kpi.hint" />
-  }
-</div>
+@if (state() !== 'ready') {
+  <app-replenishment-load-state [state]="state()" (retry)="load()" />
+} @else if (data(); as stagnant) {
+  <div class="kpi-grid">
+    <app-kpi-card
+      label="Capital inmovilizado"
+      [value]="formatSoles(stagnant.immobilizedCapital)"
+      icon="account_balance_wallet"
+      tone="danger"
+      caption="Stock sin rotación valorizado a costo"
+    />
+    <app-kpi-card label="Productos inactivos" [value]="stagnant.inactiveProducts" icon="inventory_2" tone="warning" [caption]="'Sin ventas en ' + stagnant.thresholdDays + '+ días'" />
+    <app-kpi-card
+      label="Días promedio sin venta"
+      [value]="stagnant.averageDaysWithoutSale === null ? '—' : stagnant.averageDaysWithoutSale + ' d'"
+      icon="schedule"
+      tone="info"
+      caption="Solo productos que alguna vez se vendieron"
+    />
+    <app-kpi-card label="Exceso estimado" [value]="formatSoles(stagnant.estimatedExcess)" icon="trending_down" tone="primary" caption="Stock por encima del mínimo" />
+  </div>
 
-<h2 class="section-title">Plan de acción de inventario inactivo</h2>
-<p class="muted">Artículos que superan los 80 días recomendados de almacenamiento sin transacciones registradas.</p>
-<app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" />
+  <div class="coverage__head">
+    <div>
+      <h2 class="section-title">Plan de acción de inventario inactivo</h2>
+      <p class="muted">Artículos con stock y sin ventas en los últimos {{ stagnant.thresholdDays }} días.</p>
+    </div>
+    <select #thresholdSelect aria-label="Días sin venta" [value]="threshold()" (change)="changeThreshold(thresholdSelect.value)">
+      @for (days of thresholds; track days) {
+        <option [value]="days">{{ days }}+ días sin venta</option>
+      }
+    </select>
+  </div>
+  <app-data-table
+    [columns]="columns"
+    [rows]="rows()"
+    [showEdit]="false"
+    [showRemove]="false"
+    emptyMessage="No hay inventario inmovilizado con este umbral."
+  />
+}

@@ -6,9 +6,14 @@ export interface SaleSuccessData {
   readonly customer: string;
   readonly paymentMethod: string;
   readonly total: number;
+  /** Vuelto a entregar (solo efectivo). */
+  readonly change?: number | null;
+  readonly paymentDetails?: readonly string[];
+  /** Correo del cliente: si existe se muestra junto al botón de envío. */
+  readonly clientEmail?: string | null;
 }
 
-export type SaleSuccessAction = 'print' | 'detail' | 'new';
+export type SaleSuccessAction = 'print' | 'detail' | 'email' | 'new';
 
 @Component({
   selector: 'app-sale-success-dialog',

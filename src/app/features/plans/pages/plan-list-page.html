@@ -19,26 +19,28 @@
   <section class="matrix surface-card">
     <h2>Comparación de funcionalidades</h2>
     <div class="matrix__scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Funcionalidad</th>
-            @for (code of matrix.planCodes; track code) {
-              <th>{{ code }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of matrix.rows; track row.featureCode) {
+      <div class="table-scroll">
+        <table>
+          <thead>
             <tr>
-              <td>{{ row.featureName }}</td>
-              @for (cell of row.plans; track cell.planCode) {
-                <td>{{ cell.enabled ? '✓' : '—' }}</td>
+              <th>Funcionalidad</th>
+              @for (code of matrix.planCodes; track code) {
+                <th>{{ code }}</th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (row of matrix.rows; track row.featureCode) {
+              <tr>
+                <td>{{ row.featureName }}</td>
+                @for (cell of row.plans; track cell.planCode) {
+                  <td>{{ cell.enabled ? '✓' : '—' }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 }

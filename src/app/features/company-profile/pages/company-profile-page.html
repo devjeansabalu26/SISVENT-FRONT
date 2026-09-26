@@ -1,54 +1,61 @@
-<app-page-header title="Mi empresa" [description]="'Información y configuración de ' + commercialName">
-  <button type="button" class="ghost" (click)="edit()"><span class="material-icons">edit</span>Editar información</button>
+<app-page-header title="Mi empresa" [description]="'Información y configuración de ' + (profile()?.tradeName ?? 'tu empresa')">
+  <a class="ghost" routerLink="/app/settings"><span class="material-icons">settings</span>Configuración</a>
 </app-page-header>
 
-<div class="cards">
-  <section class="surface-card">
-    <h3>Identidad comercial</h3>
-    <dl>
-      @for (field of identity; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-      }
-    </dl>
+@if (loading()) {
+  <section class="surface-card state">Cargando datos de la empresa…</section>
+} @else if (loadError()) {
+  <section class="surface-card state">
+    <p>No se pudieron cargar los datos de la empresa.</p>
+    <button type="button" class="retry" (click)="load()">Reintentar</button>
   </section>
+} @else if (profile(); as company) {
+  <div class="cards">
+    <section class="surface-card">
+      <h3>Identidad comercial</h3>
+      <dl>
+        @for (field of identity(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        }
+      </dl>
+    </section>
 
-  <section class="surface-card">
-    <h3>Contacto principal</h3>
-    <dl>
-      @for (field of contact; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-      }
-    </dl>
-  </section>
+    <section class="surface-card">
+      <h3>Contacto principal</h3>
+      <dl>
+        @for (field of contact(); track field.label) {
+          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+        }
+      </dl>
+    </section>
 
-  <section class="surface-card">
-    <h3>Dirección fiscal / principal</h3>
-    <dl>
-      @for (field of address; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+    <section class="surface-card">
+      <h3>Datos fiscales</h3>
+      @if (fiscal().length) {
+        <dl>
+          @for (field of fiscal(); track field.label) {
+            <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+          }
+        </dl>
+      } @else {
+        <p class="muted">Aún no hay configuración fiscal registrada.</p>
       }
-    </dl>
-  </section>
+    </section>
 
-  <section class="surface-card">
-    <h3>Datos fiscales</h3>
-    <dl>
-      @for (field of fiscal; track field.label) {
-        <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
+    <section class="surface-card">
+      <h3>Identidad visual</h3>
+      @if (company.theme.logoUrl) {
+        <img class="logo" [src]="company.theme.logoUrl" [alt]="'Logo de ' + company.tradeName" />
       }
-    </dl>
-  </section>
-
-  <section class="surface-card">
-    <h3>Identidad visual</h3>
-    <p class="muted">Logotipo: JPG, PNG o PNG transparente. Máx. 2MB. Dimensión sugerida 200×200px.</p>
-    <div class="swatches">
-      @for (color of brandColors; track color.label) {
-        <div class="swatch">
-          <span class="swatch__chip" [style.background]="color.value"></span>
-          <div><strong>{{ color.label }}</strong><small>{{ color.value }}</small></div>
-        </div>
-      }
-    </div>
-  </section>
-</div>
+      <div class="swatches">
+        @for (color of brandColors(); track color.label) {
+          <div class="swatch">
+            <span class="swatch__chip" [style.background]="color.value"></span>
+            <div><strong>{{ color.label }}</strong><small>{{ color.value }}</small></div>
+          </div>
+        }
+      </div>
+      <p class="muted">Colores definidos al registrar la empresa. Para cambiarlos, solicítalo al equipo de SISVENT.</p>
+    </section>
+  </div>
+}

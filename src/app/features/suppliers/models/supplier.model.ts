@@ -10,6 +10,8 @@ export interface Supplier {
   readonly notes: string | null;
   readonly isActive: boolean;
   readonly version: number;
+  /** Días entre el pedido y la recepción; lo usa el cálculo de compras sugeridas. */
+  readonly leadTimeDays: number;
 }
 
 export interface SupplierPage {
@@ -28,4 +30,5 @@ export interface SupplierFormValue {
   readonly address: string | null;
   readonly notes: string | null;
   readonly isActive: boolean;
+  readonly leadTimeDays: number;
 }

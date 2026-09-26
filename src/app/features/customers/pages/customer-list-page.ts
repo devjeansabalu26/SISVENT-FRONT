@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
+import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CustomerApiService } from '../data-access/customer-api.service';
 import { Customer, CustomerSummary } from '../models/customer.model';
 
 @Component({
   selector: 'app-customer-list-page',
-  imports: [DataTable, PageHeader],
+  imports: [DataTable, EmptyState, PageHeader],
   templateUrl: './customer-list-page.html',
   styleUrl: './customer-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +66,14 @@ export class CustomerListPage implements OnInit {
 
   selectForSale(customer: Customer): void {
     void this.router.navigate(['/app/pos'], { queryParams: { clientId: customer.id } });
+  }
+
+  create(): void {
+    void this.router.navigate(['/app/customers/new']);
+  }
+
+  clearFilters(): void {
+    this.search.set('');
   }
 
   edit(customer: Customer): void {

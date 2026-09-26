@@ -19,19 +19,21 @@
             <h2>Empresas recientes</h2>
             <a routerLink="/app/companies" class="link">Ver todas</a>
           </div>
-          <table>
-            <thead><tr><th>Empresa</th><th>Administrador</th><th>Fecha alta</th><th>Estado</th></tr></thead>
-            <tbody>
-              @for (row of platform.recentCompanies; track row.id) {
-                <tr>
-                  <td><strong>{{ row.tradeName }}</strong></td>
-                  <td>{{ row.administratorName ?? '—' }}</td>
-                  <td>{{ row.createdAt | date: 'mediumDate' }}</td>
-                  <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Empresa</th><th>Administrador</th><th>Fecha alta</th><th>Estado</th></tr></thead>
+              <tbody>
+                @for (row of platform.recentCompanies; track row.id) {
+                  <tr>
+                    <td><strong>{{ row.tradeName }}</strong></td>
+                    <td>{{ row.administratorName ?? '—' }}</td>
+                    <td>{{ row.createdAt | date: 'mediumDate' }}</td>
+                    <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section class="surface-card">
@@ -107,20 +109,22 @@
           <h2>Últimas ventas realizadas</h2>
           <a routerLink="/app/sales" class="link">Ver todo el historial</a>
         </div>
-        <table>
-          <thead><tr><th>Nro documento</th><th>Hora</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
-          <tbody>
-            @for (row of seller.recentSales; track row.saleNumber) {
-              <tr>
-                <td>{{ row.saleNumber }}</td>
-                <td>{{ row.saleDate | date: 'shortTime' }}</td>
-                <td>{{ row.clientName ?? 'Cliente general' }}</td>
-                <td>S/ {{ row.total.toFixed(2) }}</td>
-                <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nro documento</th><th>Hora</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody>
+              @for (row of seller.recentSales; track row.saleNumber) {
+                <tr>
+                  <td>{{ row.saleNumber }}</td>
+                  <td>{{ row.saleDate | date: 'shortTime' }}</td>
+                  <td>{{ row.clientName ?? 'Cliente general' }}</td>
+                  <td>S/ {{ row.total.toFixed(2) }}</td>
+                  <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
     }
   }
@@ -179,20 +183,22 @@
             <a routerLink="/app/sales" class="link">Ver todas</a>
           </div>
           @if (admin.recentSales.length) {
-            <table>
-              <thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
-              <tbody>
-                @for (row of admin.recentSales; track row.saleNumber) {
-                  <tr>
-                    <td>{{ row.saleNumber }}</td>
-                    <td>{{ row.saleDate | date: 'short' }}</td>
-                    <td>{{ row.clientName ?? 'Cliente general' }}</td>
-                    <td>S/ {{ row.total.toFixed(2) }}</td>
-                    <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Nro</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+                <tbody>
+                  @for (row of admin.recentSales; track row.saleNumber) {
+                    <tr>
+                      <td>{{ row.saleNumber }}</td>
+                      <td>{{ row.saleDate | date: 'short' }}</td>
+                      <td>{{ row.clientName ?? 'Cliente general' }}</td>
+                      <td>S/ {{ row.total.toFixed(2) }}</td>
+                      <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           } @else {
             <p class="muted">No hay ventas registradas para el período seleccionado.</p>
           }

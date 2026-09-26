@@ -1,5 +1,5 @@
 <app-page-header title="Centro de notificaciones" description="Alertas y avisos del sistema">
-  <button type="button" class="ghost" (click)="markAllRead()">
+  <button type="button" class="ghost" [disabled]="loading()" (click)="markAllRead()">
     <span class="material-icons">done_all</span>Marcar todas como leídas
   </button>
 </app-page-header>
@@ -12,31 +12,43 @@
   }
 </nav>
 
-<ul class="feed">
-  @for (item of visible(); track item.id) {
-    <li class="note" [class.note--unread]="!item.read" (click)="markRead(item)">
-      <span class="badge" [attr.data-priority]="item.priority">{{ item.priority }}</span>
-      <div class="note__body">
-        <div class="note__head">
-          <strong>{{ item.title }}</strong>
-          <small>{{ item.timeAgo }}</small>
+@if (loading()) {
+  <p class="state">Cargando notificaciones…</p>
+} @else if (loadError()) {
+  <div class="state">
+    <p>No se pudieron cargar las notificaciones.</p>
+    <button type="button" class="ghost" (click)="load()">Reintentar</button>
+  </div>
+} @else {
+  <ul class="feed">
+    @for (item of visible(); track item.id) {
+      <li class="note" [class.note--unread]="!item.isRead" (click)="markRead(item)">
+        <span class="badge" [attr.data-priority]="item.priority">{{ item.priority }}</span>
+        <div class="note__body">
+          <div class="note__head">
+            <strong>{{ item.title }}</strong>
+            <small>{{ item.timeAgo }}</small>
+          </div>
+          <p>{{ item.message }}</p>
+          <div class="note__meta">
+            <span class="chip">{{ item.category }}</span>
+            @if (item.companyName && tabs.length === 4) {
+              <span class="chip">{{ item.companyName }}</span>
+            }
+            @for (action of item.actions; track action.label) {
+              <button type="button" class="link" (click)="open(item, action, $event)">{{ action.label }}</button>
+            }
+          </div>
         </div>
-        <p>{{ item.body }}</p>
-        <div class="note__meta">
-          <span class="chip">{{ item.category }}</span>
-          @for (action of item.actions; track action) {
-            <button type="button" class="link">{{ action }}</button>
-          }
-        </div>
-      </div>
-    </li>
-  } @empty {
-    <li>
-      <app-empty-state
-        icon="notifications_off"
-        title="Sin notificaciones"
-        description="No hay avisos en esta vista. Cuando el sistema genere alertas o eventos, aparecerán aquí."
-      />
-    </li>
-  }
-</ul>
+      </li>
+    } @empty {
+      <li>
+        <app-empty-state
+          icon="notifications_off"
+          title="Sin notificaciones"
+          description="No hay avisos en esta vista. Cuando el sistema genere alertas o eventos, aparecerán aquí."
+        />
+      </li>
+    }
+  </ul>
+}

@@ -11,7 +11,9 @@
   background: var(--color-sidebar-bg);
   /* Derivado del fondo real (default o el secondaryColor de la empresa vía ThemeService), no de un
      token fijo aparte: así el hover/activo siempre combina con el color que esté puesto ahora mismo. */
-  --sidebar-hover: color-mix(in srgb, var(--color-sidebar-bg) 82%, white 18%);
+  --sidebar-hover: var(--color-sidebar-hover-bg, color-mix(in srgb, var(--color-sidebar-bg) 82%, white 18%));
+  /* Texto fuerte (nombre, hover, activo): blanco por defecto; oscuro si la empresa usa un fondo claro. */
+  --sidebar-strong: var(--color-sidebar-strong, white);
   transition: transform 180ms ease;
 }
 .brand {
@@ -19,7 +21,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: var(--space-lg);
-  color: white;
+  color: var(--sidebar-strong);
   text-decoration: none;
   font-size: var(--font-size-md);
   font-weight: 700;
@@ -80,11 +82,11 @@ nav a {
   font-size: var(--font-size-sm);
 }
 nav a:hover {
-  color: white;
+  color: var(--sidebar-strong);
   background: var(--sidebar-hover);
 }
 nav a.active {
-  color: white;
+  color: var(--sidebar-strong);
   background: var(--sidebar-hover);
   box-shadow: inset 3px 0 0 var(--color-sidebar-active);
 }

@@ -1,51 +1,107 @@
 <app-page-header title="Mi plan" description="Detalles de tu suscripción actual y opciones de escalamiento" />
 
-<section class="surface-card current">
-  <div class="current__head">
-    <div>
-      <h2>Plan Negocio</h2>
-      <p class="muted">S/ 60.00 / mes · Estado: Activo · Vigencia: 01/09/2026 – 01/09/2027</p>
-    </div>
-  </div>
-  <div class="usage">
-    @for (bar of usage; track bar.label) {
-      <div class="usage__row">
-        <div class="usage__label"><span>{{ bar.label }}</span><strong>{{ bar.detail }}</strong></div>
-        <div class="usage__track"><span class="usage__fill" [style.width.%]="bar.percent"></span></div>
+@if (loading()) {
+  <section class="surface-card state">Cargando tu plan…</section>
+} @else if (loadError()) {
+  <section class="surface-card state">
+    <p>No se pudo cargar la información del plan.</p>
+    <button type="button" class="retry" (click)="load()">Reintentar</button>
+  </section>
+} @else if (data(); as plan) {
+  @if (pending(); as request) {
+    <p class="notice notice--info">
+      <span class="material-icons" aria-hidden="true">schedule_send</span>
+      Solicitud de cambio al plan <strong>{{ request.planName }}</strong> enviada el
+      {{ formatDate(request.requestedAt) }}. El equipo de SISVENT se pondrá en contacto contigo.
+    </p>
+  }
+
+  <section class="surface-card current">
+    @if (current(); as current) {
+      <div class="current__head">
+        <div>
+          <h2>Plan {{ current.name }}</h2>
+          <p class="muted">
+            {{ formatSoles(current.contractedPrice) }} / mes · Estado: {{ statusLabel(current.status) }} · Vigencia:
+            {{ formatDate(current.startDate) }} – {{ formatDate(current.endDate) }}
+          </p>
+        </div>
+        <span class="days" [class.days--warn]="expiringSoon()">
+          {{ current.daysRemaining }} {{ current.daysRemaining === 1 ? 'día restante' : 'días restantes' }}
+        </span>
       </div>
+      @if (expiringSoon()) {
+        <p class="notice notice--warning">
+          <span class="material-icons" aria-hidden="true">warning_amber</span>
+          Tu plan vence pronto. Contacta al equipo de SISVENT para renovarlo y evitar interrupciones.
+        </p>
+      }
+    } @else {
+      <h2>Sin plan vigente</h2>
+      <p class="muted">Tu empresa no tiene un período de plan activo. Contacta al equipo de SISVENT.</p>
+    }
+    <div class="usage">
+      @for (bar of plan.usage; track bar.code) {
+        <div class="usage__row">
+          <div class="usage__label">
+            <span>{{ bar.label }}</span>
+            <strong [class.full]="usageFull(bar)">{{ usageDetail(bar) }}</strong>
+          </div>
+          <div class="usage__track" role="progressbar" [attr.aria-label]="bar.label"
+               [attr.aria-valuenow]="usagePercent(bar)" aria-valuemin="0" aria-valuemax="100">
+            <span class="usage__fill" [class.usage__fill--full]="usageFull(bar)" [style.width.%]="usagePercent(bar)"></span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <h3 class="section-title">Planes disponibles</h3>
+  <div class="plan-grid">
+    @for (item of plan.plans; track item.id) {
+      <article class="plan-card" [class.plan-card--current]="item.isCurrent">
+        <header>
+          <strong>{{ item.name }}</strong>
+          @if (item.isCurrent) { <span class="tag">Actual</span> }
+        </header>
+        <p class="plan-card__price">{{ planPrice(item) }}</p>
+        @if (item.description) { <p class="muted">{{ item.description }}</p> }
+        <ul>
+          @for (limit of planLimits(item); track limit) { <li>{{ limit }}</li> }
+          @for (feature of item.features; track feature) { <li>{{ feature }}</li> }
+        </ul>
+        <button type="button" [disabled]="item.isCurrent || pending()?.planId === item.id || sending()" (click)="requestChange(item)">
+          {{ ctaLabel(item) }}
+        </button>
+      </article>
     }
   </div>
-</section>
 
-<h3 class="section-title">Planes disponibles</h3>
-<div class="plan-grid">
-  @for (plan of plans; track plan.name) {
-    <article class="plan-card" [class.plan-card--current]="plan.current">
-      <header>
-        <strong>{{ plan.name }}</strong>
-        @if (plan.current) { <span class="tag">Actual</span> }
-      </header>
-      <p class="plan-card__price">{{ plan.price }}</p>
-      <ul>
-        @for (feature of plan.features; track feature) {
-          <li>{{ feature }}</li>
-        }
-      </ul>
-      <button type="button" [disabled]="plan.current" (click)="requestChange(plan)">{{ plan.cta }}</button>
-    </article>
-  }
-</div>
-
-<section class="surface-card">
-  <h3>Historial de cambios de plan</h3>
-  <table>
-    <thead>
-      <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Motivo del cambio</th></tr>
-    </thead>
-    <tbody>
-      @for (row of history; track row.date) {
-        <tr><td>{{ row.date }}</td><td>{{ row.from }}</td><td>{{ row.to }}</td><td>{{ row.reason }}</td></tr>
-      }
-    </tbody>
-  </table>
-</section>
+  <section class="surface-card">
+    <h3>Historial de cambios de plan</h3>
+    @if (plan.history.length) {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Plan anterior</th><th>Plan nuevo</th><th>Vigencia</th><th>Precio</th><th>Estado</th><th>Motivo del cambio</th></tr>
+          </thead>
+          <tbody>
+            @for (row of plan.history; track row.id) {
+              <tr>
+                <td>{{ formatDate(row.createdAt) }}</td>
+                <td>{{ row.previousPlanName ?? '— (Alta nueva)' }}</td>
+                <td>{{ row.planName }}</td>
+                <td>{{ formatDate(row.startDate) }} – {{ formatDate(row.endDate) }}</td>
+                <td>{{ formatSoles(row.contractedPrice) }}</td>
+                <td>{{ statusLabel(row.status) }}</td>
+                <td>{{ row.notes ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="muted">Aún no hay cambios de plan registrados.</p>
+    }
+  </section>
+}

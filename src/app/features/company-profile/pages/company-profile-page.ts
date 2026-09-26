@@ -1,59 +1,108 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { NotificationService } from '../../../core/notifications/notification.service';
-import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
+import { CompanyProfileApiService } from '../data-access/company-profile-api.service';
+import { CompanyProfile } from '../models/company-profile.model';
 
 interface Field {
   readonly label: string;
   readonly value: string;
 }
 
+const TAX_REGIMES: Readonly<Record<string, string>> = {
+  RUS: 'Nuevo RUS',
+  RER: 'Régimen Especial (RER)',
+  RMT: 'Régimen MYPE Tributario (RMT)',
+  GENERAL: 'Régimen General',
+};
+
+const CURRENCIES: Readonly<Record<string, string>> = { PEN: 'Sol peruano (S/)', USD: 'Dólar estadounidense (US$)' };
+
+const STATUS: Readonly<Record<string, string>> = {
+  ACTIVE: 'Activa',
+  PENDING: 'Pendiente',
+  SUSPENDED: 'Suspendida',
+  INACTIVE: 'Inactiva',
+};
+
+const orDash = (value: string | null | undefined): string => (value && value.trim() ? value : '—');
+
 @Component({
   selector: 'app-company-profile-page',
-  imports: [PageHeader],
+  imports: [PageHeader, RouterLink],
   templateUrl: './company-profile-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './company-profile-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CompanyProfilePage {
-  private readonly notifications = inject(NotificationService);
-  private readonly company = inject(CompanyContextService).company;
+export class CompanyProfilePage implements OnInit {
+  private readonly api = inject(CompanyProfileApiService);
 
-  readonly commercialName = this.company()?.commercialName ?? 'Comercial Andina';
+  readonly loading = signal(true);
+  readonly loadError = signal(false);
+  readonly profile = signal<CompanyProfile | null>(null);
 
-  readonly identity: readonly Field[] = [
-    { label: 'Nombre comercial', value: this.commercialName },
-    { label: 'Razón social', value: 'Comercial Andina S.A.C.' },
-    { label: 'RUC', value: '20601234567' },
-    { label: 'Rubro comercial', value: 'Distribuidora de Alimentos y Bebidas' },
-  ];
+  readonly identity = computed<readonly Field[]>(() => {
+    const p = this.profile();
+    if (!p) return [];
+    return [
+      { label: 'Nombre comercial', value: p.tradeName },
+      { label: 'Razón social', value: orDash(p.legalName) },
+      { label: 'RUC', value: p.taxDocument },
+      { label: 'Rubro comercial', value: orDash(p.businessType) },
+      { label: 'Estado', value: STATUS[p.status] ?? p.status },
+      { label: 'Plan vigente', value: orDash(p.planName) },
+    ];
+  });
 
-  readonly contact: readonly Field[] = [
-    { label: 'Teléfono de contacto', value: '+51 987 654 321' },
-    { label: 'Correo electrónico corporativo', value: 'contacto@comercialandina.pe' },
-    { label: 'Sitio web', value: 'www.comercialandina.pe' },
-  ];
+  readonly contact = computed<readonly Field[]>(() => {
+    const p = this.profile();
+    if (!p) return [];
+    return [
+      { label: 'Teléfono de contacto', value: orDash(p.phone) },
+      { label: 'Correo electrónico corporativo', value: orDash(p.email) },
+      { label: 'Dirección fiscal / principal', value: orDash(p.address) },
+    ];
+  });
 
-  readonly address: readonly Field[] = [
-    { label: 'Dirección completa', value: 'Av. Arequipa 1234, Oficina 501' },
-    { label: 'Distrito', value: 'Miraflores' },
-    { label: 'Ciudad / Provincia', value: 'Lima' },
-    { label: 'Departamento', value: 'Lima' },
-  ];
+  readonly fiscal = computed<readonly Field[]>(() => {
+    const f = this.profile()?.fiscal;
+    if (!f) return [];
+    return [
+      { label: 'Régimen tributario', value: TAX_REGIMES[f.taxRegime] ?? f.taxRegime },
+      { label: 'Moneda de facturación', value: CURRENCIES[f.currencyCode] ?? f.currencyCode },
+      { label: 'Serie de boletas', value: f.receiptSeries },
+      { label: 'Serie de facturas', value: f.invoiceSeries },
+    ];
+  });
 
-  readonly fiscal: readonly Field[] = [
-    { label: 'Tipo de contribuyente', value: 'Persona Jurídica' },
-    { label: 'Régimen tributario', value: 'Régimen MYPE Tributario (MYPE)' },
-    { label: 'Moneda de facturación', value: 'Sol Peruano (S/.)' },
-  ];
+  /** Colores guardados en company_themes al crear/editar la empresa. */
+  readonly brandColors = computed<readonly Field[]>(() => {
+    const t = this.profile()?.theme;
+    if (!t) return [];
+    return [
+      { label: 'Color primario', value: t.primaryColor },
+      { label: 'Color secundario', value: t.secondaryColor },
+      { label: 'Color de acento', value: t.accentColor },
+      { label: 'Color de fondo', value: t.backgroundColor },
+    ];
+  });
 
-  readonly brandColors: readonly Field[] = [
-    { label: 'Color primario', value: '#2563EB' },
-    { label: 'Color secundario', value: '#10B981' },
-    { label: 'Color acento', value: '#F59E0B' },
-  ];
+  ngOnInit(): void {
+    this.load();
+  }
 
-  edit(): void {
-    this.notifications.show('La edición de la empresa se habilita cuando el endpoint esté disponible.', 'info');
+  load(): void {
+    this.loading.set(true);
+    this.loadError.set(false);
+    this.api.get().subscribe({
+      next: (profile) => {
+        this.profile.set(profile);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.loadError.set(true);
+      },
+    });
   }
 }

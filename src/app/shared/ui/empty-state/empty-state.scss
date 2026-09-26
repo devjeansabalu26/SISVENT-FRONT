@@ -10,6 +10,10 @@
   background: var(--color-surface);
   text-align: center;
 }
+.empty--flush {
+  border: 0;
+  border-radius: 0;
+}
 .empty__icon {
   display: grid;
   place-items: center;

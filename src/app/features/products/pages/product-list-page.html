@@ -61,11 +61,24 @@
   [showEdit]="!isSeller"
   [menuActions]="isSeller ? [] : [{ id: 'toggle', label: 'Activar / desactivar', icon: 'power_settings_new' }]"
   [showRemove]="false"
-  emptyMessage="No se encontraron productos."
+  [customEmpty]="true"
   (view)="view($event)"
   (edit)="edit($event)"
   (menuAction)="onMenuAction($event)"
-/>
+>
+  @if (hasFilters()) {
+    <app-empty-state tableEmpty flush icon="search_off" title="Sin resultados de búsqueda"
+      description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."
+      actionLabel="Limpiar filtros" (action)="clearFilters()" />
+  } @else if (isSeller) {
+    <app-empty-state tableEmpty flush icon="inventory_2" title="No hay productos registrados"
+      description="Aún no hay productos en el catálogo. Cuando el administrador los registre aparecerán aquí." />
+  } @else {
+    <app-empty-state tableEmpty flush icon="inventory_2" title="No hay productos registrados"
+      description="Aún no has agregado productos a esta sucursal. Comienza a registrar tu inventario para empezar a facturar."
+      actionLabel="Agregar producto" (action)="create()" />
+  }
+</app-data-table>
 <app-paginator
   [pageNumber]="pageNumber()"
   [pageSize]="pageSize"

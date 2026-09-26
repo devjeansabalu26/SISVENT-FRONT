@@ -1,26 +1,28 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { filter } from 'rxjs';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
+import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
+import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
+import { formatSoles } from '../../../shared/utils/diff-rows';
+import { CompanyPlanApiService } from '../data-access/company-plan-api.service';
+import { AvailablePlan, MyPlan, MyPlanUsage } from '../models/company-plan.model';
 
-interface UsageBar {
-  readonly label: string;
-  readonly detail: string;
-  readonly percent: number;
-}
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  ACTIVE: 'Activo',
+  PENDING: 'Pendiente',
+  EXPIRED: 'Vencido',
+  SUSPENDED: 'Suspendido',
+  INACTIVE: 'Inactivo',
+  CANCELLED: 'Cerrado',
+};
 
-interface AvailablePlan {
-  readonly name: string;
-  readonly price: string;
-  readonly current: boolean;
-  readonly features: readonly string[];
-  readonly cta: string;
-}
-
-interface PlanChange {
-  readonly date: string;
-  readonly from: string;
-  readonly to: string;
-  readonly reason: string;
+/** `YYYY-MM-DD` → `DD/MM/YYYY` sin pasar por zona horaria. */
+function formatDate(value: string): string {
+  const [year, month, day] = value.slice(0, 10).split('-');
+  return day && month && year ? `${day}/${month}/${year}` : value;
 }
 
 @Component({
@@ -30,68 +32,129 @@ interface PlanChange {
   styleUrls: ['../../../shared/ui/detail-page.scss', './company-plan-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CompanyPlanPage {
+export class CompanyPlanPage implements OnInit {
+  private readonly api = inject(CompanyPlanApiService);
   private readonly notifications = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
 
-  readonly usage: readonly UsageBar[] = [
-    { label: 'Vendedores habilitados', detail: '2 / 3', percent: 67 },
-    { label: 'Locales comerciales', detail: '1 / 2', percent: 50 },
-    { label: 'Productos registrados', detail: '284 / ilimitado', percent: 28 },
-  ];
+  readonly loading = signal(true);
+  readonly loadError = signal(false);
+  readonly sending = signal(false);
+  readonly data = signal<MyPlan | null>(null);
 
-  readonly plans: readonly AvailablePlan[] = [
-    {
-      name: 'Esencial',
-      price: 'S/ 40.00 / mes',
-      current: false,
-      features: ['1 vendedor disponible', '1 local de venta', 'Dashboard básico', 'Sin reportes exportables'],
-      cta: 'Contactar para cambio',
-    },
-    {
-      name: 'Negocio',
-      price: 'S/ 60.00 / mes',
-      current: true,
-      features: [
-        '3 vendedores disponibles',
-        '2 locales comerciales',
-        'Dashboard analítico avanzado',
-        'Reportes automatizados',
-        'Módulo de auditoría básica',
-      ],
-      cta: 'Plan actual',
-    },
-    {
-      name: 'Profesional',
-      price: 'S/ 120.00 / mes',
-      current: false,
-      features: [
-        'Vendedores configurables',
-        'Locales configurables',
-        'Módulo + Proveedores',
-        'Abastecimiento automático',
-        'Ingreso y control de mercadería',
-      ],
-      cta: 'Contactar para cambio',
-    },
-  ];
+  readonly current = computed(() => this.data()?.current ?? null);
+  readonly pending = computed(() => this.data()?.pendingRequest ?? null);
+  /** Aviso cuando quedan 30 días o menos de vigencia. */
+  readonly expiringSoon = computed(() => {
+    const current = this.current();
+    return !!current && current.status === 'ACTIVE' && current.daysRemaining <= 30;
+  });
 
-  readonly history: readonly PlanChange[] = [
-    {
-      date: '01/09/2026',
-      from: 'Esencial',
-      to: 'Negocio',
-      reason: 'Expansión de operaciones: apertura de segundo local comercial.',
-    },
-    {
-      date: '01/09/2025',
-      from: '— (Alta nueva)',
-      to: 'Esencial',
-      reason: 'Registro inicial del tenant corporativo en el sistema SaaS.',
-    },
-  ];
+  readonly formatDate = formatDate;
+  readonly formatSoles = formatSoles;
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.loadError.set(false);
+    this.api.get().subscribe({
+      next: (data) => {
+        this.data.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.loadError.set(true);
+      },
+    });
+  }
+
+  statusLabel(status: string): string {
+    return STATUS_LABELS[status] ?? status;
+  }
+
+  usageDetail(usage: MyPlanUsage): string {
+    return usage.limit === null ? `${usage.used} / ilimitado` : `${usage.used} / ${usage.limit}`;
+  }
+
+  /** Porcentaje de la barra; sin límite se muestra vacía. */
+  usagePercent(usage: MyPlanUsage): number {
+    if (usage.limit === null || usage.limit === 0) return usage.limit === 0 && usage.used > 0 ? 100 : 0;
+    return Math.min(100, Math.round((usage.used / usage.limit) * 100));
+  }
+
+  usageFull(usage: MyPlanUsage): boolean {
+    return usage.limit !== null && usage.used >= usage.limit;
+  }
+
+  planPrice(plan: AvailablePlan): string {
+    return plan.price === null ? 'Precio a consultar' : `${formatSoles(plan.price)} / mes`;
+  }
+
+  planLimits(plan: AvailablePlan): readonly string[] {
+    const limit = (value: number | null, singular: string, plural: string) =>
+      value === null ? `${plural} ilimitados` : `${value} ${value === 1 ? singular : plural}`;
+    return [
+      limit(plan.maxSellers, 'vendedor', 'vendedores'),
+      limit(plan.maxStores, 'local', 'locales'),
+      plan.maxProducts === null ? 'Productos ilimitados' : `Hasta ${plan.maxProducts} productos`,
+    ];
+  }
+
+  ctaLabel(plan: AvailablePlan): string {
+    if (plan.isCurrent) return 'Plan actual';
+    if (this.pending()?.planId === plan.id) return 'Solicitud enviada';
+    return 'Solicitar cambio';
+  }
 
   requestChange(plan: AvailablePlan): void {
-    if (plan.current) return;
-    this.notifications.show(`Solicitud de cambio al plan ${plan.name} registrada. Soporte te contactará.`, 'info');
+    if (plan.isCurrent || this.pending()?.planId === plan.id || this.sending()) return;
+    const current = this.current();
+    this.dialog
+      .open<ReviewDialog, ReviewDialogData, string | boolean>(ReviewDialog, {
+        data: {
+          title: 'Solicitar cambio de plan',
+          icon: 'swap_horiz',
+          intro: 'El equipo de SISVENT recibirá tu solicitud y aplicará el cambio de plan y su vigencia.',
+          transition: current
+            ? { fromLabel: 'Plan actual', from: current.name, toLabel: 'Plan solicitado', to: plan.name }
+            : undefined,
+          meta: [{ label: 'Precio del plan solicitado', value: this.planPrice(plan) }],
+          reason: { label: 'Motivo del cambio', placeholder: 'Ej. Abriremos un segundo local y necesitamos más vendedores.' },
+          banner: { tone: 'info', text: 'Tu plan actual sigue vigente hasta que el cambio se aplique.' },
+          confirmLabel: 'Enviar solicitud',
+        },
+      })
+      .afterClosed()
+      .pipe(filter((result): result is string => typeof result === 'string'))
+      .subscribe((message) => this.send(plan, message));
+  }
+
+  private send(plan: AvailablePlan, message: string): void {
+    this.sending.set(true);
+    this.api.requestChange(plan.id, message).subscribe({
+      next: () => {
+        this.sending.set(false);
+        this.notifications.show(`Solicitud de cambio al plan ${plan.name} enviada. Te contactaremos pronto.`, 'success');
+        this.load();
+      },
+      error: (cause: unknown) => {
+        this.sending.set(false);
+        this.notifications.show(this.messageFor(cause), 'error');
+        if (cause instanceof AppHttpError && cause.status === 409) this.load();
+      },
+    });
+  }
+
+  private messageFor(cause: unknown): string {
+    if (cause instanceof AppHttpError) {
+      const title = (cause.originalError as { error?: { title?: unknown } } | undefined)?.error?.title;
+      if ((cause.status === 409 || cause.status === 400 || cause.status === 404) && typeof title === 'string') return title;
+      if (cause.status === 403) return 'No tienes permiso para solicitar cambios de plan.';
+    }
+    return 'No se pudo enviar la solicitud. Inténtalo nuevamente.';
   }
 }

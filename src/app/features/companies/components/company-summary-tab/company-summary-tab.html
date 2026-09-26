@@ -39,22 +39,24 @@
 
     <section class="surface-card wide">
       <h3>Actividad reciente</h3>
-      <table>
-        <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th></tr></thead>
-        <tbody>
-          @for (event of data.recentActivity; track event.id) {
-            <tr>
-              <td>{{ event.createdAt | dateTime }}</td>
-              <td>{{ event.actorName ?? '—' }}</td>
-              <td>{{ friendlyAction(event.action) }}</td>
-              <td>{{ friendlyEntity(event.entityName) }}</td>
-            </tr>
-          }
-          @if (!data.recentActivity.length) {
-            <tr><td colspan="4" class="muted">Sin actividad reciente registrada.</td></tr>
-          }
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th></tr></thead>
+          <tbody>
+            @for (event of data.recentActivity; track event.id) {
+              <tr>
+                <td>{{ event.createdAt | dateTime }}</td>
+                <td>{{ event.actorName ?? '—' }}</td>
+                <td>{{ friendlyAction(event.action) }}</td>
+                <td>{{ friendlyEntity(event.entityName) }}</td>
+              </tr>
+            }
+            @if (!data.recentActivity.length) {
+              <tr><td colspan="4" class="muted">Sin actividad reciente registrada.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 } @else {

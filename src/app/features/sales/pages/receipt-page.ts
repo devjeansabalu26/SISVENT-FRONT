@@ -1,10 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { SaleDetail } from '../models/sale-detail.model';
+import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
+import { downloadReceiptPdf } from '../utils/receipt-pdf';
 
 @Component({
   selector: 'app-receipt-page',
@@ -19,7 +22,13 @@ export class ReceiptPage implements OnInit {
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
 
+  private readonly company = inject(CompanyContextService).company;
+
   readonly loading = signal(true);
+  readonly downloading = signal(false);
+  private readonly mailer = inject(ReceiptMailerService);
+  readonly sending = this.mailer.sending;
+  readonly companyName = computed(() => this.company()?.commercialName ?? 'SISVENT');
   readonly sale = signal<SaleDetail | null>(null);
 
   ngOnInit(): void {
@@ -40,11 +49,23 @@ export class ReceiptPage implements OnInit {
     window.print();
   }
 
+  /** Envía el comprobante (el mismo PDF que se descarga) al correo del cliente o al que se indique. */
   sendEmail(): void {
-    this.notifications.show('El envío por correo se habilitará cuando exista el endpoint correspondiente.', 'info');
+    const sale = this.sale();
+    if (sale) this.mailer.send(sale);
   }
 
-  downloadPdf(): void {
-    this.notifications.show('La descarga en PDF se habilita cuando el endpoint esté disponible.', 'info');
+  /** Ticket de 80 mm en PDF, generado en el navegador con los datos de la venta. */
+  async downloadPdf(): Promise<void> {
+    const sale = this.sale();
+    if (!sale || this.downloading()) return;
+    this.downloading.set(true);
+    try {
+      await downloadReceiptPdf(sale, this.company()?.commercialName ?? 'SISVENT');
+    } catch {
+      this.notifications.show('No se pudo generar el PDF del comprobante.', 'error');
+    } finally {
+      this.downloading.set(false);
+    }
   }
 }

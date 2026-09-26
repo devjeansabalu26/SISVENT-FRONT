@@ -62,47 +62,51 @@
     <div [hidden]="activeTab() !== 'history'" class="cards">
       <section class="surface-card wide">
         <h3>Historial de precios de suscripción</h3>
-        <table>
-          <thead>
-            <tr><th>Fecha de cambio</th><th>Precio anterior</th><th>Precio nuevo</th><th>Responsable</th><th>Motivo</th></tr>
-          </thead>
-          <tbody>
-            @for (row of plan.priceHistory; track row.changedAt) {
-              <tr>
-                <td>{{ row.changedAt | date: 'short' }}</td>
-                <td>{{ row.oldPrice != null ? ('S/ ' + row.oldPrice.toFixed(2)) : '—' }}</td>
-                <td>S/ {{ row.newPrice.toFixed(2) }}</td>
-                <td>{{ row.changedByName ?? '—' }}</td>
-                <td>{{ row.reason ?? '—' }}</td>
-              </tr>
-            }
-            @if (!plan.priceHistory.length) {
-              <tr><td colspan="5" class="muted">Sin cambios de precio registrados.</td></tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha de cambio</th><th>Precio anterior</th><th>Precio nuevo</th><th>Responsable</th><th>Motivo</th></tr>
+            </thead>
+            <tbody>
+              @for (row of plan.priceHistory; track row.changedAt) {
+                <tr>
+                  <td>{{ row.changedAt | date: 'short' }}</td>
+                  <td>{{ row.oldPrice != null ? ('S/ ' + row.oldPrice.toFixed(2)) : '—' }}</td>
+                  <td>S/ {{ row.newPrice.toFixed(2) }}</td>
+                  <td>{{ row.changedByName ?? '—' }}</td>
+                  <td>{{ row.reason ?? '—' }}</td>
+                </tr>
+              }
+              @if (!plan.priceHistory.length) {
+                <tr><td colspan="5" class="muted">Sin cambios de precio registrados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section class="surface-card wide">
         <h3>Historial de cambios</h3>
-        <table>
-          <thead>
-            <tr><th>Fecha</th><th>Responsable</th><th>Acción</th><th>Detalle</th></tr>
-          </thead>
-          <tbody>
-            @for (row of plan.changeHistory; track row.changedAt) {
-              <tr>
-                <td>{{ row.changedAt | date: 'short' }}</td>
-                <td>{{ row.actorName ?? '—' }}</td>
-                <td>{{ friendlyAction(row.action) }}</td>
-                <td>{{ row.detail ?? '—' }}</td>
-              </tr>
-            }
-            @if (!plan.changeHistory.length) {
-              <tr><td colspan="4" class="muted">Sin cambios registrados.</td></tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Responsable</th><th>Acción</th><th>Detalle</th></tr>
+            </thead>
+            <tbody>
+              @for (row of plan.changeHistory; track row.changedAt) {
+                <tr>
+                  <td>{{ row.changedAt | date: 'short' }}</td>
+                  <td>{{ row.actorName ?? '—' }}</td>
+                  <td>{{ friendlyAction(row.action) }}</td>
+                  <td>{{ row.detail ?? '—' }}</td>
+                </tr>
+              }
+              @if (!plan.changeHistory.length) {
+                <tr><td colspan="4" class="muted">Sin cambios registrados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   }

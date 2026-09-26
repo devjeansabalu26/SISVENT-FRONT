@@ -8,10 +8,20 @@
     <div><dt>Cliente</dt><dd>{{ data.customer }}</dd></div>
     <div><dt>Método de pago</dt><dd>{{ data.paymentMethod }}</dd></div>
     <div><dt>Monto total</dt><dd>S/ {{ data.total.toFixed(2) }}</dd></div>
+    @for (detail of data.paymentDetails ?? []; track $index) {
+      <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>
+    }
   </dl>
+
+  @if (data.change != null && data.change > 0) {
+    <p class="change">Entregar vuelto: <strong>S/ {{ data.change.toFixed(2) }}</strong></p>
+  }
 
   <footer>
     <button type="button" class="ghost" (click)="close('print')"><span class="material-icons">print</span>Imprimir</button>
+    <button type="button" class="ghost" (click)="close('email')" [title]="data.clientEmail ? 'Enviar a ' + data.clientEmail : 'Enviar por correo'">
+      <span class="material-icons">mail</span>Enviar por correo
+    </button>
     <button type="button" class="ghost" (click)="close('detail')"><span class="material-icons">visibility</span>Ver detalle</button>
     <button type="button" class="primary" (click)="close('new')"><span class="material-icons">add</span>Nueva venta</button>
   </footer>

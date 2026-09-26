@@ -25,3 +25,26 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
+
+/*
+ * Tablas: si el contenido es más ancho que el contenedor (pantallas medianas o móviles) se hace scroll
+ * horizontal en lugar de ocultar las columnas de la derecha. Envolver cada <table> en .table-scroll.
+ */
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll > table {
+  min-width: 100%;
+}
+
+/* Dentro de grids/flex un hijo ancho estiraría la tarjeta; así el scroll queda dentro de la tabla. */
+section,
+article,
+.surface-card,
+.card {
+  min-width: 0;
+}

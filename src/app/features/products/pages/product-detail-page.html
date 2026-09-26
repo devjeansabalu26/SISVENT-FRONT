@@ -47,19 +47,21 @@
     <section class="surface-card">
       <h3>Historial de precios</h3>
       @if (priceHistory().length) {
-        <table>
-          <thead><tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
-          <tbody>
-            @for (item of priceHistory(); track item.changedAt) {
-              <tr>
-                <td>{{ item.changedAt | date: 'short' }}</td>
-                <td>S/ {{ item.oldPrice.toFixed(2) }}</td>
-                <td>S/ {{ item.newPrice.toFixed(2) }}</td>
-                <td>{{ item.reason || '—' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
+            <tbody>
+              @for (item of priceHistory(); track item.changedAt) {
+                <tr>
+                  <td>{{ item.changedAt | date: 'short' }}</td>
+                  <td>S/ {{ item.oldPrice.toFixed(2) }}</td>
+                  <td>S/ {{ item.newPrice.toFixed(2) }}</td>
+                  <td>{{ item.reason || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       } @else {
         <p class="muted">Sin cambios de precio registrados.</p>
       }

@@ -51,24 +51,26 @@
 
   @if (data.diff; as diff) {
     @if (diff.rows.length) {
-      <table class="review__diff">
-        <thead>
-          <tr>
-            <th>{{ headers[0] }}</th>
-            <th>{{ headers[1] }}</th>
-            <th>{{ headers[2] }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of diff.rows; track row.field) {
+      <div class="table-scroll">
+        <table class="review__diff">
+          <thead>
             <tr>
-              <td>{{ row.field }}</td>
-              <td class="before">{{ row.before }}</td>
-              <td class="after">{{ row.after }}</td>
+              <th>{{ headers[0] }}</th>
+              <th>{{ headers[1] }}</th>
+              <th>{{ headers[2] }}</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (row of diff.rows; track row.field) {
+              <tr>
+                <td>{{ row.field }}</td>
+                <td class="before">{{ row.before }}</td>
+                <td class="after">{{ row.after }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     } @else {
       <p class="muted">No hay cambios respecto a los valores guardados.</p>
     }

@@ -1,4 +1,4 @@
-<app-page-header title="Configuración de empresa" description="Parámetros fiscales, preferencias e impresión del sistema" />
+<app-page-header title="Configuración de empresa" description="Ajusta los parámetros fiscales, preferencias e impresión del sistema" />
 
 <nav class="tabs" aria-label="Secciones de configuración">
   <button type="button" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
@@ -9,63 +9,262 @@
   <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Seguridad</button>
 </nav>
 
-@if (activeTab() === 'general') {
-  @if (loading()) {
-    <section class="state">Cargando configuración…</section>
-  } @else if (loadError()) {
-    <section class="state">
-      <p>No se pudo cargar la configuración.</p>
-      <button type="button" (click)="load()">Reintentar</button>
-    </section>
-  } @else {
-    <form class="settings" [formGroup]="form" (ngSubmit)="save()">
-      <fieldset>
-        <legend>Preferencias regionales</legend>
-        <label>
-          Código de moneda (ISO 4217)
-          <input formControlName="currencyCode" maxlength="3" autocapitalize="characters" placeholder="PEN" />
-          @if (form.controls.currencyCode.touched && form.controls.currencyCode.invalid) {
-            <small class="hint">Debe tener 3 letras, por ejemplo PEN o USD.</small>
-          }
-        </label>
-        <label>
-          Idioma del sistema
-          <input formControlName="locale" placeholder="es-PE" />
-        </label>
-        <label>
-          Zona horaria (IANA)
-          <input formControlName="timezone" placeholder="America/Lima" />
-        </label>
-      </fieldset>
+@if (loading()) {
+  <section class="state">Cargando configuración…</section>
+} @else if (loadError()) {
+  <section class="state">
+    <p>No se pudo cargar la configuración.</p>
+    <button type="button" (click)="load()">Reintentar</button>
+  </section>
+} @else {
+  <form class="settings" [formGroup]="form" (ngSubmit)="save()">
+    @switch (activeTab()) {
+      @case ('general') {
+        <fieldset>
+          <legend>Datos fiscales</legend>
+          <label>
+            Régimen tributario
+            <select [formControl]="extras.controls.taxRegime">
+              @for (regime of taxRegimes; track regime.value) {
+                <option [value]="regime.value">{{ regime.label }}</option>
+              }
+            </select>
+          </label>
+          <div class="row">
+            <label>
+              Serie de boletas
+              <input [formControl]="extras.controls.receiptSeries" maxlength="4" autocapitalize="characters" placeholder="B001" />
+              @if (extras.controls.receiptSeries.touched && extras.controls.receiptSeries.invalid) {
+                <small class="hint">Empieza con B y tiene 4 caracteres, por ejemplo B001.</small>
+              }
+            </label>
+            <label>
+              Serie de facturas
+              <input [formControl]="extras.controls.invoiceSeries" maxlength="4" autocapitalize="characters" placeholder="F001" />
+              @if (extras.controls.invoiceSeries.touched && extras.controls.invoiceSeries.invalid) {
+                <small class="hint">Empieza con F y tiene 4 caracteres, por ejemplo F001.</small>
+              }
+            </label>
+          </div>
+        </fieldset>
 
-      <fieldset>
-        <legend>Punto de venta (POS) e inventario</legend>
-        <label class="check">
-          <input type="checkbox" formControlName="strictStockControl" />
-          Control estricto de stock (bloquea ventas sin existencias)
-        </label>
-        <label class="check">
-          <input type="checkbox" formControlName="lowStockAlertEnabled" />
-          Alertas de stock bajo
-        </label>
-        <label class="check">
-          <input type="checkbox" formControlName="notifyManualAdjustment" />
-          Notificar ajustes manuales de inventario
-        </label>
-      </fieldset>
+        <fieldset>
+          <legend>Preferencias regionales</legend>
+          <div class="row">
+            <label>
+              Zona horaria (IANA)
+              <input formControlName="timezone" placeholder="America/Lima" />
+            </label>
+            <label>
+              Código de moneda (ISO 4217)
+              <input formControlName="currencyCode" maxlength="3" autocapitalize="characters" placeholder="PEN" />
+              @if (form.controls.currencyCode.touched && form.controls.currencyCode.invalid) {
+                <small class="hint">Debe tener 3 letras, por ejemplo PEN o USD.</small>
+              }
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              Formato de fecha
+              <select [formControl]="extras.controls.dateFormat">
+                @for (format of dateFormats; track format) {
+                  <option [value]="format">{{ format }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Idioma del sistema
+              <input formControlName="locale" placeholder="es-PE" />
+            </label>
+          </div>
+        </fieldset>
 
-      <footer>
+        <fieldset>
+          <legend>Punto de venta (POS) e inventario</legend>
+          <label class="check">
+            <input type="checkbox" formControlName="strictStockControl" />
+            Control estricto de stock (bloquea ventas sin existencias)
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="lowStockAlertEnabled" />
+            Alertas de stock bajo
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="notifyManualAdjustment" />
+            Notificar ajustes manuales de inventario
+          </label>
+
+          <div class="toggle-list">
+            <label class="toggle">
+              <span>
+                <strong>Impresión automática de comprobante</strong>
+                <small>Generar ticket inmediatamente tras cerrar venta</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.autoPrintReceipt" />
+            </label>
+            <label class="toggle">
+              <span>
+                <strong>Efectos de sonido</strong>
+                <small>Sonido de confirmación al registrar productos</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.soundEffects" />
+            </label>
+            <label class="toggle">
+              <span>
+                <strong>Operación offline habilitada</strong>
+                <small>Permitir ventas locales sin conexión de red</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.offlineMode" />
+            </label>
+          </div>
+
+          <label class="narrow">
+            Descuento máximo autorizado (%)
+            <input type="number" min="0" max="100" step="0.5" [formControl]="extras.controls.maxDiscountPercent" />
+            @if (extras.controls.maxDiscountPercent.touched && extras.controls.maxDiscountPercent.invalid) {
+              <small class="hint">Ingresa un porcentaje entre 0 y 100.</small>
+            }
+          </label>
+        </fieldset>
+      }
+
+      @case ('billing') {
+        <fieldset>
+          <legend>Comprobantes de pago</legend>
+          <label>
+            Formato de impresión
+            <select [formControl]="extras.controls.ticketFormat">
+              @for (format of ticketFormats; track format.value) {
+                <option [value]="format.value">{{ format.label }}</option>
+              }
+            </select>
+          </label>
+          <div class="series-preview">
+            <div><span>Boletas</span><strong>{{ extras.controls.receiptSeries.value || '—' }}-00000001</strong></div>
+            <div><span>Facturas</span><strong>{{ extras.controls.invoiceSeries.value || '—' }}-00000001</strong></div>
+            <small>Las series se editan en la pestaña General → Datos fiscales.</small>
+          </div>
+          <label>
+            Mensaje al pie del comprobante
+            <input [formControl]="extras.controls.receiptFooter" maxlength="120" placeholder="Gracias por su compra" />
+            <small class="counter">{{ extras.controls.receiptFooter.value.length }}/120</small>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Impuestos</legend>
+          <div class="toggle-list">
+            <label class="toggle">
+              <span>
+                <strong>Precios incluyen IGV</strong>
+                <small>El precio de venta del catálogo ya contiene el IGV (18%)</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.pricesIncludeTax" />
+            </label>
+            <label class="toggle">
+              <span>
+                <strong>Mostrar logo en el comprobante</strong>
+                <small>Usa el logo configurado en el perfil de la empresa</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.showLogoOnReceipt" />
+            </label>
+          </div>
+        </fieldset>
+      }
+
+      @case ('notifications') {
+        <p class="note">Las alertas de stock bajo y de ajustes manuales de inventario se configuran en la pestaña General.</p>
+        <fieldset>
+          <legend>Canales</legend>
+          <label>
+            Correo para notificaciones
+            <input type="email" [formControl]="extras.controls.notificationEmail" placeholder="admin@miempresa.com" />
+            @if (extras.controls.notificationEmail.touched && extras.controls.notificationEmail.invalid) {
+              <small class="hint">Ingresa un correo válido.</small>
+            }
+          </label>
+          <div class="toggle-list">
+            <label class="toggle">
+              <span><strong>Correo electrónico</strong><small>Enviar avisos al correo indicado</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.emailChannel" />
+            </label>
+            <label class="toggle">
+              <span><strong>Centro de notificaciones</strong><small>Mostrar avisos dentro de SISVENT</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.inAppChannel" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Eventos</legend>
+          <div class="toggle-list">
+            <label class="toggle">
+              <span><strong>Vencimiento del plan</strong><small>Aviso 7 días antes de que termine la vigencia</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.notifyPlanExpiry" />
+            </label>
+            <label class="toggle">
+              <span><strong>Venta anulada</strong><small>Aviso cada vez que un usuario anula una venta</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.notifyCancelledSale" />
+            </label>
+            <label class="toggle">
+              <span><strong>Resumen diario de ventas</strong><small>Informe al cierre de cada día</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.notifyDailySummary" />
+            </label>
+          </div>
+        </fieldset>
+      }
+
+      @case ('security') {
+        <fieldset>
+          <legend>Política de acceso del servidor</legend>
+          <p class="note">Valores por defecto de la API. Los define el servidor y no se pueden cambiar desde aquí.</p>
+          <dl class="policy">
+            <div><dt>Duración de la sesión</dt><dd>15 minutos</dd></div>
+            <div><dt>Bloqueo por intentos fallidos</dt><dd>5 intentos · 15 minutos</dd></div>
+            <div><dt>Límite de intentos de inicio de sesión</dt><dd>10 por minuto por IP</dd></div>
+            <div><dt>Verificación en dos pasos</dt><dd><span class="badge">No disponible</span></dd></div>
+          </dl>
+        </fieldset>
+        <fieldset>
+          <legend>Políticas de contraseña y sesión</legend>
+          <div class="toggle-list">
+            <label class="toggle">
+              <span>
+                <strong>Contraseñas seguras obligatorias</strong>
+                <small>Mínimo 8 caracteres con mayúscula, número y símbolo</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.strongPasswords" />
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              Caducidad de contraseña (días)
+              <input type="number" min="0" max="365" [formControl]="extras.controls.passwordExpiryDays" />
+              <small class="muted">0 = nunca caduca</small>
+              @if (extras.controls.passwordExpiryDays.touched && extras.controls.passwordExpiryDays.invalid) {
+                <small class="hint">Entre 0 y 365 días.</small>
+              }
+            </label>
+            <label>
+              Cierre por inactividad (minutos)
+              <input type="number" min="5" max="240" [formControl]="extras.controls.inactivityLogoutMinutes" />
+              @if (extras.controls.inactivityLogoutMinutes.touched && extras.controls.inactivityLogoutMinutes.invalid) {
+                <small class="hint">Entre 5 y 240 minutos.</small>
+              }
+            </label>
+          </div>
+        </fieldset>
+      }
+    }
+
+    <footer>
+      <span class="muted">{{ lastSavedLabel() }}</span>
+      <div class="footer__actions">
+        <button type="button" class="ghost" [disabled]="saving()" (click)="restore()">Restablecer</button>
         <button type="submit" class="primary" [disabled]="saving()">
           {{ saving() ? 'Guardando…' : 'Guardar configuración' }}
         </button>
-      </footer>
-    </form>
-  }
-} @else {
-  <section class="state">
-    <p>
-      Esta sección del diseño (series de boletas/facturas, régimen tributario, canales de notificación, políticas de
-      seguridad) se habilitará cuando exista el endpoint correspondiente en el backend.
-    </p>
-  </section>
+      </div>
+    </footer>
+  </form>
 }
