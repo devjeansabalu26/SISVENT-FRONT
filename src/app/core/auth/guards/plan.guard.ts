@@ -3,11 +3,20 @@ import { CanActivateFn, Router } from '@angular/router';
 import { CompanyPlan } from '../../context/company-context/company-plan.model';
 import { AccessControlService } from '../services/access-control.service';
 
+/**
+ * Exige la funcionalidad del plan (`data.requiredFeature`). Si falta, en lugar de /403 se muestra
+ * la pantalla que explica qué planes la incluyen. `data.plans` se mantiene por compatibilidad.
+ */
 export const planGuard: CanActivateFn = (route) => {
+  const access = inject(AccessControlService);
+  const router = inject(Router);
   const plans = (route.data['plans'] ?? []) as readonly CompanyPlan[];
   const requiredFeature = route.data['requiredFeature'] as string | undefined;
-  const features = requiredFeature ? [requiredFeature] : undefined;
-  return inject(AccessControlService).canAccess({ plans, features })
-    ? true
-    : inject(Router).createUrlTree(['/403']);
+
+  if (requiredFeature && !access.hasFeature(requiredFeature)) {
+    return router.createUrlTree(['/app/upgrade'], {
+      queryParams: { feature: requiredFeature, module: route.data['title'] ?? null },
+    });
+  }
+  return access.canAccess({ plans }) ? true : router.createUrlTree(['/403']);
 };

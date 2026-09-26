@@ -5,7 +5,7 @@ import { AppRole } from '../../../core/auth/constants/app-role.constant';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { MAIN_NAVIGATION } from '../navigation/navigation.config';
-import { NavigationGroup, NavigationItem } from '../navigation/navigation-item.model';
+import { NavigationGroup, SidebarItem } from '../navigation/navigation-item.model';
 
 const ROLE_LABEL: Readonly<Record<AppRole, string>> = {
   SUPERADMIN: 'Superadministrador',
@@ -36,15 +36,16 @@ export class Sidebar {
     return role ? ROLE_LABEL[role] : '';
   });
 
-  private readonly items = computed(() =>
-    MAIN_NAVIGATION.filter((item) =>
-      this.access.canAccess({ ...item, features: item.requiredFeature ? [item.requiredFeature] : undefined }),
+  /** Visibles por rol/permiso; los que el plan no incluye se muestran con candado (no se ocultan). */
+  private readonly items = computed<readonly SidebarItem[]>(() =>
+    MAIN_NAVIGATION.filter((item) => this.access.canAccess({ roles: item.roles, permissions: item.permissions, plans: item.plans })).map(
+      (item) => ({ ...item, locked: this.access.isLockedByPlan({ ...item, feature: item.requiredFeature }) }),
     ),
   );
 
   /** Groups visible items by their `group` label, preserving first-seen order. */
   readonly groups = computed<readonly NavigationGroup[]>(() => {
-    const byLabel = new Map<string | null, NavigationItem[]>();
+    const byLabel = new Map<string | null, SidebarItem[]>();
     for (const item of this.items()) {
       const label = item.group ?? null;
       const bucket = byLabel.get(label) ?? [];

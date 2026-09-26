@@ -1,4 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, Injector, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, firstValueFrom, retry, throwError, timer } from 'rxjs';
 import { CompanyContextService } from '../../context/company-context/company-context.service';
 import { UserContextService } from '../../context/user-context/user-context.service';
@@ -8,7 +10,7 @@ import { ROLE_PERMISSIONS } from '../constants/role-permissions.constant';
 import { LoginResult, SessionUser } from '../models/auth-api.model';
 import { AuthApiService } from './auth-api.service';
 import { AuthService } from './auth.service';
-import { TokenStorageService } from './token-storage.service';
+import { TOKEN_KEY, TokenStorageService } from './token-storage.service';
 
 /**
  * Owns the authenticated session lifecycle: it exchanges a stored JWT for the
@@ -24,6 +26,19 @@ export class AppSessionService {
   private readonly users = inject(UserContextService);
   private readonly companies = inject(CompanyContextService);
   private readonly theme = inject(ThemeService);
+  private readonly injector = inject(Injector);
+
+  constructor() {
+    // La sesión vive en localStorage y se comparte entre pestañas: si se cierra sesión en otra pestaña,
+    // esta también sale al login en lugar de quedar con una sesión que ya no existe.
+    inject(DOCUMENT).defaultView?.addEventListener('storage', (event) => {
+      if (event.key === TOKEN_KEY && !event.newValue && this.auth.isAuthenticated()) {
+        this.clear();
+        // Router se resuelve al momento (evita dependencia circular durante el arranque).
+        void this.injector.get(Router).navigateByUrl('/login');
+      }
+    });
+  }
 
   /** Runs during app initialization, before the router activates any route. */
   async bootstrap(): Promise<void> {

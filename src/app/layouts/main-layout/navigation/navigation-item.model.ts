@@ -16,7 +16,12 @@ export interface NavigationItem {
   readonly children?: readonly NavigationItem[];
 }
 
+/** Ítem visible en el sidebar; `locked` = el plan no incluye su funcionalidad. */
+export interface SidebarItem extends NavigationItem {
+  readonly locked: boolean;
+}
+
 export interface NavigationGroup {
   readonly label: string | null;
-  readonly items: readonly NavigationItem[];
+  readonly items: readonly SidebarItem[];
 }

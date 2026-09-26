@@ -23,7 +23,23 @@ export class AccessControlService {
     if (requirement.permissions?.length && !requirement.permissions.every((permission) => user.permissions.includes(permission))) return false;
     const company = this.companies.company();
     if (requirement.plans?.length && !(company && requirement.plans.includes(company.plan))) return false;
-    if (requirement.features?.length && !requirement.features.every((feature) => company?.features.includes(feature))) return false;
+    if (requirement.features?.length && !requirement.features.every((feature) => this.hasFeature(feature))) return false;
     return true;
+  }
+
+  /**
+   * ¿El plan vigente incluye la funcionalidad? El SUPERADMIN (sin empresa) no depende de un plan.
+   * Es solo para la interfaz: el backend vuelve a validarlo en cada petición.
+   */
+  hasFeature(feature: string): boolean {
+    if (this.users.user()?.role === 'SUPERADMIN') return true;
+    return this.companies.company()?.features.includes(feature) ?? false;
+  }
+
+  /** Cumple rol y permisos, pero su plan no incluye la funcionalidad (se muestra con candado). */
+  isLockedByPlan(requirement: { roles?: readonly AppRole[]; permissions?: readonly AppPermission[]; feature?: string }): boolean {
+    return !!requirement.feature
+      && this.canAccess({ roles: requirement.roles, permissions: requirement.permissions })
+      && !this.hasFeature(requirement.feature);
   }
 }

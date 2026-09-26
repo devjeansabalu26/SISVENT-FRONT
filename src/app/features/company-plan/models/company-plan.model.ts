@@ -34,6 +34,8 @@ export interface AvailablePlan {
   readonly maxStores: number | null;
   readonly maxProducts: number | null;
   readonly features: readonly string[];
+  /** Códigos (AUDIT, REPORTS…) para saber qué plan incluye un módulo. */
+  readonly featureCodes?: readonly string[];
   readonly isCurrent: boolean;
 }
 
