@@ -17,10 +17,14 @@
     <p class="change">Entregar vuelto: <strong>S/ {{ data.change.toFixed(2) }}</strong></p>
   }
 
+  @if (data.autoEmailedTo) {
+    <p class="auto-email"><span class="material-icons">mark_email_read</span>Enviando el comprobante a <strong>{{ data.autoEmailedTo }}</strong></p>
+  }
+
   <footer>
     <button type="button" class="ghost" (click)="close('print')"><span class="material-icons">print</span>Imprimir</button>
     <button type="button" class="ghost" (click)="close('email')" [title]="data.clientEmail ? 'Enviar a ' + data.clientEmail : 'Enviar por correo'">
-      <span class="material-icons">mail</span>Enviar por correo
+      <span class="material-icons">mail</span>{{ data.autoEmailedTo ? 'Reenviar por correo' : 'Enviar por correo' }}
     </button>
     <button type="button" class="ghost" (click)="close('detail')"><span class="material-icons">visibility</span>Ver detalle</button>
     <button type="button" class="primary" (click)="close('new')"><span class="material-icons">add</span>Nueva venta</button>

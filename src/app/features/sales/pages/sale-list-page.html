@@ -2,7 +2,7 @@
   [title]="isAdmin ? 'Historial de ventas' : 'Mis ventas'"
   [description]="isAdmin ? 'Registro completo de operaciones de venta' : 'Ventas registradas con tu usuario'"
 >
-  @if (isAdmin) {<button class="ghost" type="button" (click)="closeCash()"><span class="material-icons">point_of_sale</span>Cierre de caja</button>}
+  @if (canManage) {<a class="ghost" routerLink="/app/sales/cash-closures"><span class="material-icons">history</span>Cierres</a><button class="ghost" type="button" (click)="closeCash()"><span class="material-icons">point_of_sale</span>Cierre de caja</button>}
 </app-page-header>
 <section class="filters sales-filters">
   <label><span class="material-icons">search</span><input [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nro de venta o cliente" /></label>

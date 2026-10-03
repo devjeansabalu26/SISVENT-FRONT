@@ -1,11 +1,13 @@
 @if (product(); as product) {
   <app-page-header [title]="product.name" description="Ficha del producto, precios y stock">
     <a class="ghost" routerLink="/app/products"><span class="material-icons">arrow_back</span>Productos</a>
-    <button type="button" class="ghost" (click)="toggleActive()">
-      <span class="material-icons">{{ product.isActive ? 'toggle_off' : 'toggle_on' }}</span>
-      {{ product.isActive ? 'Desactivar' : 'Activar' }}
-    </button>
-    <a class="ghost" [routerLink]="['/app/products', product.id, 'edit']"><span class="material-icons">edit</span>Editar producto</a>
+    @if (canManage) {
+      <button type="button" class="ghost" (click)="toggleActive()">
+        <span class="material-icons">{{ product.isActive ? 'toggle_off' : 'toggle_on' }}</span>
+        {{ product.isActive ? 'Desactivar' : 'Activar' }}
+      </button>
+      <a class="ghost" [routerLink]="['/app/products', product.id, 'edit']"><span class="material-icons">edit</span>Editar producto</a>
+    }
   </app-page-header>
 
   <div class="summary surface-card">

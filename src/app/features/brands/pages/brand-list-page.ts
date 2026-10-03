@@ -1,7 +1,8 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
-import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
@@ -23,14 +24,15 @@ export class BrandListPage implements OnInit {
   private readonly api = inject(BrandApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
-  private readonly userContext = inject(UserContextService);
 
   readonly loading = signal(false);
   readonly search = signal('');
   readonly statusFilter = signal('');
   private readonly brands = signal<readonly Brand[]>([]);
 
-  readonly canManage = computed(() => this.userContext.user()?.role === 'ADMIN');
+  /** Menú con nivel Gestionar (ADMIN o vendedor al que el ADMIN se lo asignó). */
+  readonly canManage = computed(() => this.access.canAccess({ permissions: [APP_PERMISSIONS.brandsManage] }));
+  private readonly access = inject(AccessControlService);
 
   readonly rows = computed(() => {
     const term = this.search().trim().toLowerCase();

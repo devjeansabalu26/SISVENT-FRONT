@@ -1,3 +1,5 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
@@ -17,6 +19,7 @@ import { GoodsReceiptListItem, GoodsReceiptSummary } from '../models/goods-recei
 export class GoodsReceiptListPage implements OnInit {
   private readonly api = inject(GoodsReceiptApiService);
   private readonly router = inject(Router);
+  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.goodsReceiptsManage] });
 
   readonly loading = signal(false);
   readonly search = signal('');

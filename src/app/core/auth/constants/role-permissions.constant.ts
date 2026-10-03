@@ -2,6 +2,9 @@ import { APP_PERMISSIONS, AppPermission } from './app-permission.constant';
 import { AppRole } from './app-role.constant';
 
 /**
+ * Respaldo cuando la sesión no trae `company.modules` (backend anterior a los menús configurables). Con
+ * menús, ADMIN y VENDEDOR toman sus permisos de MODULE_PERMISSIONS (module-permissions.constant.ts).
+ *
  * UI-only projection of a backend role onto the permission slugs the frontend
  * uses to decide which navigation entries and client routes are visible.
  *
@@ -28,14 +31,19 @@ export const ROLE_PERMISSIONS: Readonly<Record<AppRole, readonly AppPermission[]
     APP_PERMISSIONS.usersCreate,
     APP_PERMISSIONS.usersEdit,
     APP_PERMISSIONS.productsView,
+    APP_PERMISSIONS.productsManage,
     APP_PERMISSIONS.categoriesView,
     APP_PERMISSIONS.categoriesManage,
     APP_PERMISSIONS.brandsView,
     APP_PERMISSIONS.brandsManage,
     APP_PERMISSIONS.inventoryView,
+    APP_PERMISSIONS.inventoryAdjust,
+    APP_PERMISSIONS.inventoryMovementsView,
     APP_PERMISSIONS.salesView,
     APP_PERMISSIONS.salesCreate,
+    APP_PERMISSIONS.salesManage,
     APP_PERMISSIONS.customersView,
+    APP_PERMISSIONS.customersManage,
     APP_PERMISSIONS.reportsView,
     APP_PERMISSIONS.auditView,
     APP_PERMISSIONS.settingsManage,
@@ -57,5 +65,6 @@ export const ROLE_PERMISSIONS: Readonly<Record<AppRole, readonly AppPermission[]
     APP_PERMISSIONS.salesView,
     APP_PERMISSIONS.salesCreate,
     APP_PERMISSIONS.customersView,
+    APP_PERMISSIONS.customersManage,
   ],
 };

@@ -1,3 +1,5 @@
+import { SessionModule } from '../constants/module-permissions.constant';
+
 /** Contracts for POST /api/v1/auth/login and GET /api/v1/auth/me. */
 
 export interface LoginCredentials {
@@ -17,6 +19,8 @@ export interface SessionCompany {
   readonly secondaryColor: string | null;
   readonly accentColor: string | null;
   readonly backgroundColor: string | null;
+  /** Menús efectivos del usuario con su nivel (ausente en backends anteriores a los menús configurables). */
+  readonly modules?: readonly SessionModule[];
 }
 
 /** Session user as returned by the backend (login payload and /me body). */

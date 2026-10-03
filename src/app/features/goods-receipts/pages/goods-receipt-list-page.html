@@ -1,5 +1,5 @@
 <app-page-header title="Ingresos de mercadería" description="Registro de compras y recepción de productos">
-  <a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nuevo ingreso</a>
+  @if (canManage) {<a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nuevo ingreso</a>}
 </app-page-header>
 
 <div class="kpi-grid">

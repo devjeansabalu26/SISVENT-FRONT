@@ -24,6 +24,8 @@ export interface SettingsExtras {
   readonly showLogoOnReceipt: boolean;
   /** `null` al leer si no hay mensaje; al guardar, `''` lo borra. */
   readonly receiptFooter: string | null;
+  /** Enviar el comprobante al correo del cliente al confirmar la venta (011_settings_auto_email_receipt.sql). */
+  readonly autoEmailReceipt: boolean;
   // Notificaciones
   /** `null` al leer si no hay correo; al guardar, `''` lo borra. */
   readonly notificationEmail: string | null;

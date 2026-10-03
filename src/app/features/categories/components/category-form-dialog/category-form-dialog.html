@@ -16,6 +16,20 @@
       }
     </label>
     <label class="wide">
+      Categoría principal
+      <select formControlName="parentId">
+        <option value="">— Ninguna (es una categoría principal) —</option>
+        @for (parent of parents; track parent.id) {
+          <option [value]="parent.id">{{ parent.name }}</option>
+        }
+      </select>
+      @if (hasChildren) {
+        <small class="muted">Tiene subcategorías, por eso no puede convertirse en subcategoría.</small>
+      } @else {
+        <small class="muted">Elige una para crear una subcategoría (solo se admite un nivel).</small>
+      }
+    </label>
+    <label class="wide">
       Descripción (opcional)
       <textarea formControlName="description" maxlength="400" rows="3" placeholder="Detalle breve"></textarea>
     </label>

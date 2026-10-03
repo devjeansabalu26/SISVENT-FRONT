@@ -30,3 +30,15 @@ export interface CompanyProfile {
   readonly theme: CompanyTheme;
   readonly fiscal: CompanyFiscal | null;
 }
+
+/** Body de PUT /api/v1/company/profile. */
+export interface UpdateCompanyProfile {
+  readonly businessType: string;
+  readonly phone: string;
+  readonly email: string;
+  readonly address: string;
+  readonly primaryColor: string;
+  readonly secondaryColor: string;
+  readonly accentColor: string;
+  readonly backgroundColor: string;
+}

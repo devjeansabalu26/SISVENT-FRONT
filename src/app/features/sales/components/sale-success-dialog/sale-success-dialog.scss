@@ -80,3 +80,18 @@
 .change strong {
   font-size: 20px;
 }
+.auto-email {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  font-size: 13px;
+}
+.auto-email .material-icons {
+  font-size: 18px;
+}

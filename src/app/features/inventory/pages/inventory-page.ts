@@ -1,3 +1,5 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -24,6 +26,7 @@ export class InventoryPage implements OnInit {
   private readonly storeApi = inject(StoreApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
+  readonly canAdjust = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.inventoryAdjust] });
 
   readonly loading = signal(false);
   readonly stores = signal<readonly { id: string; name: string }[]>([]);

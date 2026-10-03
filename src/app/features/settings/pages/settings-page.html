@@ -170,6 +170,19 @@
             </label>
           </div>
         </fieldset>
+
+        <fieldset>
+          <legend>Envío por correo</legend>
+          <div class="toggle-list">
+            <label class="toggle">
+              <span>
+                <strong>Enviar comprobante por correo automáticamente</strong>
+                <small>Al confirmar la venta se envía el PDF al correo del cliente. Si el cliente no tiene correo, se puede enviar a mano desde el POS.</small>
+              </span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.autoEmailReceipt" />
+            </label>
+          </div>
+        </fieldset>
       }
 
       @case ('notifications') {
@@ -185,7 +198,7 @@
           </label>
           <div class="toggle-list">
             <label class="toggle">
-              <span><strong>Correo electrónico</strong><small>Enviar avisos al correo indicado</small></span>
+              <span><strong>Correo electrónico</strong><small>Copia de las alertas (stock mínimo, ventas anuladas, ajustes, plan por vencer) al correo indicado. Requiere el centro de notificaciones activo.</small></span>
               <input type="checkbox" role="switch" [formControl]="extras.controls.emailChannel" />
             </label>
             <label class="toggle">

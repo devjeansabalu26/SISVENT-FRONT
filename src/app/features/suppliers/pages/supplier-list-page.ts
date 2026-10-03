@@ -1,8 +1,9 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
-import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
@@ -24,7 +25,6 @@ export class SupplierListPage implements OnInit {
   private readonly api = inject(SupplierApiService);
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
-  private readonly userContext = inject(UserContextService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -32,7 +32,8 @@ export class SupplierListPage implements OnInit {
   readonly statusFilter = signal('');
   private readonly suppliers = signal<readonly Supplier[]>([]);
 
-  readonly canManage = computed(() => this.userContext.user()?.role === 'ADMIN');
+  readonly canManage = computed(() => this.access.canAccess({ permissions: [APP_PERMISSIONS.suppliersManage] }));
+  private readonly access = inject(AccessControlService);
 
   readonly rows = computed(() => {
     const term = this.search().trim().toLowerCase();

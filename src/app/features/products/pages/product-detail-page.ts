@@ -1,3 +1,5 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -25,6 +27,7 @@ export class ProductDetailPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
+  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.productsManage] });
 
   readonly loading = signal(true);
   readonly product = signal<ProductDetail | null>(null);

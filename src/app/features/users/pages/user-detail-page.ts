@@ -8,6 +8,7 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { UserFormDialog } from '../components/user-form-dialog/user-form-dialog';
+import { SellerModulesCard } from '../components/seller-modules-card/seller-modules-card';
 import { PlatformUserApiService } from '../data-access/platform-user-api.service';
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, UserFormValue } from '../models/user.model';
@@ -31,7 +32,7 @@ interface UserDetailView {
 
 @Component({
   selector: 'app-user-detail-page',
-  imports: [PageHeader, StatusChip, RouterLink, DatePipe],
+  imports: [PageHeader, StatusChip, RouterLink, DatePipe, SellerModulesCard],
   templateUrl: './user-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

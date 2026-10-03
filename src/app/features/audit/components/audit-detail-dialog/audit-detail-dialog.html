@@ -18,10 +18,30 @@
     <div><dt>Dirección IP</dt><dd>{{ event.ipAddress ?? '—' }}</dd></div>
   </dl>
 
-  <div class="review__chips">
-    <small>Detalle del cambio / motivo</small>
-    <p class="detail">{{ event.detail ?? 'Sin detalle registrado.' }}</p>
-  </div>
+  @if (event.reason) {
+    <div class="review__chips">
+      <small>Motivo</small>
+      <p class="detail">{{ event.reason }}</p>
+    </div>
+  }
+
+  @if (changes.length) {
+    <div class="table-scroll">
+      <table class="review__diff">
+        <thead><tr><th>Campo</th><th>Antes</th><th>Después</th></tr></thead>
+        <tbody>
+          @for (change of changes; track change.field) {
+            <tr><td>{{ change.label }}</td><td>{{ change.before }}</td><td><strong>{{ change.after }}</strong></td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!event.reason) {
+    <div class="review__chips">
+      <small>Detalle del cambio</small>
+      <p class="detail">{{ event.detail ?? 'Sin detalle registrado.' }}</p>
+    </div>
+  }
 
   <footer><button type="button" class="primary" (click)="close()">Cerrar</button></footer>
 </section>

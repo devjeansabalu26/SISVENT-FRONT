@@ -1,0 +1,61 @@
+/** Nombres legibles de los campos que aparecen en old_values/new_values de la auditoría. */
+const FIELD_LABELS: Readonly<Record<string, string>> = {
+  name: 'Nombre',
+  sku: 'SKU',
+  barcode: 'Código de barras',
+  description: 'Descripción',
+  saleprice: 'Precio de venta',
+  referencecost: 'Costo de referencia',
+  isactive: 'Activo',
+  status: 'Estado',
+  categoryid: 'Categoría',
+  brandid: 'Marca',
+  unitid: 'Unidad',
+  minstock: 'Stock mínimo',
+  stockbefore: 'Stock anterior',
+  stockafter: 'Stock resultante',
+  reason: 'Motivo',
+  notes: 'Observaciones',
+  email: 'Correo',
+  phone: 'Teléfono',
+  address: 'Dirección',
+  businesstype: 'Rubro',
+  tradename: 'Nombre comercial',
+  legalname: 'Razón social',
+  taxdocument: 'RUC',
+  documenttype: 'Tipo de documento',
+  documentnumber: 'N.º de documento',
+  displayname: 'Nombre',
+  firstname: 'Nombres',
+  lastname: 'Apellidos',
+  role: 'Rol',
+  primarycolor: 'Color primario',
+  secondarycolor: 'Color secundario',
+  accentcolor: 'Color de acento',
+  backgroundcolor: 'Color de fondo',
+  currencycode: 'Moneda',
+  locale: 'Idioma',
+  timezone: 'Zona horaria',
+  taxregime: 'Régimen tributario',
+  receiptseries: 'Serie de boletas',
+  invoiceseries: 'Serie de facturas',
+  maxdiscountpercent: 'Descuento máximo',
+  autoemailreceipt: 'Envío automático del comprobante por correo',
+  strictstockcontrol: 'Control estricto de stock',
+  lowstockalertenabled: 'Alertas de stock mínimo',
+  notifymanualadjustment: 'Notificar ajustes manuales',
+  leadtimedays: 'Tiempo de reposición (días)',
+  contactname: 'Contacto',
+  code: 'Código',
+  total: 'Total',
+  price: 'Precio',
+  currentprice: 'Precio actual',
+};
+
+/** `SalePrice` → "Precio de venta"; si no está en la lista, separa las palabras: `ticketFormat` → "Ticket format". */
+export function auditFieldLabel(field: string): string {
+  const known = FIELD_LABELS[field.replace(/[_\s]/g, '').toLowerCase()];
+  if (known) return known;
+  const words = field.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').trim().toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}

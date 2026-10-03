@@ -5,6 +5,14 @@ import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { PaymentMethodOption, PosPaymentLine } from '../models/payment.model';
 import { SaleDetail } from '../models/sale-detail.model';
 
+/** Opciones de la empresa que usa el POS (`GET /api/v1/pos/settings`, accesible para ADMIN y VENDEDOR). */
+export interface PosSettings {
+  /** Enviar el comprobante al correo del cliente al confirmar la venta. */
+  readonly autoEmailReceipt: boolean;
+  /** El servidor tiene SMTP configurado. */
+  readonly emailConfigured: boolean;
+}
+
 export interface PosSaleLineInput {
   readonly productId: string;
   readonly quantity: number;
@@ -31,6 +39,10 @@ export class PosApiService {
   /** Métodos de pago activos de la empresa, con su tipo (CASH / CARD / DIGITAL). */
   paymentMethods(): Observable<readonly PaymentMethodOption[]> {
     return this.http.get<readonly PaymentMethodOption[]>(`${this.baseUrl}/payment-methods`);
+  }
+
+  settings(): Observable<PosSettings> {
+    return this.http.get<PosSettings>(`${this.baseUrl}/settings`);
   }
 
   confirm(body: PosSaleRequest): Observable<SaleDetail> {

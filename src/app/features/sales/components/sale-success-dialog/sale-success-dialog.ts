@@ -11,6 +11,8 @@ export interface SaleSuccessData {
   readonly paymentDetails?: readonly string[];
   /** Correo del cliente: si existe se muestra junto al botón de envío. */
   readonly clientEmail?: string | null;
+  /** Si la empresa tiene el envío automático, correo al que ya se está enviando el comprobante. */
+  readonly autoEmailedTo?: string | null;
 }
 
 export type SaleSuccessAction = 'print' | 'detail' | 'email' | 'new';

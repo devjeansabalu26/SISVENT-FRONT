@@ -1,6 +1,8 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -10,12 +12,13 @@ import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model'
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CashCloseDialog } from '../components/cash-close-dialog/cash-close-dialog';
+import { CashClosure } from '../data-access/cash-closure-api.service';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
 
 @Component({
   selector: 'app-sale-list-page',
-  imports: [DataTable, EmptyState, PageHeader, FormsModule],
+  imports: [DataTable, EmptyState, PageHeader, FormsModule, RouterLink],
   templateUrl: './sale-list-page.html',
   styleUrl: './sale-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +29,8 @@ export class SaleListPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   readonly isAdmin = inject(UserContextService).user()?.role === 'ADMIN';
+  /** Cierres de caja: menú Ventas con nivel Gestionar. */
+  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
 
   readonly loading = signal(false);
   readonly rows = signal<readonly Sale[]>([]);
@@ -102,10 +107,15 @@ export class SaleListPage implements OnInit {
 
   closeCash(): void {
     this.dialog
-      .open(CashCloseDialog)
+      .open<CashCloseDialog, void, CashClosure>(CashCloseDialog)
       .afterClosed()
-      .pipe(filter(Boolean))
-      .subscribe(() => this.notifications.show('Resumen de caja generado.', 'success'));
+      .pipe(filter((closure): closure is CashClosure => !!closure))
+      .subscribe((closure) =>
+        this.notifications.show(
+          `Caja cerrada: diferencia S/ ${closure.difference.toFixed(2)}.`,
+          closure.difference === 0 ? 'success' : 'warning',
+        ),
+      );
   }
 
   open(sale: Sale): void {

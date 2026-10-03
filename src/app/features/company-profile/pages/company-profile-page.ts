@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
+import { NotificationService } from '../../../core/notifications/notification.service';
+import { ThemeService } from '../../../core/theme/theme.service';
+import { CompanyProfileEditDialog } from '../components/company-profile-edit-dialog';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CompanyProfileApiService } from '../data-access/company-profile-api.service';
 import { CompanyProfile } from '../models/company-profile.model';
@@ -36,6 +40,9 @@ const orDash = (value: string | null | undefined): string => (value && value.tri
 })
 export class CompanyProfilePage implements OnInit {
   private readonly api = inject(CompanyProfileApiService);
+  private readonly dialog = inject(MatDialog);
+  private readonly notifications = inject(NotificationService);
+  private readonly theme = inject(ThemeService);
 
   readonly loading = signal(true);
   readonly loadError = signal(false);
@@ -86,6 +93,26 @@ export class CompanyProfilePage implements OnInit {
       { label: 'Color de fondo', value: t.backgroundColor },
     ];
   });
+
+  /** Edita contacto y colores; los colores se aplican al instante (sidebar, botones) sin volver a iniciar sesión. */
+  edit(): void {
+    const profile = this.profile();
+    if (!profile) return;
+    this.dialog
+      .open<CompanyProfileEditDialog, CompanyProfile, CompanyProfile>(CompanyProfileEditDialog, { data: profile })
+      .afterClosed()
+      .subscribe((saved) => {
+        if (!saved) return;
+        this.profile.set(saved);
+        this.theme.applyCompanyTheme({
+          primary: saved.theme.primaryColor,
+          secondary: saved.theme.secondaryColor,
+          accent: saved.theme.accentColor,
+          background: saved.theme.backgroundColor,
+        });
+        this.notifications.show('Datos de la empresa actualizados.', 'success');
+      });
+  }
 
   ngOnInit(): void {
     this.load();

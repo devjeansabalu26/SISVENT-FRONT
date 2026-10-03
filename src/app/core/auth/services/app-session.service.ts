@@ -7,6 +7,7 @@ import { UserContextService } from '../../context/user-context/user-context.serv
 import { ThemeService } from '../../theme/theme.service';
 import { isAppRole } from '../constants/app-role.constant';
 import { ROLE_PERMISSIONS } from '../constants/role-permissions.constant';
+import { permissionsFromModules } from '../constants/module-permissions.constant';
 import { LoginResult, SessionUser } from '../models/auth-api.model';
 import { AuthApiService } from './auth-api.service';
 import { AuthService } from './auth.service';
@@ -93,7 +94,10 @@ export class AppSessionService {
       userId: user.id,
       displayName,
       role: user.role,
-      permissions: ROLE_PERMISSIONS[user.role],
+      // ADMIN/VENDEDOR: menús que habilitó el SUPERADMIN para la empresa y (vendedor) los que le asignó su ADMIN.
+      permissions: user.role !== 'SUPERADMIN' && user.company?.modules
+        ? permissionsFromModules(user.company.modules)
+        : ROLE_PERMISSIONS[user.role],
       branchId: user.storeId ?? undefined,
     });
 

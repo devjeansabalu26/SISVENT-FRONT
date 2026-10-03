@@ -16,6 +16,16 @@ export interface AuditEvent {
   readonly level: AuditLevel;
   readonly detail: string | null;
   readonly ipAddress: string | null;
+  /** Campos modificados (antes → después), calculados por el backend. */
+  readonly changes?: readonly AuditChange[];
+  /** Motivo escrito por el usuario (anulación, suspensión…). */
+  readonly reason?: string | null;
+}
+
+export interface AuditChange {
+  readonly field: string;
+  readonly before: string;
+  readonly after: string;
 }
 
 export interface AuditPage {

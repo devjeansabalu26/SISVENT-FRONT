@@ -1,0 +1,139 @@
+.modules {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modules__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.modules__head h3 {
+  margin: 0 0 4px;
+}
+
+.modules__head p {
+  margin: 0;
+  max-width: 640px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.modules__bulk {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modules__group {
+  margin: 14px 0 6px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modules__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modules__list label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.modules__list .is-locked label {
+  background: var(--color-surface-secondary);
+  cursor: not-allowed;
+}
+
+.modules__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modules__text small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.modules__text .material-icons {
+  font-size: 14px;
+}
+
+.modules__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.modules__foot span {
+  margin-right: auto;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-on-primary, white);
+  background: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ghost {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}

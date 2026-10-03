@@ -1,3 +1,5 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -17,6 +19,7 @@ import { CustomerDetail } from '../models/customer.model';
 export class CustomerDetailPage implements OnInit {
   private readonly api = inject(CustomerApiService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
+  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.customersManage] });
 
   readonly loading = signal(true);
   readonly customer = signal<CustomerDetail | null>(null);

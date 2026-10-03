@@ -1,0 +1,53 @@
+@if (loading()) {
+  <p class="muted">Cargando menús…</p>
+} @else if (data(); as info) {
+  <section class="surface-card modules">
+    <header class="modules__head">
+      <div>
+        <h3>Menús habilitados</h3>
+        <p>
+          {{ enabledCount() }} de {{ info.modules.length }} activos · Plan {{ info.planName ?? 'sin plan vigente' }}.
+          Los menús que el plan no incluye no se pueden activar. Los de configuración son solo para el administrador.
+        </p>
+      </div>
+      <div class="modules__bulk">
+        <button type="button" class="link" (click)="setAll(true)">Activar todos</button>
+        <button type="button" class="link" (click)="setAll(false)">Desactivar todos</button>
+      </div>
+    </header>
+
+    @for (group of groups(); track group.label) {
+      <h4 class="modules__group">{{ group.label }}</h4>
+      <ul class="modules__list">
+        @for (module of group.modules; track module.code) {
+          <li [class.is-locked]="!module.includedInPlan">
+            <label>
+              <span class="modules__text">
+                <strong>{{ module.label }}</strong>
+                <small>
+                  @if (!module.includedInPlan) {
+                    <span class="material-icons">lock</span>No incluido en el plan
+                  } @else if (!module.sellerAssignable) {
+                    Configuración · solo administrador
+                  } @else {
+                    Asignable a vendedores
+                  }
+                </small>
+              </span>
+              <input type="checkbox" role="switch" [checked]="isOn(module)" [disabled]="!module.includedInPlan || saving()"
+                (change)="toggle(module, $any($event.target).checked)" [attr.aria-label]="'Activar ' + module.label" />
+            </label>
+          </li>
+        }
+      </ul>
+    }
+
+    <footer class="modules__foot">
+      <span>{{ changes().length ? changes().length + ' cambio(s) sin guardar' : 'Sin cambios' }}</span>
+      <button type="button" class="ghost" (click)="discard()" [disabled]="!changes().length || saving()">Descartar</button>
+      <button type="button" class="primary" (click)="save()" [disabled]="!changes().length || saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar menús' }}
+      </button>
+    </footer>
+  </section>
+}

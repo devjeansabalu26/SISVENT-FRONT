@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
-import { CompanyProfile } from '../models/company-profile.model';
+import { CompanyProfile, UpdateCompanyProfile } from '../models/company-profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyProfileApiService {
@@ -11,5 +11,10 @@ export class CompanyProfileApiService {
 
   get(): Observable<CompanyProfile> {
     return this.http.get<CompanyProfile>(this.baseUrl);
+  }
+
+  /** Contacto e identidad visual (nombre comercial, razón social y RUC no se editan aquí). */
+  update(body: UpdateCompanyProfile): Observable<CompanyProfile> {
+    return this.http.put<CompanyProfile>(this.baseUrl, body);
   }
 }

@@ -14,7 +14,8 @@ import { Product } from '../../products/models/product.model';
 import { ProductApiService } from '../../products/data-access/product-api.service';
 import { SaleConfirmData, SaleConfirmDialog } from '../components/sale-confirm-dialog/sale-confirm-dialog';
 import { SaleSuccessDialog } from '../components/sale-success-dialog/sale-success-dialog';
-import { PosApiService } from '../data-access/pos-api.service';
+import { PosApiService, PosSettings } from '../data-access/pos-api.service';
+import { SaleDetail } from '../models/sale-detail.model';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { PosPaymentPanel } from '../components/pos-payment-panel/pos-payment-panel';
 import { CartItem } from '../models/cart-item.model';
@@ -57,6 +58,8 @@ export class PosPage implements OnInit {
   readonly kindOf = (code: string): PaymentKind => this.paymentMethods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
   private readonly methodName = (code: string): string => this.paymentMethods().find((method) => method.code === code)?.name ?? code;
   readonly saving = signal(false);
+  /** Opciones de la empresa para el POS; si no cargan, el envío del comprobante queda manual. */
+  private readonly posSettings = signal<PosSettings>({ autoEmailReceipt: false, emailConfigured: false });
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly selectedStoreId = signal<string | null>(null);
@@ -71,6 +74,7 @@ export class PosPage implements OnInit {
   ngOnInit(): void {
     this.search('');
     this.loadPaymentMethods();
+    this.posApi.settings().subscribe({ next: (settings) => this.posSettings.set(settings), error: () => undefined });
     const clientId = this.route.snapshot.queryParamMap.get('clientId');
     if (clientId) {
       this.customerApi.get(clientId).subscribe({
@@ -218,6 +222,19 @@ export class PosPage implements OnInit {
     });
   }
 
+  /** Envío automático (Configuración → Facturación): solo si el cliente tiene correo y hay SMTP. */
+  private autoEmailReceipt(sale: SaleDetail): string | null {
+    const settings = this.posSettings();
+    const email = sale.clientEmail?.trim();
+    if (!settings.autoEmailReceipt || !email) return null;
+    if (!settings.emailConfigured) {
+      this.notifications.show('El envío automático está activo, pero el servidor no tiene correo configurado.', 'warning');
+      return null;
+    }
+    this.receiptMailer.sendTo(sale, email);
+    return email;
+  }
+
   private register(): void {
     const total = this.subtotal();
     const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
@@ -236,6 +253,7 @@ export class PosPage implements OnInit {
       .subscribe({
         next: (sale) => {
           this.saving.set(false);
+          const autoEmailedTo = this.autoEmailReceipt(sale);
           this.dialog
             .open(SaleSuccessDialog, {
               data: {
@@ -246,6 +264,7 @@ export class PosPage implements OnInit {
                 change: sale.changeAmount ?? breakdown(this.paymentLines(), this.kindOf, total).change,
                 paymentDetails: (sale.payments ?? []).map((payment) => paymentSummary(payment)),
                 clientEmail: sale.clientEmail ?? null,
+                autoEmailedTo,
               },
             })
             .afterClosed()

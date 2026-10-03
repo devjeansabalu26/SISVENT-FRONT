@@ -1,3 +1,5 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -21,6 +23,7 @@ export class CustomerListPage implements OnInit {
 
   /** Figma `ve-clientes-operacion`: el vendedor selecciona el cliente para iniciar una venta. */
   readonly isSeller = inject(UserContextService).user()?.role === 'VENDEDOR';
+  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.customersManage] });
   readonly loading = signal(false);
   readonly search = signal('');
   readonly summary = signal<CustomerSummary | null>(null);

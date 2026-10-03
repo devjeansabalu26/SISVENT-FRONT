@@ -12,6 +12,7 @@ import { DiffField, buildDiffRows, formatSoles } from '../../../shared/utils/dif
 import { MARGIN_STATUS_LABEL, marginStatus } from '../../../shared/utils/margin-status';
 import { BrandApiService } from '../../brands/data-access/brand-api.service';
 import { CategoryApiService } from '../../categories/data-access/category-api.service';
+import { withParentLabel } from '../../categories/utils/category-label';
 import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { Store } from '../../locales/models/local.model';
 import { PriceChangeData, PriceChangeDialog } from '../components/price-change-dialog/price-change-dialog';
@@ -81,7 +82,7 @@ export class ProductFormPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(page.items));
+    this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(withParentLabel(page.items)));
     this.brandApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.brands.set(page.items));
     this.unitApi.list().subscribe((page) => this.units.set(page.items));
     if (!this.isEdit) {

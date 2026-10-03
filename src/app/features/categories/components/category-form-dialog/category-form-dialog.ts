@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Category, CategoryFormValue } from '../../models/category.model';
+import { CategoryFormData, CategoryFormValue } from '../../models/category.model';
 
 @Component({
   selector: 'app-category-form-dialog',
@@ -11,7 +11,11 @@ import { Category, CategoryFormValue } from '../../models/category.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryFormDialog {
-  readonly category = inject<Category | null>(MAT_DIALOG_DATA);
+  private readonly data = inject<CategoryFormData>(MAT_DIALOG_DATA);
+  readonly category = this.data.category;
+  readonly hasChildren = this.data.hasChildren;
+  /** Solo principales activas y distintas de la que se edita. */
+  readonly parents = this.data.parents.filter((parent) => parent.id !== this.category?.id && (parent.isActive || parent.id === this.category?.parentId));
   private readonly dialogRef = inject(MatDialogRef<CategoryFormDialog, CategoryFormValue | undefined>);
 
   readonly form = new FormGroup({
@@ -24,6 +28,7 @@ export class CategoryFormDialog {
       validators: [Validators.maxLength(400)],
     }),
     isActive: new FormControl(this.category?.isActive ?? true, { nonNullable: true }),
+    parentId: new FormControl<string>({ value: this.category?.parentId ?? '', disabled: this.data.hasChildren }, { nonNullable: true }),
   });
 
   cancel(): void {
@@ -36,6 +41,11 @@ export class CategoryFormDialog {
       return;
     }
     const value = this.form.getRawValue();
-    this.dialogRef.close({ ...value, name: value.name.trim(), description: value.description.trim() });
+    this.dialogRef.close({
+      ...value,
+      name: value.name.trim(),
+      description: value.description.trim(),
+      parentId: value.parentId || null,
+    });
   }
 }

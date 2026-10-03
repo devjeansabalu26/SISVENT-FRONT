@@ -32,6 +32,11 @@
       </dl>
     </section>
   </div>
+
+  <!-- ADMIN: menús del vendedor (dentro de lo que el SUPERADMIN habilitó para la empresa). -->
+  @if (user.editable && user.role === 'VENDEDOR') {
+    <app-seller-modules-card [userId]="user.id" />
+  }
 } @else if (loading()) {
   <p class="muted">Cargando usuario…</p>
 } @else {

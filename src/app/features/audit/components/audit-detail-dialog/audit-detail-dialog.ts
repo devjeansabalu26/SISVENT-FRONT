@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 import { friendlyAction, friendlyEntity } from '../../../../shared/utils/audit-labels';
 import { AuditEvent } from '../../models/audit-event.model';
+import { auditFieldLabel } from '../../utils/audit-field-label';
 
 const ROLE_LABEL: Readonly<Record<string, string>> = {
   SUPERADMIN: 'Superadministrador',
@@ -25,6 +26,8 @@ const ROLE_LABEL: Readonly<Record<string, string>> = {
 })
 export class AuditDetailDialog {
   readonly event = inject<AuditEvent>(MAT_DIALOG_DATA);
+  /** Antes → después con el nombre del campo en español. */
+  readonly changes = (this.event.changes ?? []).map((change) => ({ ...change, label: auditFieldLabel(change.field) }));
   private readonly ref = inject(MatDialogRef<AuditDetailDialog>);
 
   readonly code = this.event.companyName !== undefined ? 'MOD-SA-17' : 'MOD-AD-20';

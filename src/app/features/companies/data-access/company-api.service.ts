@@ -1,3 +1,4 @@
+import { CompanyModules, ModuleToggle } from '../models/company-modules.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -58,6 +59,15 @@ export class CompanyApiService {
   }
 
   /** Tab Locales. */
+  /** Menús de la empresa (el SUPERADMIN los activa dentro de lo que incluye su plan). */
+  getModules(id: string): Observable<CompanyModules> {
+    return this.http.get<CompanyModules>(`${this.baseUrl}/${id}/modules`);
+  }
+
+  updateModules(id: string, modules: readonly ModuleToggle[]): Observable<CompanyModules> {
+    return this.http.put<CompanyModules>(`${this.baseUrl}/${id}/modules`, { modules });
+  }
+
   getStores(id: string): Observable<CompanyStores> {
     return this.http.get<CompanyStores>(`${this.baseUrl}/${id}/stores`);
   }

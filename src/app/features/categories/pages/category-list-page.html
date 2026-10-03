@@ -24,11 +24,12 @@
 @if (view() === 'cards') {
   @if (loading()) {
     <p class="muted">Cargando categorías…</p>
-  } @else if (!rows().length) {
+  } @else if (!cards().length) {
     <p class="muted">No hay categorías registradas.</p>
   } @else {
     <div class="category-grid">
-      @for (category of rows(); track category.id) {
+      @for (card of cards(); track card.category.id) {
+        @let category = card.category;
         <article class="category-card" [class.category-card--inactive]="!category.isActive">
           <header>
             <span class="category-card__icon material-icons">category</span>
@@ -36,6 +37,17 @@
           </header>
           <h3>{{ category.name }}</h3>
           <p>{{ category.description || 'Sin descripción' }}</p>
+          <small class="count">{{ card.totalProducts }} {{ card.totalProducts === 1 ? 'producto' : 'productos' }}</small>
+          @if (card.children.length) {
+            <div class="subcategories" aria-label="Subcategorías">
+              @for (child of card.children; track child.id) {
+                <button type="button" class="sub" [class.sub--inactive]="!child.isActive" [disabled]="!canManage()"
+                  (click)="edit(child)" [title]="canManage() ? 'Editar subcategoría' : child.name">
+                  {{ child.name }} <span>{{ child.productCount ?? 0 }}</span>
+                </button>
+              }
+            </div>
+          }
           @if (canManage()) {
             <footer>
               <button type="button" (click)="edit(category)"><span class="material-icons">edit</span>Editar</button>

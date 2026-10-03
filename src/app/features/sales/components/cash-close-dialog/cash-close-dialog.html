@@ -2,43 +2,70 @@
   <header>
     <span class="material-icons">point_of_sale</span>
     <div>
-      <h2>Resumen de caja</h2>
-      <p>Ventas confirmadas del día, calculadas en el momento</p>
+      <h2>Cierre de caja</h2>
+      <p>Ventas confirmadas del día, calculadas por el sistema</p>
     </div>
   </header>
 
-  <div class="fields">
-    @if (loading()) {
-      <p class="muted">Calculando totales del día…</p>
-    } @else {
-      <dl class="expected">
-        <div><dt>Sistema · total esperado</dt><dd>S/ {{ expectedTotal().toFixed(2) }}</dd></div>
-        <div><dt>— Efectivo esperado</dt><dd>S/ {{ expectedCash().toFixed(2) }}</dd></div>
-        <div><dt>— Otros métodos de pago</dt><dd>S/ {{ expectedOther().toFixed(2) }}</dd></div>
-      </dl>
-      <label class="wide"
-        >Efectivo real en caja (S/)
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          [value]="countedCash()"
-          (input)="countedCash.set(+$any($event.target).value)"
-        />
+  <div class="fields two">
+    @if (stores().length > 1) {
+      <label>Local
+        <select [value]="storeId() ?? ''" (change)="changeStore($any($event.target).value)">
+          @for (store of stores(); track store.id) {
+            <option [value]="store.id">{{ store.name }}</option>
+          }
+        </select>
       </label>
-      <p class="difference" [class.difference--ok]="difference() === 0">
-        Diferencia: S/ {{ difference().toFixed(2) }} {{ difference() === 0 ? 'Ok' : '' }}
-      </p>
-      <label class="wide"
-        >Observaciones
-        <textarea [value]="notes()" (input)="notes.set($any($event.target).value)" placeholder="Ningún descuadre reportado…"></textarea>
-      </label>
-      <p class="muted">Este resumen se calcula al momento a partir de las ventas registradas; todavía no existe un módulo de cierre de caja persistente en el backend.</p>
     }
+    <label>Día
+      <input type="date" [max]="today" [value]="date()" (change)="changeDate($any($event.target).value)" />
+    </label>
   </div>
 
+  @if (loading()) {
+    <p class="muted">Calculando totales del día…</p>
+  } @else if (preview(); as summary) {
+    <dl class="expected">
+      <div><dt>{{ summary.storeName }} · {{ summary.salesCount }} {{ summary.salesCount === 1 ? 'venta' : 'ventas' }}</dt><dd>S/ {{ summary.totalSales.toFixed(2) }}</dd></div>
+      @for (method of summary.byMethod; track method.code) {
+        <div><dt>— {{ method.name }}</dt><dd>S/ {{ method.amount.toFixed(2) }}</dd></div>
+      } @empty {
+        <div><dt>— Sin ventas confirmadas</dt><dd>S/ 0.00</dd></div>
+      }
+      <div class="strong"><dt>Efectivo esperado en caja</dt><dd>S/ {{ summary.expectedCash.toFixed(2) }}</dd></div>
+    </dl>
+
+    @if (summary.existing; as closure) {
+      <div class="closed">
+        <span class="material-icons">lock</span>
+        <div>
+          <strong>Caja cerrada por {{ closure.closedBy }}</strong>
+          <p>Contado S/ {{ closure.countedCash.toFixed(2) }} · Diferencia S/ {{ closure.difference.toFixed(2) }}</p>
+          @if (closure.notes) { <p class="muted">{{ closure.notes }}</p> }
+        </div>
+      </div>
+    } @else {
+      <label class="wide">Efectivo real en caja (S/)
+        <input type="number" min="0" step="0.10" [value]="countedCash()" (input)="countedCash.set(+$any($event.target).value)" />
+      </label>
+      <p class="difference" [class.difference--ok]="difference() === 0" [class.difference--bad]="difference() !== 0">
+        Diferencia: S/ {{ difference().toFixed(2) }}
+        {{ difference() === 0 ? '· Cuadra' : difference() > 0 ? '· Sobrante' : '· Faltante' }}
+      </p>
+      <label class="wide">Observaciones
+        <textarea maxlength="500" [value]="notes()" (input)="notes.set($any($event.target).value)" placeholder="Ningún descuadre reportado…"></textarea>
+      </label>
+    }
+  }
+
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
   <footer>
-    <button type="button" (click)="cancel()">Cancelar</button>
-    <button type="button" class="primary" [disabled]="loading()" (click)="confirm()">Cerrar</button>
+    <button type="button" (click)="cancel()">{{ preview()?.existing ? 'Cerrar' : 'Cancelar' }}</button>
+    @if (!preview()?.existing) {
+      <button type="button" class="primary" [disabled]="loading() || saving() || !preview()" (click)="confirm()">
+        {{ saving() ? 'Registrando…' : 'Registrar cierre' }}
+      </button>
+    }
   </footer>
 </section>

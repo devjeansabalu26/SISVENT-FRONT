@@ -1,5 +1,8 @@
 <app-page-header title="Mi empresa" [description]="'Información y configuración de ' + (profile()?.tradeName ?? 'tu empresa')">
   <a class="ghost" routerLink="/app/settings"><span class="material-icons">settings</span>Configuración</a>
+  @if (profile()) {
+    <button type="button" class="primary-btn" (click)="edit()"><span class="material-icons">edit</span>Editar</button>
+  }
 </app-page-header>
 
 @if (loading()) {
@@ -55,7 +58,7 @@
           </div>
         }
       </div>
-      <p class="muted">Colores definidos al registrar la empresa. Para cambiarlos, solicítalo al equipo de SISVENT.</p>
+      <p class="muted">Puedes cambiar los colores desde "Editar"; se aplican al instante en el menú y los botones.</p>
     </section>
   </div>
 }

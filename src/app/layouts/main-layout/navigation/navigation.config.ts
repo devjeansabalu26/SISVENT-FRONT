@@ -28,14 +28,14 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
   { label: 'Marcas', icon: 'branding_watermark', route: '/app/brands', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.brandsView], requiredFeature: 'BRANDS' },
 
   // Almacén — ADMIN
-  { label: 'Inventario', icon: 'warehouse', route: '/app/inventory', group: 'Almacén', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.inventoryView], requiredFeature: 'STOCK' },
-  { label: 'Movimientos', icon: 'swap_vert', route: '/app/inventory/movements', group: 'Almacén', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.inventoryView], requiredFeature: 'INVENTORY_MOVEMENTS' },
+  { label: 'Inventario', icon: 'warehouse', route: '/app/inventory', group: 'Almacén', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.inventoryView], requiredFeature: 'STOCK' },
+  { label: 'Movimientos', icon: 'swap_vert', route: '/app/inventory/movements', group: 'Almacén', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.inventoryMovementsView], requiredFeature: 'INVENTORY_MOVEMENTS' },
   { label: 'Locales', icon: 'store', route: '/app/locales', group: 'Almacén', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.localesView] },
 
   // Abastecimiento — ADMIN
-  { label: 'Proveedores', icon: 'local_shipping', route: '/app/suppliers', group: 'Abastecimiento', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.suppliersView], requiredFeature: 'SUPPLIERS' },
-  { label: 'Ingreso de mercadería', icon: 'move_to_inbox', route: '/app/goods-receipts', group: 'Abastecimiento', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.goodsReceiptsView], requiredFeature: 'GOODS_RECEIPTS' },
-  { label: 'Reabastecimiento', icon: 'insights', route: '/app/replenishment', group: 'Abastecimiento', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.replenishmentView], requiredFeature: 'SUPPLY_ANALYTICS' },
+  { label: 'Proveedores', icon: 'local_shipping', route: '/app/suppliers', group: 'Abastecimiento', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.suppliersView], requiredFeature: 'SUPPLIERS' },
+  { label: 'Ingreso de mercadería', icon: 'move_to_inbox', route: '/app/goods-receipts', group: 'Abastecimiento', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.goodsReceiptsView], requiredFeature: 'GOODS_RECEIPTS' },
+  { label: 'Reabastecimiento', icon: 'insights', route: '/app/replenishment', group: 'Abastecimiento', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.replenishmentView], requiredFeature: 'SUPPLY_ANALYTICS' },
 
   // Empresa — ADMIN
   { label: 'Mi empresa', icon: 'apartment', route: '/app/company', group: 'Empresa', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.companyProfileView] },
@@ -43,7 +43,7 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
   { label: 'Usuarios', icon: 'people', route: '/app/users', group: 'Empresa', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.usersView] },
 
   // Análisis y sistema
-  { label: 'Reportes', icon: 'bar_chart', route: '/app/reports', group: 'Análisis', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS' },
+  { label: 'Reportes', icon: 'bar_chart', route: '/app/reports', group: 'Análisis', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS' },
   { label: 'Auditoría', icon: 'verified_user', route: '/app/audit', group: 'Análisis', permissions: [APP_PERMISSIONS.auditView], requiredFeature: 'AUDIT' },
   { label: 'Notificaciones', icon: 'notifications', route: '/app/notifications', group: 'Sistema', permissions: [APP_PERMISSIONS.notificationsView], requiredFeature: 'NOTIFICATIONS' },
   { label: 'Configuración', icon: 'settings', route: '/app/settings', group: 'Sistema', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.settingsManage] },

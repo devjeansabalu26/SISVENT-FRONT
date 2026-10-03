@@ -5,7 +5,7 @@
     <button type="button" class="ghost" [disabled]="sending()" (click)="sendReceipt()" [title]="sale.clientEmail ? 'Enviar a ' + sale.clientEmail : 'Enviar por correo'">
       <span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar comprobante' }}
     </button>
-    @if (isAdmin && sale.status === 'CONFIRMED') {
+    @if (canCancel && sale.status === 'CONFIRMED') {
       <button type="button" class="ghost danger" (click)="annul()"><span class="material-icons">block</span>Anular venta</button>
     }
   </app-page-header>

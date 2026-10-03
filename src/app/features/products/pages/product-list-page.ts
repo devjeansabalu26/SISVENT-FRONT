@@ -1,13 +1,15 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
-import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { BrandApiService } from '../../brands/data-access/brand-api.service';
 import { CategoryApiService } from '../../categories/data-access/category-api.service';
+import { withParentLabel } from '../../categories/utils/category-label';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { productStatusReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
@@ -35,7 +37,8 @@ export class ProductListPage implements OnInit {
 
   readonly loading = signal(false);
   /** Figma `vendedor-productos`: el vendedor consulta el catálogo en solo lectura. */
-  readonly isSeller = inject(UserContextService).user()?.role === 'VENDEDOR';
+  /** Sin nivel Gestionar en Productos: vista de consulta (banner de solo lectura, sin crear/editar). */
+  readonly isSeller = !inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.productsManage] });
 
   // Filtros: se aplican server-side solo al presionar "Filtrar" (o "Limpiar"), no en cada tecleo/cambio.
   readonly search = signal('');
@@ -67,7 +70,7 @@ export class ProductListPage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(page.items));
+    this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(withParentLabel(page.items)));
     this.brandApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.brands.set(page.items));
     this.load();
   }

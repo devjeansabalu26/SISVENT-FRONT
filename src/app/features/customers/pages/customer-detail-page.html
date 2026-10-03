@@ -1,7 +1,7 @@
 @if (customer(); as customer) {
   <app-page-header [title]="customer.displayName" description="Detalle del cliente y su historial de compras">
     <a class="ghost" routerLink="/app/customers"><span class="material-icons">arrow_back</span>Clientes</a>
-    <a class="ghost" [routerLink]="['/app/customers', customer.id, 'edit']"><span class="material-icons">edit</span>Editar cliente</a>
+    @if (canManage) {<a class="ghost" [routerLink]="['/app/customers', customer.id, 'edit']"><span class="material-icons">edit</span>Editar cliente</a>}
   </app-page-header>
 
   <div class="summary surface-card">

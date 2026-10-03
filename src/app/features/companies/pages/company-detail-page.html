@@ -27,6 +27,7 @@
   <nav class="tabs">
     <button type="button" [class.active]="activeTab() === 'general'" (click)="setTab('general')">General</button>
     <button type="button" [class.active]="activeTab() === 'plan'" (click)="setTab('plan')">Cuenta / Plan</button>
+    <button type="button" [class.active]="activeTab() === 'modules'" (click)="setTab('modules')">Menús</button>
     <button type="button" [class.active]="activeTab() === 'users'" (click)="setTab('users')">Usuarios</button>
     <button type="button" [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">Locales</button>
     <button type="button" [class.active]="activeTab() === 'summary'" (click)="setTab('summary')">Resumen</button>
@@ -139,6 +140,11 @@
   @if (activatedTabs().has('plan')) {
     <div [hidden]="activeTab() !== 'plan'">
       <app-company-plan-tab [companyId]="company.id" />
+    </div>
+  }
+  @if (activatedTabs().has('modules')) {
+    <div [hidden]="activeTab() !== 'modules'">
+      <app-company-modules-tab [companyId]="company.id" />
     </div>
   }
   @if (activatedTabs().has('users')) {

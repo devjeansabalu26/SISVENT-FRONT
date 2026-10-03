@@ -36,6 +36,12 @@ export class ReceiptMailerService {
       .subscribe((email) => void this.deliver(sale, email));
   }
 
+  /** Envía sin preguntar el destinatario (envío automático al confirmar la venta). */
+  sendTo(sale: SaleDetail, email: string): void {
+    if (this.sendingState()) return;
+    void this.deliver(sale, email);
+  }
+
   private async deliver(sale: SaleDetail, email: string): Promise<void> {
     this.sendingState.set(true);
     this.notifications.show(`Enviando comprobante a ${email}…`, 'info');

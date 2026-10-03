@@ -1,9 +1,10 @@
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
-import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
@@ -28,7 +29,8 @@ export class SaleDetailPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
-  readonly isAdmin = inject(UserContextService).user()?.role === 'ADMIN';
+  /** Anular venta: menú Ventas con nivel Gestionar. */
+  readonly canCancel = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);

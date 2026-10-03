@@ -1,0 +1,54 @@
+<section class="surface-card seller-modules">
+  <header class="seller-modules__head">
+    <div>
+      <h3>Menús del vendedor</h3>
+      <p>
+        <strong>Ver</strong>: solo consulta. <strong>Gestionar</strong>: crear, editar, ajustar stock o anular.
+        Solo aparecen los menús habilitados para tu empresa; las opciones de configuración son del administrador.
+      </p>
+    </div>
+    @if (data(); as info) {
+      <span class="badge" [class.badge--custom]="info.customized">
+        {{ info.customized ? 'Personalizado' : 'Menús por defecto' }} · {{ assignedCount() }} asignados
+      </span>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="muted">Cargando menús…</p>
+  } @else if (data()) {
+    @for (group of groups(); track group.label) {
+      <h4 class="seller-modules__group">{{ group.label }}</h4>
+      <ul class="seller-modules__list">
+        @for (module of group.modules; track module.code) {
+          <li [class.is-off]="!module.availableInCompany">
+            <span class="seller-modules__name">
+              <strong>{{ module.label }}</strong>
+              @if (!module.availableInCompany) {
+                <small><span class="material-icons">lock</span>No habilitado para tu empresa</small>
+              }
+            </span>
+            <div class="segmented" role="radiogroup" [attr.aria-label]="'Acceso a ' + module.label">
+              <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'NONE'" [class.on]="choiceOf(module) === 'NONE'"
+                [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'NONE')">Sin acceso</button>
+              <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'VIEW'" [class.on]="choiceOf(module) === 'VIEW'"
+                [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'VIEW')">Ver</button>
+              @if (module.supportsManage) {
+                <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'MANAGE'" [class.on]="choiceOf(module) === 'MANAGE'"
+                  [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'MANAGE')">Gestionar</button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    <footer class="seller-modules__foot">
+      <button type="button" class="link" (click)="restoreDefaults()" [disabled]="saving()">Restablecer menús por defecto</button>
+      <button type="button" class="ghost" (click)="discard()" [disabled]="!dirty() || saving()">Descartar</button>
+      <button type="button" class="primary" (click)="save()" [disabled]="!dirty() || saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar menús' }}
+      </button>
+    </footer>
+  }
+</section>

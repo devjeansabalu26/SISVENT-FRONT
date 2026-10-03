@@ -1,3 +1,4 @@
+import { SellerModules, UpdateSellerModules } from '../models/seller-modules.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -33,6 +34,15 @@ export class UserApiService {
     if (params.storeId) httpParams = httpParams.set('storeId', params.storeId);
     if (params.isActive !== undefined) httpParams = httpParams.set('isActive', params.isActive);
     return this.http.get<UserListResponse>(this.baseUrl, { params: httpParams });
+  }
+
+  /** Menús del vendedor (solo VENDEDOR; el ADMIN ve todo lo activo en la empresa). */
+  getModules(id: string): Observable<SellerModules> {
+    return this.http.get<SellerModules>(`${this.baseUrl}/${id}/modules`);
+  }
+
+  updateModules(id: string, body: UpdateSellerModules): Observable<SellerModules> {
+    return this.http.put<SellerModules>(`${this.baseUrl}/${id}/modules`, body);
   }
 
   get(id: string): Observable<UserDetail> {

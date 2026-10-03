@@ -1,4 +1,4 @@
-<app-page-header title="Clientes" description="Base de datos de clientes registrados en el sistema"><a class="primary" href="/app/customers/new"><span class="material-icons">add</span>Nuevo cliente</a></app-page-header>
+<app-page-header title="Clientes" description="Base de datos de clientes registrados en el sistema">@if (canManage) {<a class="primary" href="/app/customers/new"><span class="material-icons">add</span>Nuevo cliente</a>}</app-page-header>
 <section class="kpis">
   <article><span>Total clientes</span><strong>{{ summary()?.total ?? '—' }}</strong><i class="material-icons">groups</i></article>
   <article><span>Activos</span><strong>{{ summary()?.active ?? '—' }}</strong><i class="material-icons">check_circle_outline</i></article>
@@ -6,7 +6,7 @@
   <article><span>Compras promedio</span><strong>S/ {{ (summary()?.averagePurchases ?? 0).toFixed(2) }}</strong><i class="material-icons">shopping_cart</i></article>
 </section>
 <section class="filters"><label><span class="material-icons">search</span><input #searchBox [value]="search()" (input)="search.set(searchBox.value)" placeholder="Buscar por nombre, documento o correo…" /></label></section>
-<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showKey]="isSeller" keyLabel="Seleccionar para venta" keyIcon="add_shopping_cart" (key)="selectForSale($event)" editLabel="Ver cliente" editIcon="visibility" removeLabel="Editar cliente" removeIcon="edit" (edit)="open($event)" (remove)="edit($event)" [customEmpty]="true">
+<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showKey]="isSeller" keyLabel="Seleccionar para venta" keyIcon="add_shopping_cart" (key)="selectForSale($event)" editLabel="Ver cliente" editIcon="visibility" removeLabel="Editar cliente" removeIcon="edit" [showRemove]="canManage" (edit)="open($event)" (remove)="edit($event)" [customEmpty]="true">
   @if (search().trim()) {
     <app-empty-state tableEmpty flush icon="search_off" title="Sin resultados de búsqueda"
       description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."

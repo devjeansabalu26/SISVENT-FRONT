@@ -52,6 +52,7 @@ const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
   { key: 'pricesIncludeTax', label: 'Precios incluyen IGV' },
   { key: 'showLogoOnReceipt', label: 'Logo en comprobante' },
   { key: 'receiptFooter', label: 'Mensaje al pie del comprobante' },
+  { key: 'autoEmailReceipt', label: 'Enviar comprobante por correo automáticamente' },
   { key: 'notificationEmail', label: 'Correo de notificaciones' },
   { key: 'emailChannel', label: 'Canal: correo electrónico' },
   { key: 'inAppChannel', label: 'Canal: centro de notificaciones' },
@@ -134,6 +135,7 @@ export class SettingsPage implements OnInit {
     pricesIncludeTax: new FormControl(true, { nonNullable: true }),
     showLogoOnReceipt: new FormControl(true, { nonNullable: true }),
     receiptFooter: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
+    autoEmailReceipt: new FormControl(false, { nonNullable: true }),
     notificationEmail: new FormControl('', {
       nonNullable: true,
       validators: [Validators.email, Validators.maxLength(150)],
@@ -281,6 +283,7 @@ export class SettingsPage implements OnInit {
       pricesIncludeTax: settings.pricesIncludeTax,
       showLogoOnReceipt: settings.showLogoOnReceipt,
       receiptFooter: settings.receiptFooter ?? '',
+      autoEmailReceipt: settings.autoEmailReceipt ?? false,
       notificationEmail: settings.notificationEmail ?? '',
       emailChannel: settings.emailChannel,
       inAppChannel: settings.inAppChannel,
