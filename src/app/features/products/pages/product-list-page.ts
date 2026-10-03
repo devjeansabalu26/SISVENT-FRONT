@@ -1,6 +1,6 @@
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -18,6 +18,7 @@ import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { ProductApiService } from '../data-access/product-api.service';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { Product } from '../models/product.model';
 
 @Component({
@@ -34,6 +35,8 @@ export class ProductListPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
+  /** Local del encabezado: con local, solo sus productos y su stock; sin local, stock general por local. */
+  readonly storeContext = inject(StoreContextService);
 
   readonly loading = signal(false);
   /** Figma `vendedor-productos`: el vendedor consulta el catálogo en solo lectura. */
@@ -59,20 +62,42 @@ export class ProductListPage implements OnInit {
   readonly categories = signal<readonly { id: string; name: string }[]>([]);
   readonly brands = signal<readonly { id: string; name: string }[]>([]);
 
-  readonly columns: readonly DataTableColumn<Product>[] = [
-    { key: 'sku', label: 'SKU', value: (r) => r.sku },
-    { key: 'name', label: 'Producto', value: (r) => r.name },
-    { key: 'category', label: 'Categoría', value: (r) => r.categoryName ?? '—' },
-    { key: 'brand', label: 'Marca', value: (r) => r.brandName ?? '—' },
-    { key: 'price', label: 'Precio', value: (r) => `S/ ${r.salePrice.toFixed(2)}` },
-    { key: 'status', label: 'Estado', value: (r) => (r.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
-    { key: 'stock', label: 'Stock', value: (r) => (r.lowStock ? `⚠ ${r.totalStock}` : `${r.totalStock}`) },
-  ];
+  readonly columns = computed<readonly DataTableColumn<Product>[]>(() => {
+    const general = !this.storeContext.selectedStoreId();
+    const base: DataTableColumn<Product>[] = [
+      { key: 'sku', label: 'SKU', value: (r) => r.sku },
+      { key: 'name', label: 'Producto', value: (r) => r.name },
+      { key: 'category', label: 'Categoría', value: (r) => r.categoryName ?? '—' },
+      { key: 'brand', label: 'Marca', value: (r) => r.brandName ?? '—' },
+      { key: 'price', label: 'Precio', value: (r) => `S/ ${r.salePrice.toFixed(2)}` },
+      { key: 'status', label: 'Estado', value: (r) => (r.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
+      {
+        key: 'stock', label: general ? 'Stock total' : 'Stock del local',
+        value: (r) => (r.lowStock ? `⚠ ${r.totalStock}` : `${r.totalStock}`),
+      },
+    ];
+    if (general && this.storeContext.canPick())
+      base.push({
+        key: 'byStore', label: 'Por local',
+        value: (r) => (r.stores ?? []).map((s) => `${s.storeName}: ${s.currentStock}`).join(' · ') || 'Sin stock en locales',
+      });
+    return base;
+  });
+
+  constructor() {
+    // Recarga al cambiar el local del encabezado (y la primera vez).
+    effect(() => {
+      this.storeContext.selectedStoreId();
+      untracked(() => {
+        this.pageNumber.set(1);
+        this.load();
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(withParentLabel(page.items)));
     this.brandApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.brands.set(page.items));
-    this.load();
   }
 
   load(): void {
@@ -84,6 +109,7 @@ export class ProductListPage implements OnInit {
         search: this.search().trim() || undefined,
         categoryId: this.categoryFilter() || undefined,
         brandId: this.brandFilter() || undefined,
+        storeId: this.storeContext.selectedStoreId(),
         isActive: this.statusFilter() ? this.statusFilter() === 'ACTIVE' : undefined,
         lowStock: this.lowStockOnly() || undefined,
       })

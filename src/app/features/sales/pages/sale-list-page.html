@@ -1,9 +1,20 @@
 <app-page-header
-  [title]="isAdmin ? 'Historial de ventas' : 'Mis ventas'"
-  [description]="isAdmin ? 'Registro completo de operaciones de venta' : 'Ventas registradas con tu usuario'"
+  [title]="isAdmin ? 'Historial de ventas' : scope() === 'STORE' ? 'Ventas del local' : 'Mis ventas'"
+  [description]="isAdmin ? 'Registro completo de operaciones de venta' : scope() === 'STORE' ? 'Ventas registradas en tu local' : 'Ventas registradas con tu usuario'"
 >
-  @if (canManage) {<a class="ghost" routerLink="/app/sales/cash-closures"><span class="material-icons">history</span>Cierres</a><button class="ghost" type="button" (click)="closeCash()"><span class="material-icons">point_of_sale</span>Cierre de caja</button>}
+  <a class="ghost" routerLink="/app/sales/credit-notes"><span class="material-icons">assignment_return</span>Notas de crédito</a>
+  @if (canUseCash) {<a class="ghost" routerLink="/app/sales/cash"><span class="material-icons">point_of_sale</span>Caja</a>}
 </app-page-header>
+@if (isSeller) {
+  <nav class="scope-tabs" aria-label="Alcance de ventas">
+    <button type="button" [class.active]="scope() === 'MINE'" [attr.aria-pressed]="scope() === 'MINE'" (click)="setScope('MINE')">
+      <span class="material-icons">person</span>Mis ventas
+    </button>
+    <button type="button" [class.active]="scope() === 'STORE'" [attr.aria-pressed]="scope() === 'STORE'" (click)="setScope('STORE')">
+      <span class="material-icons">storefront</span>Ventas del local
+    </button>
+  </nav>
+}
 <section class="filters sales-filters">
   <label><span class="material-icons">search</span><input [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nro de venta o cliente" /></label>
   <input type="date" [(ngModel)]="from" aria-label="Fecha desde" />

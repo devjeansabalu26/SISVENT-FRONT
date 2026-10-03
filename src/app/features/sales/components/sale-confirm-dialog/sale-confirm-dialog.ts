@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { formatSoles } from '../../../../shared/utils/diff-rows';
 
@@ -17,12 +18,15 @@ export interface SaleConfirmData {
   readonly paymentDetails?: readonly string[];
 }
 
-/** Figma `mod-confirmar-venta` (MOD-AD-18): último vistazo al carrito antes de registrar la venta. */
+/**
+ * Figma `mod-confirmar-venta` (MOD-AD-18): último vistazo al carrito antes de registrar la venta. Pide el usuario
+ * (código de 5 dígitos) de quien vende: la venta queda a su nombre. Se cierra con ese código (o `false`).
+ */
 @Component({
   selector: 'app-sale-confirm-dialog',
-  imports: [MatDialogModule],
+  imports: [MatDialogModule, ReactiveFormsModule],
   template: `
-    <section class="dialog review">
+    <form class="dialog review" [formGroup]="form" (ngSubmit)="confirm()">
       <header>
         <span class="material-icons">shopping_cart</span>
         <div class="review__title"><h2>Confirmar venta</h2></div>
@@ -61,11 +65,20 @@ export interface SaleConfirmData {
         <div><dt><strong>Total</strong></dt><dd class="total">{{ soles(subtotal - data.discount) }}</dd></div>
       </dl>
 
+      <div class="fields">
+        <label class="wide"
+          ><span>Usuario del vendedor <span class="required">*</span></span>
+          <input type="text" inputmode="numeric" maxlength="5" autocomplete="off" formControlName="sellerCode"
+            placeholder="Escribe tu código de 5 dígitos" [class.invalid]="showError()" (input)="digitsOnly($event)" />
+          @if (showError()) { <small class="hint">Ingresa el código de 5 dígitos con el que inicias sesión.</small> }
+        </label>
+      </div>
+
       <footer>
-        <button type="button" (click)="close(false)">Cancelar</button>
-        <button type="button" class="primary" (click)="close(true)">Confirmar venta</button>
+        <button type="button" (click)="cancel()">Cancelar</button>
+        <button type="submit" class="primary" [disabled]="form.invalid">Confirmar venta</button>
       </footer>
-    </section>
+    </form>
   `,
   styleUrls: ['../../../../shared/forms/dialog-form.scss', '../../../../shared/ui/review-dialog/review-dialog.scss'],
   styles: `
@@ -77,11 +90,35 @@ export interface SaleConfirmData {
 })
 export class SaleConfirmDialog {
   readonly data = inject<SaleConfirmData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject(MatDialogRef<SaleConfirmDialog, boolean>);
+  private readonly dialogRef = inject(MatDialogRef<SaleConfirmDialog, string | false>);
   readonly soles = formatSoles;
   readonly subtotal = this.data.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
 
-  close(result: boolean): void {
-    this.dialogRef.close(result);
+  readonly form = new FormGroup({
+    sellerCode: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{5}$/)] }),
+  });
+
+  showError(): boolean {
+    const control = this.form.controls.sellerCode;
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  /** Solo dígitos en el código. */
+  digitsOnly(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const clean = input.value.replace(/\D/g, '').slice(0, 5);
+    if (clean !== input.value) this.form.controls.sellerCode.setValue(clean);
+  }
+
+  confirm(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.dialogRef.close(this.form.controls.sellerCode.value);
+  }
+
+  cancel(): void {
+    this.dialogRef.close(false);
   }
 }

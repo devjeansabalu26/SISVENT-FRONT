@@ -18,7 +18,7 @@ import { PlatformUserApiService } from '../data-access/platform-user-api.service
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, PlatformUserItem, UserFormValue, UserRoleLimit } from '../models/user.model';
 
-type Row = { readonly id: string; readonly fullName: string; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean };
+type Row = { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean };
 
 @Component({
   selector: 'app-user-list-page',
@@ -61,6 +61,7 @@ export class UserListPage implements OnInit {
       ? {
           id: u.profileId,
           fullName: u.fullName,
+          userCode: u.userCode ?? null,
           email: u.email,
           document: u.document,
           role: u.role,
@@ -71,6 +72,7 @@ export class UserListPage implements OnInit {
       : {
           id: u.id,
           fullName: u.fullName,
+          userCode: u.userCode ?? null,
           email: u.email,
           document: u.document,
           role: u.role,
@@ -85,7 +87,8 @@ export class UserListPage implements OnInit {
 
   readonly columns: readonly DataTableColumn<Row>[] = this.isSuperadmin
     ? [
-        { key: 'name', label: 'Usuario', value: (row) => row.fullName },
+        { key: 'name', label: 'Nombre', value: (row) => row.fullName },
+        { key: 'code', label: 'Usuario', value: (row) => row.userCode ?? '—' },
         { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
         { key: 'role', label: 'Rol', value: (row) => row.role },
         { key: 'company', label: 'Empresa', value: (row) => row.companyName ?? '—' },
@@ -93,7 +96,8 @@ export class UserListPage implements OnInit {
         { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       ]
     : [
-        { key: 'name', label: 'Usuario', value: (row) => row.fullName },
+        { key: 'name', label: 'Nombre', value: (row) => row.fullName },
+        { key: 'code', label: 'Usuario', value: (row) => row.userCode ?? '—' },
         { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
         { key: 'document', label: 'Documento', value: (row) => row.document ?? '—' },
         { key: 'role', label: 'Rol', value: (row) => row.role },
@@ -210,13 +214,13 @@ export class UserListPage implements OnInit {
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => {
-        const request: Observable<{ readonly temporaryPassword: string }> = this.isSuperadmin
+        const request: Observable<{ readonly temporaryPassword: string; readonly userCode?: string | null }> = this.isSuperadmin
           ? this.platformApi.resetAccess(row.id)
           : this.api.resetAccess(row.id);
         request.subscribe({
           next: (result) => {
             this.dialog.open(CredentialDialog, {
-              data: resetCredential(row.email ?? row.fullName, result.temporaryPassword),
+              data: resetCredential(result.userCode ?? row.userCode ?? row.fullName, result.temporaryPassword),
               disableClose: true,
             });
           },
@@ -271,10 +275,15 @@ export class UserListPage implements OnInit {
         } else {
           this.api.create(value).subscribe({
             next: (result) => {
-              this.notifications.show(
-                `Usuario creado. Contraseña temporal: ${result.temporaryPassword} (se muestra una sola vez).`,
-                'success',
-              );
+              // Credenciales de acceso: usuario (código) y PIN, se muestran una sola vez.
+              this.dialog.open(CredentialDialog, {
+                data: {
+                  ...resetCredential(result.user.userCode ?? result.user.email ?? '', result.temporaryPassword),
+                  title: 'Usuario creado',
+                  successMessage: 'Entrega estas credenciales al usuario: inicia sesión con su usuario y su clave de 5 dígitos.',
+                },
+                disableClose: true,
+              });
               this.load();
             },
             error: onError,

@@ -3,7 +3,8 @@ import { SessionModule } from '../constants/module-permissions.constant';
 /** Contracts for POST /api/v1/auth/login and GET /api/v1/auth/me. */
 
 export interface LoginCredentials {
-  readonly email: string;
+  /** Código de 5 dígitos (ADMIN/VENDEDOR) o correo (SUPERADMIN). */
+  readonly username: string;
   readonly password: string;
 }
 
@@ -32,6 +33,11 @@ export interface SessionUser {
   readonly role: string;
   readonly companyId: string | null;
   readonly storeId: string | null;
+  /** Nombre del local asignado. */
+  readonly storeName?: string | null;
+  /** VENDEDOR autorizado por el ADMIN a consultar otros locales. */
+  readonly canViewAllStores?: boolean;
+  readonly visibleStores?: readonly { readonly id: string; readonly name: string }[];
   readonly company: SessionCompany | null;
 }
 

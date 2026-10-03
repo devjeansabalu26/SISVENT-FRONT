@@ -30,9 +30,10 @@ export class LoginPage {
   }));
 
   readonly form = new FormGroup({
-    email: new FormControl('', {
+    // Usuario: código de 5 dígitos (ADMIN/VENDEDOR) o correo (SUPERADMIN).
+    username: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email],
+      validators: [Validators.required, Validators.pattern(/^(\d{5}|[^\s@]+@[^\s@]+\.[^\s@]+)$/)],
     }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });

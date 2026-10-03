@@ -67,12 +67,14 @@
       </label>
       @if (!isEdit) {
         <label
-          ><span>Contraseña temporal <span class="required">*</span></span>
+          ><span>Clave del administrador (5 dígitos) <span class="required">*</span></span>
           <span class="password-input">
             <input
               [type]="showAdminPassword() ? 'text' : 'password'"
               formControlName="adminPassword"
-              placeholder="Mínimo 10 caracteres"
+              placeholder="Escribe una clave de 5 dígitos"
+              inputmode="numeric"
+              maxlength="5"
               autocomplete="new-password"
             />
             <button type="button" (click)="showAdminPassword.set(!showAdminPassword())">
@@ -80,7 +82,7 @@
             </button>
           </span>
           @if (form.controls.adminPassword.touched && form.controls.adminPassword.invalid) {
-            <span class="error">Mínimo 10 caracteres.</span>
+            <span class="error">La clave debe tener exactamente 5 dígitos.</span>
           }
         </label>
       }

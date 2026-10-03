@@ -1,18 +1,12 @@
-import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
-import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
-import { NotificationService } from '../../../core/notifications/notification.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { CashCloseDialog } from '../components/cash-close-dialog/cash-close-dialog';
-import { CashClosure } from '../data-access/cash-closure-api.service';
+import { canUseCash } from '../cash-access';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
 
@@ -26,18 +20,19 @@ import { Sale, SalesTotals } from '../models/sale.model';
 export class SaleListPage implements OnInit {
   private readonly api = inject(SaleApiService);
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
-  private readonly notifications = inject(NotificationService);
-  readonly isAdmin = inject(UserContextService).user()?.role === 'ADMIN';
-  /** Cierres de caja: menú Ventas con nivel Gestionar. */
-  readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
+  private readonly role = inject(UserContextService).user()?.role;
+  readonly isAdmin = this.role === 'ADMIN';
+  readonly isSeller = this.role === 'VENDEDOR';
+  /** Toggle del VENDEDOR (Figma `vendedor-mis-ventas`): sus ventas o todas las de su local. */
+  readonly scope = signal<'MINE' | 'STORE'>('MINE');
+  /** Caja (apertura/cierre de turnos): ADMIN con Ventas en Gestionar o VENDEDOR con Punto de venta. */
+  readonly canUseCash = canUseCash();
 
   readonly loading = signal(false);
   readonly rows = signal<readonly Sale[]>([]);
   readonly totals = signal<SalesTotals>({ operationCount: 0, totalAmount: 0 });
 
   // Filtros (Figma `admin-historial-ventas` / `vendedor-mis-ventas`): se aplican al presionar "Filtrar".
-  // El backend ya limita al VENDEDOR a sus propias ventas, por eso no hay selector "Ventas del local".
   search = '';
   from = '';
   to = '';
@@ -76,6 +71,7 @@ export class SaleListPage implements OnInit {
         to: this.to || undefined,
         paymentMethod: this.paymentMethod || undefined,
         status: this.status || undefined,
+        scope: this.isSeller ? this.scope() : undefined,
       })
       .subscribe({
       next: (page) => {
@@ -92,6 +88,12 @@ export class SaleListPage implements OnInit {
     return !!(this.search.trim() || this.from || this.to || this.paymentMethod || this.status);
   }
 
+  setScope(scope: 'MINE' | 'STORE'): void {
+    if (this.scope() === scope) return;
+    this.scope.set(scope);
+    this.load();
+  }
+
   newSale(): void {
     void this.router.navigate(['/app/pos']);
   }
@@ -103,19 +105,6 @@ export class SaleListPage implements OnInit {
     this.paymentMethod = '';
     this.status = '';
     this.load();
-  }
-
-  closeCash(): void {
-    this.dialog
-      .open<CashCloseDialog, void, CashClosure>(CashCloseDialog)
-      .afterClosed()
-      .pipe(filter((closure): closure is CashClosure => !!closure))
-      .subscribe((closure) =>
-        this.notifications.show(
-          `Caja cerrada: diferencia S/ ${closure.difference.toFixed(2)}.`,
-          closure.difference === 0 ? 'success' : 'warning',
-        ),
-      );
   }
 
   open(sale: Sale): void {

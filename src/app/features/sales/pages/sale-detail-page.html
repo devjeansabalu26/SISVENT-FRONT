@@ -5,7 +5,10 @@
     <button type="button" class="ghost" [disabled]="sending()" (click)="sendReceipt()" [title]="sale.clientEmail ? 'Enviar a ' + sale.clientEmail : 'Enviar por correo'">
       <span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar comprobante' }}
     </button>
-    @if (canCancel && sale.status === 'CONFIRMED') {
+    @if (credit()?.canIssue) {
+      <button type="button" class="ghost" (click)="issueCreditNote()"><span class="material-icons">assignment_return</span>Nota de crédito</button>
+    }
+    @if (canCancel && sale.status === 'CONFIRMED' && credit()?.cancellable) {
       <button type="button" class="ghost danger" (click)="annul()"><span class="material-icons">block</span>Anular venta</button>
     }
   </app-page-header>
@@ -14,6 +17,15 @@
     <div><span class="code">{{ sale.saleDate | date: 'medium' }}</span><h2>{{ sale.saleNumber }}</h2></div>
     <app-status-chip [value]="sale.status" [label]="sale.status" />
   </div>
+
+  @if (credit(); as c) {
+    @if (c.cashClosed && sale.status === 'CONFIRMED') {
+      <p class="notice"><span class="material-icons">lock</span>Venta cerrada en caja: ya no se puede anular. Para devoluciones emite una nota de crédito.</p>
+    }
+    @if (!c.canIssue && c.issueBlockedReason && sale.status === 'CONFIRMED' && c.creditedTotal < c.saleTotal) {
+      <p class="notice muted-notice"><span class="material-icons">info</span>{{ c.issueBlockedReason }}</p>
+    }
+  }
 
   <section class="surface-card">
     <h3>Detalle de items</h3>
@@ -37,6 +49,29 @@
       </table>
     </div>
   </section>
+
+  @if (credit()?.creditNotes?.length) {
+    <section class="surface-card">
+      <h3>Notas de crédito · devuelto S/ {{ credit()!.creditedTotal.toFixed(2) }} de S/ {{ credit()!.saleTotal.toFixed(2) }}</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>N.º nota</th><th>Fecha</th><th>Reembolso</th><th>Total</th><th>Emitida por</th><th>Motivo</th></tr></thead>
+          <tbody>
+            @for (note of credit()!.creditNotes; track note.id) {
+              <tr class="clickable" (click)="openCreditNote(note)">
+                <td>{{ note.creditNoteNumber }}</td>
+                <td>{{ note.issuedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ note.refundMethod }}</td>
+                <td>S/ {{ note.total.toFixed(2) }}</td>
+                <td>{{ note.createdBy }}</td>
+                <td>{{ note.reason }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
 
   <div class="cards">
     <section class="surface-card">

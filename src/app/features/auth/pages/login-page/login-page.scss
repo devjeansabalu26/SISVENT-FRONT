@@ -6,3 +6,4 @@
 @keyframes dot-fade{0%,100%{opacity:1}50%{opacity:.2}}
 @media(prefers-reduced-motion:reduce){.dots span{animation:none}}
 
+.field-error{color:var(--color-error-text);font-size:12px;font-weight:500}

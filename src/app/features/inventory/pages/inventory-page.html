@@ -1,5 +1,9 @@
-<app-page-header title="Inventario" description="Control de existencias por local">
+<app-page-header title="Inventario"
+  [description]="general() ? 'Stock general de todos los locales' : (storeContext.selectedStore()?.name ? 'Stock de ' + storeContext.selectedStore()!.name : 'Control de existencias de tu local')">
   <a class="ghost" routerLink="/app/inventory/movements"><span class="material-icons">swap_vert</span>Ver movimientos</a>
+  @if (storeContext.isAdmin() && canAdjust && storeContext.stores().length > 1) {
+    <button type="button" class="ghost" (click)="transfer()"><span class="material-icons">local_shipping</span>Transferir stock</button>
+  }
 </app-page-header>
 <section class="metrics">
   <article><span class="material-icons">inventory_2</span><div><small>Unidades disponibles</small><strong>{{ totalUnits() }}</strong></div></article>
@@ -10,4 +14,9 @@
   <label><span class="material-icons">search</span><input #query (input)="filter(query.value, status.value)" placeholder="Buscar por SKU o producto" /></label>
   <select #status (change)="filter(query.value, status.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="AVAILABLE">Disponible</option><option value="LOW_STOCK">Stock bajo</option><option value="OUT_OF_STOCK">Sin stock</option></select>
 </section>
-<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="false" [showEdit]="canAdjust" editLabel="Ajustar stock" emptyMessage="No hay productos que coincidan con los filtros." (edit)="adjust($event)" />
+@if (general()) {
+  <app-data-table [columns]="generalColumns()" [rows]="generalRows()" [loading]="loading()" [showRemove]="false" [showEdit]="false" emptyMessage="No hay productos que coincidan con los filtros." />
+  <p class="hint-general">Selecciona un local en la parte superior para ajustar su stock.</p>
+} @else {
+  <app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="false" [showEdit]="canAdjustHere()" editLabel="Ajustar stock" emptyMessage="No hay productos que coincidan con los filtros." (edit)="adjust($event)" />
+}

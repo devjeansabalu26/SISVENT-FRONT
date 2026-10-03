@@ -2,3 +2,5 @@
 
 .card header .new-customer{padding:0;border:0;color:var(--color-primary);background:none;font-size:12px;cursor:pointer}
 .pay-error{margin:0;color:var(--color-danger);font-size:12px}.pay-error .link{border:0;background:none;color:var(--color-primary);font-weight:600;cursor:pointer}
+
+.cash-closed{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:12px 16px;border:1px solid color-mix(in srgb,var(--color-warning) 40%,var(--color-border));border-radius:var(--radius-md);color:var(--color-text-primary);background:color-mix(in srgb,var(--color-warning) 10%,var(--color-surface));font-size:13px}.cash-closed .material-icons{color:var(--color-warning);font-size:20px}.cash-closed a{margin-left:auto;color:var(--color-primary);font-weight:600;text-decoration:none;white-space:nowrap}

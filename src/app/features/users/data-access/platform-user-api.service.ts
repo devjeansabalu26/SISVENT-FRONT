@@ -22,6 +22,8 @@ interface PlatformUserPage {
 }
 
 export interface PlatformResetAccessResponse {
+  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
+  readonly userCode?: string | null;
   readonly temporaryPassword: string;
   readonly forceChange: boolean;
 }

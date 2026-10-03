@@ -9,6 +9,7 @@ import { UserContextService } from '../../../core/context/user-context/user-cont
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
 import { NotificationBadgeService } from '../../../features/notifications/data-access/notification-badge.service';
 import { ThemeService } from '../../../core/theme/theme.service';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 
 @Component({ selector: 'app-header', imports: [RouterLink], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
@@ -17,6 +18,8 @@ export class Header implements OnInit {
   readonly menuToggle = output<void>();
   readonly user = inject(UserContextService).user;
   readonly company = inject(CompanyContextService).company;
+  /** Local seleccionado (ADMIN): filtra productos e inventario; vacío = todos los locales. */
+  readonly storeContext = inject(StoreContextService);
   private readonly badge = inject(NotificationBadgeService);
   private readonly destroyRef = inject(DestroyRef);
   /** Campana conectada al centro de notificaciones (mismo permiso que la ruta). */
@@ -29,6 +32,7 @@ export class Header implements OnInit {
   readonly modeLabel = computed(() => (this.isDark() ? 'Cambiar a modo día' : 'Cambiar a modo noche'));
 
   ngOnInit(): void {
+    this.storeContext.load();
     if (!this.canSeeNotifications) return;
     this.badge.refresh();
     this.router.events

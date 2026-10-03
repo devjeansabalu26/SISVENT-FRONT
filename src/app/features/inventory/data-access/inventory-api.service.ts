@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { StockAdjustmentRequest, StockPage, StockRow } from '../models/inventory-item.model';
 import { InventoryMovement, MovementPage } from '../models/inventory-movement.model';
@@ -54,6 +55,21 @@ interface RawMovementItem {
   readonly originType: string | null;
 }
 
+export interface StockTransferRequest {
+  readonly fromStoreId: string;
+  readonly toStoreId: string;
+  readonly reason: string;
+  readonly lines: readonly { productId: string; quantity: number }[];
+}
+
+export interface StockTransferResult {
+  readonly transferId: string;
+  readonly fromStoreName: string;
+  readonly toStoreName: string;
+  readonly lines: number;
+  readonly units: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InventoryApiService {
   private readonly http = inject(HttpClient);
@@ -99,5 +115,10 @@ export class InventoryApiService {
 
   adjust(body: StockAdjustmentRequest): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/adjustments`, body);
+  }
+
+  /** Transferencia entre locales (ADMIN). Los 403/409 se muestran en el diálogo. */
+  transfer(body: StockTransferRequest): Observable<StockTransferResult> {
+    return this.http.post<StockTransferResult>(`${this.baseUrl}/transfers`, body, { context: handleForbiddenInline() });
   }
 }

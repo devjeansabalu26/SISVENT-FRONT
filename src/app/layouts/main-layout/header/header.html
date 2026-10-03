@@ -1,6 +1,18 @@
 <header>
   <button type="button" class="menu" (click)="menuToggle.emit()" aria-label="Abrir navegación"><span class="material-icons">menu</span></button>
   <div class="crumb">{{ company()?.commercialName ?? 'SISVENT' }} <span>/</span> Panel</div>
+  @if (storeContext.canPick() && storeContext.stores().length) {
+    <label class="store-picker" title="Local para productos e inventario">
+      <span class="material-icons">storefront</span>
+      <select data-native-picker [value]="storeContext.selectedStoreId() ?? ''" (change)="storeContext.select($any($event.target).value)"
+        aria-label="Local seleccionado">
+        <option value="">Todos los locales (stock general)</option>
+        @for (store of storeContext.stores(); track store.id) {
+          <option [value]="store.id" [selected]="store.id === storeContext.selectedStoreId()">{{ store.name }}</option>
+        }
+      </select>
+    </label>
+  }
   <div class="user">
     <button type="button" class="mode" (click)="toggleMode()" [attr.aria-label]="modeLabel()" [title]="modeLabel()" [attr.aria-pressed]="isDark()">
       <span class="material-icons">{{ isDark() ? 'light_mode' : 'dark_mode' }}</span>
@@ -13,7 +25,14 @@
     } @else {
       <button type="button" aria-label="Notificaciones"><span class="material-icons">notifications_none</span></button>
     }
-    <div><strong>{{ user()?.displayName ?? 'Usuario SISVENT' }}</strong><small>{{ user()?.role ?? 'Sin sesión' }}</small></div>
+    <div>
+      <strong>{{ user()?.displayName ?? 'Usuario SISVENT' }}</strong>
+      @if (user()?.role === 'VENDEDOR' && user()?.branchName) {
+        <small class="store-name"><span class="material-icons">storefront</span>{{ user()!.branchName }}</small>
+      } @else {
+        <small>{{ user()?.role ?? 'Sin sesión' }}</small>
+      }
+    </div>
     <button type="button" class="logout" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión"><span class="material-icons">logout</span></button>
   </div>
 </header>

@@ -1,6 +1,6 @@
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,7 +9,12 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { StoreApiService } from '../../locales/data-access/store-api.service';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
+import { UserContextService } from '../../../core/context/user-context/user-context.service';
+import { ProductApiService } from '../../products/data-access/product-api.service';
+import { Product } from '../../products/models/product.model';
+import { StockTransferData, StockTransferDialog } from '../components/stock-transfer-dialog/stock-transfer-dialog';
+import { StockTransferResult } from '../data-access/inventory-api.service';
 import { StockAdjustmentDialog } from '../components/stock-adjustment-dialog/stock-adjustment-dialog';
 import { InventoryApiService } from '../data-access/inventory-api.service';
 import { StockAdjustmentRequest, StockRow } from '../models/inventory-item.model';
@@ -21,15 +26,23 @@ import { StockAdjustmentRequest, StockRow } from '../models/inventory-item.model
   styleUrl: './inventory-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InventoryPage implements OnInit {
+export class InventoryPage {
   private readonly api = inject(InventoryApiService);
-  private readonly storeApi = inject(StoreApiService);
+  private readonly productApi = inject(ProductApiService);
+  /** Local del encabezado: con local, el stock de ese local; sin local (ADMIN), el stock general por local. */
+  readonly storeContext = inject(StoreContextService);
+  private readonly ownStoreId = inject(UserContextService).user()?.branchId ?? null;
+  readonly general = computed(() => this.storeContext.canPick() && !this.storeContext.selectedStoreId());
+  /** Ajustar: el ADMIN en cualquier local; el vendedor solo en su local (consultar otros no permite ajustarlos). */
+  readonly canAdjustHere = computed(() =>
+    this.canAdjust && (this.storeContext.isAdmin() || this.storeContext.selectedStoreId() === this.ownStoreId));
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   readonly canAdjust = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.inventoryAdjust] });
 
   readonly loading = signal(false);
-  readonly stores = signal<readonly { id: string; name: string }[]>([]);
+  /** Vista general: una fila por producto con total y columna por local. */
+  private readonly generalData = signal<readonly Product[]>([]);
   private readonly search = signal('');
   private readonly statusFilter = signal('');
   private readonly rowsData = signal<readonly StockRow[]>([]);
@@ -44,9 +57,43 @@ export class InventoryPage implements OnInit {
     );
   });
 
-  readonly totalUnits = computed(() => this.rowsData().reduce((total, item) => total + item.currentStock, 0));
-  readonly lowStock = computed(() => this.rowsData().filter((item) => item.status === 'LOW_STOCK').length);
-  readonly outOfStock = computed(() => this.rowsData().filter((item) => item.status === 'OUT_OF_STOCK').length);
+  readonly generalRows = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    const status = this.statusFilter();
+    return this.generalData().filter(
+      (row) =>
+        (!term || `${row.sku} ${row.name}`.toLowerCase().includes(term)) && (!status || this.generalStatus(row) === status),
+    );
+  });
+
+  readonly totalUnits = computed(() =>
+    this.general()
+      ? this.generalData().reduce((total, item) => total + item.totalStock, 0)
+      : this.rowsData().reduce((total, item) => total + item.currentStock, 0));
+  readonly lowStock = computed(() =>
+    this.general()
+      ? this.generalData().filter((item) => this.generalStatus(item) === 'LOW_STOCK').length
+      : this.rowsData().filter((item) => item.status === 'LOW_STOCK').length);
+  readonly outOfStock = computed(() =>
+    this.general()
+      ? this.generalData().filter((item) => this.generalStatus(item) === 'OUT_OF_STOCK').length
+      : this.rowsData().filter((item) => item.status === 'OUT_OF_STOCK').length);
+
+  /** Columnas de la vista general: total y una por local. */
+  readonly generalColumns = computed<readonly DataTableColumn<Product>[]>(() => [
+    { key: 'sku', label: 'SKU', value: (row) => row.sku },
+    { key: 'product', label: 'Producto', value: (row) => row.name },
+    { key: 'total', label: 'Stock total', value: (row) => row.totalStock },
+    ...this.storeContext.stores().map((store) => ({
+      key: `store-${store.id}`,
+      label: store.name,
+      value: (row: Product) => {
+        const cell = row.stores?.find((s) => s.storeId === store.id);
+        return cell ? cell.currentStock : '—';
+      },
+    })),
+    { key: 'status', label: 'Estado', value: (row) => this.generalStatus(row), type: 'status' as const },
+  ]);
 
   readonly columns: readonly DataTableColumn<StockRow>[] = [
     { key: 'sku', label: 'SKU', value: (row) => row.sku },
@@ -57,20 +104,52 @@ export class InventoryPage implements OnInit {
     { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
   ];
 
-  ngOnInit(): void {
-    this.storeApi.list().subscribe((response) => this.stores.set(response.items));
-    this.load();
+  constructor() {
+    // Recarga al cambiar el local del encabezado (y la primera vez).
+    effect(() => {
+      this.storeContext.selectedStoreId();
+      this.general();
+      untracked(() => this.load());
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.stock({ pageSize: 100 }).subscribe({
+    if (this.general()) {
+      this.productApi.list({ pageSize: 100, isActive: true }).subscribe({
+        next: (page) => {
+          this.generalData.set(page.items);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+      return;
+    }
+    this.api.stock({ pageSize: 100, storeId: this.storeContext.selectedStoreId() ?? undefined }).subscribe({
       next: (page) => {
         this.rowsData.set(page.items);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  transfer(): void {
+    this.dialog
+      .open<StockTransferDialog, StockTransferData, StockTransferResult>(StockTransferDialog, {
+        data: { stores: this.storeContext.stores(), fromStoreId: this.storeContext.selectedStoreId() },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result) return;
+        this.notifications.show(
+          `Transferidas ${result.units} unidades de ${result.fromStoreName} a ${result.toStoreName}.`, 'success');
+        this.load();
+      });
+  }
+
+  private generalStatus(row: Product): string {
+    return row.totalStock <= 0 ? 'OUT_OF_STOCK' : row.lowStock ? 'LOW_STOCK' : 'AVAILABLE';
   }
 
   filter(query: string, status: string): void {

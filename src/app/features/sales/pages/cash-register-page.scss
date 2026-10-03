@@ -1,0 +1,213 @@
+.ghost,
+.primary,
+.danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ghost {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+.primary {
+  border: 0;
+  color: var(--color-on-primary, white);
+  background: var(--color-primary);
+}
+.danger {
+  border: 0;
+  color: white;
+  background: var(--color-danger);
+}
+.ghost .material-icons,
+.primary .material-icons,
+.danger .material-icons {
+  font-size: 18px;
+}
+
+.section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.section-title h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.small {
+  font-size: 12px;
+}
+.state {
+  padding: 28px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.state.error {
+  color: var(--color-error-text);
+}
+
+.status {
+  margin-bottom: var(--space-lg, 28px);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.card--open {
+  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+}
+.card > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.card h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.card header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.card dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+.card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.card dl .method {
+  color: var(--color-text-muted);
+}
+.card dl .strong {
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+  font-weight: 700;
+}
+.card dd {
+  margin: 0;
+  font-weight: 600;
+}
+.card footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.pending {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
+  font-size: 13px;
+}
+.pending .material-icons {
+  font-size: 18px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 999px);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge--open {
+  color: var(--color-success-text, var(--color-success));
+  background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+}
+.badge--forced {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.filters label {
+  display: grid;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+tbody tr {
+  cursor: pointer;
+}
+tbody tr:hover {
+  background: var(--color-surface-secondary);
+}
+.ok {
+  color: var(--color-success);
+  font-weight: 600;
+}
+.bad {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.card dl .refund {
+  color: var(--color-danger);
+}

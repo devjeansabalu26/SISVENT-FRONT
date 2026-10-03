@@ -38,6 +38,7 @@ export class UserFormDialog implements OnInit {
       validators: [Validators.required],
     }),
     storeId: new FormControl<string | null>(this.user?.storeId ?? null, { nonNullable: false }),
+    canViewAllStores: new FormControl(this.user?.canViewAllStores ?? false, { nonNullable: true }),
   });
 
   ngOnInit(): void {
@@ -63,6 +64,7 @@ export class UserFormDialog implements OnInit {
       document: value.document.trim() || null,
       role: value.role,
       storeId: value.role === 'VENDEDOR' ? value.storeId : null,
+      canViewAllStores: value.role === 'VENDEDOR' && value.canViewAllStores,
     });
   }
 }

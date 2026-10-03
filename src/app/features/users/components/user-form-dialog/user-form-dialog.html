@@ -18,6 +18,10 @@
           }
         </select>
       </label>
+      <label class="check">
+        <input type="checkbox" formControlName="canViewAllStores" />
+        <span>Puede ver productos y stock de otros locales <small>(solo consulta; vende y ajusta solo en su local)</small></span>
+      </label>
     }
   </div>
   <footer><button type="button" (click)="cancel()">Cancelar</button><button type="submit" class="primary">Guardar usuario</button></footer>

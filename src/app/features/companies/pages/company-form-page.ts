@@ -211,7 +211,7 @@ export class CompanyFormPage implements OnInit {
   /** Validators only meaningful when provisioning a new tenant. */
   private addCreateValidators(): void {
     this.form.controls.taxId.addValidators(Validators.required);
-    this.form.controls.adminPassword.addValidators([Validators.required, Validators.minLength(10)]);
+    this.form.controls.adminPassword.addValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
     this.form.updateValueAndValidity();
   }
 

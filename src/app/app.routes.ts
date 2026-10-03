@@ -5,6 +5,7 @@ import { homeGuard } from './core/auth/guards/home.guard';
 import { permissionGuard } from './core/auth/guards/permission.guard';
 import { planGuard } from './core/auth/guards/plan.guard';
 import { roleGuard } from './core/auth/guards/role.guard';
+import { cashAccessGuard } from './features/sales/cash-access';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,8 @@ export const routes: Routes = [
       { path: 'customers/:id/edit', canActivate: [roleGuard, permissionGuard, planGuard], data: { requiredFeature: 'CLIENTS', title: 'Editar cliente', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.customersManage] }, loadComponent: () => import('./features/customers/pages/customer-form-page').then((component) => component.CustomerFormPage) },
       { path: 'customers/:id', canActivate: [roleGuard, permissionGuard, planGuard], data: { requiredFeature: 'CLIENTS', title: 'Detalle de cliente', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.customersView] }, loadComponent: () => import('./features/customers/pages/customer-detail-page').then((component) => component.CustomerDetailPage) },
       { path: 'customers', canActivate: [roleGuard, permissionGuard, planGuard], data: { requiredFeature: 'CLIENTS', title: 'Clientes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.customersView] }, loadComponent: () => import('./features/customers/pages/customer-list-page').then((component) => component.CustomerListPage) },
+      { path: 'sales/credit-notes', canActivate: [roleGuard, permissionGuard, planGuard], data: { title: 'Notas de crédito', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesView], requiredFeature: 'SALES' }, loadComponent: () => import('./features/sales/pages/credit-notes-page').then((component) => component.CreditNotesPage) },
+      { path: 'sales/cash', canActivate: [roleGuard, cashAccessGuard, planGuard], data: { title: 'Caja', roles: ['ADMIN', 'VENDEDOR'], requiredFeature: 'SALES' }, loadComponent: () => import('./features/sales/pages/cash-register-page').then((component) => component.CashRegisterPage) },
       { path: 'sales/cash-closures', canActivate: [roleGuard, permissionGuard, planGuard], data: { title: 'Cierres de caja', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesManage], requiredFeature: 'SALES' }, loadComponent: () => import('./features/sales/pages/cash-closures-page').then((component) => component.CashClosuresPage) },
       { path: 'sales/:id/comprobante', canActivate: [roleGuard, permissionGuard, planGuard], data: { requiredFeature: 'SALES', title: 'Comprobante', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesView] }, loadComponent: () => import('./features/sales/pages/receipt-page').then((component) => component.ReceiptPage) },
       { path: 'sales/:id', canActivate: [roleGuard, permissionGuard, planGuard], data: { requiredFeature: 'SALES', title: 'Detalle de venta', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesView] }, loadComponent: () => import('./features/sales/pages/sale-detail-page').then((component) => component.SaleDetailPage) },

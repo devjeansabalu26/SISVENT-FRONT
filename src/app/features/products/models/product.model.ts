@@ -12,6 +12,15 @@ export interface Product {
   readonly totalStock: number;
   readonly lowStock: boolean;
   readonly version: number;
+  /** Stock en cada local que maneja el producto (vista "Todos los locales"). */
+  readonly stores?: readonly ProductStoreStock[];
+}
+
+export interface ProductStoreStock {
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly currentStock: number;
+  readonly minStock: number;
 }
 
 export interface ProductPage {

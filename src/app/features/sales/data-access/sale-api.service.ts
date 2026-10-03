@@ -16,6 +16,8 @@ interface ListParams {
   readonly paymentMethod?: string;
   readonly status?: string;
   readonly mineOnly?: boolean;
+  /** Solo VENDEDOR: 'MINE' (sus ventas, por defecto) o 'STORE' (ventas de su local). */
+  readonly scope?: 'MINE' | 'STORE';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -35,6 +37,7 @@ export class SaleApiService {
     if (params.paymentMethod) httpParams = httpParams.set('paymentMethod', params.paymentMethod);
     if (params.status) httpParams = httpParams.set('status', params.status);
     if (params.mineOnly !== undefined) httpParams = httpParams.set('mineOnly', params.mineOnly);
+    if (params.scope) httpParams = httpParams.set('scope', params.scope);
     return this.http.get<SalePage>(this.baseUrl, { params: httpParams });
   }
 

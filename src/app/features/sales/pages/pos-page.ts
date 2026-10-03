@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
@@ -15,6 +15,9 @@ import { ProductApiService } from '../../products/data-access/product-api.servic
 import { SaleConfirmData, SaleConfirmDialog } from '../components/sale-confirm-dialog/sale-confirm-dialog';
 import { SaleSuccessDialog } from '../components/sale-success-dialog/sale-success-dialog';
 import { PosApiService, PosSettings } from '../data-access/pos-api.service';
+import { CashSessionApiService, StoreCashStatus } from '../data-access/cash-session-api.service';
+import { canUseCash } from '../cash-access';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { SaleDetail } from '../models/sale-detail.model';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { PosPaymentPanel } from '../components/pos-payment-panel/pos-payment-panel';
@@ -24,7 +27,7 @@ import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../uti
 
 @Component({
   selector: 'app-pos-page',
-  imports: [PosPaymentPanel],
+  imports: [PosPaymentPanel, RouterLink],
   templateUrl: './pos-page.html',
   styleUrl: './pos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +66,28 @@ export class PosPage implements OnInit {
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly selectedStoreId = signal<string | null>(null);
+  private readonly storeContext = inject(StoreContextService);
+
+  // Aviso de caja cerrada: la venta igual se registra y pasa a la próxima caja que se abra en el local.
+  private readonly cashApi = inject(CashSessionApiService);
+  readonly canUseCash = canUseCash();
+  private readonly cashStatuses = signal<readonly StoreCashStatus[]>([]);
+  /** Cambio de local (ADMIN): el buscador muestra solo los productos de ese local; el carrito se vacía. */
+  changeStore(storeId: string): void {
+    if (storeId === this.selectedStoreId()) return;
+    this.selectedStoreId.set(storeId);
+    if (this.cart().length) {
+      this.cart.set([]);
+      this.notifications.show('Se vació el carrito: cada local vende solo sus productos.', 'info');
+    }
+    this.search('');
+  }
+
+  readonly closedCash = computed(() => {
+    const statuses = this.cashStatuses();
+    const status = this.isAdmin ? statuses.find((s) => s.storeId === this.selectedStoreId()) : statuses[0];
+    return status && !status.current ? status : null;
+  });
 
   readonly customerResults = signal<readonly Customer[]>([]);
   readonly selectedCustomer = signal<Customer | null>(null);
@@ -82,10 +107,17 @@ export class PosPage implements OnInit {
         error: () => this.notifications.show('No se pudo cargar el cliente seleccionado.', 'error'),
       });
     }
+    if (this.canUseCash) {
+      this.cashApi.status().subscribe({ next: (statuses) => this.cashStatuses.set(statuses), error: () => undefined });
+    }
     if (this.isAdmin) {
       this.storeApi.list().subscribe((response) => {
         this.stores.set(response.items);
-        if (response.items.length) this.selectedStoreId.set(response.items[0].id);
+        // Por defecto, el local elegido en el encabezado; si es "todos", el primero.
+        const preferred = this.storeContext.selectedStoreId();
+        const initial = response.items.find((item) => item.id === preferred) ?? response.items[0];
+        if (initial) this.selectedStoreId.set(initial.id);
+        this.search('');
       });
     }
   }
@@ -108,7 +140,7 @@ export class PosPage implements OnInit {
   }
 
   search(query: string): void {
-    this.productApi.list({ pageSize: 30, search: query || undefined, isActive: true }).subscribe((page) => {
+    this.productApi.list({ pageSize: 30, search: query || undefined, isActive: true, storeId: this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null) }).subscribe((page) => {
       this.products.set(page.items);
     });
   }
@@ -187,7 +219,7 @@ export class PosPage implements OnInit {
     }
     const customer = this.selectedCustomer();
     this.dialog
-      .open<SaleConfirmDialog, SaleConfirmData, boolean>(SaleConfirmDialog, {
+      .open<SaleConfirmDialog, SaleConfirmData, string | false>(SaleConfirmDialog, {
         data: {
           customer: customer
             ? `${customer.displayName}${customer.documentNumber ? ` (${customer.documentType ?? 'Doc.'} ${customer.documentNumber})` : ''}`
@@ -199,8 +231,8 @@ export class PosPage implements OnInit {
         },
       })
       .afterClosed()
-      .pipe(filter(Boolean))
-      .subscribe(() => this.register());
+      .pipe(filter((sellerCode): sellerCode is string => typeof sellerCode === 'string'))
+      .subscribe((sellerCode) => this.register(sellerCode));
   }
 
   /** Resumen de cada pago antes de confirmar ("Tarjeta S/ 6000.00 · Op. 004512"). */
@@ -235,7 +267,7 @@ export class PosPage implements OnInit {
     return email;
   }
 
-  private register(): void {
+  private register(sellerCode: string): void {
     const total = this.subtotal();
     const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
     if (!payments.length) return;
@@ -243,6 +275,7 @@ export class PosPage implements OnInit {
     this.posApi
       .confirm({
         storeId: this.isAdmin ? this.selectedStoreId() : null,
+        sellerCode,
         clientId: this.selectedCustomer()?.id ?? null,
         paymentMethod: payments[0].method,
         discountTotal: 0,

@@ -21,6 +21,8 @@ export interface PosSaleLineInput {
 
 export interface PosSaleRequest {
   readonly storeId: string | null;
+  /** Usuario (código de 5 dígitos) de quien registra la venta; la venta queda a su nombre. */
+  readonly sellerCode: string;
   readonly clientId: string | null;
   /** Método principal (el primero); el detalle completo va en `payments`. */
   readonly paymentMethod: string;

@@ -1,3 +1,10 @@
+@if (closedCash(); as cash) {
+  <p class="cash-closed" role="status">
+    <span class="material-icons">lock</span>
+    <span>La caja de <strong>{{ cash.storeName }}</strong> está cerrada. Puedes vender: la venta se asignará a la próxima caja que se abra.</span>
+    <a routerLink="/app/sales/cash">Abrir caja</a>
+  </p>
+}
 <div class="pos">
   <div class="left">
     <section class="card">
@@ -19,7 +26,7 @@
     @if (isAdmin && stores().length > 1) {
       <section class="card">
         <h2>Local de venta</h2>
-        <select #store (change)="selectedStoreId.set(store.value)">
+        <select #store (change)="changeStore(store.value)">
           @for (item of stores(); track item.id) {
             <option [value]="item.id" [selected]="item.id === selectedStoreId()">{{ item.name }}</option>
           }

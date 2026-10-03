@@ -99,6 +99,9 @@ export class AppSessionService {
         ? permissionsFromModules(user.company.modules)
         : ROLE_PERMISSIONS[user.role],
       branchId: user.storeId ?? undefined,
+      branchName: user.storeName ?? undefined,
+      canViewAllStores: user.canViewAllStores ?? false,
+      visibleStores: user.visibleStores ?? [],
     });
 
     if (user.companyId && user.company) {

@@ -1,0 +1,137 @@
+<app-page-header
+  title="Caja"
+  [description]="isAdmin ? 'Estado de las cajas de cada local y turnos de caja' : 'Apertura y cierre de caja de tu local'"
+>
+  <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Ventas</a>
+  <button type="button" class="ghost" (click)="loadStatus()"><span class="material-icons">refresh</span>Actualizar</button>
+</app-page-header>
+
+<section class="status">
+  <header class="section-title">
+    <h2>{{ isAdmin ? 'Estado de cajas' : 'Mi caja' }}</h2>
+    @if (isAdmin && statuses().length) {
+      <span class="muted">{{ openCount() }} de {{ statuses().length }} abiertas · se actualiza cada 30 s</span>
+    }
+  </header>
+
+  @if (statusLoading()) {
+    <p class="state">Cargando estado de la caja…</p>
+  } @else if (statusError()) {
+    <p class="state error">{{ statusError() }}</p>
+  } @else {
+    <div class="cards">
+      @for (status of statuses(); track status.storeId) {
+        <article class="card" [class.card--open]="status.current">
+          <header>
+            <div>
+              <h3>{{ status.storeName }}</h3>
+              @if (status.current; as s) {
+                <p>Abierta por <strong>{{ s.openedBy }}</strong> · desde {{ s.openedAt | date: 'dd/MM HH:mm' }}</p>
+              } @else {
+                <p>Sin turno abierto</p>
+              }
+            </div>
+            <span class="badge" [class.badge--open]="status.current">{{ status.current ? 'Abierta' : 'Cerrada' }}</span>
+          </header>
+
+          @if (status.current; as s) {
+            <dl>
+              <div><dt>Fondo inicial</dt><dd>S/ {{ s.openingAmount.toFixed(2) }}</dd></div>
+              <div><dt>Ventas</dt><dd>{{ s.salesCount }} · S/ {{ s.totalSales.toFixed(2) }}</dd></div>
+              @for (method of s.byMethod; track method.code) {
+                <div class="method"><dt>{{ method.name }}</dt><dd>S/ {{ method.amount.toFixed(2) }}</dd></div>
+              }
+              @if (s.totalRefunds > 0) {
+                <div class="refund"><dt>Devoluciones (notas de crédito)</dt><dd>- S/ {{ s.totalRefunds.toFixed(2) }}</dd></div>
+              }
+              <div class="strong"><dt>Efectivo esperado</dt><dd>S/ {{ s.expectedCash.toFixed(2) }}</dd></div>
+            </dl>
+            <footer>
+              <button type="button" class="ghost" (click)="detail(s)"><span class="material-icons">receipt_long</span>Ver ventas</button>
+              @if (canClose(s)) {
+                <button type="button" [class.primary]="isMine(s)" [class.danger]="!isMine(s)" (click)="close(s)">
+                  <span class="material-icons">{{ isMine(s) ? 'lock' : 'gpp_maybe' }}</span>{{ isMine(s) ? 'Cerrar caja' : 'Forzar cierre' }}
+                </button>
+              } @else {
+                <span class="muted small">Solo {{ s.openedBy }} o el administrador pueden cerrarla.</span>
+              }
+            </footer>
+          } @else {
+            @if (status.pendingSales > 0) {
+              <p class="pending">
+                <span class="material-icons">schedule</span>
+                {{ status.pendingSales }} {{ status.pendingSales === 1 ? 'venta pendiente' : 'ventas pendientes' }}: se
+                {{ status.pendingSales === 1 ? 'asignará' : 'asignarán' }} a la próxima caja que se abra.
+              </p>
+            }
+            <footer>
+              <button type="button" class="primary" (click)="open(status)"><span class="material-icons">lock_open</span>Abrir caja</button>
+            </footer>
+          }
+        </article>
+      } @empty {
+        <p class="state">No hay locales activos.</p>
+      }
+    </div>
+  }
+</section>
+
+<section class="history">
+  <header class="section-title"><h2>Historial de turnos</h2></header>
+  <div class="filters">
+    @if (isAdmin && statuses().length > 1) {
+      <label>Local
+        <select [value]="storeFilter()" (change)="storeFilter.set($any($event.target).value)">
+          <option value="">Todos los locales</option>
+          @for (status of statuses(); track status.storeId) { <option [value]="status.storeId">{{ status.storeName }}</option> }
+        </select>
+      </label>
+    }
+    <label>Desde <input type="date" [value]="from()" (change)="from.set($any($event.target).value)" /></label>
+    <label>Hasta <input type="date" [value]="to()" (change)="to.set($any($event.target).value)" /></label>
+    <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>
+    <button type="button" class="primary" (click)="loadHistory()">Filtrar</button>
+  </div>
+
+  <div class="table-scroll surface-card">
+    @if (historyLoading()) {
+      <p class="state">Cargando turnos…</p>
+    } @else if (!history().length) {
+      <p class="state">No hay turnos de caja en este período.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            @if (isAdmin) { <th>Local</th> }
+            <th>Apertura</th><th>Abierta por</th><th>Fondo</th><th>Cierre</th><th>Cerrada por</th>
+            <th>Ventas</th><th>Total</th><th>Esperado</th><th>Contado</th><th>Diferencia</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of history(); track row.id) {
+            <tr (click)="detail(row)" title="Ver ventas de la caja">
+              @if (isAdmin) { <td>{{ row.storeName }}</td> }
+              <td>{{ row.openedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ row.openedBy }}</td>
+              <td>S/ {{ row.openingAmount.toFixed(2) }}</td>
+              <td>{{ row.closedAt ? (row.closedAt | date: 'dd/MM HH:mm') : '—' }}</td>
+              <td>{{ row.closedBy ?? '—' }}</td>
+              <td>{{ row.salesCount }}</td>
+              <td>S/ {{ row.totalSales.toFixed(2) }}</td>
+              <td>S/ {{ row.expectedCash.toFixed(2) }}</td>
+              <td>{{ row.countedCash !== null ? 'S/ ' + row.countedCash.toFixed(2) : '—' }}</td>
+              <td [class.ok]="row.difference === 0" [class.bad]="row.difference !== null && row.difference !== 0">
+                {{ row.difference !== null ? 'S/ ' + row.difference.toFixed(2) : '—' }}
+              </td>
+              <td>
+                <span class="badge" [class.badge--open]="row.status === 'OPEN'" [class.badge--forced]="row.forced">
+                  {{ row.status === 'OPEN' ? 'Abierta' : row.forced ? 'Cierre forzado' : 'Cerrada' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</section>

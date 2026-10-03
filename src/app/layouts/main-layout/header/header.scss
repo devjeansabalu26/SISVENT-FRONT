@@ -4,3 +4,10 @@ header { height: 64px; display: flex; align-items: center; justify-content: spac
 @media (max-width: 900px) { .menu { display: inline-grid; } header { padding: 0 16px; } .user div { display: none; } }
 .mode { width: 36px; height: 36px; border-radius: var(--radius-md); color: var(--color-text-secondary); transition: color 0.2s ease, background 0.2s ease, transform 0.3s ease; }.mode:hover,.mode:focus-visible { color: var(--color-primary); background: var(--color-primary-soft); outline: none; }.mode:active .material-icons { transform: rotate(-30deg); }.mode .material-icons { transition: transform 0.3s ease; }
 
+.store-picker { display: flex; align-items: center; gap: 6px; margin-right: auto; margin-left: 16px; padding: 0 10px; height: 38px; border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); background: var(--color-surface); }
+.store-picker .material-icons { font-size: 18px; color: var(--color-primary); }
+.store-picker select { max-width: 240px; padding: 0 22px 0 0; border: 0; box-shadow: none; background-color: transparent; font: inherit; font-weight: 600; color: var(--color-text-primary); cursor: pointer; }
+@media (max-width: 900px) { .store-picker { margin-left: 8px; } .store-picker select { max-width: 140px; } }
+
+.store-name { display: inline-flex; align-items: center; gap: 4px; }
+.store-name .material-icons { font-size: 14px; color: var(--color-primary); }

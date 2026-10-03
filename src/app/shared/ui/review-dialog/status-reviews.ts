@@ -71,7 +71,7 @@ export function resetCredential(username: string, password: string): CredentialD
     code: 'MOD-SA-16',
     successMessage: 'Las credenciales de acceso temporal han sido generadas con éxito.',
     username,
-    passwordLabel: 'Contraseña nueva',
+    passwordLabel: 'Clave nueva (PIN de 5 dígitos)',
     password,
   };
 }

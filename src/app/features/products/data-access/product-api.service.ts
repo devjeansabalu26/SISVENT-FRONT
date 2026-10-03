@@ -17,6 +17,8 @@ interface ListParams {
   readonly search?: string;
   readonly categoryId?: string;
   readonly brandId?: string;
+  /** Local: solo productos que maneja, con su stock. Sin valor = todos los locales. */
+  readonly storeId?: string | null;
   readonly isActive?: boolean;
   readonly lowStock?: boolean;
 }
@@ -33,6 +35,7 @@ export class ProductApiService {
     if (params.search) httpParams = httpParams.set('search', params.search);
     if (params.categoryId) httpParams = httpParams.set('categoryId', params.categoryId);
     if (params.brandId) httpParams = httpParams.set('brandId', params.brandId);
+    if (params.storeId) httpParams = httpParams.set('storeId', params.storeId);
     if (params.isActive !== undefined) httpParams = httpParams.set('isActive', params.isActive);
     if (params.lowStock !== undefined) httpParams = httpParams.set('lowStock', params.lowStock);
     return this.http.get<ProductPage>(this.baseUrl, { params: httpParams });

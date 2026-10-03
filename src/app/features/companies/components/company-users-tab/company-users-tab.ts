@@ -17,6 +17,7 @@ import { CompanyApiService } from '../../data-access/company-api.service';
 interface Row {
   readonly id: string;
   readonly fullName: string;
+  readonly userCode: string | null;
   readonly email: string | null;
   readonly phone: string | null;
   readonly document: string | null;
@@ -58,6 +59,7 @@ export class CompanyUsersTab implements OnInit {
 
   readonly columns: readonly DataTableColumn<Row>[] = [
     { key: 'name', label: 'Nombre', value: (row) => row.fullName },
+    { key: 'code', label: 'Usuario', value: (row) => row.userCode ?? '—' },
     { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
     { key: 'role', label: 'Rol', value: (row) => row.role },
     { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
@@ -97,6 +99,7 @@ export class CompanyUsersTab implements OnInit {
             page.items.map((u) => ({
               id: u.profileId,
               fullName: u.fullName,
+              userCode: u.userCode ?? null,
               email: u.email,
               phone: u.phone,
               document: u.document,
@@ -164,7 +167,7 @@ export class CompanyUsersTab implements OnInit {
         this.api.resetAccess(row.id).subscribe({
           next: (result) =>
             this.dialog.open(CredentialDialog, {
-              data: resetCredential(row.email ?? row.fullName, result.temporaryPassword),
+              data: resetCredential(result.userCode ?? row.userCode ?? row.fullName, result.temporaryPassword),
               disableClose: true,
             }),
           error: () => this.notifications.show('No se pudo generar la contraseña temporal.', 'error'),
