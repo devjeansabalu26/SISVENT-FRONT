@@ -14,16 +14,16 @@
     <h2>1. Datos de la empresa</h2>
     <div class="fields">
       <label
-        >Nombre comercial *
+        ><span>Nombre comercial <span class="required">*</span></span>
         <input formControlName="tradeName" placeholder="Ej. TechStore Perú" />
         @if (form.controls.tradeName.touched && form.controls.tradeName.invalid) {
           <span class="error">Obligatorio.</span>
         }
       </label>
-      <label>Razón social * <input formControlName="legalName" placeholder="Ej. Importaciones Tecnológicas S.A.C." /></label>
+      <label><span>Razón social <span class="required">*</span></span> <input formControlName="legalName" placeholder="Ej. Importaciones Tecnológicas S.A.C." /></label>
       @if (!isEdit) {
         <label
-          >RUC *
+          ><span>RUC <span class="required">*</span></span>
           <input formControlName="taxId" placeholder="20512345678" />
           @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
             <span class="error">11 dígitos.</span>
@@ -33,10 +33,10 @@
       <label>Rubro / descripción <input formControlName="businessType" /></label>
       <label>Teléfono de la empresa <input formControlName="companyPhone" placeholder="+51 999 999 999" /></label>
       <label
-        >Correo de contacto *
+        ><span>Correo de contacto <span class="required">*</span></span>
         <input type="email" formControlName="companyEmail" placeholder="contacto@empresa.pe" />
       </label>
-      <label class="full">Dirección legal * <input formControlName="legalAddress" placeholder="Calle, Av. o Jr. con numeración y distrito" /></label>
+      <label class="full"><span>Dirección legal <span class="required">*</span></span> <input formControlName="legalAddress" placeholder="Calle, Av. o Jr. con numeración y distrito" /></label>
       <label class="full">Notas internas <textarea formControlName="internalNotes"></textarea></label>
     </div>
   </section>
@@ -45,21 +45,21 @@
     <h2>2. Administrador principal</h2>
     <div class="fields three">
       <label
-        >Nombres *
+        ><span>Nombres <span class="required">*</span></span>
         <input formControlName="adminFirstName" />
         @if (form.controls.adminFirstName.touched && form.controls.adminFirstName.invalid) {
           <span class="error">Obligatorio.</span>
         }
       </label>
       <label
-        >Apellidos *
+        ><span>Apellidos <span class="required">*</span></span>
         <input formControlName="adminLastName" />
         @if (form.controls.adminLastName.touched && form.controls.adminLastName.invalid) {
           <span class="error">Obligatorio.</span>
         }
       </label>
       <label
-        >Correo del administrador *
+        ><span>Correo del administrador <span class="required">*</span></span>
         <input type="email" formControlName="adminEmail" [readonly]="isEdit" />
         @if (isEdit) {
           <span class="note">El correo de acceso se cambia desde "Restablecer acceso admin".</span>
@@ -67,7 +67,7 @@
       </label>
       @if (!isEdit) {
         <label
-          >Contraseña temporal *
+          ><span>Contraseña temporal <span class="required">*</span></span>
           <span class="password-input">
             <input
               [type]="showAdminPassword() ? 'text' : 'password'"
@@ -93,7 +93,7 @@
     <h2>3. Plan y vigencia</h2>
     <div class="fields three">
       <label
-        >Plan *
+        ><span>Plan <span class="required">*</span></span>
         <select formControlName="planId">
           @for (plan of plans(); track plan.id) {
             <option [value]="plan.id">{{ plan.name }} @if (plan.currentPrice != null) { (S/ {{ plan.currentPrice.toFixed(2) }}) }</option>
@@ -103,17 +103,17 @@
       <label>Precio contratado <input type="number" step="0.01" formControlName="contractedPrice" /></label>
       @if (!isEdit) {
         <label
-          >Estado inicial *
+          ><span>Estado inicial <span class="required">*</span></span>
           <select formControlName="initialStatus">
             <option value="ACTIVE">Activa</option>
             <option value="INACTIVE">Inactiva</option>
           </select>
         </label>
       }
-      <label>Fecha inicio vigencia * <input type="date" formControlName="startDate" /></label>
-      <label>Fecha de vencimiento * <input type="date" formControlName="endDate" /></label>
+      <label><span>Fecha inicio vigencia <span class="required">*</span></span> <input type="date" formControlName="startDate" /></label>
+      <label><span>Fecha de vencimiento <span class="required">*</span></span> <input type="date" formControlName="endDate" /></label>
       <label
-        >{{ isEdit ? 'Local principal' : 'Local inicial' }} *
+        ><span>{{ isEdit ? 'Local principal' : 'Local inicial' }} <span class="required">*</span></span>
         <input formControlName="firstStoreName" />
         @if (form.controls.firstStoreName.touched && form.controls.firstStoreName.invalid) {
           <span class="error">Obligatorio.</span>

@@ -58,7 +58,7 @@
 }
 .success .ghost {
   border: 1px solid var(--color-border);
-  background: white;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
 }
 .success .primary {
@@ -74,7 +74,7 @@
   padding: 12px 14px;
   border-radius: var(--radius-md);
   color: var(--color-success);
-  background: color-mix(in srgb, var(--color-success) 10%, white);
+  background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
   text-align: center;
 }
 .change strong {
@@ -89,7 +89,7 @@
   padding: 10px 14px;
   border-radius: var(--radius-md);
   color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
   font-size: 13px;
 }
 .auto-email .material-icons {

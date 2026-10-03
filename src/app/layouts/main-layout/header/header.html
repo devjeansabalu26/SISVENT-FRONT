@@ -2,6 +2,9 @@
   <button type="button" class="menu" (click)="menuToggle.emit()" aria-label="Abrir navegación"><span class="material-icons">menu</span></button>
   <div class="crumb">{{ company()?.commercialName ?? 'SISVENT' }} <span>/</span> Panel</div>
   <div class="user">
+    <button type="button" class="mode" (click)="toggleMode()" [attr.aria-label]="modeLabel()" [title]="modeLabel()" [attr.aria-pressed]="isDark()">
+      <span class="material-icons">{{ isDark() ? 'light_mode' : 'dark_mode' }}</span>
+    </button>
     @if (canSeeNotifications) {
       <a class="bell" routerLink="/app/notifications" [attr.aria-label]="bellLabel()" [title]="bellLabel()">
         <span class="material-icons">{{ unread() ? 'notifications' : 'notifications_none' }}</span>

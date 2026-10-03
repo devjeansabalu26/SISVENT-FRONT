@@ -14,14 +14,14 @@
         </div>
         <div class="fields">
           <label
-            >Código de plan *
+            ><span>Código de plan <span class="required">*</span></span>
             <input formControlName="code" placeholder="BUSINESS" />
             @if (form.controls.code.touched && form.controls.code.invalid) {
               <span class="error">El código es obligatorio.</span>
             }
           </label>
           <label
-            >Nombre comercial del plan *
+            ><span>Nombre comercial del plan <span class="required">*</span></span>
             <input formControlName="name" placeholder="Ej. Negocio" />
             @if (form.controls.name.touched && form.controls.name.invalid) {
               <span class="error">El nombre es obligatorio.</span>
@@ -48,7 +48,7 @@
         </div>
         <div class="fields">
           <label
-            >Precio mensual base (S/ PEN) *
+            ><span>Precio mensual base (S/ PEN) <span class="required">*</span></span>
             <input type="number" formControlName="currentPrice" min="0" step="0.01" />
           </label>
           <label

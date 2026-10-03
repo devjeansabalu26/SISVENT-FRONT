@@ -9,7 +9,7 @@ label.check{grid-auto-flow:column;justify-content:start;align-items:center;gap:1
 input:not([type='checkbox']),textarea{padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);font:inherit;background:var(--color-surface)}
 input:focus,textarea:focus{border-color:var(--color-primary);outline:2px solid var(--color-primary-soft)}
 textarea{resize:vertical}
-.hint{color:#b91c1c;font-weight:500}
+.hint{color:var(--color-error-text);font-weight:500}
 footer{display:flex;justify-content:flex-end;gap:10px}
 button{padding:10px 16px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);font-weight:600}
 .primary{border-color:var(--color-primary);color:white;background:var(--color-primary)}

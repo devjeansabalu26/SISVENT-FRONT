@@ -23,7 +23,7 @@
   @if (resulting() < 0) {
     <p class="review__banner" data-tone="danger"><span class="material-icons">report</span>El stock resultante no puede ser negativo.</p>
   }
-  <label>Motivo *<textarea rows="2" formControlName="reason" placeholder="Ingreso de lote por reposición…"></textarea></label>
+  <label><span>Motivo <span class="required">*</span></span><textarea rows="2" formControlName="reason" placeholder="Ingreso de lote por reposición…"></textarea></label>
   @if (form.controls.reason.touched && form.controls.reason.invalid) {
     <small class="hint">Indica el motivo del ajuste.</small>
   }

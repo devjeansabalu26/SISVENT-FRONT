@@ -19,3 +19,8 @@ export function formatDate(value: string | null | undefined): string {
   if (Number.isNaN(date.getTime())) return '—';
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
+
+/** "2026-10-02" en la hora local (no UTC). Para filtros por día y nombres de archivo. */
+export function localIsoDate(date: Date = new Date()): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

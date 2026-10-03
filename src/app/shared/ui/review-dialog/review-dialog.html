@@ -104,7 +104,7 @@
 
   @if (data.reason; as reasonConfig) {
     <label
-      >{{ reasonConfig.label }} *
+      ><span>{{ reasonConfig.label }} <span class="required">*</span></span>
       <textarea [formControl]="reason" [placeholder]="reasonConfig.placeholder ?? ''"></textarea>
       @if (reason.touched && reason.invalid) {
         <small class="hint">Describe el motivo (mínimo {{ reasonMinLength }} caracteres).</small>

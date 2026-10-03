@@ -17,7 +17,7 @@
 }
 .review--danger header > span {
   color: var(--color-error);
-  background: color-mix(in srgb, var(--color-error) 12%, white);
+  background: color-mix(in srgb, var(--color-error) 12%, var(--color-surface));
 }
 .review__intro {
   color: var(--color-text-secondary);
@@ -148,22 +148,22 @@
 .review__chip[data-tone='info'],
 .review__banner[data-tone='info'] {
   color: var(--color-info);
-  background: color-mix(in srgb, var(--color-info) 10%, white);
+  background: color-mix(in srgb, var(--color-info) 10%, var(--color-surface));
 }
 .review__chip[data-tone='success'],
 .review__banner[data-tone='success'] {
-  color: #047857;
-  background: color-mix(in srgb, var(--color-success) 12%, white);
+  color: var(--color-success-text);
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
 }
 .review__chip[data-tone='warning'],
 .review__banner[data-tone='warning'] {
-  color: #b45309;
-  background: color-mix(in srgb, var(--color-warning) 14%, white);
+  color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
 }
 .review__chip[data-tone='danger'],
 .review__banner[data-tone='danger'] {
-  color: #b91c1c;
-  background: color-mix(in srgb, var(--color-error) 10%, white);
+  color: var(--color-error-text);
+  background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
 }
 
 footer .primary.danger {

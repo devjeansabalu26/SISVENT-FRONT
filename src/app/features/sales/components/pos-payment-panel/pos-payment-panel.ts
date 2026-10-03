@@ -125,9 +125,9 @@ import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment'
     .quick button.active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); }
     .add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); background: transparent; color: var(--color-primary); font-weight: 600; cursor: pointer; }
     .add .material-icons { font-size: 18px; }
-    .status { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-md); color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, white); }
+    .status { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-md); color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); }
     .status strong { font-size: 18px; }
-    .status--pending { color: #b45309; background: #fffbeb; }
+    .status--pending { color: var(--color-warning-text); background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); }
     .hint { color: var(--color-text-muted); font-size: 12px; }
     .error { margin: 0; color: var(--color-danger); font-size: 12px; font-weight: 600; }
   `,

@@ -16,7 +16,7 @@
 }
 .dialog header span.danger {
   color: var(--color-error);
-  background: #fee2e2;
+  background: color-mix(in srgb, var(--color-error) 16%, var(--color-surface));
 }
 h2 {
   margin: 0;
@@ -47,7 +47,7 @@ button {
   padding: 10px 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: white;
+  background: var(--color-surface);
   font-weight: 600;
   cursor: pointer;
 }

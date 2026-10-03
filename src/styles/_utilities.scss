@@ -48,3 +48,8 @@ article,
 .card {
   min-width: 0;
 }
+
+/* Asterisco de campo obligatorio: va dentro del <span> del texto del label para quedar a su costado. */
+.required {
+  color: var(--color-error-text);
+}

@@ -1,3 +1,4 @@
+import { localIsoDate } from '../../../shared/utils/date-format';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -102,7 +103,7 @@ export class ReplenishmentSummaryPage implements OnInit {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `orden-compra-sugerida-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `orden-compra-sugerida-${localIsoDate()}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     this.notifications.show(`Orden de compra sugerida descargada (${suggestions.length} productos).`, 'success');

@@ -59,7 +59,7 @@ textarea {
   resize: vertical;
 }
 .hint {
-  color: #b91c1c;
+  color: var(--color-error-text);
   font-weight: 500;
 }
 .muted {

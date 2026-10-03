@@ -15,6 +15,7 @@ import { TokenStorageService } from './core/auth/services/token-storage.service'
 import { errorInterceptor } from './core/http/interceptors/error.interceptor';
 import { loadingInterceptor } from './core/http/interceptors/loading.interceptor';
 import { routes } from './app.routes';
+import { NativeControlsEnhancer } from './shared/ui/pickers/native-controls-enhancer.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +25,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, errorInterceptor])),
     { provide: AUTH_TOKEN_PROVIDER, useExisting: TokenStorageService },
     provideAppInitializer(() => inject(AppSessionService).bootstrap()),
+    // Desplegables y calendarios propios en lugar de los paneles nativos del sistema.
+    provideAppInitializer(() => inject(NativeControlsEnhancer).start()),
     // Modales: ancho según el contenido de cada diálogo, alto automático y tope en el tamaño de pantalla.
     {
       provide: MAT_DIALOG_DEFAULT_OPTIONS,

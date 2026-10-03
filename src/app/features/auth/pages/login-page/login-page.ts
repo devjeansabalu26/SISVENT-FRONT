@@ -23,6 +23,12 @@ export class LoginPage {
   readonly submitting = signal(false);
   readonly error = signal<LoginAlert | null>(null);
 
+  // Puntos decorativos del panel: cada uno parpadea con su propia duración y desfase.
+  readonly dots = Array.from({ length: 600 }, () => ({
+    duration: `${(4 + Math.random() * 4).toFixed(1)}s`,
+    delay: `-${(Math.random() * 8).toFixed(1)}s`,
+  }));
+
   readonly form = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,

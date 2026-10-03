@@ -1,5 +1,6 @@
 <div class="login">
-    <section class="brand-panel"><a class="brand"><span class="material-icons">grid_view</span>
+    <section class="brand-panel">
+        <div class="dots" aria-hidden="true">@for (dot of dots; track $index) {<span [style.animation-duration]="dot.duration" [style.animation-delay]="dot.delay"></span>}</div><a class="brand"><span class="material-icons">grid_view</span>
             <div><strong>SISVENT</strong><small>MULTIEMPRESA</small></div>
         </a>
         <div>

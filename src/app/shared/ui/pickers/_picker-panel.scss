@@ -1,0 +1,27 @@
+/* Superficie común de los paneles emergentes (desplegable y calendario). */
+:host {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 8%),
+    0 18px 40px -12px rgb(15 23 42 / 28%);
+  font-family: var(--font-family);
+  animation: picker-in 0.14s ease-out;
+}
+
+@keyframes picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation: none;
+  }
+}

@@ -65,18 +65,18 @@
 }
 .kpi[data-tone='success'] .kpi__icon {
   color: var(--color-success);
-  background: color-mix(in srgb, var(--color-success) 14%, white);
+  background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
 }
 .kpi[data-tone='warning'] .kpi__icon {
   color: var(--color-warning);
-  background: color-mix(in srgb, var(--color-warning) 16%, white);
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
 }
 .kpi[data-tone='danger'] .kpi__icon {
   color: var(--color-error);
-  background: color-mix(in srgb, var(--color-error) 12%, white);
+  background: color-mix(in srgb, var(--color-error) 12%, var(--color-surface));
 }
 .kpi[data-tone='info'] .kpi__icon {
   color: var(--color-info);
-  background: color-mix(in srgb, var(--color-info) 12%, white);
+  background: color-mix(in srgb, var(--color-info) 12%, var(--color-surface));
 }
 .kpi__caption{color:var(--color-text-muted);font-size:var(--font-size-xs)}

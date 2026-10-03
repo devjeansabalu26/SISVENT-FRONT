@@ -120,8 +120,8 @@
   font-weight: 600;
 }
 .days--warn {
-  color: #b45309;
-  background: #fffbeb;
+  color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
 }
 .notice {
   display: flex;
@@ -137,15 +137,15 @@
   font-size: 20px;
 }
 .notice--info {
-  border-color: #bfdbfe;
-  color: #1d4ed8;
-  background: #eff6ff;
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 .notice--warning {
   margin-top: var(--space-md);
-  border-color: #fde68a;
-  color: #b45309;
-  background: #fffbeb;
+  border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+  color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
 }
 .usage__label .full {
   color: var(--color-danger);

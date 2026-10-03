@@ -1,3 +1,21 @@
+// Angular Material toma sus superficies de los tokens de SISVENT: así diálogos, menús y paneles siguen el
+// modo día/noche y los colores de la empresa que aplica ThemeService.
+:root {
+  --mat-sys-surface: var(--color-surface);
+  --mat-sys-surface-container-lowest: var(--color-surface);
+  --mat-sys-surface-container-low: var(--color-surface);
+  --mat-sys-surface-container: var(--color-surface);
+  --mat-sys-surface-container-high: var(--color-surface);
+  --mat-sys-surface-container-highest: var(--color-surface-secondary);
+  --mat-sys-on-surface: var(--color-text-primary);
+  --mat-sys-on-surface-variant: var(--color-text-secondary);
+  --mat-sys-outline: var(--color-border-strong);
+  --mat-sys-outline-variant: var(--color-border);
+  --mat-dialog-container-color: var(--color-surface);
+  --mat-dialog-subhead-color: var(--color-text-primary);
+  --mat-dialog-supporting-text-color: var(--color-text-secondary);
+}
+
 // Row overflow menu (app-data-table "Más opciones"). The app ships no Angular Material
 // theme, so the panel + items are styled here against the design-system tokens.
 .mat-mdc-menu-panel.mat-mdc-menu-panel {

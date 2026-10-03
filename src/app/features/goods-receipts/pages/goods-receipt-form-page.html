@@ -5,7 +5,7 @@
     <h2>Datos del documento de ingreso</h2>
     <div class="fields three">
       <label
-        >Local / almacén *
+        ><span>Local / almacén <span class="required">*</span></span>
         <select formControlName="storeId">
           <option value="">Seleccionar</option>
           @for (store of stores(); track store.id) {

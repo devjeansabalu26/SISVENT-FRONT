@@ -8,6 +8,7 @@ import { AppSessionService } from '../../../core/auth/services/app-session.servi
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
 import { NotificationBadgeService } from '../../../features/notifications/data-access/notification-badge.service';
+import { ThemeService } from '../../../core/theme/theme.service';
 
 @Component({ selector: 'app-header', imports: [RouterLink], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
@@ -22,6 +23,10 @@ export class Header implements OnInit {
   readonly canSeeNotifications = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.notificationsView] });
   readonly unread = this.badge.unread;
   readonly bellLabel = computed(() => (this.unread() ? `Notificaciones: ${this.unread()} sin leer` : 'Notificaciones'));
+  private readonly theme = inject(ThemeService);
+  /** Modo día/noche: los colores de la noche se derivan de los de la empresa. */
+  readonly isDark = computed(() => this.theme.mode() === 'dark');
+  readonly modeLabel = computed(() => (this.isDark() ? 'Cambiar a modo día' : 'Cambiar a modo noche'));
 
   ngOnInit(): void {
     if (!this.canSeeNotifications) return;
@@ -29,6 +34,10 @@ export class Header implements OnInit {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.badge.refresh());
+  }
+
+  toggleMode(): void {
+    this.theme.toggleMode();
   }
 
   logout(): void {

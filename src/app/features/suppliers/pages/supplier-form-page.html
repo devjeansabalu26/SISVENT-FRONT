@@ -13,7 +13,7 @@
           <span class="error">Ingresa un documento válido.</span>
         }
       </label>
-      <label class="full">Razón social *
+      <label class="full"><span>Razón social <span class="required">*</span></span>
         <input formControlName="businessName" />
         @if (form.controls.businessName.touched && form.controls.businessName.invalid) {
           <span class="error">La razón social es obligatoria.</span>

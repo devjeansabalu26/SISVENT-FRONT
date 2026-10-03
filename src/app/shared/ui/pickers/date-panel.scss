@@ -1,0 +1,187 @@
+@use 'picker-panel';
+
+.cal {
+  display: grid;
+  gap: 8px;
+  width: 296px;
+  padding: 12px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-ring);
+}
+
+.nav {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  background: transparent;
+}
+
+.nav:hover,
+.title:hover {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  background: transparent;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.title .material-icons {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.weekdays span {
+  padding: 4px 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.days button {
+  position: relative;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--color-text-primary);
+  background: transparent;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.days button:hover:not(:disabled, .selected) {
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--color-surface));
+}
+
+.days button.out {
+  color: var(--color-text-disabled);
+}
+
+.days button.today:not(.selected) {
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.days button.selected {
+  color: var(--color-on-primary, #fff);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 88%, white), var(--color-primary));
+  font-weight: 700;
+  box-shadow: 0 6px 12px -8px var(--color-primary);
+}
+
+.days button:disabled {
+  color: var(--color-text-disabled);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.months button {
+  height: 44px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-secondary);
+  text-transform: capitalize;
+}
+
+.months button:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+}
+
+.months button.current {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.months button.selected {
+  color: var(--color-on-primary, #fff);
+  background: var(--color-primary);
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.clear {
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.clear:hover {
+  color: var(--color-error-text);
+}
+
+.today-btn {
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.today-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+}
+
+.today-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

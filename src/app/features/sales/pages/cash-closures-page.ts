@@ -1,3 +1,4 @@
+import { localIsoDate } from '../../../shared/utils/date-format';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -86,8 +87,8 @@ export class CashClosuresPage implements OnInit {
 
   readonly loading = signal(true);
   readonly rows = signal<readonly CashClosure[]>([]);
-  readonly from = signal(new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
-  readonly to = signal(new Date().toISOString().slice(0, 10));
+  readonly from = signal(localIsoDate(new Date(Date.now() - 30 * 86400000)));
+  readonly to = signal(localIsoDate());
 
   readonly totals = computed(() => ({
     sales: this.rows().reduce((sum, row) => sum + row.totalSales, 0),
