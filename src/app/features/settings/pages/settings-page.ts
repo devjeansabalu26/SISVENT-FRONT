@@ -132,7 +132,8 @@ export class SettingsPage implements OnInit {
       validators: [Validators.required, Validators.min(0), Validators.max(100)],
     }),
     ticketFormat: new FormControl<TicketFormat>('TICKET_80', { nonNullable: true }),
-    pricesIncludeTax: new FormControl(true, { nonNullable: true }),
+    // Solo lectura: las ventas siempre cobran el precio con IGV incluido (el backend rechaza desactivarlo).
+    pricesIncludeTax: new FormControl({ value: true, disabled: true }, { nonNullable: true }),
     showLogoOnReceipt: new FormControl(true, { nonNullable: true }),
     receiptFooter: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
     autoEmailReceipt: new FormControl(false, { nonNullable: true }),
@@ -171,6 +172,7 @@ export class SettingsPage implements OnInit {
         this.loading.set(false);
         this.form.enable();
         this.extras.enable();
+        this.extras.controls.pricesIncludeTax.disable(); // siempre activo (ver TaxRules en el backend)
       },
       error: () => {
         this.loading.set(false);
@@ -245,7 +247,7 @@ export class SettingsPage implements OnInit {
 
   /** Normaliza el formulario ampliado; `''` en correo/pie le indica al backend que borre el valor. */
   private normalizedExtras(): SettingsExtras {
-    const value = this.extras.getRawValue();
+    const value = { ...this.extras.getRawValue(), pricesIncludeTax: true };
     return {
       ...value,
       receiptSeries: value.receiptSeries.trim().toUpperCase(),

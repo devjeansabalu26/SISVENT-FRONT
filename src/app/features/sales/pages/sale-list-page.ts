@@ -8,6 +8,7 @@ import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { canUseCash } from '../cash-access';
 import { SaleApiService } from '../data-access/sale-api.service';
+import { PosApiService } from '../data-access/pos-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
 
 @Component({
@@ -19,6 +20,7 @@ import { Sale, SalesTotals } from '../models/sale.model';
 })
 export class SaleListPage implements OnInit {
   private readonly api = inject(SaleApiService);
+  private readonly posApi = inject(PosApiService);
   private readonly router = inject(Router);
   private readonly role = inject(UserContextService).user()?.role;
   readonly isAdmin = this.role === 'ADMIN';
@@ -38,13 +40,8 @@ export class SaleListPage implements OnInit {
   to = '';
   paymentMethod = '';
   status = '';
-  readonly paymentOptions = [
-    { value: 'CASH', label: 'Efectivo' },
-    { value: 'CARD', label: 'Tarjeta' },
-    { value: 'YAPE', label: 'Yape' },
-    { value: 'PLIN', label: 'Plin' },
-    { value: 'TRANSFER', label: 'Transferencia' },
-  ] as const;
+  /** Métodos de pago activos de la empresa (los mismos que ofrece el POS). */
+  readonly paymentOptions = signal<readonly { value: string; label: string }[]>([]);
 
   readonly columns: readonly DataTableColumn<Sale>[] = [
     { key: 'number', label: 'Nro venta', value: (row) => row.saleNumber },
@@ -58,6 +55,10 @@ export class SaleListPage implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.posApi.paymentMethods().subscribe({
+      next: (methods) => this.paymentOptions.set(methods.map((m) => ({ value: m.code, label: m.name }))),
+      error: () => this.paymentOptions.set([]),
+    });
     this.load();
   }
 

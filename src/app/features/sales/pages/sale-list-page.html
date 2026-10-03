@@ -21,7 +21,7 @@
   <input type="date" [(ngModel)]="to" aria-label="Fecha hasta" />
   <select [(ngModel)]="paymentMethod" aria-label="Método de pago">
     <option value="">Todos los métodos</option>
-    @for (option of paymentOptions; track option.value) {<option [value]="option.value">{{ option.label }}</option>}
+    @for (option of paymentOptions(); track option.value) {<option [value]="option.value">{{ option.label }}</option>}
   </select>
   <select [(ngModel)]="status" aria-label="Estado">
     <option value="">Todos los estados</option>
