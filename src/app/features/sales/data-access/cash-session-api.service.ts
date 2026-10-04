@@ -6,7 +6,6 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import { CashMethodTotal } from './cash-closure-api.service';
 
-/** Mirrors /api/v1/cash-sessions (Sisvent.Application.CashSessions): turnos de caja por local. */
 export type CashSessionStatus = 'OPEN' | 'CLOSED';
 
 export interface CashSession {
@@ -15,7 +14,6 @@ export interface CashSession {
   readonly storeName: string;
   readonly status: CashSessionStatus;
   readonly openedByProfileId: string;
-  /** Usuario (identity) que abrió el turno: se compara con el usuario en sesión. */
   readonly openedByUserId: string;
   readonly openedBy: string;
   readonly openedAt: string;
@@ -24,15 +22,12 @@ export interface CashSession {
   readonly closedAt: string | null;
   readonly salesCount: number;
   readonly totalSales: number;
-  /** Notas de crédito reembolsadas en el turno. */
   readonly totalRefunds: number;
-  /** Fondo inicial + ventas en efectivo - reembolsos en efectivo del turno. */
   readonly expectedCash: number;
   readonly expectedOther: number;
   readonly countedCash: number | null;
   readonly difference: number | null;
   readonly notes: string | null;
-  /** Cerrada por el ADMIN en lugar de quien la abrió. */
   readonly forced: boolean;
   readonly forceReason: string | null;
   readonly byMethod: readonly CashMethodTotal[];
@@ -65,7 +60,6 @@ export interface CashSessionDetail {
   readonly refunds: readonly CashSessionRefund[];
 }
 
-/** Caja de un local: turno abierto (o null) y ventas pendientes que pasarán al próximo turno. */
 export interface StoreCashStatus {
   readonly storeId: string;
   readonly storeName: string;
@@ -73,7 +67,6 @@ export interface StoreCashStatus {
   readonly pendingSales: number;
 }
 
-/** Mensaje del backend (ProblemDetails.title) o el texto por defecto. */
 export function cashErrorMessage(cause: unknown, fallback: string): string {
   const body = cause instanceof AppHttpError
     ? (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error
@@ -85,7 +78,6 @@ export function cashErrorMessage(cause: unknown, fallback: string): string {
 export class CashSessionApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/cash-sessions`;
-  // Los 403 de caja ("solo quien abrió puede cerrarla", "sin local asignado") se muestran en pantalla.
   private readonly context = handleForbiddenInline();
 
   status(): Observable<readonly StoreCashStatus[]> {

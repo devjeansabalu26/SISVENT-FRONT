@@ -1,4 +1,3 @@
-/** Mirrors DashboardResponse from GET /api/v1/dashboard (ADMIN/VENDEDOR). */
 export interface DashboardRecentSale {
   readonly saleNumber: string;
   readonly saleDate: string;
@@ -61,7 +60,6 @@ export interface DashboardResponse {
   readonly seller: SellerDashboard | null;
 }
 
-/** Mirrors PlatformDashboardResponse from GET /api/v1/platform/dashboard (SUPERADMIN). */
 export interface PlatformCompanySummary {
   readonly totalCompanies: number;
   readonly active: number;

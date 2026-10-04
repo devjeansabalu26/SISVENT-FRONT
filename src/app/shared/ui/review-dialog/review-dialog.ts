@@ -13,12 +13,6 @@ const BANNER_ICON: Readonly<Record<ReviewTone, string>> = {
 
 const DEFAULT_REASON_MIN_LENGTH = 5;
 
-/**
- * Diálogo genérico de revisión / confirmación. Cubre los modales de Figma que muestran un resumen
- * (metadatos, transición de estado, KPIs, tabla antes/después, chips) antes de ejecutar una acción.
- * Se cierra con `true` al confirmar (o con el motivo escrito, si `data.reason` está definido) y
- * `false` al cancelar.
- */
 @Component({
   selector: 'app-review-dialog',
   imports: [MatDialogModule, ReactiveFormsModule, StatusChip],

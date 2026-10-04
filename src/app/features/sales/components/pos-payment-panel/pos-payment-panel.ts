@@ -2,10 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, input, model } from '@ang
 import { CARD_BRANDS, MAX_PAYMENTS, PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../../models/payment.model';
 import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment';
 
-/**
- * Pagos del POS (uno o varios métodos): efectivo (monto recibido + vuelto), tarjeta (voucher del POS)
- * o digital (n.º de operación). Ej.: S/ 6000 con tarjeta + S/ 800 en efectivo.
- */
 @Component({
   selector: 'app-pos-payment-panel',
   template: `
@@ -150,17 +146,12 @@ export class PosPaymentPanel {
     this.lines.update((lines) => lines.map((line, i) => (i === index ? { ...line, ...changes } : line)));
   }
 
-  /** Cambiar el método limpia los datos del pago anterior (conserva el monto). */
   changeMethod(index: number, methodCode: string): void {
     this.lines.update((lines) =>
       lines.map((line, i) => (i === index ? { ...newPaymentLine(methodCode, line.amount), key: line.key } : line)),
     );
   }
 
-  /**
-   * Nuevo pago con lo que falta cubrir. Si solo había un pago con tarjeta/digital sin monto,
-   * se le fija el total para que el nuevo parta de cero; el efectivo se sugiere primero si no está en uso.
-   */
   add(): void {
     const lines = this.lines();
     const total = this.total();

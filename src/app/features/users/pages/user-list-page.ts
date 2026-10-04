@@ -51,7 +51,6 @@ export class UserListPage implements OnInit {
   readonly pageSize = 10;
   readonly total = signal(0);
   readonly rows = signal<readonly Row[]>([]);
-  /** Usuarios de la página actual, para resolver `edit()` sin volver a pedir el detalle. */
   private readonly users = signal<readonly AppUser[]>([]);
 
   private readonly search$ = new Subject<void>();
@@ -275,7 +274,6 @@ export class UserListPage implements OnInit {
         } else {
           this.api.create(value).subscribe({
             next: (result) => {
-              // Credenciales de acceso: usuario (código) y PIN, se muestran una sola vez.
               this.dialog.open(CredentialDialog, {
                 data: {
                   ...resetCredential(result.user.userCode ?? result.user.email ?? '', result.temporaryPassword),

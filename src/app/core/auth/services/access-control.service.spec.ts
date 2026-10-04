@@ -39,7 +39,6 @@ describe('AccessControlService (plan features)', () => {
 
   it('items the role cannot see are hidden, not locked', () => {
     login('VENDEDOR', ['SALES']);
-    // Reportes es solo ADMIN: para el vendedor no aparece (ni con candado).
     expect(access.isLockedByPlan({ roles: ['ADMIN'], permissions: [APP_PERMISSIONS.reportsView], feature: 'REPORTS' })).toBeFalse();
   });
 });

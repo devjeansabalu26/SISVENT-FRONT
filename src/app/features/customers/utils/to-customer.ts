@@ -1,6 +1,5 @@
 import { Customer, CustomerDetail } from '../models/customer.model';
 
-/** Reduce el detalle de `GET/POST /clients` a la fila de listado que usan el POS y los buscadores. */
 export function toCustomer(detail: CustomerDetail): Customer {
   return {
     id: detail.id,

@@ -117,7 +117,6 @@ export class InventoryApiService {
     return this.http.post(`${this.baseUrl}/adjustments`, body);
   }
 
-  /** Transferencia entre locales (ADMIN). Los 403/409 se muestran en el diálogo. */
   transfer(body: StockTransferRequest): Observable<StockTransferResult> {
     return this.http.post<StockTransferResult>(`${this.baseUrl}/transfers`, body, { context: handleForbiddenInline() });
   }

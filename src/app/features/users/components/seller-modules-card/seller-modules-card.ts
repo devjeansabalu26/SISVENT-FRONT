@@ -18,10 +18,6 @@ function groupModules(modules: readonly SellerModule[]): readonly ModuleGroup[] 
   return [...groups].map(([label, items]) => ({ label, modules: items }));
 }
 
-/**
- * Menús del vendedor (ADMIN): de los menús activos en la empresa, elige cuáles ve y con qué nivel
- * (Ver = consulta; Gestionar = crear, editar, ajustar, anular). Las opciones de configuración no se ofrecen.
- */
 @Component({
   selector: 'app-seller-modules-card',
   templateUrl: './seller-modules-card.html',

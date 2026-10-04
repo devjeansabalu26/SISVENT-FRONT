@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,7 +10,7 @@ import { LoginAlert, loginAlertFor } from './login-alert';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, AlertBanner],
+  imports: [ReactiveFormsModule, NgOptimizedImage, AlertBanner],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,14 +24,12 @@ export class LoginPage {
   readonly submitting = signal(false);
   readonly error = signal<LoginAlert | null>(null);
 
-  // Puntos decorativos del panel: cada uno parpadea con su propia duración y desfase.
-  readonly dots = Array.from({ length: 600 }, () => ({
+  readonly dots = Array.from({ length: 1200 }, () => ({
     duration: `${(4 + Math.random() * 4).toFixed(1)}s`,
     delay: `-${(Math.random() * 8).toFixed(1)}s`,
   }));
 
   readonly form = new FormGroup({
-    // Usuario: código de 5 dígitos (ADMIN/VENDEDOR) o correo (SUPERADMIN).
     username: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.pattern(/^(\d{5}|[^\s@]+@[^\s@]+\.[^\s@]+)$/)],
@@ -45,6 +44,7 @@ export class LoginPage {
   }
 
   submit(): void {
+    if (this.submitting()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

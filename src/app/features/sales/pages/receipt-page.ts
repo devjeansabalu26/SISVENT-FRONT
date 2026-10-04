@@ -49,13 +49,11 @@ export class ReceiptPage implements OnInit {
     window.print();
   }
 
-  /** Envía el comprobante (el mismo PDF que se descarga) al correo del cliente o al que se indique. */
   sendEmail(): void {
     const sale = this.sale();
     if (sale) this.mailer.send(sale);
   }
 
-  /** Ticket de 80 mm en PDF, generado en el navegador con los datos de la venta. */
   async downloadPdf(): Promise<void> {
     const sale = this.sale();
     if (!sale || this.downloading()) return;

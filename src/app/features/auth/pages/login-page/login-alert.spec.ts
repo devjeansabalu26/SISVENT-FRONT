@@ -27,7 +27,6 @@ describe('loginAlertFor', () => {
     expect(loginAlertFor(forbidden('x', 'PLAN_PENDING'))).toBe(LOGIN_ALERTS.planPending);
     expect(loginAlertFor(forbidden('x', 'ACCOUNT_LOCKED'))).toBe(LOGIN_ALERTS.accountLocked);
     expect(loginAlertFor(forbidden('x', 'STORE_DISABLED'))).toBe(LOGIN_ALERTS.storeDisabled);
-    // Un texto que menciona "empresa" ya no confunde si el código dice que es la cuenta.
     expect(loginAlertFor(forbidden('Usuario de la empresa deshabilitado', 'ACCOUNT_DISABLED'))).toBe(LOGIN_ALERTS.userDisabled);
   });
 

@@ -1,18 +1,6 @@
 import { APP_PERMISSIONS, AppPermission } from './app-permission.constant';
 import { AppRole } from './app-role.constant';
 
-/**
- * Respaldo cuando la sesión no trae `company.modules` (backend anterior a los menús configurables). Con
- * menús, ADMIN y VENDEDOR toman sus permisos de MODULE_PERMISSIONS (module-permissions.constant.ts).
- *
- * UI-only projection of a backend role onto the permission slugs the frontend
- * uses to decide which navigation entries and client routes are visible.
- *
- * The backend `/auth/login` and `/auth/me` responses do not carry permissions
- * (see SISVENT-BACK/docs/AUTH.md §E); it stays the sole authority on every
- * request. This map never grants real access — a hidden menu item whose route
- * is reached directly is still rejected server-side.
- */
 export const ROLE_PERMISSIONS: Readonly<Record<AppRole, readonly AppPermission[]>> = {
   SUPERADMIN: [
     APP_PERMISSIONS.dashboardView,

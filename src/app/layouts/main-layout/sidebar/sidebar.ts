@@ -27,8 +27,6 @@ export class Sidebar {
   private readonly access = inject(AccessControlService);
   private readonly users = inject(UserContextService);
 
-  /** Nombre mostrado arriba del sidebar: la empresa real del usuario, o "SISVENT" para SUPERADMIN
-   * (sin empresa) — nunca un nombre de empresa de ejemplo. */
   readonly brandName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly brandInitial = computed(() => this.brandName().trim().charAt(0).toUpperCase() || 'S');
   readonly roleLabel = computed(() => {
@@ -36,14 +34,12 @@ export class Sidebar {
     return role ? ROLE_LABEL[role] : '';
   });
 
-  /** Visibles por rol/permiso; los que el plan no incluye se muestran con candado (no se ocultan). */
   private readonly items = computed<readonly SidebarItem[]>(() =>
     MAIN_NAVIGATION.filter((item) => this.access.canAccess({ roles: item.roles, permissions: item.permissions, plans: item.plans })).map(
       (item) => ({ ...item, locked: this.access.isLockedByPlan({ ...item, feature: item.requiredFeature }) }),
     ),
   );
 
-  /** Groups visible items by their `group` label, preserving first-seen order. */
   readonly groups = computed<readonly NavigationGroup[]>(() => {
     const byLabel = new Map<string | null, SidebarItem[]>();
     for (const item of this.items()) {

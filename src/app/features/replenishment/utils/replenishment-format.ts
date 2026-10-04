@@ -1,6 +1,5 @@
 import { StockRiskItem } from '../models/replenishment.model';
 
-/** Cantidades sin ceros sobrantes: 12, 1.5, 0.25. */
 export function formatQuantity(value: number): string {
   return Number.isInteger(value) ? String(value) : String(Math.round(value * 100) / 100);
 }
@@ -14,14 +13,9 @@ const csvCell = (value: string | number): string => {
   return /[";\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
-/** Proveedores en orden alfabético; los productos sin proveedor, al final. */
 const bySupplier = (a: string | null, b: string | null): number =>
   a === b ? 0 : a === null ? 1 : b === null ? -1 : a.localeCompare(b, 'es');
 
-/**
- * Orden de compra sugerida en CSV (separador `;` para Excel en español), agrupada por proveedor.
- * Los productos sin ingreso previo quedan como "Sin proveedor asignado".
- */
 export function purchaseOrderCsv(items: readonly StockRiskItem[]): string {
   const rows = [...items]
     .filter((item) => item.suggestedQuantity > 0)
@@ -37,6 +31,5 @@ export function purchaseOrderCsv(items: readonly StockRiskItem[]): string {
     formatQuantity(item.averageDailySales),
     item.leadTimeDays,
   ]);
-  // BOM para que Excel respete las tildes.
   return '﻿' + [header, ...lines].map((line) => line.map(csvCell).join(';')).join('\n');
 }

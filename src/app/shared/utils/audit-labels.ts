@@ -1,8 +1,3 @@
-/**
- * Nombres amigables para los códigos internos de auditoría (audit_logs.action / entity_name).
- * Los códigos internos NO cambian (siguen siendo COMPANY.UPDATED, etc.); esto es solo presentación.
- * Un código no listado se "humaniza" automáticamente en vez de inventarle una traducción.
- */
 const ACTION_LABELS: Record<string, string> = {
   'COMPANY.CREATED': 'Empresa creada',
   'COMPANY.UPDATED': 'Empresa actualizada',

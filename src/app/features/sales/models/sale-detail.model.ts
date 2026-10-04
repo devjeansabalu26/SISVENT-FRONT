@@ -15,7 +15,6 @@ export interface SaleEvent {
   readonly description: string;
 }
 
-/** Mirrors SaleDetailResponse from GET /api/v1/sales/{id} and POST /api/v1/pos/sales. */
 export interface SaleDetail {
   readonly id: string;
   readonly saleNumber: string;
@@ -34,10 +33,7 @@ export interface SaleDetail {
   readonly notes: string | null;
   readonly lines: readonly SaleDetailLine[];
   readonly events: readonly SaleEvent[];
-  /** Pagos de la venta (uno o varios métodos). */
   readonly payments?: readonly SalePayment[];
-  /** Vuelto total entregado (solo efectivo). */
   readonly changeAmount?: number;
-  /** Correo del cliente: destinatario por defecto al enviar el comprobante. */
   readonly clientEmail?: string | null;
 }

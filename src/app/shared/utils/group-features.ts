@@ -5,7 +5,6 @@ export interface FeatureDomainGroup {
   readonly items: readonly PlanFeatureRow[];
 }
 
-/** Agrupa features de un plan por dominio (CATALOG, COMMERCIAL, ...), preservando el orden de llegada. */
 export function groupFeaturesByDomain(features: readonly PlanFeatureRow[]): readonly FeatureDomainGroup[] {
   const groups = new Map<string, PlanFeatureRow[]>();
   for (const feature of features) {

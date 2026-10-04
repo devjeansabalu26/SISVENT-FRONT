@@ -1,5 +1,3 @@
-// Angular Material toma sus superficies de los tokens de SISVENT: así diálogos, menús y paneles siguen el
-// modo día/noche y los colores de la empresa que aplica ThemeService.
 :root {
   --mat-sys-surface: var(--color-surface);
   --mat-sys-surface-container-lowest: var(--color-surface);
@@ -16,8 +14,6 @@
   --mat-dialog-supporting-text-color: var(--color-text-secondary);
 }
 
-// Row overflow menu (app-data-table "Más opciones"). The app ships no Angular Material
-// theme, so the panel + items are styled here against the design-system tokens.
 .mat-mdc-menu-panel.mat-mdc-menu-panel {
   min-width: 200px;
   max-width: 320px;
@@ -91,11 +87,6 @@
   }
 }
 
-/*
- * Modales: cada diálogo define su ancho preferido (`.dialog { width: min(…) }`) y el alto crece con el
- * contenido. Sin tema de Material, el contenedor limitaba el ancho a 560px por defecto y los modales más
- * anchos quedaban recortados con scroll. Solo se hace scroll interno si el contenido supera la pantalla.
- */
 .mat-mdc-dialog-panel {
   --mat-dialog-container-max-width: calc(100vw - 32px);
   --mat-dialog-container-small-max-width: calc(100vw - 32px);

@@ -4,17 +4,11 @@ import { AppHttpError } from '../../../../core/http/models/app-http-error.model'
 import { StoreApiService } from '../../../locales/data-access/store-api.service';
 import { CashClosure, CashClosureApiService, CashClosurePreview } from '../../data-access/cash-closure-api.service';
 
-/** `YYYY-MM-DD` de hoy en la zona del navegador (el backend valida el día con la zona de la empresa). */
 function today(): string {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
-/**
- * Figma `mod-cierre-caja`: resumen del día calculado por el backend (por método de pago) y registro del
- * cierre con el efectivo contado. Un local/día solo se cierra una vez; si ya existe se muestra el cierre.
- * Se cierra con el cierre registrado (o `undefined` si se cancela).
- */
 @Component({
   selector: 'app-cash-close-dialog',
   imports: [MatDialogModule],

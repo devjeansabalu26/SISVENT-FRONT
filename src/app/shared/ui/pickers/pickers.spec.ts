@@ -16,7 +16,6 @@ describe('DatePanel', () => {
     const panel = create('2026-10-02').componentInstance;
     expect(panel.viewMonth()).toBe(9);
     expect(panel.viewYear()).toBe(2026);
-    // Octubre 2026 empieza en jueves: la primera celda es el lunes 28 de septiembre.
     expect(panel.cells()[0].iso).toBe('2026-09-28');
     expect(panel.cells().length).toBe(42);
   });

@@ -14,7 +14,6 @@ import { CategoryFormDialog } from '../components/category-form-dialog/category-
 import { CategoryApiService } from '../data-access/category-api.service';
 import { Category, CategoryFormData, CategoryFormValue } from '../models/category.model';
 
-/** Tarjeta: categoría principal con sus subcategorías. */
 interface CategoryCard {
   readonly category: Category;
   readonly children: readonly Category[];
@@ -48,10 +47,8 @@ export class CategoryListPage implements OnInit {
   readonly search = signal('');
   private readonly categories = signal<readonly Category[]>([]);
 
-  /** Figma `ad-categorias` presenta tarjetas; la tabla queda como vista alternativa (se recuerda por navegador). */
   readonly view = signal<CategoryView>(readStoredView());
 
-  /** Menú con nivel Gestionar (ADMIN o vendedor al que el ADMIN se lo asignó). */
   readonly canManage = computed(() => this.access.canAccess({ permissions: [APP_PERMISSIONS.categoriesManage] }));
   private readonly access = inject(AccessControlService);
 
@@ -64,7 +61,6 @@ export class CategoryListPage implements OnInit {
     return this.categories().filter((category) => this.matches(category, term));
   });
 
-  /** Principales con sus subcategorías; la búsqueda también encuentra por subcategoría. */
   readonly cards = computed<readonly CategoryCard[]>(() => {
     const term = this.search().trim().toLowerCase();
     const all = this.categories();
@@ -91,7 +87,6 @@ export class CategoryListPage implements OnInit {
     try {
       localStorage.setItem(VIEW_STORAGE_KEY, view);
     } catch {
-      // Almacenamiento no disponible (modo privado): la preferencia solo dura la sesión.
     }
   }
 
@@ -183,7 +178,6 @@ export class CategoryListPage implements OnInit {
 
   private messageFor(cause: unknown, fallback: string): string {
     if (cause instanceof AppHttpError) {
-      // El backend explica el motivo (un solo nivel, subcategorías activas, versión, nombre repetido…).
       const body = (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error;
       if ((cause.status === 400 || cause.status === 409) && typeof body?.title === 'string' && !body.errors) return body.title;
       if (cause.status === 409) return 'Conflicto: el registro cambió o el nombre ya existe. Se recargó la lista.';

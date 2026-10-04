@@ -36,7 +36,6 @@ export class UserApiService {
     return this.http.get<UserListResponse>(this.baseUrl, { params: httpParams });
   }
 
-  /** Menús del vendedor (solo VENDEDOR; el ADMIN ve todo lo activo en la empresa). */
   getModules(id: string): Observable<SellerModules> {
     return this.http.get<SellerModules>(`${this.baseUrl}/${id}/modules`);
   }

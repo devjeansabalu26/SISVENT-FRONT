@@ -30,7 +30,6 @@ export interface TopProduct {
   readonly marginPercent: number | null;
 }
 
-/** Mirrors SalesReportResponse from GET /api/v1/reports/sales. */
 export interface SalesReport {
   readonly from: string;
   readonly to: string;

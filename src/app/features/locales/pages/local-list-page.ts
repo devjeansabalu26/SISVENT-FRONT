@@ -64,7 +64,6 @@ export class LocalListPage implements OnInit {
     this.openForm(local);
   }
 
-  /** MOD-AD-03: desactivar (o reactivar) un local mostrando los vendedores afectados. */
   toggleStatus(local: Store): void {
     const deactivate = local.isActive;
     const data: ReviewDialogData = {

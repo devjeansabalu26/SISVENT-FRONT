@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../../data-access/cash-session-api.service';
 
-/** Detalle de un turno: quién abrió/cerró, montos y las ventas que lo componen. */
 @Component({
   selector: 'app-cash-session-detail-dialog',
   imports: [MatDialogModule, DatePipe],

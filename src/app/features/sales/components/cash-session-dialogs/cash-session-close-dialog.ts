@@ -6,7 +6,6 @@ import { CashSession, CashSessionApiService, cashErrorMessage } from '../../data
 
 export interface CashSessionCloseData {
   readonly session: CashSession;
-  /** El ADMIN cierra una caja abierta por otro usuario: el motivo es obligatorio. */
   readonly forced: boolean;
 }
 
@@ -15,7 +14,6 @@ function trimmedMinLength(min: number) {
     control.value && String(control.value).trim().length < min ? { minlength: true } : null;
 }
 
-/** Cierre del turno: muestra el esperado (fondo + efectivo vendido) y registra el conteo. */
 @Component({
   selector: 'app-cash-session-close-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],

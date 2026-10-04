@@ -29,11 +29,9 @@ import { StockAdjustmentRequest, StockRow } from '../models/inventory-item.model
 export class InventoryPage {
   private readonly api = inject(InventoryApiService);
   private readonly productApi = inject(ProductApiService);
-  /** Local del encabezado: con local, el stock de ese local; sin local (ADMIN), el stock general por local. */
   readonly storeContext = inject(StoreContextService);
   private readonly ownStoreId = inject(UserContextService).user()?.branchId ?? null;
   readonly general = computed(() => this.storeContext.canPick() && !this.storeContext.selectedStoreId());
-  /** Ajustar: el ADMIN en cualquier local; el vendedor solo en su local (consultar otros no permite ajustarlos). */
   readonly canAdjustHere = computed(() =>
     this.canAdjust && (this.storeContext.isAdmin() || this.storeContext.selectedStoreId() === this.ownStoreId));
   private readonly dialog = inject(MatDialog);
@@ -41,7 +39,6 @@ export class InventoryPage {
   readonly canAdjust = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.inventoryAdjust] });
 
   readonly loading = signal(false);
-  /** Vista general: una fila por producto con total y columna por local. */
   private readonly generalData = signal<readonly Product[]>([]);
   private readonly search = signal('');
   private readonly statusFilter = signal('');
@@ -79,7 +76,6 @@ export class InventoryPage {
       ? this.generalData().filter((item) => this.generalStatus(item) === 'OUT_OF_STOCK').length
       : this.rowsData().filter((item) => item.status === 'OUT_OF_STOCK').length);
 
-  /** Columnas de la vista general: total y una por local. */
   readonly generalColumns = computed<readonly DataTableColumn<Product>[]>(() => [
     { key: 'sku', label: 'SKU', value: (row) => row.sku },
     { key: 'product', label: 'Producto', value: (row) => row.name },
@@ -105,7 +101,6 @@ export class InventoryPage {
   ];
 
   constructor() {
-    // Recarga al cambiar el local del encabezado (y la primera vez).
     effect(() => {
       this.storeContext.selectedStoreId();
       this.general();

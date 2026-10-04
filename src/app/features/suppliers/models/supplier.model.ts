@@ -1,4 +1,3 @@
-/** Mirrors SupplierResponse from /api/v1/suppliers. */
 export interface Supplier {
   readonly id: string;
   readonly taxDocument: string | null;
@@ -10,7 +9,6 @@ export interface Supplier {
   readonly notes: string | null;
   readonly isActive: boolean;
   readonly version: number;
-  /** Días entre el pedido y la recepción; lo usa el cálculo de compras sugeridas. */
   readonly leadTimeDays: number;
 }
 

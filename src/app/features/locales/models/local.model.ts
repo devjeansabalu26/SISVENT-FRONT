@@ -1,4 +1,3 @@
-/** Mirrors StoreResponse from /api/v1/stores. */
 export interface Store {
   readonly id: string;
   readonly code: string;

@@ -8,7 +8,6 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CashCloseDialog } from '../components/cash-close-dialog/cash-close-dialog';
 import { CashClosure, CashClosureApiService } from '../data-access/cash-closure-api.service';
 
-/** Historial de cierres de caja por local y día (ADMIN). */
 @Component({
   selector: 'app-cash-closures-page',
   imports: [PageHeader, RouterLink, DatePipe],

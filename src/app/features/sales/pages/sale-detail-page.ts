@@ -33,17 +33,13 @@ export class SaleDetailPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
-  /** Anular venta: menú Ventas con nivel Gestionar. */
   readonly canCancel = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);
-  /** Devoluciones de la venta: notas emitidas, lo que se puede devolver y si aún se puede anular. */
   readonly credit = signal<SaleCreditSummary | null>(null);
-  /** Recibido/vuelto, voucher de tarjeta o n.º de operación; null en ventas anteriores al detalle de pago. */
   readonly paymentDetails = computed(() => (this.sale()?.payments ?? []).map((payment) => paymentSummary(payment)));
 
-  /** Envía el comprobante en PDF al correo del cliente (o al que se indique en el diálogo). */
   sendReceipt(): void {
     const sale = this.sale();
     if (sale) this.mailer.send(sale);

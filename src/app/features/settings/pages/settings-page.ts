@@ -32,7 +32,6 @@ const labelOf =
   (value: unknown): string =>
     options.find((option) => option.value === value)?.label ?? String(value);
 
-/** Campos del resumen "Cambios de Configuración" (MOD-AD-19), en el orden de la pantalla. */
 const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
   { key: 'taxRegime', label: 'Régimen tributario', format: labelOf(TAX_REGIMES) },
   { key: 'receiptSeries', label: 'Serie de boletas' },
@@ -85,7 +84,6 @@ export class SettingsPage implements OnInit {
   readonly loadError = signal(false);
   readonly activeTab = signal<'general' | 'billing' | 'notifications' | 'security'>('general');
   private version = 0;
-  /** Última configuración guardada: base del resumen "Cambios de Configuración" (MOD-AD-19). */
   private saved: CompanySettings | null = null;
   private readonly lastSavedAt = signal<string | null>(null);
   readonly lastSavedLabel = computed(() => {
@@ -112,7 +110,6 @@ export class SettingsPage implements OnInit {
     notifyManualAdjustment: new FormControl(true, { nonNullable: true }),
   });
 
-  /** Parámetros ampliados (Datos fiscales, POS, Facturación, Notificaciones, Seguridad). */
   readonly extras = new FormGroup({
     taxRegime: new FormControl<TaxRegime>('RMT', { nonNullable: true }),
     receiptSeries: new FormControl('', {
@@ -132,7 +129,6 @@ export class SettingsPage implements OnInit {
       validators: [Validators.required, Validators.min(0), Validators.max(100)],
     }),
     ticketFormat: new FormControl<TicketFormat>('TICKET_80', { nonNullable: true }),
-    // Solo lectura: las ventas siempre cobran el precio con IGV incluido (el backend rechaza desactivarlo).
     pricesIncludeTax: new FormControl({ value: true, disabled: true }, { nonNullable: true }),
     showLogoOnReceipt: new FormControl(true, { nonNullable: true }),
     receiptFooter: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
@@ -222,7 +218,6 @@ export class SettingsPage implements OnInit {
       .subscribe(() => this.persist(request));
   }
 
-  /** Botón "Restablecer" (Figma): descarta lo no guardado y vuelve a los últimos valores guardados. */
   restore(): void {
     if (!this.saved) return;
     this.apply(this.saved);
@@ -245,7 +240,6 @@ export class SettingsPage implements OnInit {
     });
   }
 
-  /** Normaliza el formulario ampliado; `''` en correo/pie le indica al backend que borre el valor. */
   private normalizedExtras(): SettingsExtras {
     const value = { ...this.extras.getRawValue(), pricesIncludeTax: true };
     return {
@@ -307,7 +301,6 @@ export class SettingsPage implements OnInit {
     return 'No se pudo guardar la configuración.';
   }
 
-  /** El backend explica la validación en el `title` del ProblemDetails (p. ej. "La serie de boletas debe empezar con B…"). */
   private problemTitle(cause: AppHttpError): string | null {
     const body = (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error;
     if (!body || body.errors) return null; // Validación automática de ASP.NET: título genérico en inglés.

@@ -18,16 +18,13 @@ export class Header implements OnInit {
   readonly menuToggle = output<void>();
   readonly user = inject(UserContextService).user;
   readonly company = inject(CompanyContextService).company;
-  /** Local seleccionado (ADMIN): filtra productos e inventario; vacío = todos los locales. */
   readonly storeContext = inject(StoreContextService);
   private readonly badge = inject(NotificationBadgeService);
   private readonly destroyRef = inject(DestroyRef);
-  /** Campana conectada al centro de notificaciones (mismo permiso que la ruta). */
   readonly canSeeNotifications = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.notificationsView] });
   readonly unread = this.badge.unread;
   readonly bellLabel = computed(() => (this.unread() ? `Notificaciones: ${this.unread()} sin leer` : 'Notificaciones'));
   private readonly theme = inject(ThemeService);
-  /** Modo día/noche: los colores de la noche se derivan de los de la empresa. */
   readonly isDark = computed(() => this.theme.mode() === 'dark');
   readonly modeLabel = computed(() => (this.isDark() ? 'Cambiar a modo día' : 'Cambiar a modo noche'));
 

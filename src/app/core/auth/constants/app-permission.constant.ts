@@ -13,7 +13,6 @@ export const APP_PERMISSIONS = {
   inventoryMovementsView: 'inventory-movements.view',
   salesView: 'sales.view',
   salesCreate: 'sales.create',
-  /** Anular ventas y cierres de caja. */
   salesManage: 'sales.manage',
   customersView: 'customers.view',
   customersManage: 'customers.manage',

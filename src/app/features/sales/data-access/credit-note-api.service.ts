@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
 
-/** Mirrors /api/v1/sales/{id}/credit-notes y /api/v1/credit-notes (Sisvent.Application.CreditNotes). */
 export interface CreditNoteLineAvailability {
   readonly productId: string;
   readonly sku: string;
@@ -12,7 +11,6 @@ export interface CreditNoteLineAvailability {
   readonly sold: number;
   readonly returned: number;
   readonly available: number;
-  /** Precio neto por unidad (descuentos incluidos). */
   readonly unitPrice: number;
 }
 
@@ -50,7 +48,6 @@ export interface SaleCreditSummary {
   readonly status: string;
   readonly saleTotal: number;
   readonly creditedTotal: number;
-  /** La venta quedó en una caja cerrada: ya no se puede anular. */
   readonly cashClosed: boolean;
   readonly cancellable: boolean;
   readonly canIssue: boolean;

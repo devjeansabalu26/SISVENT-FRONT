@@ -1,4 +1,3 @@
-/** Nombres legibles de los campos que aparecen en old_values/new_values de la auditoría. */
 const FIELD_LABELS: Readonly<Record<string, string>> = {
   name: 'Nombre',
   sku: 'SKU',
@@ -52,7 +51,6 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   currentprice: 'Precio actual',
 };
 
-/** `SalePrice` → "Precio de venta"; si no está en la lista, separa las palabras: `ticketFormat` → "Ticket format". */
 export function auditFieldLabel(field: string): string {
   const known = FIELD_LABELS[field.replace(/[_\s]/g, '').toLowerCase()];
   if (known) return known;

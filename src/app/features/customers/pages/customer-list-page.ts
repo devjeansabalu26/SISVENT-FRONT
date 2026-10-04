@@ -21,7 +21,6 @@ export class CustomerListPage implements OnInit {
   private readonly api = inject(CustomerApiService);
   private readonly router = inject(Router);
 
-  /** Figma `ve-clientes-operacion`: el vendedor selecciona el cliente para iniciar una venta. */
   readonly isSeller = inject(UserContextService).user()?.role === 'VENDEDOR';
   readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.customersManage] });
   readonly loading = signal(false);

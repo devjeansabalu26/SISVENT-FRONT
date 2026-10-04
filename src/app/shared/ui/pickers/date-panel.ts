@@ -11,7 +11,6 @@ interface DayCell {
   readonly disabled: boolean;
 }
 
-/** "2026-10-02" → Date local a medianoche (sin pasar por UTC). */
 function parseIso(value: string | null | undefined): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
   if (!match) return null;
@@ -25,10 +24,6 @@ function addDays(iso: string, days: number): string {
   return localIsoDate(date);
 }
 
-/**
- * Calendario propio que reemplaza al selector nativo de los <input type="date"> (ver NativeControlsEnhancer).
- * Semana desde el lunes, hoy resaltado, respeta min/max y se maneja con teclado.
- */
 @Component({
   selector: 'app-date-panel',
   template: `

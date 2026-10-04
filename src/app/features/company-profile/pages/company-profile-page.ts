@@ -82,7 +82,6 @@ export class CompanyProfilePage implements OnInit {
     ];
   });
 
-  /** Colores guardados en company_themes al crear/editar la empresa. */
   readonly brandColors = computed<readonly Field[]>(() => {
     const t = this.profile()?.theme;
     if (!t) return [];
@@ -94,7 +93,6 @@ export class CompanyProfilePage implements OnInit {
     ];
   });
 
-  /** Edita contacto y colores; los colores se aplican al instante (sidebar, botones) sin volver a iniciar sesión. */
   edit(): void {
     const profile = this.profile();
     if (!profile) return;

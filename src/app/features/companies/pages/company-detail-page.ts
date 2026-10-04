@@ -68,8 +68,6 @@ export class CompanyDetailPage implements OnInit {
     return (VALID_TABS as readonly string[]).includes(fromUrl ?? '') ? (fromUrl as CompanyTab) : 'general';
   })();
   readonly activeTab = signal<CompanyTab>(this.initialTab);
-  // Lazy loading por tab: un tab solo monta su componente (y por lo tanto pide datos) la primera vez que
-  // se abre; luego queda montado y oculto con [hidden] para conservar su estado al volver a él.
   readonly activatedTabs = signal<ReadonlySet<CompanyTab>>(new Set([this.initialTab]));
 
   readonly permissionGroups = computed(() => groupFeaturesByDomain(this.company()?.planFeatures ?? []));
@@ -80,9 +78,6 @@ export class CompanyDetailPage implements OnInit {
     void this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
-  /** Un tab ya montado no vuelve a pedir datos por su cuenta: tras una acción que cambia lo que muestra
-   * (cambiar plan, suspender), lo desmontamos para que la próxima vez que se abra pida datos frescos. No
-   * afecta al tab en el que el usuario está parado en ese momento (evita que la pantalla parpadee). */
   private invalidateTabs(tabs: readonly CompanyTab[]): void {
     const current = this.activeTab();
     const next = new Set(this.activatedTabs());
@@ -104,7 +99,6 @@ export class CompanyDetailPage implements OnInit {
     });
   }
 
-  /** `mod-suspender-empresa` / MOD-SA-02 `mod-reactivar-empresa`: transición de estado con motivo obligatorio. */
   suspend(): void {
     const company = this.company();
     if (!company) return;
@@ -182,7 +176,6 @@ export class CompanyDetailPage implements OnInit {
       });
   }
 
-  /** MOD-SA-03: extiende/reduce la vigencia reutilizando `change-plan` con el mismo plan y precio (queda auditado). */
   changeValidity(): void {
     const company = this.company();
     if (!company?.planId || !company.planEnd) return;

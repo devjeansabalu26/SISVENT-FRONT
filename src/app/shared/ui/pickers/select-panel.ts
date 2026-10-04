@@ -3,23 +3,17 @@ import {
 } from '@angular/core';
 
 export interface SelectPanelOption {
-  /** Posición en el <select> nativo (selectedIndex). */
   readonly index: number;
   readonly label: string;
   readonly disabled: boolean;
 }
 
-/** A partir de cuántas opciones se muestra el buscador. */
 const SEARCH_THRESHOLD = 8;
 
 function normalize(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
-/**
- * Lista desplegable propia que reemplaza al panel nativo de los <select> (ver NativeControlsEnhancer).
- * Marca la opción elegida, busca sin tildes cuando hay muchas opciones y se maneja con teclado.
- */
 @Component({
   selector: 'app-select-panel',
   template: `
@@ -118,7 +112,6 @@ export class SelectPanel implements AfterViewInit {
         this.dismiss.emit();
         break;
       default:
-        // Sin buscador: saltar a la primera opción que empieza con la letra escrita.
         if (!this.searchable() && event.key.length === 1) {
           const letter = normalize(event.key);
           const from = this.active() + 1;

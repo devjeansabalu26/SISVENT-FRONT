@@ -24,7 +24,6 @@ export class ResetAccessDialog implements OnInit {
 
   readonly loading = signal(true);
   readonly password = signal('');
-  /** Usuario de acceso (código de 5 dígitos) que devuelve el backend al restablecer. */
   readonly username = signal(this.data.username);
   readonly forceChange = signal(true);
   readonly copied = signal(false);

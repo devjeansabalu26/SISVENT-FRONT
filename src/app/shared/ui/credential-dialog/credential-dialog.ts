@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 
 export interface CredentialDialogData {
   readonly title: string;
-  /** Código del catálogo Figma (MOD-SA-07 / MOD-SA-16). */
   readonly code?: string;
   readonly successMessage: string;
   readonly username: string;
@@ -13,7 +12,6 @@ export interface CredentialDialogData {
 
 type CopiedField = 'username' | 'password' | null;
 
-/** Muestra una credencial una sola vez, con botones de copiar (Figma `mod-credencial-creada`). */
 @Component({
   selector: 'app-credential-dialog',
   imports: [MatDialogModule],

@@ -1,6 +1,3 @@
-/* Gráficos ligeros sin librería externa (CSS puro): barras verticales para series temporales
-   (Evolución de Ventas / tendencia) y barras horizontales de participación (Ventas por Categoría /
-   por Vendedor). Reutilizado por Reportes y por el Dashboard ADMIN — no duplicar estas reglas. */
 .chart {
   display: flex;
   align-items: end;

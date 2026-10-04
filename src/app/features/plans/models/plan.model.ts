@@ -1,4 +1,3 @@
-/** Mirrors PlanListItem from GET /api/v1/plans. */
 export interface Plan {
   readonly id: string;
   readonly code: string;
@@ -35,7 +34,6 @@ export interface PlanPriceHistoryRow {
   readonly changedByName: string | null;
 }
 
-/** Historial de cambios del plan en sí (alta/edición), distinto del historial de precios: sale de audit_logs. */
 export interface PlanChangeLogEntry {
   readonly changedAt: string;
   readonly actorName: string | null;

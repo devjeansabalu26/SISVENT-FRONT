@@ -14,14 +14,9 @@ export interface SaleConfirmData {
   readonly lines: readonly SaleConfirmLine[];
   readonly discount: number;
   readonly paymentMethod: string;
-  /** Un resumen por pago: monto, recibido/vuelto, voucher o n.º de operación. */
   readonly paymentDetails?: readonly string[];
 }
 
-/**
- * Figma `mod-confirmar-venta` (MOD-AD-18): último vistazo al carrito antes de registrar la venta. Pide el usuario
- * (código de 5 dígitos) de quien vende: la venta queda a su nombre. Se cierra con ese código (o `false`).
- */
 @Component({
   selector: 'app-sale-confirm-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -103,7 +98,6 @@ export class SaleConfirmDialog {
     return control.invalid && (control.touched || control.dirty);
   }
 
-  /** Solo dígitos en el código. */
   digitsOnly(event: Event): void {
     const input = event.target as HTMLInputElement;
     const clean = input.value.replace(/\D/g, '').slice(0, 5);

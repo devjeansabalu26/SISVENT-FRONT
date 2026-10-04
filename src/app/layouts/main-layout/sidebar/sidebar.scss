@@ -9,10 +9,7 @@
   overflow-y: auto;
   color: var(--color-sidebar-text);
   background: var(--color-sidebar-bg);
-  /* Derivado del fondo real (default o el secondaryColor de la empresa vía ThemeService), no de un
-     token fijo aparte: así el hover/activo siempre combina con el color que esté puesto ahora mismo. */
   --sidebar-hover: var(--color-sidebar-hover-bg, color-mix(in srgb, var(--color-sidebar-bg) 82%, white 18%));
-  /* Texto fuerte (nombre, hover, activo): blanco por defecto; oscuro si la empresa usa un fondo claro. */
   --sidebar-strong: var(--color-sidebar-strong, white);
   transition: transform 180ms ease;
 }
@@ -93,7 +90,6 @@ nav a.active {
 .material-icons {
   font-size: 20px;
 }
-/* Módulo no incluido en el plan: visible pero atenuado, con candado a la derecha. */
 nav a.locked {
   opacity: 0.55;
 }

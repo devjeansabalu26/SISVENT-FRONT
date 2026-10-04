@@ -9,7 +9,6 @@ export interface LoginAlert {
   readonly message: string;
 }
 
-/** Variantes de Figma `state-variations-canvas` (textos literales del diseño). */
 export const LOGIN_ALERTS = {
   invalidCredentials: {
     tone: 'error',
@@ -79,10 +78,6 @@ export const LOGIN_ALERTS = {
   },
 } as const satisfies Record<string, LoginAlert>;
 
-/**
- * El backend (`IdentityAuthService`) envía el motivo en `ProblemDetails.code`. Si falta (backend anterior),
- * se usa el texto del `title` como respaldo: empresa/vigencia → licencia vencida; lo demás → cuenta.
- */
 const ALERT_BY_CODE: Readonly<Record<string, LoginAlert>> = {
   INVALID_CREDENTIALS: LOGIN_ALERTS.invalidCredentials,
   ACCOUNT_DISABLED: LOGIN_ALERTS.userDisabled,

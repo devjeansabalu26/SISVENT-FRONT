@@ -1,4 +1,3 @@
-/** Mirrors GoodsReceiptListItem from GET /api/v1/goods-receipts. */
 export interface GoodsReceiptListItem {
   readonly id: string;
   readonly receiptNumber: string;

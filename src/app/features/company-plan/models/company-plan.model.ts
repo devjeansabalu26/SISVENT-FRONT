@@ -1,20 +1,15 @@
-/** Mirrors MyPlanResponse and PlanChangeRequest* from /api/v1/company/plan. */
 export interface MyPlanCurrent {
   readonly planId: string;
   readonly code: string;
   readonly name: string;
   readonly contractedPrice: number;
   readonly currencyCode: string;
-  /** `YYYY-MM-DD` */
   readonly startDate: string;
-  /** `YYYY-MM-DD` */
   readonly endDate: string;
-  /** Estado efectivo: ACTIVE, PENDING, EXPIRED, SUSPENDED, INACTIVE. */
   readonly status: string;
   readonly daysRemaining: number;
 }
 
-/** `limit` null = ilimitado. */
 export interface MyPlanUsage {
   readonly code: string;
   readonly label: string;
@@ -27,14 +22,12 @@ export interface AvailablePlan {
   readonly code: string;
   readonly name: string;
   readonly description: string | null;
-  /** null = precio a consultar. */
   readonly price: number | null;
   readonly currencyCode: string;
   readonly maxSellers: number | null;
   readonly maxStores: number | null;
   readonly maxProducts: number | null;
   readonly features: readonly string[];
-  /** Códigos (AUDIT, REPORTS…) para saber qué plan incluye un módulo. */
   readonly featureCodes?: readonly string[];
   readonly isCurrent: boolean;
 }

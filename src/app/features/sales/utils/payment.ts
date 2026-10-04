@@ -2,28 +2,19 @@ import { CARD_BRANDS, MAX_PAYMENTS, PaymentDraftLine, PaymentKind, PosPaymentLin
 
 const round2 = (value: number): number => Math.round(value * 100) / 100;
 
-/** Texto → número; vacío = null, inválido = NaN. Acepta coma decimal. */
 function parseAmount(text: string): number | null {
   const clean = text.trim().replace(',', '.');
   return clean ? Number(clean) : null;
 }
 
 export interface PaymentBreakdown {
-  /** Suma de tarjeta y pagos digitales. */
   readonly nonCash: number;
-  /** Lo que queda para efectivo (o sin cubrir si no hay efectivo). */
   readonly due: number;
-  /** Efectivo entregado (null si no hay pago en efectivo). */
   readonly cashReceived: number | null;
   readonly change: number;
-  /** Lo que falta cubrir con los pagos actuales. */
   readonly pending: number;
 }
 
-/**
- * Mismas reglas que SalePayment.ResolveSplit del backend: tarjeta y digitales aplican su monto; el efectivo
- * cubre lo que falta y es el único que da vuelto. Con un solo pago de tarjeta/digital sin monto se asume el total.
- */
 export function breakdown(lines: readonly PaymentDraftLine[], kindOf: (code: string) => PaymentKind, total: number): PaymentBreakdown {
   const single = lines.length === 1;
   let nonCash = 0;
@@ -54,7 +45,6 @@ export function breakdown(lines: readonly PaymentDraftLine[], kindOf: (code: str
   };
 }
 
-/** null = listo para confirmar; si no, el primer problema a corregir. */
 export function paymentsError(lines: readonly PaymentDraftLine[], kindOf: (code: string) => PaymentKind, total: number): string | null {
   if (!lines.length) return 'Agrega un método de pago.';
   if (lines.length > MAX_PAYMENTS) return `Una venta admite hasta ${MAX_PAYMENTS} pagos.`;
@@ -91,7 +81,6 @@ export function paymentsError(lines: readonly PaymentDraftLine[], kindOf: (code:
   return null;
 }
 
-/** Body `payments`: solo los campos del tipo de cada método. */
 export function toPaymentLines(
   lines: readonly PaymentDraftLine[],
   kindOf: (code: string) => PaymentKind,
@@ -118,7 +107,6 @@ export function toPaymentLines(
   });
 }
 
-/** Montos sugeridos para cobrar en efectivo: exacto y los billetes siguientes por encima. */
 export function quickCashAmounts(due: number): readonly number[] {
   if (due <= 0) return [];
   const bills = [10, 20, 50, 100, 200];
@@ -137,7 +125,6 @@ interface PaymentSummarySource {
   readonly cardLast4?: string | null;
 }
 
-/** "Tarjeta S/ 6000.00 · Visa •••• 4242 · Op. 004512" / "Efectivo S/ 800.00 · Recibido S/ 1000.00 · Vuelto S/ 200.00". */
 export function paymentSummary(source: PaymentSummarySource): string {
   const parts: string[] = [];
   if (source.methodName) parts.push(source.amount != null ? `${source.methodName} S/ ${source.amount.toFixed(2)}` : source.methodName);

@@ -18,7 +18,6 @@ interface FeatureOption {
   readonly domain: string;
 }
 
-/** A feature option plus its position in the `features` FormArray. */
 interface FeatureGroupItem {
   readonly option: FeatureOption;
   readonly index: number;
@@ -47,7 +46,6 @@ export class PlanFormPage implements OnInit {
   readonly loading = signal(this.isEdit);
   readonly saving = signal(false);
   readonly featureOptions = signal<readonly FeatureOption[]>([]);
-  /** Plan tal como se cargó: base del resumen "Cambios de Plan" (MOD-SA-11). */
   private original: PlanDetail | null = null;
 
   readonly form = new FormGroup({
@@ -67,7 +65,6 @@ export class PlanFormPage implements OnInit {
     return this.form.controls.features;
   }
 
-  /** Feature options grouped by domain, preserving each control's FormArray index. */
   readonly featureGroups = computed<readonly FeatureGroup[]>(() => {
     const groups = new Map<string, FeatureGroupItem[]>();
     this.featureOptions().forEach((option, index) => {
@@ -148,7 +145,6 @@ export class PlanFormPage implements OnInit {
       .subscribe(() => this.persist(body));
   }
 
-  /** MOD-SA-11: precio, límites y módulos activados / retirados respecto al plan guardado. */
   private changesReview(original: PlanDetail, body: PlanFormValue): ReviewDialogData {
     const limit = (value: number | null, unit: string) => (value == null ? 'Ilimitado' : `${value} ${unit}`);
     const originalLimit = (code: string) => original.limits.find((row) => row.code === code)?.value ?? null;

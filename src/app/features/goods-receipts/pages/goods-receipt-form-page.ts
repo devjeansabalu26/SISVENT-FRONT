@@ -101,7 +101,6 @@ export class GoodsReceiptFormPage implements OnInit {
     this.linesVersion.update((value) => value + 1);
   }
 
-  /** MOD-PR-02: si ya se cargaron datos, pide confirmación antes de descartar el ingreso. */
   cancel(): void {
     if (!this.form.dirty) {
       void this.router.navigateByUrl('/app/goods-receipts');
@@ -123,7 +122,6 @@ export class GoodsReceiptFormPage implements OnInit {
       .subscribe(() => void this.router.navigateByUrl('/app/goods-receipts'));
   }
 
-  /** MOD-PR-01: resumen (proveedor, local, documento, totales) antes de impactar el stock. */
   save(): void {
     if (this.form.invalid || this.lines.length === 0) {
       this.form.markAllAsTouched();

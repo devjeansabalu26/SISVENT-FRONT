@@ -1,15 +1,3 @@
-/*
- * Controles de SISVENT: botones, campos, selects y casillas con un mismo diseño en toda la app,
- * en modo día y noche, con el color de la empresa (tokens de _theme.scss que aplica ThemeService).
- *
- * Botones: cada pantalla trae su propio .primary/.ghost encapsulado, que siempre le ganaría a una hoja
- * global. Por eso aquí la "piel" (borde, fondo, color, sombra y estados) usa una especificidad reforzada
- * (.primary.primary.primary); el tamaño, el espaciado y el layout los sigue definiendo cada pantalla.
- * Campos: varias pantallas ponen un input sin borde dentro de un buscador con ícono, así que aquí solo
- * hay valores por defecto de baja prioridad (:where); las hojas compartidas de formularios usan los
- * mismos tokens --control-*.
- */
-
 :root {
   --control-height: 40px;
   --control-radius: 10px;
@@ -20,8 +8,6 @@
   --control-shadow: 0 1px 2px rgb(15 23 42 / 6%);
   --control-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
-
-/* ---------------------------------------------------------------- Botones */
 
 :is(button, a).primary.primary.primary {
   border: 1px solid color-mix(in srgb, var(--color-primary) 80%, black);
@@ -65,7 +51,6 @@
   background: color-mix(in srgb, var(--color-primary) 6%, var(--control-bg));
 }
 
-/* Acciones destructivas */
 :is(button, a).primary.danger.danger {
   border-color: color-mix(in srgb, var(--color-error) 80%, black);
   color: #fff;
@@ -84,7 +69,6 @@
   background: color-mix(in srgb, var(--color-error) 8%, var(--control-bg));
 }
 
-/* Botón con aspecto de enlace */
 button.link.link.link {
   padding: 0;
   border: 0;
@@ -101,7 +85,6 @@ button.link.link.link:hover:not(:disabled) {
   text-decoration: underline;
 }
 
-/* Estados comunes (misma especificidad reforzada que la piel, para que la ganen) */
 :is(button, a).primary.primary.primary:active:not(:disabled),
 :is(button, a).ghost.ghost.ghost:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
@@ -123,8 +106,6 @@ button.link.link.link:disabled {
   box-shadow: none;
   cursor: not-allowed;
 }
-
-/* ---------------------------------------------------------------- Campos */
 
 :where(input:not([type='checkbox'], [type='radio'], [type='color'], [type='range'], [type='file'], [type='hidden']), select, textarea) {
   border: 1px solid var(--control-border);
@@ -155,7 +136,6 @@ button.link.link.link:disabled {
   cursor: not-allowed;
 }
 
-/* Select con flecha propia (reforzado: las pantallas usan el atajo `background`, que borraría la flecha). */
 select:not([multiple], [size]):not(.__a):not(.__b) {
   appearance: none;
   padding-right: 36px;
@@ -170,8 +150,6 @@ select option {
   color: var(--color-text-primary);
   background: var(--color-surface);
 }
-
-/* ---------------------------------------------------------------- Casillas */
 
 input[type='checkbox']:not([role='switch']):not(.__a) {
   appearance: none;
@@ -238,9 +216,6 @@ input[type='checkbox']:not([role='switch']):not(.__a):disabled {
   }
 }
 
-/* ---------------------------------------------------------------- Fechas */
-
-/* El calendario nativo se reemplaza por DatePanel (NativeControlsEnhancer): se oculta su ícono y se usa uno propio. */
 input[type='date']:not([data-native-picker]):not(.__a):not(.__b) {
   min-height: var(--control-height);
   padding-right: 38px;
@@ -256,7 +231,6 @@ input[type='date']:not([data-native-picker])::-webkit-calendar-picker-indicator 
   display: none;
 }
 
-/* Paneles emergentes propios: la capa del overlay no recibe estilos de los diálogos. */
 .app-picker-overlay {
   z-index: 1100;
 }

@@ -4,6 +4,5 @@ export interface ConfirmDialogData {
   readonly confirmLabel?: string;
   readonly cancelLabel?: string;
   readonly destructive?: boolean;
-  /** When set, renders a checkbox the user must tick before confirming (Figma `mod-eliminar-producto`). */
   readonly acknowledgeLabel?: string;
 }

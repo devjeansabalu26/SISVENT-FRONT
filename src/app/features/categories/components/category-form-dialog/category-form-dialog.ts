@@ -14,7 +14,6 @@ export class CategoryFormDialog {
   private readonly data = inject<CategoryFormData>(MAT_DIALOG_DATA);
   readonly category = this.data.category;
   readonly hasChildren = this.data.hasChildren;
-  /** Solo principales activas y distintas de la que se edita. */
   readonly parents = this.data.parents.filter((parent) => parent.id !== this.category?.id && (parent.isActive || parent.id === this.category?.parentId));
   private readonly dialogRef = inject(MatDialogRef<CategoryFormDialog, CategoryFormValue | undefined>);
 

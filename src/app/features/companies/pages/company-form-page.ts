@@ -55,12 +55,8 @@ export class CompanyFormPage implements OnInit {
   readonly plans = signal<readonly Plan[]>([]);
   readonly steps = ['Empresa', 'Administrador', 'Vigencia'];
   private existing: CompanyDetail | null = null;
-  /** Valores del formulario recién precargado en edición: base del "Resumen de cambios" (MOD-SA-08). */
   private initialValue: CompanyFormValue | null = null;
 
-  // Campos obligatorios (marcados con *) de cada card del stepper, en el mismo orden que `steps`.
-  // Un card se marca "completo" cuando todos sus campos obligatorios son válidos (Validators.required
-  // ya cubre "vacío"), sin exigir los campos opcionales de esa misma sección.
   private readonly stepFields: readonly (readonly string[])[] = [
     this.isEdit
       ? ['tradeName', 'legalName', 'companyEmail', 'legalAddress']
@@ -92,7 +88,6 @@ export class CompanyFormPage implements OnInit {
     companyEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     legalAddress: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     internalNotes: new FormControl('', { nonNullable: true }),
-    // Create-only:
     planId: new FormControl('', { nonNullable: true }),
     contractedPrice: new FormControl(0, { nonNullable: true, validators: [Validators.min(0)] }),
     adminFirstName: new FormControl('', { nonNullable: true }),
@@ -112,8 +107,6 @@ export class CompanyFormPage implements OnInit {
   });
 
   ngOnInit(): void {
-    // The edit screen is the create screen in edit mode: same FormGroup, same
-    // sections, same validators — only pre-filled and routed to PUT.
     this.addSharedValidators();
     this.watchThemeColors();
     this.watchStepCompletion();
@@ -142,11 +135,8 @@ export class CompanyFormPage implements OnInit {
     });
   }
 
-  /** Prefills every section from the existing company (create-only fields excluded). */
   private patchFromCompany(company: CompanyDetail): void {
     const preset = DEFAULT_COMPANY_THEME_PRESET;
-    // The backend sends first/last name split; if only the combined `administratorName`
-    // is available, fall back to splitting on the first whitespace.
     const nameParts = (company.administratorName ?? '').trim().split(/\s+/).filter(Boolean);
     const derivedFirst = company.administratorFirstName ?? nameParts[0] ?? '';
     const derivedLast = company.administratorLastName ?? nameParts.slice(1).join(' ');
@@ -177,11 +167,6 @@ export class CompanyFormPage implements OnInit {
     });
   }
 
-  /**
-   * Selects the company's current plan in the dropdown. Uses `planId` when the
-   * backend provides it; otherwise matches the loaded plans by `planCode`.
-   * Runs after both the plan list and the company have loaded (whichever is last).
-   */
   private resolvePlanSelection(): void {
     if (!this.isEdit) return;
     const control = this.form.controls.planId;
@@ -193,7 +178,6 @@ export class CompanyFormPage implements OnInit {
     if (match) control.setValue(match.id);
   }
 
-  /** Validators that apply to both create and edit (the full form is shared). */
   private addSharedValidators(): void {
     this.form.controls.planId.addValidators(Validators.required);
     this.form.controls.adminFirstName.addValidators(Validators.required);
@@ -208,29 +192,23 @@ export class CompanyFormPage implements OnInit {
     this.form.updateValueAndValidity();
   }
 
-  /** Validators only meaningful when provisioning a new tenant. */
   private addCreateValidators(): void {
     this.form.controls.taxId.addValidators(Validators.required);
     this.form.controls.adminPassword.addValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
     this.form.updateValueAndValidity();
   }
 
-  /** Recalcula qué cards del stepper están completas cada vez que cambia el formulario (tecleo, patchValue,
-   * o que se agreguen/quiten validadores de creación). `startWith` fuerza un primer cálculo al suscribirse. */
   private watchStepCompletion(): void {
     merge(this.form.valueChanges, this.form.statusChanges)
       .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.stepsCompleted.set(this.computeStepsCompleted()));
   }
 
-  /** Una card está completa cuando todos sus campos obligatorios (los marcados con *) son válidos; los
-   * campos opcionales de esa misma sección no se exigen. */
   private computeStepsCompleted(): readonly boolean[] {
     const controls = this.form.controls as unknown as Record<string, AbstractControl>;
     return this.stepFields.map((fields) => fields.every((name) => controls[name].valid));
   }
 
-  /** Keeps the live preview and the highlighted preset in sync with the colour controls. */
   private watchThemeColors(): void {
     merge(
       this.form.controls.primaryColor.valueChanges,
@@ -243,11 +221,6 @@ export class CompanyFormPage implements OnInit {
     this.refreshTheme();
   }
 
-  /**
-   * Recomputes the preview and the highlighted preset from the current control
-   * values. Every entry point (presets, hex input, colour picker, defaults)
-   * already stores canonical `#RRGGBB`, so this only reads.
-   */
   private refreshTheme(): void {
     const colors: CompanyThemeColors = {
       primaryColor: this.form.controls.primaryColor.value,
@@ -268,12 +241,10 @@ export class CompanyFormPage implements OnInit {
     });
   }
 
-  /** Free-typed hex: force a leading `#`, keep only hex digits, uppercase, cap at `#RRGGBB`. */
   onHexInput(field: ThemeColorField, event: Event): void {
     this.form.controls[field].setValue(normalizeHexInput((event.target as HTMLInputElement).value));
   }
 
-  /** Native colour picker always yields `#rrggbb`; store it uppercased. */
   onColorPick(field: ThemeColorField, event: Event): void {
     this.form.controls[field].setValue((event.target as HTMLInputElement).value.toUpperCase());
   }
@@ -293,7 +264,6 @@ export class CompanyFormPage implements OnInit {
       .subscribe(() => this.persist(value));
   }
 
-  /** `mod-confirmar-empresa`: resumen de la empresa antes de aprovisionarla. */
   private creationReview(value: CompanyFormValue): ReviewDialogData {
     return {
       title: 'Confirmar creación de empresa',
@@ -315,7 +285,6 @@ export class CompanyFormPage implements OnInit {
     };
   }
 
-  /** MOD-SA-08: tabla Campo / Antes / Después con solo los campos modificados. */
   private changesReview(value: CompanyFormValue): ReviewDialogData {
     const fields: readonly DiffField<CompanyFormValue>[] = [
       { key: 'tradeName', label: 'Nombre comercial' },
@@ -422,7 +391,6 @@ export class CompanyFormPage implements OnInit {
         next: () => {
           this.saving.set(false);
           this.notifications.show('Empresa creada correctamente.', 'success');
-          // MOD-SA-07: la contraseña la definió el superadmin en el paso 2; se muestra una única vez.
           this.dialog
             .open<CredentialDialog, CredentialDialogData, void>(CredentialDialog, {
               data: {

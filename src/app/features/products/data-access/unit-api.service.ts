@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 
-/** Mirrors UnitResponse from /api/v1/units. Only used here to populate the unit dropdown. */
 export interface UnitOption {
   readonly id: string;
   readonly code: string;

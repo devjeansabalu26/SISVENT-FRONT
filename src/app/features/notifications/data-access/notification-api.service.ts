@@ -9,7 +9,6 @@ export class NotificationApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/notifications`;
 
-  /** Trae las últimas notificaciones con los contadores de todas las pestañas; el filtro se aplica en cliente. */
   list(limit = 100): Observable<NotificationList> {
     return this.http.get<NotificationList>(this.baseUrl, { params: new HttpParams().set('limit', limit) });
   }

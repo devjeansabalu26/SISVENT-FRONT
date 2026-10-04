@@ -1,4 +1,3 @@
-/** Presets del filtro "Fecha" del dashboard ADMIN, resueltos a fechas locales (YYYY-MM-DD). */
 export type DateRangePreset = 'today' | 'yesterday' | 'last7' | 'thisMonth' | 'lastMonth';
 
 export const DATE_RANGE_PRESET_LABEL: Readonly<Record<DateRangePreset, string>> = {

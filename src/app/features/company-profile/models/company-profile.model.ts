@@ -1,4 +1,3 @@
-/** Mirrors CompanyProfileResponse from /api/v1/company/profile. */
 export interface CompanyTheme {
   readonly primaryColor: string;
   readonly secondaryColor: string;
@@ -31,7 +30,6 @@ export interface CompanyProfile {
   readonly fiscal: CompanyFiscal | null;
 }
 
-/** Body de PUT /api/v1/company/profile. */
 export interface UpdateCompanyProfile {
   readonly businessType: string;
   readonly phone: string;

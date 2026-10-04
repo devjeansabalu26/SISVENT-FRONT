@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 
-/** Mirrors /api/v1/cash-closures (Sisvent.Application.CashClosures). */
 export interface CashMethodTotal {
   readonly code: string;
   readonly name: string;
@@ -14,7 +13,6 @@ export interface CashClosure {
   readonly id: string;
   readonly storeId: string;
   readonly storeName: string;
-  /** `YYYY-MM-DD` */
   readonly businessDate: string;
   readonly salesCount: number;
   readonly totalSales: number;
@@ -36,7 +34,6 @@ export interface CashClosurePreview {
   readonly expectedCash: number;
   readonly expectedOther: number;
   readonly byMethod: readonly CashMethodTotal[];
-  /** Cierre ya registrado para ese local y día (no se puede volver a cerrar). */
   readonly existing: CashClosure | null;
 }
 

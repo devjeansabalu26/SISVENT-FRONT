@@ -9,10 +9,6 @@ import { SaleDetail } from '../models/sale-detail.model';
 import { receiptPdfBase64 } from '../utils/receipt-pdf';
 import { SaleApiService } from './sale-api.service';
 
-/**
- * Envío del comprobante por correo desde cualquier pantalla (comprobante, venta exitosa):
- * confirma el destinatario (por defecto el correo del cliente), genera el PDF y lo envía.
- */
 @Injectable({ providedIn: 'root' })
 export class ReceiptMailerService {
   private readonly api = inject(SaleApiService);
@@ -24,7 +20,6 @@ export class ReceiptMailerService {
   readonly sending = this.sendingState.asReadonly();
   readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
 
-  /** Abre el diálogo del destinatario y, si se confirma, envía el comprobante. */
   send(sale: SaleDetail): void {
     if (this.sendingState()) return;
     this.dialog
@@ -36,7 +31,6 @@ export class ReceiptMailerService {
       .subscribe((email) => void this.deliver(sale, email));
   }
 
-  /** Envía sin preguntar el destinatario (envío automático al confirmar la venta). */
   sendTo(sale: SaleDetail, email: string): void {
     if (this.sendingState()) return;
     void this.deliver(sale, email);
@@ -63,7 +57,6 @@ export class ReceiptMailerService {
     }
   }
 
-  /** El backend explica el motivo: correo inválido, SMTP no configurado, límite de reenvíos… */
   private errorMessage(cause: unknown): string {
     if (cause instanceof AppHttpError) {
       const body = (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error;

@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { CompanyContext } from './company-context.model';
 
-/** UI context only. A company ID in the browser never grants authorization. */
 @Injectable({ providedIn: 'root' })
 export class CompanyContextService {
   private readonly companyState = signal<CompanyContext | null>(null);
