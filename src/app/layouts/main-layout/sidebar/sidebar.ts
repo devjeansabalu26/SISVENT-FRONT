@@ -29,7 +29,7 @@ export class Sidebar {
 
   /** Nombre mostrado arriba del sidebar: la empresa real del usuario, o "SISVENT" para SUPERADMIN
    * (sin empresa) — nunca un nombre de empresa de ejemplo. */
-  readonly brandName = computed(() => this.company()?.commercialName ?? 'SISVENT');
+  readonly brandName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly brandInitial = computed(() => this.brandName().trim().charAt(0).toUpperCase() || 'S');
   readonly roleLabel = computed(() => {
     const role = this.users.user()?.role;

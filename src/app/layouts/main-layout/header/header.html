@@ -1,6 +1,6 @@
 <header>
   <button type="button" class="menu" (click)="menuToggle.emit()" aria-label="Abrir navegación"><span class="material-icons">menu</span></button>
-  <div class="crumb">{{ company()?.commercialName ?? 'SISVENT' }} <span>/</span> Panel</div>
+  <div class="crumb">{{ company()?.commercialName ?? 'SAVIX' }} <span>/</span> Panel</div>
   @if (storeContext.canPick() && storeContext.stores().length) {
     <label class="store-picker" title="Local para productos e inventario">
       <span class="material-icons">storefront</span>
@@ -26,7 +26,7 @@
       <button type="button" aria-label="Notificaciones"><span class="material-icons">notifications_none</span></button>
     }
     <div>
-      <strong>{{ user()?.displayName ?? 'Usuario SISVENT' }}</strong>
+      <strong>{{ user()?.displayName ?? 'Usuario SAVIX' }}</strong>
       @if (user()?.role === 'VENDEDOR' && user()?.branchName) {
         <small class="store-name"><span class="material-icons">storefront</span>{{ user()!.branchName }}</small>
       } @else {

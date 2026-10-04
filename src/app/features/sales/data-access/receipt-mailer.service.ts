@@ -22,7 +22,7 @@ export class ReceiptMailerService {
 
   private readonly sendingState = signal(false);
   readonly sending = this.sendingState.asReadonly();
-  readonly companyName = computed(() => this.company()?.commercialName ?? 'SISVENT');
+  readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
 
   /** Abre el diálogo del destinatario y, si se confirma, envía el comprobante. */
   send(sale: SaleDetail): void {

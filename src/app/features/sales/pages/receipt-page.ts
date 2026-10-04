@@ -28,7 +28,7 @@ export class ReceiptPage implements OnInit {
   readonly downloading = signal(false);
   private readonly mailer = inject(ReceiptMailerService);
   readonly sending = this.mailer.sending;
-  readonly companyName = computed(() => this.company()?.commercialName ?? 'SISVENT');
+  readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly sale = signal<SaleDetail | null>(null);
 
   ngOnInit(): void {
@@ -61,7 +61,7 @@ export class ReceiptPage implements OnInit {
     if (!sale || this.downloading()) return;
     this.downloading.set(true);
     try {
-      await downloadReceiptPdf(sale, this.company()?.commercialName ?? 'SISVENT');
+      await downloadReceiptPdf(sale, this.company()?.commercialName ?? 'SAVIX');
     } catch {
       this.notifications.show('No se pudo generar el PDF del comprobante.', 'error');
     } finally {

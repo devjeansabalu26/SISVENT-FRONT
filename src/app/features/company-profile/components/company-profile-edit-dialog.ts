@@ -20,7 +20,7 @@ type ColorKey = 'primaryColor' | 'secondaryColor' | 'accentColor' | 'backgroundC
         <span class="material-icons">edit</span>
         <div>
           <h2>Editar mi empresa</h2>
-          <p>Nombre comercial, razón social y RUC los gestiona el equipo de SISVENT.</p>
+          <p>Nombre comercial, razón social y RUC los gestiona el equipo de SAVIX.</p>
         </div>
       </header>
 

@@ -33,13 +33,13 @@ export const LOGIN_ALERTS = {
     tone: 'error',
     icon: 'block',
     title: 'Empresa suspendida',
-    message: 'El acceso de tu organización está suspendido. Comunícate con el equipo de SISVENT.',
+    message: 'El acceso de tu organización está suspendido. Comunícate con el equipo de SAVIX.',
   },
   companyInactive: {
     tone: 'warning',
     icon: 'domain_disabled',
     title: 'Empresa no activa',
-    message: 'Tu organización todavía no está activa o fue desactivada. Comunícate con el equipo de SISVENT.',
+    message: 'Tu organización todavía no está activa o fue desactivada. Comunícate con el equipo de SAVIX.',
   },
   planPending: {
     tone: 'info',

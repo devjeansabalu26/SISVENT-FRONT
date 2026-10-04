@@ -12,7 +12,7 @@
     <p class="notice notice--info">
       <span class="material-icons" aria-hidden="true">schedule_send</span>
       Solicitud de cambio al plan <strong>{{ request.planName }}</strong> enviada el
-      {{ formatDate(request.requestedAt) }}. El equipo de SISVENT se pondrá en contacto contigo.
+      {{ formatDate(request.requestedAt) }}. El equipo de SAVIX se pondrá en contacto contigo.
     </p>
   }
 
@@ -33,12 +33,12 @@
       @if (expiringSoon()) {
         <p class="notice notice--warning">
           <span class="material-icons" aria-hidden="true">warning_amber</span>
-          Tu plan vence pronto. Contacta al equipo de SISVENT para renovarlo y evitar interrupciones.
+          Tu plan vence pronto. Contacta al equipo de SAVIX para renovarlo y evitar interrupciones.
         </p>
       }
     } @else {
       <h2>Sin plan vigente</h2>
-      <p class="muted">Tu empresa no tiene un período de plan activo. Contacta al equipo de SISVENT.</p>
+      <p class="muted">Tu empresa no tiene un período de plan activo. Contacta al equipo de SAVIX.</p>
     }
     <div class="usage">
       @for (bar of plan.usage; track bar.code) {

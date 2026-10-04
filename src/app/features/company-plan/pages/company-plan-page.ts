@@ -118,7 +118,7 @@ export class CompanyPlanPage implements OnInit {
         data: {
           title: 'Solicitar cambio de plan',
           icon: 'swap_horiz',
-          intro: 'El equipo de SISVENT recibirá tu solicitud y aplicará el cambio de plan y su vigencia.',
+          intro: 'El equipo de SAVIX recibirá tu solicitud y aplicará el cambio de plan y su vigencia.',
           transition: current
             ? { fromLabel: 'Plan actual', from: current.name, toLabel: 'Plan solicitado', to: plan.name }
             : undefined,

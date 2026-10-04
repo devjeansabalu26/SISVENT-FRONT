@@ -29,7 +29,7 @@ import { AvailablePlan, MyPlan } from '../models/company-plan.model';
             }
           </ul>
         } @else if (!loading()) {
-          <p>Consulta con el equipo de SISVENT qué plan incluye este módulo.</p>
+          <p>Consulta con el equipo de SAVIX qué plan incluye este módulo.</p>
         }
         <div class="actions">
           <a class="primary" routerLink="/app/plan"><span class="material-icons">workspace_premium</span>Ver planes y solicitar cambio</a>

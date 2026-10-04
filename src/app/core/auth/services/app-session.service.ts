@@ -89,7 +89,7 @@ export class AppSessionService {
       throw new Error(`Rol de usuario no reconocido: ${user.role}`);
     }
 
-    const displayName = `${user.firstName} ${user.lastName}`.trim() || user.email || 'Usuario SISVENT';
+    const displayName = `${user.firstName} ${user.lastName}`.trim() || user.email || 'Usuario SAVIX';
     this.users.set({
       userId: user.id,
       displayName,

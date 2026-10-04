@@ -17,7 +17,7 @@ import { PRIORITY_LABELS, RISK_LABELS, ReplenishmentSummary, StockRiskItem } fro
 import { formatQuantity, purchaseOrderCsv } from '../utils/replenishment-format';
 
 /** Método mostrado en el modal MOD-PR-03. */
-const RECOMMENDATION_METHOD = 'SISVENT Smart Stock (ventas de los últimos 30 días)';
+const RECOMMENDATION_METHOD = 'SAVIX Smart Stock (ventas de los últimos 30 días)';
 
 @Component({
   selector: 'app-replenishment-summary-page',

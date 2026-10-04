@@ -21,7 +21,7 @@ const CRITICAL_COVERAGE_DAYS = 7;
         <span class="material-icons">lightbulb</span>
         <div class="review__title">
           <h2>Explicación de recomendación</h2>
-          <p>{{ data.product }} · Cálculo automatizado de reabastecimiento (SISVENT Smart Stock)</p>
+          <p>{{ data.product }} · Cálculo automatizado de reabastecimiento (SAVIX Smart Stock)</p>
         </div>
         <small class="review__code">MOD-PR-03</small>
       </header>
