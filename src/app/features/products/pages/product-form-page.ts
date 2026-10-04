@@ -48,7 +48,6 @@ export class ProductFormPage implements OnInit {
   readonly stores = signal<readonly Store[]>([]);
 
   private existing: ProductDetail | null = null;
-  /** Formulario recién precargado en edición: base del "Resumen de cambios" (MOD-AD-14). */
   private initialValue: ProductFormValue | null = null;
 
   readonly form = new FormGroup({
@@ -64,8 +63,6 @@ export class ProductFormPage implements OnInit {
     priceChangeReason: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     active: new FormControl(true, { nonNullable: true }),
     imageUrl: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(2000)] }),
-    // Solo CREATE: stock inicial opcional (ver Control de Almacén). En EDIT el stock se gestiona desde
-    // Inventario / Ingreso de mercadería, no desde este formulario (regla ya existente en el sistema).
     initialStoreId: new FormControl<string | null>(null, { nonNullable: false }),
     initialStock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.min(0)] }),
     minStock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.min(0)] }),
@@ -88,7 +85,6 @@ export class ProductFormPage implements OnInit {
     if (!this.isEdit) {
       this.storeApi.list().subscribe((result) => {
         this.stores.set(result.items);
-        // Con un único local (caso típico al recién crear la empresa) lo preseleccionamos.
         if (result.items.length === 1) this.form.controls.initialStoreId.setValue(result.items[0].id);
       });
     }
@@ -145,10 +141,6 @@ export class ProductFormPage implements OnInit {
       .subscribe((value) => this.persist(value));
   }
 
-  /**
-   * MOD-AD-15: si cambió el precio de venta y no se escribió el motivo en el formulario, lo pide en el
-   * modal y lo copia al control `priceChangeReason` (que ya viaja al backend). Emite `false` si se cancela.
-   */
   private askPriceReason(product: ProductDetail, initial: ProductFormValue): Observable<boolean> {
     const newPrice = this.form.controls.salePrice.value;
     if (newPrice === initial.salePrice || this.form.controls.priceChangeReason.value.trim()) return of(true);
@@ -166,7 +158,6 @@ export class ProductFormPage implements OnInit {
       );
   }
 
-  /** MOD-AD-14: tabla Campo / Antes / Después con solo lo modificado. */
   private changesReview(initial: ProductFormValue, value: ProductFormValue): ReviewDialogData {
     const nameOf = (list: readonly { id: string; name: string }[]) => (id: unknown) =>
       list.find((item) => item.id === id)?.name ?? '—';

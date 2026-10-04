@@ -16,7 +16,6 @@ import {
 
 const EMPTY_COUNTS: NotificationCounts = { all: 0, unread: 0, alerts: 0, critical: 0, updates: 0, system: 0 };
 
-/** "Hace 5 minutos", "Ayer, 18:45", "12/09/2026". */
 export function timeAgo(iso: string, now = new Date()): string {
   const date = new Date(iso);
   const minutes = Math.floor((now.getTime() - date.getTime()) / 60000);
@@ -49,7 +48,6 @@ export class NotificationsPage implements OnInit {
   readonly counts = signal<NotificationCounts>(EMPTY_COUNTS);
   readonly activeTab = signal<NotificationTab>('all');
 
-  /** Figma: `sa-centro-notificaciones` (Alertas / Sistema) y `ad-notificaciones` (Críticas / Actualizaciones / Sistema). */
   readonly tabs: readonly { readonly id: NotificationTab; readonly label: string }[] = this.isSuperadmin
     ? [
         { id: 'all', label: 'Todas' },
@@ -134,7 +132,6 @@ export class NotificationsPage implements OnInit {
     void this.router.navigate(action.route);
   }
 
-  /** Marca en la vista sin recargar y ajusta los contadores y la campana. */
   private setRead(match: (row: NotificationItem) => boolean): void {
     let changed = 0;
     this.items.update((rows) =>

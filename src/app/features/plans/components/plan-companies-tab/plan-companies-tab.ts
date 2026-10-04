@@ -16,9 +16,6 @@ interface Row {
   readonly userCount: number;
 }
 
-/** Tab "Empresas asignadas" del detalle de plan: quiénes están usando este plan HOY, con paginación
- * server-side real — reutiliza GET /api/v1/companies?planId= (mismo endpoint y store que el listado de
- * Empresas), no crea un endpoint aparte. */
 @Component({
   selector: 'app-plan-companies-tab',
   imports: [DataTable, Paginator],

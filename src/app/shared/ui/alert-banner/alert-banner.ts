@@ -9,7 +9,6 @@ const DEFAULT_ICON: Readonly<Record<AlertBannerTone, string>> = {
   success: 'check_circle',
 };
 
-/** Banner de alerta en línea (icono + título + descripción) — Figma `state-variations-canvas`. */
 @Component({
   selector: 'app-alert-banner',
   template: `

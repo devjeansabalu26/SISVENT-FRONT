@@ -1,7 +1,5 @@
 @use 'picker-panel';
 
-/* El overlay de CDK es un contenedor flex: sin esto el panel se encoge al ancho de su texto
-   en vez de ocupar el ancho del <select> que le da NativeControlsEnhancer. */
 :host {
   flex: 1 1 auto;
   width: 100%;

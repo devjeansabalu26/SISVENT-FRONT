@@ -5,7 +5,6 @@ import { RouterLink } from '@angular/router';
 import { cashErrorMessage } from '../../data-access/cash-session-api.service';
 import { CreditNoteApiService, CreditNoteDetail } from '../../data-access/credit-note-api.service';
 
-/** Detalle de una nota de crédito: venta de origen, reembolso, motivo y productos devueltos. */
 @Component({
   selector: 'app-credit-note-detail-dialog',
   imports: [MatDialogModule, DatePipe, RouterLink],

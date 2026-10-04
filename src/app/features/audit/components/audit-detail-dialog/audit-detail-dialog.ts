@@ -11,11 +11,6 @@ const ROLE_LABEL: Readonly<Record<string, string>> = {
   VENDEDOR: 'Vendedor',
 };
 
-/**
- * Figma `mod-detalle-auditoria` (MOD-AD-20) y `mod-detalle-auditoria-plataforma` (MOD-SA-17).
- * El backend expone un único texto `detail` (no valores antes/después separados), que se muestra
- * como "Detalle del cambio".
- */
 @Component({
   selector: 'app-audit-detail-dialog',
   imports: [MatDialogModule, DateTimePipe],
@@ -26,7 +21,6 @@ const ROLE_LABEL: Readonly<Record<string, string>> = {
 })
 export class AuditDetailDialog {
   readonly event = inject<AuditEvent>(MAT_DIALOG_DATA);
-  /** Antes → después con el nombre del campo en español. */
   readonly changes = (this.event.changes ?? []).map((change) => ({ ...change, label: auditFieldLabel(change.field) }));
   private readonly ref = inject(MatDialogRef<AuditDetailDialog>);
 

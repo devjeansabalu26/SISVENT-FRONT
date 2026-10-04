@@ -8,10 +8,8 @@ export interface RecommendationExplainData {
   readonly input: ReplenishmentInput;
 }
 
-/** Días de cobertura por debajo de los cuales el producto se marca como crítico (misma regla que la cobertura "< 7 días"). */
 const CRITICAL_COVERAGE_DAYS = 7;
 
-/** Figma `mod-explicacion-recomendacion` (MOD-PR-03): desglose de la fórmula de compra sugerida. */
 @Component({
   selector: 'app-recommendation-explain-dialog',
   imports: [MatDialogModule],

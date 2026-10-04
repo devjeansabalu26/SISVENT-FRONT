@@ -17,7 +17,6 @@ interface ListParams {
   readonly search?: string;
   readonly categoryId?: string;
   readonly brandId?: string;
-  /** Local: solo productos que maneja, con su stock. Sin valor = todos los locales. */
   readonly storeId?: string | null;
   readonly isActive?: boolean;
   readonly lowStock?: boolean;

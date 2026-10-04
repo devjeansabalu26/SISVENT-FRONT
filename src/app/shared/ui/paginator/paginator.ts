@@ -3,10 +3,6 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 
 type PageToken = { readonly kind: 'page'; readonly value: number } | { readonly kind: 'gap' };
 
-/**
- * Footer de paginación reutilizable: "Mostrando 1-10 de 124 registros   < 1 2 3 … 13 >".
- * El paginado es real: emite `pageChange` y la página contenedora vuelve a pedir datos al backend.
- */
 @Component({
   selector: 'app-paginator',
   imports: [DecimalPipe],
@@ -15,12 +11,9 @@ type PageToken = { readonly kind: 'page'; readonly value: number } | { readonly 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Paginator {
-  /** Página actual (base 1). */
   readonly pageNumber = input.required<number>();
   readonly pageSize = input.required<number>();
-  /** Total de registros que cumplen los filtros activos (no solo la página visible). */
   readonly total = input.required<number>();
-  /** Sustantivo para la leyenda: "registros", "usuarios", "empresas"… */
   readonly itemNoun = input('registros');
   readonly disabled = input(false);
 

@@ -5,7 +5,6 @@ import { groupFeaturesByDomain } from '../../../../shared/utils/group-features';
 import { CompanyApiService } from '../../data-access/company-api.service';
 import { CompanyPlan } from '../../models/company.model';
 
-/** Etiquetas amigables para los limit_code conocidos; uno no listado muestra su descripción o el código tal cual. */
 const LIMIT_LABELS: Record<string, string> = {
   MAX_ADMINS: 'Administradores máximos',
   MAX_SELLERS: 'Vendedores máximos',

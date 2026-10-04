@@ -4,7 +4,6 @@ import { UserContextService } from '../../context/user-context/user-context.serv
 import { isAppRole } from '../constants/app-role.constant';
 import { AuthService } from '../services/auth.service';
 
-/** Routes using this guard must declare `data: { roles: AppRole[] }`. */
 export const roleGuard: CanActivateFn = (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);

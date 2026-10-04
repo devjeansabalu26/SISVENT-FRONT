@@ -2,9 +2,9 @@
   <button type="button" class="menu" (click)="menuToggle.emit()" aria-label="Abrir navegación"><span class="material-icons">menu</span></button>
   <div class="crumb">{{ company()?.commercialName ?? 'SAVIX' }} <span>/</span> Panel</div>
   @if (storeContext.canPick() && storeContext.stores().length) {
-    <label class="store-picker" title="Local para productos e inventario">
+    <label class="store-picker" data-picker-anchor title="Local para productos e inventario">
       <span class="material-icons">storefront</span>
-      <select data-native-picker [value]="storeContext.selectedStoreId() ?? ''" (change)="storeContext.select($any($event.target).value)"
+      <select [value]="storeContext.selectedStoreId() ?? ''" (change)="storeContext.select($any($event.target).value)"
         aria-label="Local seleccionado">
         <option value="">Todos los locales (stock general)</option>
         @for (store of storeContext.stores(); track store.id) {

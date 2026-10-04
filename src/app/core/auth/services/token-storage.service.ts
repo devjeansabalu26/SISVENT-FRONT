@@ -5,12 +5,6 @@ import { AuthTokenProvider } from '../models/auth-token-provider.model';
 export const TOKEN_KEY = 'sisvent.access_token';
 const EXPIRES_KEY = 'sisvent.access_token_expires';
 
-/**
- * Holds the JWT access token. Backed by localStorage: the session survives closing the tab or the
- * browser and ends only with "Cerrar sesión" (or when a configured expiration passes). An expired
- * token is discarded on read so callers never send a stale credential; a token without expiration
- * (expiresAt null) lives until logout.
- */
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService implements AuthTokenProvider {
   private readonly window = inject(DOCUMENT).defaultView;
@@ -43,7 +37,6 @@ export class TokenStorageService implements AuthTokenProvider {
     this.storage?.removeItem(EXPIRES_KEY);
   }
 
-  /** Sesiones abiertas antes del cambio (sessionStorage) se conservan: se mueven una vez a localStorage. */
   private migrateFromSessionStorage(): void {
     const legacy = this.window?.sessionStorage;
     const token = legacy?.getItem(TOKEN_KEY);

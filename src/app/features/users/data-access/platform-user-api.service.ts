@@ -22,24 +22,17 @@ interface PlatformUserPage {
 }
 
 export interface PlatformResetAccessResponse {
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly temporaryPassword: string;
   readonly forceChange: boolean;
 }
 
-/**
- * Cross-company user access (SUPERADMIN). `list` reads any company's users; `resetAccess` and
- * `setStatus` are the only write operations exposed for users outside the actor's own company.
- * Creating a user in another company is done from the Companies module (POST /companies), not here.
- */
 @Injectable({ providedIn: 'root' })
 export class PlatformUserApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/platform/users`;
 
   list(params: ListParams = {}): Observable<PlatformUserPage> {
-    // El backend limita PageSize a 100 (PlatformUserQuery [Range(1, 100)]).
     let httpParams = new HttpParams()
       .set('pageNumber', params.pageNumber ?? 1)
       .set('pageSize', Math.min(params.pageSize ?? 20, 100));

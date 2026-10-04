@@ -45,34 +45,27 @@ export class PosPage implements OnInit {
   private readonly userContext = inject(UserContextService);
 
   readonly isAdmin = this.userContext.user()?.role === 'ADMIN';
-  /** Métodos activos de la empresa (GET /pos/payment-methods). */
   readonly paymentMethods = signal<readonly PaymentMethodOption[]>([]);
   readonly paymentMethodsError = signal(false);
 
   readonly products = signal<readonly Product[]>([]);
   readonly cart = signal<readonly CartItem[]>([]);
-  /** Pagos de la venta: uno o varios métodos (p. ej. tarjeta + efectivo). */
   readonly paymentLines = signal<readonly PaymentDraftLine[]>([]);
-  /** Método del primer pago: lo marcan los botones rápidos cuando hay un solo pago. */
   readonly payment = computed(() => this.paymentLines()[0]?.methodCode ?? '');
-  /** Los errores del pago se muestran recién al intentar confirmar. */
   readonly showPaymentErrors = signal(false);
   readonly selectedMethod = computed(() => this.paymentMethods().find((method) => method.code === this.payment()) ?? null);
   readonly kindOf = (code: string): PaymentKind => this.paymentMethods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
   private readonly methodName = (code: string): string => this.paymentMethods().find((method) => method.code === code)?.name ?? code;
   readonly saving = signal(false);
-  /** Opciones de la empresa para el POS; si no cargan, el envío del comprobante queda manual. */
   private readonly posSettings = signal<PosSettings>({ autoEmailReceipt: false, emailConfigured: false });
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly selectedStoreId = signal<string | null>(null);
   private readonly storeContext = inject(StoreContextService);
 
-  // Aviso de caja cerrada: la venta igual se registra y pasa a la próxima caja que se abra en el local.
   private readonly cashApi = inject(CashSessionApiService);
   readonly canUseCash = canUseCash();
   private readonly cashStatuses = signal<readonly StoreCashStatus[]>([]);
-  /** Cambio de local (ADMIN): el buscador muestra solo los productos de ese local; el carrito se vacía. */
   changeStore(storeId: string): void {
     if (storeId === this.selectedStoreId()) return;
     this.selectedStoreId.set(storeId);
@@ -113,7 +106,6 @@ export class PosPage implements OnInit {
     if (this.isAdmin) {
       this.storeApi.list().subscribe((response) => {
         this.stores.set(response.items);
-        // Por defecto, el local elegido en el encabezado; si es "todos", el primero.
         const preferred = this.storeContext.selectedStoreId();
         const initial = response.items.find((item) => item.id === preferred) ?? response.items[0];
         if (initial) this.selectedStoreId.set(initial.id);
@@ -133,7 +125,6 @@ export class PosPage implements OnInit {
     });
   }
 
-  /** Botones rápidos: un solo pago con el método elegido (limpia los pagos anteriores). */
   selectPayment(code: string): void {
     this.paymentLines.set(code ? [newPaymentLine(code)] : []);
     this.showPaymentErrors.set(false);
@@ -159,7 +150,6 @@ export class PosPage implements OnInit {
     this.customerResults.set([]);
   }
 
-  /** `mod-crear-cliente`: alta rápida sin abandonar la venta en curso; el cliente creado queda seleccionado. */
   newCustomer(): void {
     this.dialog
       .open<CustomerQuickDialog, void, Customer>(CustomerQuickDialog)
@@ -200,7 +190,6 @@ export class PosPage implements OnInit {
     this.cart.update((items) => items.filter((item) => item.product.id !== id));
   }
 
-  /** MOD-AD-18: resumen del carrito antes de registrar la venta. */
   confirm(): void {
     if (!this.cart().length) {
       this.notifications.show('Agrega al menos un producto.', 'warning');
@@ -235,7 +224,6 @@ export class PosPage implements OnInit {
       .subscribe((sellerCode) => this.register(sellerCode));
   }
 
-  /** Resumen de cada pago antes de confirmar ("Tarjeta S/ 6000.00 · Op. 004512"). */
   private previewPayments(total: number): readonly string[] {
     const lines = this.paymentLines();
     const due = breakdown(lines, this.kindOf, total).due;
@@ -254,7 +242,6 @@ export class PosPage implements OnInit {
     });
   }
 
-  /** Envío automático (Configuración → Facturación): solo si el cliente tiene correo y hay SMTP. */
   private autoEmailReceipt(sale: SaleDetail): string | null {
     const settings = this.posSettings();
     const email = sale.clientEmail?.trim();
@@ -307,13 +294,11 @@ export class PosPage implements OnInit {
               this.selectPayment(this.paymentMethods()[0]?.code ?? '');
               if (action === 'print') void this.router.navigate(['/app/sales', sale.id, 'comprobante']);
               else if (action === 'detail') void this.router.navigate(['/app/sales', sale.id]);
-              // El POS queda listo para la siguiente venta mientras se confirma el destinatario.
               else if (action === 'email') this.receiptMailer.send(sale);
             });
         },
         error: (cause: unknown) => {
           this.saving.set(false);
-          // El backend explica el motivo en el title (stock insuficiente, monto recibido, n.º de operación…).
           const title = (cause instanceof AppHttpError
             ? (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error
             : undefined);

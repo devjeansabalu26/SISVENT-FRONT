@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 
-/** Punto de la curva de Pareto: % acumulado de productos (x) vs. % acumulado del valor (y). */
 export interface ParetoPoint {
   readonly products: number;
   readonly value: number;
@@ -13,16 +12,11 @@ const PLOT_W = WIDTH - PAD.left - PAD.right;
 const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
 const TICKS = [0, 25, 50, 75, 100];
 
-/** Umbrales de valor acumulado que separan las clases A / B / C. */
 const CLASS_THRESHOLDS = [
   { value: 80, label: 'A | B (80%)' },
   { value: 95, label: 'B | C (95%)' },
 ] as const;
 
-/**
- * Curva de acumulación de Pareto (Figma `canvas` › `screen-abc`). Una sola serie: línea de 2px,
- * rejilla recesiva, umbrales ABC como líneas punteadas y tooltip por punto.
- */
 @Component({
   selector: 'app-pareto-chart',
   template: `
@@ -118,7 +112,6 @@ export class ParetoChart {
     return PAD.top + PLOT_H - (percent / 100) * PLOT_H;
   }
 
-  /** Mantiene el tooltip dentro del área del gráfico. */
   tipX(percent: number): number {
     return Math.min(Math.max(this.x(percent) - 75, PAD.left), WIDTH - PAD.right - 150);
   }

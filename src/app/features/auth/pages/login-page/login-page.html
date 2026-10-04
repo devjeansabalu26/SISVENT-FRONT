@@ -1,44 +1,101 @@
 <div class="login">
-    <section class="brand-panel">
-        <div class="dots" aria-hidden="true">@for (dot of dots; track $index) {<span [style.animation-duration]="dot.duration" [style.animation-delay]="dot.delay"></span>}</div><a class="brand"><span class="material-icons">grid_view</span>
-            <div><strong>SAVIX</strong><small>MULTIEMPRESA</small></div>
-        </a>
-        <div>
-            <h1>Gestión inteligente de ventas e inventario</h1>
-            <p>La plataforma multiempresa diseñada para unificar el control de stock, facturación y sucursales en tiempo
-                real.</p>
+  <div class="dots" aria-hidden="true">
+    @for (dot of dots; track $index) {
+      <span [style.animation-duration]="dot.duration" [style.animation-delay]="dot.delay"></span>
+    }
+  </div>
+
+  <section class="brand-panel">
+    <img class="logo" ngSrc="images/login/savix-logo-600x193.webp" width="600" height="193" priority
+      alt="SAVIX — Sistema de Gestión" />
+
+    <div class="intro">
+      <h1>Gestión inteligente de <span>ventas e inventario</span></h1>
+      <p>La plataforma multiempresa diseñada para unificar el control de stock, facturación y sucursales en tiempo real.</p>
+    </div>
+
+    <div class="hero">
+      <img ngSrc="images/login/login-hero-1200x900.webp" width="1200" height="900" priority
+        alt="Monitor con un gráfico de ventas en ascenso, un carrito de compras y cajas de inventario" />
+    </div>
+
+    <ul class="benefits">
+      <li>
+        <img ngSrc="images/login/icon-multiempresa-128.webp" width="128" height="128" alt="" />
+        <div><strong>Control Multiempresa Unificado</strong><small>Gestione múltiples empresas desde un único portal.</small></div>
+      </li>
+      <li>
+        <img ngSrc="images/login/icon-inventario-128.webp" width="128" height="128" alt="" />
+        <div><strong>Inventario de Alta Precisión</strong><small>Actualización y sincronización de sucursales.</small></div>
+      </li>
+      <li>
+        <img ngSrc="images/login/icon-seguridad-128.webp" width="128" height="128" alt="" />
+        <div><strong>Seguridad por Roles</strong><small>Permisos configurables y auditoría integrada.</small></div>
+      </li>
+    </ul>
+  </section>
+
+  <main>
+    <div class="card">
+      <img class="card-logo" ngSrc="images/login/savix-logo-600x193.webp" width="600" height="193"
+        alt="SAVIX — Sistema de Gestión" />
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <header>
+          <h2>Iniciar Sesión</h2>
+          <p>Ingresa tus credenciales para acceder a la plataforma.</p>
+        </header>
+
+        <div class="control">
+          <label for="login-username">Usuario</label>
+          <div class="field" [class.invalid]="form.controls.username.touched && form.controls.username.invalid">
+            <span class="material-icons" aria-hidden="true">person_outline</span>
+            <input id="login-username" type="text" formControlName="username" autocomplete="username" inputmode="text"
+              placeholder="Código de 5 dígitos o correo" [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid"
+              aria-describedby="login-username-error" />
+          </div>
+          @if (form.controls.username.touched && form.controls.username.invalid) {
+            <small id="login-username-error" class="field-error">Ingresa tu código de 5 dígitos o tu correo.</small>
+          }
         </div>
-        <ul>
-            <li><span class="material-icons">business</span>
-                <div><strong>Control Multiempresa Unificado</strong><small>Gestione múltiples empresas desde un único
-                        portal.</small></div>
-            </li>
-            <li><span class="material-icons">sync</span>
-                <div><strong>Inventario de Alta Precisión</strong><small>Actualización y sincronización de
-                        sucursales.</small></div>
-            </li>
-            <li><span class="material-icons">lock</span>
-                <div><strong>Seguridad por roles</strong><small>Permisos configurables y auditoría integrada.</small>
-                </div>
-            </li>
-        </ul>
-    </section>
-    <main>
-        <form [formGroup]="form" (ngSubmit)="submit()">
-            <header>
-                <h2>Iniciar Sesión</h2>
-                <p>Ingresa tus credenciales para acceder a la plataforma</p>
-            </header><label>Usuario<div class="field"><span class="material-icons">badge</span><input
-                        type="text" formControlName="username" autocomplete="username" inputmode="text"
-                        placeholder="Tu código de 5 dígitos" /></div>@if (form.controls.username.touched && form.controls.username.invalid) {<small class="field-error">Ingresa tu código de 5 dígitos.</small>}</label><label>Contraseña<div class="field"><span
-                        class="material-icons">lock_outline</span><input formControlName="password"
-                        [type]="hidePassword() ? 'password' : 'text'" autocomplete="current-password"
-                        placeholder="••••••••" /><button type="button" (click)="hidePassword.set(!hidePassword())"
-                        aria-label="Mostrar contraseña"><span class="material-icons">visibility</span></button></div>
-                </label>@if (error(); as alert) { <app-alert-banner [tone]="alert.tone" [icon]="alert.icon" [title]="alert.title" [message]="alert.message" /> }<button class="submit"
-                type="submit" [disabled]="submitting()">{{submitting() ? 'Ingresando…' : 'Iniciar Sesión'}}</button>
-            <p class="support">¿Problemas para acceder? <a href="mailto:soporte@sisvent.pe">Contactar Soporte</a></p>
-        </form>
-        <footer>SAVIX v1.0 — Todos los derechos reservados</footer>
-    </main>
+
+        <div class="control">
+          <label for="login-password">Contraseña</label>
+          <div class="field" [class.invalid]="form.controls.password.touched && form.controls.password.invalid">
+            <span class="material-icons" aria-hidden="true">lock_outline</span>
+            <input id="login-password" formControlName="password" [type]="hidePassword() ? 'password' : 'text'"
+              autocomplete="current-password" placeholder="••••••••"
+              [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+              aria-describedby="login-password-error" />
+            <button type="button" class="eye" (click)="hidePassword.set(!hidePassword())"
+              [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'" [attr.aria-pressed]="!hidePassword()">
+              <span class="material-icons" aria-hidden="true">{{ hidePassword() ? 'visibility' : 'visibility_off' }}</span>
+            </button>
+          </div>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <small id="login-password-error" class="field-error">Ingresa tu contraseña.</small>
+          }
+        </div>
+
+        @if (error(); as alert) {
+          <app-alert-banner [tone]="alert.tone" [icon]="alert.icon" [title]="alert.title" [message]="alert.message" />
+        }
+
+        <button class="submit" type="submit" [disabled]="submitting()" [attr.aria-busy]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span>Iniciando sesión…
+          } @else {
+            Iniciar Sesión<span class="material-icons" aria-hidden="true">arrow_forward</span>
+          }
+        </button>
+
+        <p class="support">¿Problemas para acceder? <a href="mailto:soporte@sisvent.pe">Contactar Soporte</a></p>
+      </form>
+
+      <footer>
+        <span><strong>SAVIX</strong> | Sistema de Gestión</span>
+        <span>v1.0 — Todos los derechos reservados</span>
+      </footer>
+    </div>
+  </main>
 </div>

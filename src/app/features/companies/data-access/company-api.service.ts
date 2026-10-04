@@ -53,13 +53,10 @@ export class CompanyApiService {
     return this.http.get<CompanyDetail>(`${this.baseUrl}/${id}`);
   }
 
-  /** Tab Cuenta / Plan. */
   getPlan(id: string): Observable<CompanyPlan> {
     return this.http.get<CompanyPlan>(`${this.baseUrl}/${id}/plan`);
   }
 
-  /** Tab Locales. */
-  /** Menús de la empresa (el SUPERADMIN los activa dentro de lo que incluye su plan). */
   getModules(id: string): Observable<CompanyModules> {
     return this.http.get<CompanyModules>(`${this.baseUrl}/${id}/modules`);
   }
@@ -72,7 +69,6 @@ export class CompanyApiService {
     return this.http.get<CompanyStores>(`${this.baseUrl}/${id}/stores`);
   }
 
-  /** Tab Resumen. */
   getOverview(id: string): Observable<CompanyOverview> {
     return this.http.get<CompanyOverview>(`${this.baseUrl}/${id}/summary`);
   }

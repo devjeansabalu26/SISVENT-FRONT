@@ -9,7 +9,6 @@ import { InventoryApiService, StockTransferResult } from '../../data-access/inve
 
 export interface StockTransferData {
   readonly stores: readonly StoreOption[];
-  /** Origen sugerido (local del encabezado). */
   readonly fromStoreId: string | null;
 }
 
@@ -25,10 +24,6 @@ function differentStores(group: AbstractControl): ValidationErrors | null {
 
 type LineGroup = FormGroup<{ productId: FormControl<string>; quantity: FormControl<number | null> }>;
 
-/**
- * Transferencia de stock entre locales (ADMIN). Lista solo los productos que el origen maneja; si el destino no
- * los tenía, quedan distribuidos en él. Se cierra con el resultado (o `undefined` si se cancela).
- */
 @Component({
   selector: 'app-stock-transfer-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -142,7 +137,6 @@ export class StockTransferDialog implements OnInit {
     this.loadProducts();
   }
 
-  /** Productos que el local de origen maneja, con su stock disponible. */
   loadProducts(): void {
     const from = this.form.controls.fromStoreId.value;
     this.products.set([]);
@@ -176,7 +170,6 @@ export class StockTransferDialog implements OnInit {
     return control.invalid && (control.touched || control.dirty);
   }
 
-  /** Disponible en el origen si la cantidad lo supera (null si está bien). */
   overAvailable(index: number): number | null {
     const { productId, quantity } = this.lines.at(index).getRawValue();
     const product = this.products().find((p) => p.id === productId);

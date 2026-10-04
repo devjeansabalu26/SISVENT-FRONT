@@ -4,13 +4,11 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { PlanApiService } from '../../../plans/data-access/plan-api.service';
 import { Plan } from '../../../plans/models/plan.model';
 
-// La fecha de fin no puede ser anterior a la de inicio (misma regla que valida el backend).
 function endAfterStart(group: AbstractControl): ValidationErrors | null {
   const { startDate, endDate } = group.value as { startDate?: string; endDate?: string };
   return startDate && endDate && endDate < startDate ? { endBeforeStart: true } : null;
 }
 
-// Evita motivos con solo espacios: el backend exige 5 caracteres reales.
 function trimmedMinLength(min: number) {
   return (control: AbstractControl): ValidationErrors | null =>
     control.value && String(control.value).trim().length < min ? { minlength: true } : null;
@@ -59,7 +57,6 @@ export class PlanChangeDialog implements OnInit {
     { validators: endAfterStart },
   );
 
-  /** Marca en rojo un campo inválido una vez que el usuario lo tocó o lo modificó. */
   showError(name: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[name];
     const touched = control.touched || control.dirty;
@@ -76,7 +73,6 @@ export class PlanChangeDialog implements OnInit {
         this.form.controls.contractedPrice.setValue(first.currentPrice ?? 0);
       }
     });
-    // Al elegir otro plan se sugiere su precio vigente (se puede editar).
     this.form.controls.planId.valueChanges.subscribe((id) => {
       const plan = this.plans().find((p) => p.id === id);
       if (plan?.currentPrice != null) this.form.controls.contractedPrice.setValue(plan.currentPrice);

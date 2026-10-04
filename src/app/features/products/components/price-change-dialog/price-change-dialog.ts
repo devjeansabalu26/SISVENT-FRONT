@@ -10,12 +10,10 @@ export interface PriceChangeData {
   readonly newPrice: number;
 }
 
-/** Variación porcentual redondeada a 1 decimal; `null` si el precio anterior es 0. */
 export function priceVariation(previous: number, next: number): number | null {
   return previous > 0 ? Math.round(((next - previous) / previous) * 1000) / 10 : null;
 }
 
-/** Figma `mod-cambio-precio` (MOD-AD-15): confirma el nuevo precio de venta y exige el motivo. Devuelve el motivo. */
 @Component({
   selector: 'app-price-change-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],

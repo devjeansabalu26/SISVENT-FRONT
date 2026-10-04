@@ -5,11 +5,9 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 export interface SendReceiptData {
   readonly saleNumber: string;
   readonly clientName: string | null;
-  /** Correo del cliente de la venta (destinatario por defecto). */
   readonly clientEmail: string | null;
 }
 
-/** Confirma el destinatario del comprobante; se cierra con el correo o `undefined` si se cancela. */
 @Component({
   selector: 'app-send-receipt-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],

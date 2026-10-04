@@ -11,7 +11,6 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const errors = inject(HttpErrorService);
   const router = inject(Router);
 
-  // The login page renders auth failures inline; don't hijack its navigation.
   const isAuthRequest = request.url.includes('/api/v1/auth/');
 
   return next(request).pipe(

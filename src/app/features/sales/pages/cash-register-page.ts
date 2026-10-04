@@ -14,13 +14,8 @@ import {
   CashSession, CashSessionApiService, StoreCashStatus, cashErrorMessage,
 } from '../data-access/cash-session-api.service';
 
-/** Cada cuánto se refresca el estado de las cajas (montos en vivo). */
 const REFRESH_MS = 30_000;
 
-/**
- * Turnos de caja. VENDEDOR: abre y cierra la caja de su local. ADMIN: estado de todas las cajas en vivo
- * (quién la tiene, ventas y montos), abrir, cerrar y forzar el cierre de una caja abierta por otro usuario.
- */
 @Component({
   selector: 'app-cash-register-page',
   imports: [PageHeader, RouterLink, DatePipe],
@@ -84,7 +79,6 @@ export class CashRegisterPage implements OnInit {
       });
   }
 
-  /** ¿La caja la abrió el usuario en sesión? Si no, solo el ADMIN puede cerrarla (cierre forzado). */
   isMine(session: CashSession): boolean {
     return session.openedByUserId === this.user?.userId;
   }

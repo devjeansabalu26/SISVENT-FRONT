@@ -6,10 +6,6 @@ import { CustomerApiService } from '../../data-access/customer-api.service';
 import { Customer } from '../../models/customer.model';
 import { toCustomer } from '../../utils/to-customer';
 
-/**
- * Figma `mod-crear-cliente`: alta compacta de cliente sin salir de la pantalla (p. ej. desde el POS).
- * Usa el mismo endpoint y validaciones que `customer-form-page`; se cierra con el cliente creado.
- */
 @Component({
   selector: 'app-customer-quick-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],

@@ -1,8 +1,5 @@
-/** Mirrors UserListItem from GET /api/v1/users (ADMIN, scoped to their company). */
 export interface AppUser {
-  /** VENDEDOR autorizado a consultar otros locales. */
   readonly canViewAllStores?: boolean;
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly id: string;
   readonly fullName: string;
@@ -33,7 +30,6 @@ export interface UserListResponse {
 }
 
 export interface UserDetail {
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly id: string;
   readonly firstName: string;
@@ -55,7 +51,6 @@ export interface CreateUserResponse {
 }
 
 export interface ResetAccessResponse {
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly temporaryPassword: string;
   readonly forceChange: boolean;
@@ -69,13 +64,10 @@ export interface UserFormValue {
   readonly document: string | null;
   readonly role: 'ADMIN' | 'VENDEDOR';
   readonly storeId: string | null;
-  /** VENDEDOR: puede consultar productos y stock de otros locales (solo lectura). */
   readonly canViewAllStores?: boolean;
 }
 
-/** Mirrors PlatformUserDetailResponse from GET /api/v1/platform/users/{id} (SUPERADMIN, cross-company, read only). */
 export interface PlatformUserDetail {
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly profileId: string;
   readonly identityUserId: string;
@@ -94,9 +86,7 @@ export interface PlatformUserDetail {
   readonly createdAt: string;
 }
 
-/** Mirrors PlatformUserItem from GET /api/v1/platform/users (SUPERADMIN, cross-company, read only here). */
 export interface PlatformUserItem {
-  /** Usuario de acceso: código de 5 dígitos (null si aún no fue migrado). */
   readonly userCode?: string | null;
   readonly profileId: string;
   readonly fullName: string;

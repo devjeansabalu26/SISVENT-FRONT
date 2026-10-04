@@ -1,6 +1,5 @@
 import { SaleDetail } from '../models/sale-detail.model';
 
-/** Ticket de 80 mm (impresora térmica). */
 const WIDTH = 80;
 const MARGIN = 5;
 const LINE = 4;
@@ -15,7 +14,6 @@ type Row =
 const money = (value: number): string => `S/ ${value.toFixed(2)}`;
 const quantity = (value: number): string => (Number.isInteger(value) ? String(value) : value.toFixed(2));
 
-/** Filas del ticket; se arman antes de crear el PDF para calcular su alto. Exportada para pruebas. */
 export function receiptRows(sale: SaleDetail, companyName: string): readonly Row[] {
   const date = new Date(sale.saleDate).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' });
   const rows: Row[] = [
@@ -70,23 +68,19 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
   return rows;
 }
 
-/** Genera y descarga el ticket en PDF. */
 export async function downloadReceiptPdf(sale: SaleDetail, companyName: string): Promise<void> {
   (await buildReceiptPdf(sale, companyName)).save(`comprobante-${sale.saleNumber}.pdf`);
 }
 
-/** PDF del ticket en base64 (sin el prefijo data:), para adjuntarlo al correo. */
 export async function receiptPdfBase64(sale: SaleDetail, companyName: string): Promise<string> {
   const dataUri = (await buildReceiptPdf(sale, companyName)).output('datauristring');
   return dataUri.slice(dataUri.indexOf(',') + 1);
 }
 
-/** Arma el ticket. jsPDF se carga solo al usarlo para no pesar en la carga inicial. */
 async function buildReceiptPdf(sale: SaleDetail, companyName: string) {
   const { jsPDF } = await import('jspdf');
   const rows = receiptRows(sale, companyName);
 
-  // Medición previa: los textos largos ocupan varias líneas.
   const measure = new jsPDF({ unit: 'mm', format: [WIDTH, 200] });
   const wrap = (text: string, size = 8, bold = false, width = CONTENT): string[] => {
     measure.setFont('helvetica', bold ? 'bold' : 'normal');

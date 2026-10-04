@@ -1,4 +1,3 @@
-/** Mirrors PaymentMethodOption from GET /api/v1/pos/payment-methods. */
 export type PaymentKind = 'CASH' | 'CARD' | 'DIGITAL';
 
 export interface PaymentMethodOption {
@@ -17,14 +16,10 @@ export const CARD_BRANDS = [
 
 export const MAX_PAYMENTS = 5;
 
-/** Un pago que escribe el cajero en el POS (texto de los inputs; se normaliza al enviar). */
 export interface PaymentDraftLine {
-  /** Identificador local para @for. */
   readonly key: number;
   readonly methodCode: string;
-  /** Monto que cubre (tarjeta/digital). En efectivo se calcula como lo que falta. */
   readonly amount: string;
-  /** Solo efectivo: lo que entrega el cliente. Vacío = exacto. */
   readonly amountReceived: string;
   readonly reference: string;
   readonly authorizationCode: string;
@@ -47,7 +42,6 @@ export function newPaymentLine(methodCode: string, amount = ''): PaymentDraftLin
   };
 }
 
-/** Mirrors PosPaymentLine (body `payments` de POST /api/v1/pos/sales). */
 export interface PosPaymentLine {
   readonly method: string;
   readonly amount?: number;
@@ -58,7 +52,6 @@ export interface PosPaymentLine {
   readonly cardLast4?: string;
 }
 
-/** Mirrors SalePaymentResponse. */
 export interface SalePayment {
   readonly methodCode: string;
   readonly methodName: string;

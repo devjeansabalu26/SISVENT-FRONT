@@ -25,9 +25,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor, errorInterceptor])),
     { provide: AUTH_TOKEN_PROVIDER, useExisting: TokenStorageService },
     provideAppInitializer(() => inject(AppSessionService).bootstrap()),
-    // Desplegables y calendarios propios en lugar de los paneles nativos del sistema.
     provideAppInitializer(() => inject(NativeControlsEnhancer).start()),
-    // Modales: ancho según el contenido de cada diálogo, alto automático y tope en el tamaño de pantalla.
     {
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
       useValue: { ...new MatDialogConfig(), maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' },

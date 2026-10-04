@@ -1,4 +1,3 @@
-/** Mirrors /api/v1/replenishment/* (Sisvent.Application.Replenishment). */
 export type RiskCode = 'CRITICAL' | 'MODERATE' | 'OPTIMAL' | 'NO_SALES';
 export type PurchasePriority = 'CRITICA' | 'ALTA' | 'MEDIA';
 export type AbcClassCode = 'A' | 'B' | 'C';
@@ -10,7 +9,6 @@ export interface StockRiskItem {
   readonly currentStock: number;
   readonly minStock: number;
   readonly averageDailySales: number;
-  /** null = sin ventas en la ventana. */
   readonly coverageDays: number | null;
   readonly risk: RiskCode;
   readonly supplierName: string | null;
@@ -49,7 +47,6 @@ export interface AbcClassSummary {
   readonly class: AbcClassCode;
   readonly items: number;
   readonly revenue: number;
-  /** % de los ingresos de la ventana. */
   readonly valueShare: number;
 }
 
@@ -78,7 +75,6 @@ export interface StagnantItem {
   readonly sku: string;
   readonly name: string;
   readonly stock: number;
-  /** null = nunca se vendió. */
   readonly daysWithoutSale: number | null;
   readonly value: number;
   readonly lastSaleAt: string | null;
@@ -96,7 +92,6 @@ export interface StagnantAnalysis {
   readonly thresholdDays: number;
 }
 
-/** Texto de riesgo en español (el chip de estado colorea Crítico / Moderado). */
 export const RISK_LABELS: Readonly<Record<RiskCode, string>> = {
   CRITICAL: 'Crítico',
   MODERATE: 'Moderado',

@@ -1,8 +1,3 @@
-/**
- * Funcionalidades de plan (tabla `features` del backend) que controlan el acceso a cada módulo.
- * Deben coincidir con el segundo argumento de `ITenantAccess.RequireAsync(permiso, feature)` en el backend:
- * si el plan vigente no incluye la funcionalidad, el backend responde 403.
- */
 export const PLAN_FEATURES = {
   sales: 'SALES',
   clients: 'CLIENTS',
@@ -20,7 +15,6 @@ export const PLAN_FEATURES = {
   notifications: 'NOTIFICATIONS',
 } as const;
 
-/** Nombre del módulo para la pantalla "Disponible en un plan superior". */
 export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   SALES: 'Ventas y punto de venta',
   CLIENTS: 'Clientes',

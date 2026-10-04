@@ -13,12 +13,6 @@ import { AuthApiService } from './auth-api.service';
 import { AuthService } from './auth.service';
 import { TOKEN_KEY, TokenStorageService } from './token-storage.service';
 
-/**
- * Owns the authenticated session lifecycle: it exchanges a stored JWT for the
- * current profile via /auth/me on startup, applies the login result, and clears
- * everything on logout. The token in {@link TokenStorageService} is the single
- * source of truth; profile/company data is always re-fetched from the backend.
- */
 @Injectable({ providedIn: 'root' })
 export class AppSessionService {
   private readonly auth = inject(AuthService);
@@ -30,18 +24,14 @@ export class AppSessionService {
   private readonly injector = inject(Injector);
 
   constructor() {
-    // La sesión vive en localStorage y se comparte entre pestañas: si se cierra sesión en otra pestaña,
-    // esta también sale al login en lugar de quedar con una sesión que ya no existe.
     inject(DOCUMENT).defaultView?.addEventListener('storage', (event) => {
       if (event.key === TOKEN_KEY && !event.newValue && this.auth.isAuthenticated()) {
         this.clear();
-        // Router se resuelve al momento (evita dependencia circular durante el arranque).
         void this.injector.get(Router).navigateByUrl('/login');
       }
     });
   }
 
-  /** Runs during app initialization, before the router activates any route. */
   async bootstrap(): Promise<void> {
     if (!this.token.getToken()) {
       this.auth.markUnauthenticated();
@@ -52,14 +42,11 @@ export class AppSessionService {
       this.applyProfile(await firstValueFrom(this.authApi.me().pipe(retry({ count: 5, delay: retryUnlessRejected }))));
       this.auth.markAuthenticated();
     } catch (cause: unknown) {
-      // Solo un 401/403 invalida la sesión. Si el backend no responde (reinicio, sin red) se conserva el
-      // token: al recargar cuando el backend vuelva, el usuario sigue dentro sin volver a loguearse.
       if (isRejected(cause)) this.clear();
       else this.auth.markUnauthenticated();
     }
   }
 
-  /** Called by the login page once credentials are accepted. */
   start(result: LoginResult): void {
     this.token.set(result.accessToken, result.expiresAt);
     try {
@@ -79,7 +66,6 @@ export class AppSessionService {
     this.auth.markUnauthenticated();
   }
 
-  /** Kept for the synchronous {@link authGuard}; bootstrap already did the work. */
   restore(): boolean {
     return this.auth.isAuthenticated();
   }
@@ -94,7 +80,6 @@ export class AppSessionService {
       userId: user.id,
       displayName,
       role: user.role,
-      // ADMIN/VENDEDOR: menús que habilitó el SUPERADMIN para la empresa y (vendedor) los que le asignó su ADMIN.
       permissions: user.role !== 'SUPERADMIN' && user.company?.modules
         ? permissionsFromModules(user.company.modules)
         : ROLE_PERMISSIONS[user.role],
@@ -118,21 +103,17 @@ export class AppSessionService {
         background: user.company.backgroundColor,
       });
     } else {
-      // SUPERADMIN (o una empresa sin contexto todavía resuelto): sin tenant, sin theme propio —
-      // se usa el theme por defecto de SISVENT (fallback real, no un tema "de otra empresa" residual).
       this.companies.clear();
       this.theme.reset();
     }
   }
 }
 
-/** 401/403 del backend = token inválido o cuenta sin acceso (no aplica a errores de red o 5xx). */
 function isRejected(cause: unknown): boolean {
   const status = (cause as { status?: unknown } | null)?.status;
   return status === 401 || status === 403;
 }
 
-/** Reintenta /me cada 2 s mientras el backend no responda (p. ej. reiniciándose); 401/403 no se reintentan. */
 function retryUnlessRejected(cause: unknown): Observable<number> {
   return isRejected(cause) ? throwError(() => cause) : timer(2000);
 }

@@ -13,7 +13,6 @@ export class CompanyProfileApiService {
     return this.http.get<CompanyProfile>(this.baseUrl);
   }
 
-  /** Contacto e identidad visual (nombre comercial, razón social y RUC no se editan aquí). */
   update(body: UpdateCompanyProfile): Observable<CompanyProfile> {
     return this.http.put<CompanyProfile>(this.baseUrl, body);
   }

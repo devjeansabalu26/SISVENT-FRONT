@@ -7,14 +7,6 @@ import { SelectPanel, SelectPanelOption } from './select-panel';
 
 type DateInput = HTMLInputElement & { type: 'date' };
 
-/**
- * Reemplaza los paneles nativos (lista del <select> y calendario del <input type="date">) por los
- * componentes propios SelectPanel y DatePanel, en toda la app y sin tocar las plantillas.
- *
- * El control nativo sigue siendo la fuente del valor: al elegir se actualiza su value y se emiten los
- * eventos `input` y `change`, así ngModel, formControlName y los (change) existentes funcionan igual.
- * Para dejar un control con su panel nativo, añadirle el atributo `data-native-picker`.
- */
 @Injectable({ providedIn: 'root' })
 export class NativeControlsEnhancer {
   private readonly document = inject(DOCUMENT);
@@ -28,7 +20,6 @@ export class NativeControlsEnhancer {
   start(): void {
     if (this.started) return;
     this.started = true;
-    // Fase de captura: se adelanta al panel nativo y a los handlers de cada pantalla.
     this.document.addEventListener('mousedown', (event) => this.onPointer(event), true);
     this.document.addEventListener('click', (event) => this.onDateClick(event), true);
     this.document.addEventListener('keydown', (event) => this.onKeydown(event), true);
@@ -60,7 +51,6 @@ export class NativeControlsEnhancer {
       this.zone.run(() => this.openSelect(select));
       return;
     }
-    // En fechas, Espacio/Enter siguen sirviendo para escribir; el calendario se abre con Alt+↓ o F4.
     const input = this.enhancedDate(event.target);
     if (input && (event.key === 'F4' || event.altKey)) {
       event.preventDefault();
@@ -86,8 +76,8 @@ export class NativeControlsEnhancer {
       label: option.label || option.text,
       disabled: option.disabled || (option.parentElement instanceof HTMLOptGroupElement && option.parentElement.disabled),
     }));
-    // Mismo ancho que el <select> (mínimo 180px para selects muy angostos).
-    const ref = this.open(select, SelectPanel, Math.max(select.getBoundingClientRect().width, 180));
+    const box = select.closest<HTMLElement>('[data-picker-anchor]') ?? select;
+    const ref = this.open(select, SelectPanel, box.getBoundingClientRect().width, box);
     if (!ref) return;
     ref.setInput('options', options);
     ref.setInput('selected', select.selectedIndex);
@@ -118,11 +108,11 @@ export class NativeControlsEnhancer {
     ref.instance.dismiss.subscribe(() => this.close(true));
   }
 
-  private open<T>(anchor: HTMLElement, component: ComponentType<T>, width?: number): ComponentRef<T> | null {
+  private open<T>(anchor: HTMLElement, component: ComponentType<T>, width?: number, box: HTMLElement = anchor): ComponentRef<T> | null {
     this.close();
     const position = this.overlay
       .position()
-      .flexibleConnectedTo(anchor)
+      .flexibleConnectedTo(box)
       .withPush(true)
       .withViewportMargin(8)
       .withPositions([

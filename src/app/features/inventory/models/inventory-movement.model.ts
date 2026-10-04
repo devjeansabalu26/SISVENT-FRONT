@@ -1,4 +1,3 @@
-/** Mirrors MovementItem from GET /api/v1/inventory/movements. */
 export interface InventoryMovement {
   readonly id: string;
   readonly createdAt: string;

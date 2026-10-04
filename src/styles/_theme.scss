@@ -1,28 +1,22 @@
 @use '@angular/material' as mat;
 
 :root {
-  /* Design tokens — sincronizados con Figma "SISVENT · Foundations" (§01–§06). */
-
-  /* Marca y acento */
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-primary-soft: #eff6ff;
   --color-secondary: #475569;
   --color-accent: #10b981;
 
-  /* Estados operativos (ventas / inventario) */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-danger: #ef4444; /* alias heredado de --color-error */
+  --color-danger: #ef4444;
   --color-info: #3b82f6;
-  /* Texto de estado legible en día y noche (mezcla con el texto principal de cada modo). */
   --color-success-text: color-mix(in srgb, var(--color-success) 72%, var(--color-text-primary));
   --color-warning-text: color-mix(in srgb, var(--color-warning) 68%, var(--color-text-primary));
   --color-error-text: color-mix(in srgb, var(--color-error) 80%, var(--color-text-primary));
 
-  /* Superficies y texto */
-  --color-background: #ffffff; /* Modo día: siempre blanco (no depende de la empresa). */
+  --color-background: #ffffff;
   --color-surface: #ffffff;
   --color-surface-secondary: #f1f5f9;
   --color-border: #e2e8f0;
@@ -32,55 +26,49 @@
   --color-text-muted: #64748b;
   --color-text-disabled: #94a3b8;
 
-  /* Consola de navegación lateral (sidebar) */
   --color-sidebar-bg: #0f172a;
   --color-sidebar-text: #94a3b8;
   --color-sidebar-active: #38bdf8;
   --color-sidebar-hover: #1e293b;
 
-  /* Tipografía — escala Inter (§02) */
   --font-family: Inter, Roboto, 'Helvetica Neue', sans-serif;
-  --font-size-xxs: 0.6875rem; /* 11px · Caption */
-  --font-size-xs: 0.75rem; /* 12px · Body Small / Label */
-  --font-size-sm: 0.875rem; /* 14px · Body */
-  --font-size-md: 1rem; /* 16px · H4 */
-  --font-size-lg: 1.25rem; /* 20px · H3 */
-  --font-size-xl: 1.5rem; /* 24px · H2 */
-  --font-size-2xl: 1.875rem; /* 30px · H1 */
-  --font-size-3xl: 2.25rem; /* 36px · Display */
+  --font-size-xxs: 0.6875rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --font-size-3xl: 2.25rem;
   --line-height-tight: 1.25;
   --line-height-heading: 1.35;
   --line-height-body: 1.5;
 
-  /* Espaciado (§03) */
-  --space-xs: 0.25rem; /* 4 */
-  --space-sm: 0.5rem; /* 8 */
-  --space-smd: 0.75rem; /* 12 */
-  --space-md: 1rem; /* 16 */
-  --space-mlg: 1.25rem; /* 20 */
-  --space-lg: 1.5rem; /* 24 */
-  --space-xl: 2rem; /* 32 */
-  --space-2xl: 2.5rem; /* 40 */
-  --space-3xl: 3rem; /* 48 */
-  --space-4xl: 4rem; /* 64 */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-smd: 0.75rem;
+  --space-md: 1rem;
+  --space-mlg: 1.25rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 2.5rem;
+  --space-3xl: 3rem;
+  --space-4xl: 4rem;
 
-  /* Radios (§04) */
-  --radius-sm: 0.25rem; /* 4 */
-  --radius-md: 0.5rem; /* 8 */
-  --radius-lg: 0.75rem; /* 12 */
-  --radius-xl: 1rem; /* 16 */
-  --radius-2xl: 1.25rem; /* 20 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
   --radius-full: 9999px;
 
-  /* Sombras y elevación (§05) */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 5%);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 8%);
   --shadow-lg: 0 16px 32px rgb(0 0 0 / 13%);
 
-  /* Grilla responsiva estándar desktop (§06) */
-  --layout-max-width: 90rem; /* 1440px */
-  --layout-gutter: 1.5rem; /* 24px */
-  --layout-margin: 4rem; /* 64px */
+  --layout-max-width: 90rem;
+  --layout-gutter: 1.5rem;
+  --layout-margin: 4rem;
 
   @include mat.theme(
     (
@@ -94,7 +82,6 @@
   );
 }
 
-/* El modo día/noche lo fija ThemeService en <html> (style.colorScheme); controles nativos y scrollbars lo heredan. */
 body {
   color-scheme: inherit;
   transition: background-color 0.25s ease, color 0.25s ease;

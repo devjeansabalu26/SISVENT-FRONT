@@ -12,15 +12,10 @@ function trimmedMinLength(min: number) {
     control.value && String(control.value).trim().length < min ? { minlength: true } : null;
 }
 
-/** Al menos un producto con cantidad mayor a cero. */
 function anyQuantity(array: AbstractControl): ValidationErrors | null {
   return (array.value as (number | null)[]).some((qty) => (qty ?? 0) > 0) ? null : { empty: true };
 }
 
-/**
- * Nota de crédito total o parcial: cantidades a devolver por producto (máximo lo disponible), método de
- * reembolso y motivo. Se cierra con la nota emitida (o `undefined` si se cancela).
- */
 @Component({
   selector: 'app-credit-note-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -130,7 +125,6 @@ export class CreditNoteDialog implements OnInit {
     initialValue: this.form.controls.quantities.value,
   });
 
-  /** Vista previa; el backend recalcula y ajusta el redondeo al devolver todo. */
   readonly total = computed(() => this.data.lines.reduce((sum, _, i) => sum + this.amountAt(i), 0));
 
   ngOnInit(): void {

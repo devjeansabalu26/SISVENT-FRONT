@@ -1,6 +1,5 @@
 import { APP_PERMISSIONS, AppPermission } from './app-permission.constant';
 
-/** Nivel de acceso de un menú (ModuleCatalog del backend). */
 export type ModuleLevel = 'VIEW' | 'MANAGE';
 
 export interface SessionModule {
@@ -8,11 +7,6 @@ export interface SessionModule {
   readonly level: ModuleLevel;
 }
 
-/**
- * Permisos de interfaz que habilita cada menú del backend (`Sisvent.Application/Modules/ModuleCatalog.cs`).
- * `manage` se suma a `view` cuando el nivel es MANAGE. Solo decide qué se muestra: el backend valida
- * menú y nivel en cada petición.
- */
 export const MODULE_PERMISSIONS: Readonly<Record<string, { readonly view: readonly AppPermission[]; readonly manage: readonly AppPermission[] }>> = {
   DASHBOARD: { view: [APP_PERMISSIONS.dashboardView], manage: [] },
   POS: { view: [APP_PERMISSIONS.salesCreate], manage: [] },
@@ -36,7 +30,6 @@ export const MODULE_PERMISSIONS: Readonly<Record<string, { readonly view: readon
   SETTINGS: { view: [APP_PERMISSIONS.settingsManage], manage: [] },
 };
 
-/** Permisos de interfaz a partir de los menús efectivos de la sesión. */
 export function permissionsFromModules(modules: readonly SessionModule[]): readonly AppPermission[] {
   const result = new Set<AppPermission>();
   for (const module of modules) {

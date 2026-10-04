@@ -16,7 +16,6 @@ interface ListParams {
   readonly paymentMethod?: string;
   readonly status?: string;
   readonly mineOnly?: boolean;
-  /** Solo VENDEDOR: 'MINE' (sus ventas, por defecto) o 'STORE' (ventas de su local). */
   readonly scope?: 'MINE' | 'STORE';
 }
 
@@ -45,7 +44,6 @@ export class SaleApiService {
     return this.http.get<SaleDetail>(`${this.baseUrl}/${id}`);
   }
 
-  /** Envía el comprobante (PDF en base64) por correo; sin `email` se usa el del cliente de la venta. */
   sendReceipt(id: string, email: string, pdfBase64: string): Observable<{ readonly email: string; readonly sentAt: string }> {
     return this.http.post<{ readonly email: string; readonly sentAt: string }>(`${this.baseUrl}/${id}/send-receipt`, { email, pdfBase64 });
   }

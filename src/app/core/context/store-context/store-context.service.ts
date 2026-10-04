@@ -7,33 +7,22 @@ export interface StoreOption {
   readonly name: string;
 }
 
-/** Valor guardado para "Todos los locales". */
 const ALL = '*';
 
-/**
- * Local seleccionado en el encabezado para consultar productos e inventario.
- * - ADMIN: elige un local o "Todos los locales" (null = stock general).
- * - VENDEDOR con permiso del ADMIN para ver otros locales: igual, solo lectura; por defecto, su local.
- * - VENDEDOR sin permiso: siempre su local (el backend también lo fuerza).
- * La elección se recuerda por usuario en este navegador. Vender y ajustar siguen limitados a su local.
- */
 @Injectable({ providedIn: 'root' })
 export class StoreContextService {
   private readonly users = inject(UserContextService);
   private readonly storeApi = inject(StoreApiService);
-  /** undefined = sin elección guardada; ALL = todos; id = un local. */
   private readonly chosen = signal<string | undefined>(undefined);
   private chosenFor: string | null = null;
   private loaded = false;
   private readonly apiStores = signal<readonly StoreOption[]>([]);
 
   readonly isAdmin = computed(() => this.users.user()?.role === 'ADMIN');
-  /** Puede elegir local en el encabezado. */
   readonly canPick = computed(() => this.isAdmin() || !!this.users.user()?.canViewAllStores);
   readonly stores = computed<readonly StoreOption[]>(() =>
     this.isAdmin() ? this.apiStores() : (this.users.user()?.visibleStores ?? []));
 
-  /** null = todos los locales. */
   readonly selectedStoreId = computed<string | null>(() => {
     const user = this.users.user();
     if (!user || user.role === 'SUPERADMIN') return null;
@@ -47,7 +36,6 @@ export class StoreContextService {
 
   readonly selectedStore = computed(() => this.stores().find((s) => s.id === this.selectedStoreId()) ?? null);
 
-  /** Carga los locales activos para el ADMIN (el vendedor autorizado los recibe en la sesión). */
   load(): void {
     if (this.loaded || !this.isAdmin()) return;
     this.loaded = true;
@@ -66,7 +54,6 @@ export class StoreContextService {
     try {
       localStorage.setItem(this.key(userId), value);
     } catch {
-      // Sin almacenamiento disponible: la elección dura solo esta sesión.
     }
   }
 

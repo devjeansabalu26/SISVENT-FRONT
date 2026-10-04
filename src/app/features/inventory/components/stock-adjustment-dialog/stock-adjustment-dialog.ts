@@ -6,14 +6,12 @@ import { StockAdjustmentRequest, StockAdjustmentType, StockRow } from '../../mod
 
 const REASON_MAX_LENGTH = 500;
 
-/** Stock que quedaría tras el movimiento (misma regla que aplica el backend). */
 export function resultingStock(current: number, type: StockAdjustmentType, quantity: number): number {
   if (type === 'In') return current + quantity;
   if (type === 'Out') return current - quantity;
   return quantity;
 }
 
-/** Figma `mod-ajuste-stock` (MOD-AD-16). */
 @Component({
   selector: 'app-stock-adjustment-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -51,7 +49,6 @@ export class StockAdjustmentDialog {
       return;
     }
     const value = this.form.getRawValue();
-    // El backend solo guarda un texto de motivo: la observación opcional se anexa a él.
     const observation = value.observation.trim();
     const reason = (observation ? `${value.reason.trim()} — Obs.: ${observation}` : value.reason.trim()).slice(0, REASON_MAX_LENGTH);
     this.dialogRef.close({

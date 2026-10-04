@@ -3,10 +3,6 @@ import { CanActivateFn, Router } from '@angular/router';
 import { CompanyPlan } from '../../context/company-context/company-plan.model';
 import { AccessControlService } from '../services/access-control.service';
 
-/**
- * Exige la funcionalidad del plan (`data.requiredFeature`). Si falta, en lugar de /403 se muestra
- * la pantalla que explica qué planes la incluyen. `data.plans` se mantiene por compatibilidad.
- */
 export const planGuard: CanActivateFn = (route) => {
   const access = inject(AccessControlService);
   const router = inject(Router);

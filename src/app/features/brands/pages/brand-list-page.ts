@@ -30,7 +30,6 @@ export class BrandListPage implements OnInit {
   readonly statusFilter = signal('');
   private readonly brands = signal<readonly Brand[]>([]);
 
-  /** Menú con nivel Gestionar (ADMIN o vendedor al que el ADMIN se lo asignó). */
   readonly canManage = computed(() => this.access.canAccess({ permissions: [APP_PERMISSIONS.brandsManage] }));
   private readonly access = inject(AccessControlService);
 

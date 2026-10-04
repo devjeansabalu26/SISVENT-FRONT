@@ -1,7 +1,6 @@
 import { CredentialDialogData } from '../credential-dialog/credential-dialog';
 import { ReviewDialogData } from './review-dialog.model';
 
-/** MOD-AD-12: activar / desactivar producto (nombre, SKU y stock actual). */
 export function productStatusReview(
   product: { readonly name: string; readonly sku: string; readonly totalStock: number },
   deactivate: boolean,
@@ -28,7 +27,6 @@ export function productStatusReview(
   };
 }
 
-/** MOD-AD-05: activar / desactivar vendedor o usuario. */
 export function userStatusReview(user: { readonly fullName: string; readonly role: string }, deactivate: boolean): ReviewDialogData {
   const label = user.role === 'VENDEDOR' ? 'vendedor' : 'usuario';
   return {
@@ -50,7 +48,6 @@ export function userStatusReview(user: { readonly fullName: string; readonly rol
   };
 }
 
-/** Paso previo a MOD-SA-16: confirmar que se generará una contraseña temporal. */
 export function resetPasswordReview(fullName: string): ReviewDialogData {
   return {
     title: 'Restablecer acceso',
@@ -64,7 +61,6 @@ export function resetPasswordReview(fullName: string): ReviewDialogData {
   };
 }
 
-/** MOD-SA-16: credencial restablecida. */
 export function resetCredential(username: string, password: string): CredentialDialogData {
   return {
     title: 'Contraseña restablecida',

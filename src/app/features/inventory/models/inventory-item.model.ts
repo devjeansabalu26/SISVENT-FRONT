@@ -1,6 +1,5 @@
 export type StockStatus = 'AVAILABLE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
-/** Mirrors StockItem from GET /api/v1/inventory/stock, plus a synthetic `id` for the data table. */
 export interface StockRow {
   readonly id: string;
   readonly productId: string;

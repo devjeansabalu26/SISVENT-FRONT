@@ -6,11 +6,9 @@ import { CashSession, CashSessionApiService, cashErrorMessage } from '../../data
 export interface CashOpenData {
   readonly storeId: string;
   readonly storeName: string;
-  /** Ventas hechas con la caja cerrada que pasarán a este turno. */
   readonly pendingSales: number;
 }
 
-/** Apertura de caja: fondo inicial obligatorio. Se cierra con el turno abierto (o `undefined` si se cancela). */
 @Component({
   selector: 'app-cash-open-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -61,7 +59,6 @@ export class CashOpenDialog {
   private readonly dialogRef = inject(MatDialogRef<CashOpenDialog, CashSession>);
   private readonly api = inject(CashSessionApiService);
 
-  // [formGroup] es necesario: sin él (ngSubmit) no existe y el botón hace un submit nativo que recarga la página.
   readonly form = new FormGroup({
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0), Validators.max(99999999.99)]),
   });

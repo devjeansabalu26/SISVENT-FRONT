@@ -33,7 +33,6 @@ export class AuditPage implements OnInit {
   readonly loading = signal(false);
   readonly exporting = signal(false);
 
-  // Filtros activos (se envían al backend; la exportación los respeta).
   readonly query = signal('');
   readonly level = signal('');
   readonly companyId = signal('');
@@ -95,7 +94,6 @@ export class AuditPage implements OnInit {
     });
   }
 
-  /** Cambios de filtro: vuelven a la página 1. La búsqueda de texto se aplica con debounce. */
   onSearch(value: string): void {
     this.query.set(value);
     this.pageNumber.set(1);
@@ -143,7 +141,6 @@ export class AuditPage implements OnInit {
       const pageSize = 200;
       const collected: AuditEvent[] = [];
       let page = 1;
-      // La exportación recorre TODAS las páginas que cumplen los filtros activos, no solo la visible.
       for (;;) {
         const result = await new Promise<{ items: readonly AuditEvent[]; totalCount: number }>((resolve, reject) =>
           this.api.list(this.params(page, pageSize)).subscribe({ next: resolve, error: reject }),

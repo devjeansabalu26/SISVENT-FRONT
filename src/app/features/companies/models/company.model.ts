@@ -1,6 +1,5 @@
 import { PlanFeatureRow, PlanLimitRow } from '../../plans/models/plan.model';
 
-/** Mirrors CompanyListItem from GET /api/v1/companies. */
 export interface Company {
   readonly id: string;
   readonly tradeName: string;
@@ -33,7 +32,6 @@ export interface CompanyAccessEntry {
   readonly result: string;
 }
 
-/** Mirrors CompanyDetailResponse from GET /api/v1/companies/{id}. */
 export interface CompanyDetail {
   readonly id: string;
   readonly tradeName: string;
@@ -70,11 +68,9 @@ export interface CompanyDetail {
   readonly accentColor: string | null;
   readonly backgroundColor: string | null;
   readonly recentAccess: readonly CompanyAccessEntry[];
-  /** Features habilitadas del plan activo (empresa → plan_features → features). Vacío si no tiene plan activo. */
   readonly planFeatures: readonly PlanFeatureRow[];
 }
 
-/** Mirrors CompanyPlanHistoryEntry: un cambio de plan de ESTA empresa (company_plan_periods + audit_logs). */
 export interface CompanyPlanHistoryEntry {
   readonly changedAt: string;
   readonly previousPlanName: string | null;
@@ -85,7 +81,6 @@ export interface CompanyPlanHistoryEntry {
   readonly reason: string | null;
 }
 
-/** Mirrors CompanyPlanResponse from GET /api/v1/companies/{id}/plan (tab Cuenta / Plan). */
 export interface CompanyPlan {
   readonly planId: string | null;
   readonly planCode: string | null;
@@ -103,7 +98,6 @@ export interface CompanyPlan {
   readonly history: readonly CompanyPlanHistoryEntry[];
 }
 
-/** Mirrors CompanyStoreItem: un local de la empresa con sus contadores reales (tab Locales). */
 export interface CompanyStoreItem {
   readonly id: string;
   readonly code: string;
@@ -116,7 +110,6 @@ export interface CompanyStoreItem {
   readonly lastActivityAt: string | null;
 }
 
-/** Mirrors CompanyStoresResponse from GET /api/v1/companies/{id}/stores. */
 export interface CompanyStores {
   readonly items: readonly CompanyStoreItem[];
   readonly totalStores: number;
@@ -125,7 +118,6 @@ export interface CompanyStores {
   readonly recentlyActiveUsers: number;
 }
 
-/** Mirrors CompanyPlanUsage: uso real de un límite del plan (Max null = ilimitado). */
 export interface CompanyPlanUsage {
   readonly code: string;
   readonly label: string;
@@ -133,7 +125,6 @@ export interface CompanyPlanUsage {
   readonly max: number | null;
 }
 
-/** Reutiliza la forma de PlatformAuditEntry (misma auditoría de plataforma, filtrada por esta empresa). */
 export interface CompanyRecentActivity {
   readonly id: string;
   readonly createdAt: string;
@@ -146,7 +137,6 @@ export interface CompanyRecentActivity {
   readonly detail: string | null;
 }
 
-/** Mirrors CompanySummaryTabResponse from GET /api/v1/companies/{id}/summary (tab Resumen). */
 export interface CompanyOverview {
   readonly storeCount: number;
   readonly userCount: number;

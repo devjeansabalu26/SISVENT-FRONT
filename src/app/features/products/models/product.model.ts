@@ -1,4 +1,3 @@
-/** Mirrors ProductListItem from GET /api/v1/products. */
 export interface Product {
   readonly id: string;
   readonly sku: string;
@@ -12,7 +11,6 @@ export interface Product {
   readonly totalStock: number;
   readonly lowStock: boolean;
   readonly version: number;
-  /** Stock en cada local que maneja el producto (vista "Todos los locales"). */
   readonly stores?: readonly ProductStoreStock[];
 }
 
@@ -30,7 +28,6 @@ export interface ProductPage {
   readonly totalCount: number;
 }
 
-/** Mirrors ProductDetailResponse from GET /api/v1/products/{id}. */
 export interface ProductDetail {
   readonly id: string;
   readonly sku: string;
@@ -71,8 +68,6 @@ export interface ProductCreateValue {
   readonly referenceCost: number | null;
   readonly imageUrl?: string | null;
   readonly isActive: boolean;
-  // Stock inicial opcional (solo al crear): si se informan ambos se crea el registro en stock_by_store
-  // + el movimiento INITIAL_STOCK correspondiente.
   readonly initialStoreId?: string | null;
   readonly initialStock?: number | null;
   readonly minStock?: number | null;

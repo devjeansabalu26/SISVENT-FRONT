@@ -40,8 +40,6 @@ export class DashboardPage implements OnInit {
   readonly seller = signal<SellerDashboard | null>(null);
   readonly platform = signal<PlatformDashboardResponse | null>(null);
 
-  // Filtros superiores del dashboard ADMIN (sección 2 del pedido). "Fecha" es un preset resuelto a
-  // dateFrom/dateTo reales antes de llamar al backend; Local/Vendedor son ids reales de la empresa.
   readonly datePreset = signal<DateRangePreset>('today');
   readonly dateRangeLabel = DATE_RANGE_PRESET_LABEL;
   readonly dateRangePresets: readonly DateRangePreset[] = ['today', 'yesterday', 'last7', 'thisMonth', 'lastMonth'];
@@ -121,7 +119,6 @@ export class DashboardPage implements OnInit {
 
   onStoreChange(value: string): void {
     this.storeId.set(value);
-    // El vendedor seleccionado puede no pertenecer al local nuevo: se limpia y se recarga la lista.
     this.sellerId.set('');
     this.loadSellers();
     this.load();
@@ -132,7 +129,6 @@ export class DashboardPage implements OnInit {
     this.load();
   }
 
-  /** Botón "Sincronizar": vuelve a pedir los datos sin recargar el navegador ni destruir el layout. */
   sync(): void {
     this.load(true);
   }

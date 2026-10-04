@@ -13,7 +13,6 @@ export class CompanyPlanApiService {
     return this.http.get<MyPlan>(this.baseUrl);
   }
 
-  /** Envía la solicitud de cambio: le llega como notificación a los SUPERADMIN. */
   requestChange(planId: string, message: string): Observable<PlanChangeRequestResult> {
     return this.http.post<PlanChangeRequestResult>(`${this.baseUrl}/change-requests`, { planId, message });
   }

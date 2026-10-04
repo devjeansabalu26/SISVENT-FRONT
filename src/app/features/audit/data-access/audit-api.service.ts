@@ -24,8 +24,6 @@ export class AuditApiService {
   private readonly userContext = inject(UserContextService);
 
   list(params: ListParams = {}): Observable<AuditPage> {
-    // SUPERADMIN has no company, so the tenant-scoped /audit (ADMIN-only) returns 403.
-    // The cross-company trail lives at /platform/audit (same shape + companyName).
     const isPlatform = this.userContext.user()?.role === 'SUPERADMIN';
     const url = `${this.apiBaseUrl}/api/v1/${isPlatform ? 'platform/audit' : 'audit'}`;
     let httpParams = new HttpParams()

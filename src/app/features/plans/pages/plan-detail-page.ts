@@ -40,8 +40,6 @@ export class PlanDetailPage implements OnInit {
     return (VALID_TABS as readonly string[]).includes(fromUrl ?? '') ? (fromUrl as PlanTab) : 'general';
   })();
   readonly activeTab = signal<PlanTab>(this.initialTab);
-  // Igual que en Ver Empresa: cada tab se monta la primera vez que se abre y luego queda oculto (no
-  // destruido), así que "Empresas asignadas" no vuelve a pedir la página al alternar entre tabs.
   readonly activatedTabs = signal<ReadonlySet<PlanTab>>(new Set([this.initialTab]));
 
   readonly featuresByDomain = computed(() => groupFeaturesByDomain(this.plan()?.features ?? []));
@@ -53,7 +51,6 @@ export class PlanDetailPage implements OnInit {
     void this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
-  /** MOD-SA-10: activa / desactiva el plan. Reenvía el plan completo con `isActive` invertido (PUT /plans/{id}). */
   toggleStatus(): void {
     const plan = this.plan();
     if (!plan) return;

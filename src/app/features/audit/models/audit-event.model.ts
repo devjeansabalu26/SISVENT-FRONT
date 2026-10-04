@@ -1,9 +1,5 @@
 export type AuditLevel = 'INFO' | 'WARNING' | 'ERROR';
 
-/**
- * Mirrors AuditEntryResponse from GET /api/v1/audit, plus `companyName` which is
- * only present on the SUPERADMIN cross-company trail (GET /api/v1/platform/audit).
- */
 export interface AuditEvent {
   readonly id: string;
   readonly createdAt: string;
@@ -16,9 +12,7 @@ export interface AuditEvent {
   readonly level: AuditLevel;
   readonly detail: string | null;
   readonly ipAddress: string | null;
-  /** Campos modificados (antes → después), calculados por el backend. */
   readonly changes?: readonly AuditChange[];
-  /** Motivo escrito por el usuario (anulación, suspensión…). */
   readonly reason?: string | null;
 }
 

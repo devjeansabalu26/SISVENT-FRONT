@@ -1,4 +1,3 @@
-/** Mirrors ClientListItem from GET /api/v1/clients. */
 export interface Customer {
   readonly id: string;
   readonly type: 'PERSON' | 'COMPANY';
@@ -20,7 +19,6 @@ export interface CustomerPage {
   readonly totalCount: number;
 }
 
-/** Mirrors ClientDetailResponse from GET /api/v1/clients/{id}. */
 export interface CustomerDetail {
   readonly id: string;
   readonly type: 'PERSON' | 'COMPANY';
@@ -41,7 +39,6 @@ export interface CustomerDetail {
   readonly version: number;
 }
 
-/** Mirrors ClientSummaryResponse from GET /api/v1/clients/summary. */
 export interface CustomerSummary {
   readonly total: number;
   readonly active: number;

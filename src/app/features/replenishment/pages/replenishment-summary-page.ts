@@ -16,7 +16,6 @@ import { ReplenishmentApiService } from '../data-access/replenishment-api.servic
 import { PRIORITY_LABELS, RISK_LABELS, ReplenishmentSummary, StockRiskItem } from '../models/replenishment.model';
 import { formatQuantity, purchaseOrderCsv } from '../utils/replenishment-format';
 
-/** Método mostrado en el modal MOD-PR-03. */
 const RECOMMENDATION_METHOD = 'SAVIX Smart Stock (ventas de los últimos 30 días)';
 
 @Component({
@@ -47,7 +46,6 @@ export class ReplenishmentSummaryPage implements OnInit {
     ];
   });
 
-  /** Críticos con menos de 3 días de cobertura (o agotados): el banner de "Atención requerida". */
   readonly urgent = computed(() => this.data()?.critical.filter((item) => item.priority === 'CRITICA').length ?? 0);
 
   readonly columns: readonly DataTableColumn<StockRiskItem & { readonly id: string }>[] = [
@@ -76,7 +74,6 @@ export class ReplenishmentSummaryPage implements OnInit {
     });
   }
 
-  /** MOD-PR-03: desglose de la fórmula detrás de una compra sugerida, con los datos reales del producto. */
   explain(item: StockRiskItem): void {
     this.dialog.open<RecommendationExplainDialog, RecommendationExplainData, void>(RecommendationExplainDialog, {
       data: {
@@ -92,7 +89,6 @@ export class ReplenishmentSummaryPage implements OnInit {
     });
   }
 
-  /** "Procesar todo": descarga la orden de compra sugerida agrupada por proveedor. */
   processAll(): void {
     const suggestions = this.data()?.suggestions ?? [];
     if (!suggestions.length) {

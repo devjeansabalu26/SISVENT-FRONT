@@ -1,4 +1,3 @@
-/** Mirrors BrandResponse from /api/v1/brands. */
 export interface Brand {
   readonly id: string;
   readonly name: string;

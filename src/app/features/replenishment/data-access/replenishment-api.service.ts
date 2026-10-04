@@ -10,7 +10,6 @@ export class ReplenishmentApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/replenishment`;
 
-  // El 403 (plan sin SUPPLY_ANALYTICS / ABC_ANALYSIS) lo muestra la pantalla, sin redirigir a /403.
   summary(): Observable<ReplenishmentSummary> {
     return this.http.get<ReplenishmentSummary>(`${this.baseUrl}/summary`, { context: handleForbiddenInline() });
   }

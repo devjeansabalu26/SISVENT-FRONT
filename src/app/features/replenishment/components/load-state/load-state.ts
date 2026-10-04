@@ -4,12 +4,10 @@ import { AppHttpError } from '../../../../core/http/models/app-http-error.model'
 
 export type LoadState = 'loading' | 'ready' | 'plan-blocked' | 'error';
 
-/** 403 del backend = el plan no incluye la analítica de abastecimiento. */
 export function loadStateFor(cause: unknown): LoadState {
   return cause instanceof AppHttpError && cause.status === 403 ? 'plan-blocked' : 'error';
 }
 
-/** Estados comunes de las pantallas de abastecimiento: cargando, plan sin la funcionalidad o error. */
 @Component({
   selector: 'app-replenishment-load-state',
   imports: [RouterLink],

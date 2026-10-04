@@ -19,7 +19,6 @@ const STATUS_LABELS: Readonly<Record<string, string>> = {
   CANCELLED: 'Cerrado',
 };
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY` sin pasar por zona horaria. */
 function formatDate(value: string): string {
   const [year, month, day] = value.slice(0, 10).split('-');
   return day && month && year ? `${day}/${month}/${year}` : value;
@@ -44,7 +43,6 @@ export class CompanyPlanPage implements OnInit {
 
   readonly current = computed(() => this.data()?.current ?? null);
   readonly pending = computed(() => this.data()?.pendingRequest ?? null);
-  /** Aviso cuando quedan 30 días o menos de vigencia. */
   readonly expiringSoon = computed(() => {
     const current = this.current();
     return !!current && current.status === 'ACTIVE' && current.daysRemaining <= 30;
@@ -80,7 +78,6 @@ export class CompanyPlanPage implements OnInit {
     return usage.limit === null ? `${usage.used} / ilimitado` : `${usage.used} / ${usage.limit}`;
   }
 
-  /** Porcentaje de la barra; sin límite se muestra vacía. */
   usagePercent(usage: MyPlanUsage): number {
     if (usage.limit === null || usage.limit === 0) return usage.limit === 0 && usage.used > 0 ? 100 : 0;
     return Math.min(100, Math.round((usage.used / usage.limit) * 100));

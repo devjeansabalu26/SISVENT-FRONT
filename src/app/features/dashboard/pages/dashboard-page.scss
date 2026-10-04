@@ -142,7 +142,6 @@ td small {
   margin: 0;
   list-style: none;
 }
-/* Keeps a long feed from stretching the page; the list scrolls inside its card. */
 .activity.scroll {
   max-height: 360px;
   overflow-y: auto;
@@ -179,7 +178,6 @@ td small {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
 }
-/* Right-rail variant: always one column so the card stays narrow. */
 .quick-grid.stack {
   grid-template-columns: 1fr;
   gap: 10px;

@@ -9,17 +9,12 @@ interface ModuleGroup {
   readonly modules: readonly CompanyModule[];
 }
 
-/** Agrupa por la sección del menú lateral, en el orden del catálogo. */
 function groupModules(modules: readonly CompanyModule[]): readonly ModuleGroup[] {
   const groups = new Map<string, CompanyModule[]>();
   for (const module of modules) groups.set(module.group, [...(groups.get(module.group) ?? []), module]);
   return [...groups].map(([label, items]) => ({ label, modules: items }));
 }
 
-/**
- * Menús de la empresa (SUPERADMIN): activa o desactiva cada menú dentro de lo que incluye el plan vigente.
- * Un menú apagado desaparece para el ADMIN y sus vendedores, y el backend rechaza sus operaciones.
- */
 @Component({
   selector: 'app-company-modules-tab',
   templateUrl: './company-modules-tab.html',
@@ -35,7 +30,6 @@ export class CompanyModulesTab implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly data = signal<CompanyModules | null>(null);
-  /** Cambios sin guardar: código → activo. */
   readonly draft = signal<ReadonlyMap<string, boolean>>(new Map());
 
   readonly groups = computed<readonly ModuleGroup[]>(() => groupModules(this.data()?.modules ?? []));
@@ -65,7 +59,6 @@ export class CompanyModulesTab implements OnInit {
     this.draft.set(next);
   }
 
-  /** Activa o apaga todos los menús que el plan permite. */
   setAll(enabled: boolean): void {
     const next = new Map<string, boolean>();
     for (const module of this.data()?.modules ?? []) if (module.includedInPlan) next.set(module.code, enabled);

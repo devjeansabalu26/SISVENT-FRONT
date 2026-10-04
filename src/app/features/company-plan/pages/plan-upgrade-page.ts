@@ -5,10 +5,6 @@ import { UserContextService } from '../../../core/context/user-context/user-cont
 import { CompanyPlanApiService } from '../data-access/company-plan-api.service';
 import { AvailablePlan, MyPlan } from '../models/company-plan.model';
 
-/**
- * Módulo que el plan vigente no incluye (menú con candado o URL directa). Explica qué planes lo incluyen
- * y lleva a "Mi plan" para solicitar el cambio. El VENDEDOR no consulta el plan: se le pide avisar al ADMIN.
- */
 @Component({
   selector: 'app-plan-upgrade-page',
   imports: [RouterLink],

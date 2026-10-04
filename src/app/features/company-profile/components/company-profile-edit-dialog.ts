@@ -10,7 +10,6 @@ import { CompanyProfile } from '../models/company-profile.model';
 
 type ColorKey = 'primaryColor' | 'secondaryColor' | 'accentColor' | 'backgroundColor';
 
-/** Edición de "Mi empresa" por el ADMIN: contacto e identidad visual. Se cierra con el perfil guardado. */
 @Component({
   selector: 'app-company-profile-edit-dialog',
   imports: [MatDialogModule, ReactiveFormsModule],
@@ -134,7 +133,6 @@ export class CompanyProfileEditDialog {
   });
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
-  /** Mismo cálculo que el sidebar real: el primario, ajustado para leerse sobre el secundario. */
   readonly previewAccent = computed(() => {
     const value = this.formValue();
     const primary = value.primaryColor ?? '';

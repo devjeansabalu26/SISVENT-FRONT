@@ -1,8 +1,3 @@
-/**
- * Predefined colour schemes offered when creating a company. These are the only
- * hard-coded values allowed in this feature: they seed the theme form and the
- * live preview, never real company data. Every colour is a canonical `#RRGGBB`.
- */
 export interface CompanyThemePreset {
   readonly id: string;
   readonly name: string;
@@ -65,13 +60,11 @@ export const COMPANY_THEME_PRESETS: readonly CompanyThemePreset[] = [
 
 export const DEFAULT_COMPANY_THEME_PRESET = COMPANY_THEME_PRESETS[0];
 
-/** Colours shared by a preset and the theme form, in the shape both sides use. */
 export type CompanyThemeColors = Pick<
   CompanyThemePreset,
   'primaryColor' | 'secondaryColor' | 'accentColor' | 'backgroundColor'
 >;
 
-/** Returns the preset whose four colours exactly match `colors`, or `null`. */
 export function matchThemePreset(colors: CompanyThemeColors): CompanyThemePreset | null {
   const normalized = {
     primaryColor: colors.primaryColor?.toUpperCase(),

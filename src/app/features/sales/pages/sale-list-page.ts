@@ -25,22 +25,18 @@ export class SaleListPage implements OnInit {
   private readonly role = inject(UserContextService).user()?.role;
   readonly isAdmin = this.role === 'ADMIN';
   readonly isSeller = this.role === 'VENDEDOR';
-  /** Toggle del VENDEDOR (Figma `vendedor-mis-ventas`): sus ventas o todas las de su local. */
   readonly scope = signal<'MINE' | 'STORE'>('MINE');
-  /** Caja (apertura/cierre de turnos): ADMIN con Ventas en Gestionar o VENDEDOR con Punto de venta. */
   readonly canUseCash = canUseCash();
 
   readonly loading = signal(false);
   readonly rows = signal<readonly Sale[]>([]);
   readonly totals = signal<SalesTotals>({ operationCount: 0, totalAmount: 0 });
 
-  // Filtros (Figma `admin-historial-ventas` / `vendedor-mis-ventas`): se aplican al presionar "Filtrar".
   search = '';
   from = '';
   to = '';
   paymentMethod = '';
   status = '';
-  /** Métodos de pago activos de la empresa (los mismos que ofrece el POS). */
   readonly paymentOptions = signal<readonly { value: string; label: string }[]>([]);
 
   readonly columns: readonly DataTableColumn<Sale>[] = [
@@ -84,7 +80,6 @@ export class SaleListPage implements OnInit {
     });
   }
 
-  /** Distingue "sin ventas" de "sin resultados" en el estado vacío (Figma `empty-states`). */
   hasFilters(): boolean {
     return !!(this.search.trim() || this.from || this.to || this.paymentMethod || this.status);
   }

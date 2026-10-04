@@ -1,6 +1,5 @@
 export type NotificationPriority = 'ALTA' | 'MEDIA' | 'INFO' | 'SISTEMA';
 
-/** Mirrors NotificationItem from /api/v1/notifications (prioridad y categoría las define el backend). */
 export interface ApiNotification {
   readonly id: string;
   readonly type: string;
@@ -31,7 +30,6 @@ export interface NotificationList {
   readonly counts: NotificationCounts;
 }
 
-/** Acción contextual de una notificación ("Ver producto", "Ver empresa"…). */
 export interface NotificationAction {
   readonly label: string;
   readonly route: readonly string[];
@@ -42,5 +40,4 @@ export interface NotificationItem extends ApiNotification {
   readonly actions: readonly NotificationAction[];
 }
 
-/** Pestañas del backend: SUPERADMIN usa all/unread/alerts/system; ADMIN all/unread/critical/updates/system. */
 export type NotificationTab = keyof NotificationCounts;

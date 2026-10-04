@@ -6,7 +6,6 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CreditNoteDetailDialog } from '../components/credit-note-dialogs/credit-note-detail-dialog';
 import { CreditNoteApiService, CreditNoteListItem } from '../data-access/credit-note-api.service';
 
-/** Historial de notas de crédito (el VENDEDOR ve solo las de su local). Se emiten desde el detalle de la venta. */
 @Component({
   selector: 'app-credit-notes-page',
   imports: [PageHeader, RouterLink, DatePipe],

@@ -14,7 +14,6 @@ const CLASS_TEXT: Readonly<Record<AbcClassCode, { readonly label: string; readon
   C: { label: 'Baja contribución', description: 'Último 5% o sin ventas: revisar surtido y compras.' },
 };
 
-/** Curva de Pareto: % acumulado de productos (en orden de ingresos) vs. % acumulado de ingresos. */
 export function paretoPoints(items: readonly AbcItem[]): readonly ParetoPoint[] {
   if (!items.length) return [];
   return [

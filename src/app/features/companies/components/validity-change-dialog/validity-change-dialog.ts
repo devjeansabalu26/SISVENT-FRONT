@@ -6,7 +6,6 @@ import { ShortDatePipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface ValidityChangeData {
   readonly companyName: string;
-  /** Fecha de fin vigente, `yyyy-MM-dd`. */
   readonly currentEnd: string;
 }
 
@@ -17,12 +16,10 @@ export interface ValidityChangeResult {
 
 const DAY_MS = 86_400_000;
 
-/** Diferencia en días entre dos fechas `yyyy-MM-dd` (sin zona horaria: ambas se leen como UTC). */
 export function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
 }
 
-/** Figma `mod-cambiar-vigencia` (MOD-SA-03): nueva fecha de vencimiento con motivo obligatorio. */
 @Component({
   selector: 'app-validity-change-dialog',
   imports: [MatDialogModule, ReactiveFormsModule, ShortDatePipe],

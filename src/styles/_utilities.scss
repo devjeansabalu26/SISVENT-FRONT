@@ -10,7 +10,6 @@
   border: 0;
 }
 
-/* KPI card row used across list/detail pages (Figma stat-card grids). */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -18,7 +17,6 @@
   margin-bottom: var(--space-md);
 }
 
-/* Generic surface card (Figma panels). */
 .surface-card {
   padding: var(--space-lg);
   border: 1px solid var(--color-border);
@@ -26,10 +24,6 @@
   background: var(--color-surface);
 }
 
-/*
- * Tablas: si el contenido es más ancho que el contenedor (pantallas medianas o móviles) se hace scroll
- * horizontal en lugar de ocultar las columnas de la derecha. Envolver cada <table> en .table-scroll.
- */
 .table-scroll {
   width: 100%;
   max-width: 100%;
@@ -41,7 +35,6 @@
   min-width: 100%;
 }
 
-/* Dentro de grids/flex un hijo ancho estiraría la tarjeta; así el scroll queda dentro de la tabla. */
 section,
 article,
 .surface-card,
@@ -49,7 +42,6 @@ article,
   min-width: 0;
 }
 
-/* Asterisco de campo obligatorio: va dentro del <span> del texto del label para quedar a su costado. */
 .required {
   color: var(--color-error-text);
 }

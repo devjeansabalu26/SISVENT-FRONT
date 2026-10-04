@@ -13,7 +13,6 @@ import { PlatformUserApiService } from '../data-access/platform-user-api.service
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, UserFormValue } from '../models/user.model';
 
-/** Read-only view backing both the tenant (ADMIN) and cross-company (SUPERADMIN) detail responses. */
 interface UserDetailView {
   readonly id: string;
   readonly fullName: string;
@@ -26,7 +25,6 @@ interface UserDetailView {
   readonly isActive: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string | null;
-  /** Present only for the tenant response; enables in-place editing. */
   readonly editable: AppUser | null;
 }
 

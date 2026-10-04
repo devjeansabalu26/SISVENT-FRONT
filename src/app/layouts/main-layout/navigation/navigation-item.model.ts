@@ -6,17 +6,14 @@ export interface NavigationItem {
   readonly label: string;
   readonly route: string;
   readonly icon: string;
-  /** Optional sidebar section heading (Figma groups: Operaciones, Catálogo, Almacén, …). */
   readonly group?: string;
   readonly roles?: readonly AppRole[];
   readonly permissions?: readonly AppPermission[];
   readonly plans?: readonly CompanyPlan[];
-  /** Código de feature real del plan vigente (plan_features/features) requerido para ver este item. */
   readonly requiredFeature?: string;
   readonly children?: readonly NavigationItem[];
 }
 
-/** Ítem visible en el sidebar; `locked` = el plan no incluye su funcionalidad. */
 export interface SidebarItem extends NavigationItem {
   readonly locked: boolean;
 }

@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { NotificationApiService } from './notification-api.service';
 
-/** Contador de no leídas compartido por la campana del header y el centro de notificaciones. */
 @Injectable({ providedIn: 'root' })
 export class NotificationBadgeService {
   private readonly api = inject(NotificationApiService);
@@ -9,7 +8,6 @@ export class NotificationBadgeService {
   readonly unread = this.count.asReadonly();
 
   refresh(): void {
-    // Silencioso: si falla (sin red, sesión vencida) la campana simplemente conserva el último valor.
     this.api.unreadCount().subscribe({ next: (value) => this.count.set(value), error: () => undefined });
   }
 

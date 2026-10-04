@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../config/app-config.token';
 import { LoginCredentials, LoginResult, SessionUser } from '../models/auth-api.model';
 
-/** Thin client for the backend authentication endpoints. */
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);

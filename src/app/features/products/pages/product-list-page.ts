@@ -35,21 +35,16 @@ export class ProductListPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationService);
-  /** Local del encabezado: con local, solo sus productos y su stock; sin local, stock general por local. */
   readonly storeContext = inject(StoreContextService);
 
   readonly loading = signal(false);
-  /** Figma `vendedor-productos`: el vendedor consulta el catálogo en solo lectura. */
-  /** Sin nivel Gestionar en Productos: vista de consulta (banner de solo lectura, sin crear/editar). */
   readonly isSeller = !inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.productsManage] });
 
-  // Filtros: se aplican server-side solo al presionar "Filtrar" (o "Limpiar"), no en cada tecleo/cambio.
   readonly search = signal('');
   readonly categoryFilter = signal('');
   readonly brandFilter = signal('');
   readonly statusFilter = signal('');
   readonly lowStockOnly = signal(false);
-  /** Distingue "catálogo vacío" de "sin resultados" en el estado vacío (Figma `empty-states`). */
   readonly hasFilters = computed(
     () => !!(this.search().trim() || this.categoryFilter() || this.brandFilter() || this.statusFilter() || this.lowStockOnly()),
   );
@@ -85,7 +80,6 @@ export class ProductListPage implements OnInit {
   });
 
   constructor() {
-    // Recarga al cambiar el local del encabezado (y la primera vez).
     effect(() => {
       this.storeContext.selectedStoreId();
       untracked(() => {
@@ -126,19 +120,16 @@ export class ProductListPage implements OnInit {
       });
   }
 
-  /** Chips de categoría (vista vendedor): filtran al instante. */
   selectCategory(categoryId: string): void {
     this.categoryFilter.set(categoryId);
     this.applyFilters();
   }
 
-  /** Aplica los filtros vigentes desde página 1 (botón "Filtrar"). */
   applyFilters(): void {
     this.pageNumber.set(1);
     this.load();
   }
 
-  /** Resetea todos los filtros y vuelve a página 1 (botón "Limpiar"). */
   create(): void {
     void this.router.navigate(['/app/products/new']);
   }
