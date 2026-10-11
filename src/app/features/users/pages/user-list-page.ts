@@ -18,7 +18,7 @@ import { PlatformUserApiService } from '../data-access/platform-user-api.service
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, PlatformUserItem, UserFormValue, UserRoleLimit } from '../models/user.model';
 
-type Row = { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean };
+interface Row { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean }
 
 @Component({
   selector: 'app-user-list-page',

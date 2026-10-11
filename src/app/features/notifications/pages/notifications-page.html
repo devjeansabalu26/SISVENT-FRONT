@@ -22,7 +22,7 @@
 } @else {
   <ul class="feed">
     @for (item of visible(); track item.id) {
-      <li class="note" [class.note--unread]="!item.isRead" (click)="markRead(item)">
+      <li class="note" [class.note--unread]="!item.isRead" tabindex="0" (click)="markRead(item)" (keydown.enter)="markRead(item)">
         <span class="badge" [attr.data-priority]="item.priority">{{ item.priority }}</span>
         <div class="note__body">
           <div class="note__head">

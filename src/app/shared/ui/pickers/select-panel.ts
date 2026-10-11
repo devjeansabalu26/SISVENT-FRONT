@@ -128,7 +128,8 @@ export class SelectPanel implements AfterViewInit {
     const options = this.visible();
     if (!options.length) return;
     let next = this.active();
-    for (let i = 0; i < options.length; i++) {
+    let remaining = options.length;
+    while (remaining-- > 0) {
       next = (next + step + options.length) % options.length;
       if (!options[next].disabled) break;
     }

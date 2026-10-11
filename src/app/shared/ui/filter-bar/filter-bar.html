@@ -2,7 +2,7 @@
   @if (showSearch()) {
     <label class="filter-bar__search">
       <span class="material-icons" aria-hidden="true">search</span>
-      <input #search type="search" [placeholder]="searchPlaceholder()" (input)="this.search.emit(search.value)" />
+      <input #search type="search" [placeholder]="searchPlaceholder()" (input)="searchChange.emit(search.value)" />
     </label>
   }
   <div class="filter-bar__controls">

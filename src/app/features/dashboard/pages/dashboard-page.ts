@@ -80,7 +80,8 @@ export class DashboardPage implements OnInit {
   }
 
   private load(syncOnly = false): void {
-    syncOnly ? this.syncing.set(true) : this.loading.set(true);
+    if (syncOnly) this.syncing.set(true);
+    else this.loading.set(true);
     if (this.role() === 'ADMIN') {
       const range = resolveDateRange(this.datePreset());
       this.api
