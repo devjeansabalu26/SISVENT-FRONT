@@ -10,7 +10,7 @@ export class FilterBar {
   readonly searchPlaceholder = input('Buscar…');
   readonly showSearch = input(true);
   readonly showActions = input(true);
-  readonly search = output<string>();
+  readonly searchChange = output<string>();
   readonly clear = output<void>();
   readonly apply = output<void>();
 }

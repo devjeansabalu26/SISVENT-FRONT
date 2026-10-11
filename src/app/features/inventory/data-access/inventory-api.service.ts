@@ -4,7 +4,7 @@ import { Observable, map } from 'rxjs';
 import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { StockAdjustmentRequest, StockPage, StockRow } from '../models/inventory-item.model';
-import { InventoryMovement, MovementPage } from '../models/inventory-movement.model';
+import { MovementPage } from '../models/inventory-movement.model';
 
 interface StockListParams {
   readonly pageNumber?: number;

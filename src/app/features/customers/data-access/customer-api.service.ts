@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import {
-  Customer,
   CustomerDetail,
   CustomerFormValue,
   CustomerPage,
