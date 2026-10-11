@@ -40,7 +40,9 @@ export class PosApiService {
     return this.http.get<PosSettings>(`${this.baseUrl}/settings`);
   }
 
-  confirm(body: PosSaleRequest): Observable<SaleDetail> {
-    return this.http.post<SaleDetail>(`${this.baseUrl}/sales`, body);
+  confirm(body: PosSaleRequest, idempotencyKey: string): Observable<SaleDetail> {
+    return this.http.post<SaleDetail>(`${this.baseUrl}/sales`, body, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, timeout } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -14,7 +14,7 @@ import { Product } from '../../products/models/product.model';
 import { ProductApiService } from '../../products/data-access/product-api.service';
 import { SaleConfirmData, SaleConfirmDialog } from '../components/sale-confirm-dialog/sale-confirm-dialog';
 import { SaleSuccessDialog } from '../components/sale-success-dialog/sale-success-dialog';
-import { PosApiService, PosSettings } from '../data-access/pos-api.service';
+import { PosApiService, PosSaleRequest, PosSettings } from '../data-access/pos-api.service';
 import { CashSessionApiService, StoreCashStatus } from '../data-access/cash-session-api.service';
 import { canUseCash } from '../cash-access';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
@@ -24,6 +24,7 @@ import { PosPaymentPanel } from '../components/pos-payment-panel/pos-payment-pan
 import { CartItem } from '../models/cart-item.model';
 import { PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../models/payment.model';
 import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../utils/payment';
+import { PendingSale, SALE_CONFIRM_TIMEOUT_MS, isUncertainSaleFailure, pendingSaleFor } from '../utils/pending-sale';
 
 @Component({
   selector: 'app-pos-page',
@@ -57,6 +58,7 @@ export class PosPage implements OnInit {
   readonly kindOf = (code: string): PaymentKind => this.paymentMethods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
   private readonly methodName = (code: string): string => this.paymentMethods().find((method) => method.code === code)?.name ?? code;
   readonly saving = signal(false);
+  private pendingSale: PendingSale | null = null;
   private readonly posSettings = signal<PosSettings>({ autoEmailReceipt: false, emailConfigured: false });
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
@@ -258,21 +260,26 @@ export class PosPage implements OnInit {
     const total = this.subtotal();
     const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
     if (!payments.length) return;
+    const body: PosSaleRequest = {
+      storeId: this.isAdmin ? this.selectedStoreId() : null,
+      sellerCode,
+      clientId: this.selectedCustomer()?.id ?? null,
+      paymentMethod: payments[0].method,
+      discountTotal: 0,
+      notes: null,
+      lines: this.cart().map((item) => ({ productId: item.product.id, quantity: item.quantity, discountAmount: 0 })),
+      payments,
+    };
+    const pending = pendingSaleFor(this.pendingSale, body, () => crypto.randomUUID());
+    this.pendingSale = pending;
     this.saving.set(true);
     this.posApi
-      .confirm({
-        storeId: this.isAdmin ? this.selectedStoreId() : null,
-        sellerCode,
-        clientId: this.selectedCustomer()?.id ?? null,
-        paymentMethod: payments[0].method,
-        discountTotal: 0,
-        notes: null,
-        lines: this.cart().map((item) => ({ productId: item.product.id, quantity: item.quantity, discountAmount: 0 })),
-        payments,
-      })
+      .confirm(body, pending.key)
+      .pipe(timeout(SALE_CONFIRM_TIMEOUT_MS))
       .subscribe({
         next: (sale) => {
           this.saving.set(false);
+          this.pendingSale = null;
           const autoEmailedTo = this.autoEmailReceipt(sale);
           this.dialog
             .open(SaleSuccessDialog, {
@@ -299,6 +306,14 @@ export class PosPage implements OnInit {
         },
         error: (cause: unknown) => {
           this.saving.set(false);
+          if (isUncertainSaleFailure(cause)) {
+            this.notifications.show(
+              'No se pudo confirmar si la venta se registró. Vuelve a confirmar: la venta no se duplicará.',
+              'warning',
+            );
+            return;
+          }
+          this.pendingSale = null;
           const title = (cause instanceof AppHttpError
             ? (cause.originalError as { error?: { title?: unknown; errors?: unknown } } | undefined)?.error
             : undefined);
