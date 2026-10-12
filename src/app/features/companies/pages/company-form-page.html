@@ -76,6 +76,7 @@
               inputmode="numeric"
               maxlength="5"
               autocomplete="new-password"
+              (input)="adminPasswordDigitsOnly($event)"
             />
             <button type="button" (click)="showAdminPassword.set(!showAdminPassword())">
               {{ showAdminPassword() ? 'Ocultar' : 'Ver' }}
