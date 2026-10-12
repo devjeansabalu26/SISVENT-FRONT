@@ -232,6 +232,12 @@ export class CompanyFormPage implements OnInit {
     this.selectedPresetId.set(matchThemePreset(colors)?.id ?? null);
   }
 
+  adminPasswordDigitsOnly(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const clean = input.value.replace(/\D/g, '').slice(0, 5);
+    if (clean !== input.value) this.form.controls.adminPassword.setValue(clean);
+  }
+
   selectPreset(preset: CompanyThemePreset): void {
     this.form.patchValue({
       primaryColor: preset.primaryColor,
