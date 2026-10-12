@@ -153,7 +153,10 @@ export class CompanyDetailPage implements OnInit {
     const company = this.company();
     if (!company) return;
     this.dialog
-      .open(PlanChangeDialog, { data: { companyName: company.tradeName, currentPlan: company.planName ?? 'Sin plan' } })
+      .open(PlanChangeDialog, {
+        maxWidth: 'calc(100vw - 32px)',
+        data: { companyId: company.id, companyName: company.tradeName, currentPlan: company.planName ?? 'Sin plan' },
+      })
       .afterClosed()
       .pipe(filter((result): result is PlanChangeResult => !!result))
       .subscribe((result) => {
@@ -164,12 +167,14 @@ export class CompanyDetailPage implements OnInit {
             startDate: result.startDate,
             endDate: result.endDate,
             reason: result.reason,
+            keepStoreIds: result.keepStoreIds,
+            keepSellerIds: result.keepSellerIds,
           })
           .subscribe({
             next: () => {
               this.notifications.show('Plan actualizado correctamente.', 'success');
               this.load();
-              this.invalidateTabs(['plan', 'summary']);
+              this.invalidateTabs(['plan', 'summary', 'stores', 'users']);
             },
             error: () => this.notifications.show('No se pudo cambiar el plan.', 'error'),
           });

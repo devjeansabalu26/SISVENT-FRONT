@@ -58,6 +58,12 @@ export const LOGIN_ALERTS = {
     title: 'Local no habilitado',
     message: 'El local asignado a tu usuario está desactivado. Pide a tu administrador que lo revise.',
   },
+  storeUnassigned: {
+    tone: 'warning',
+    icon: 'store',
+    title: 'Sin local asignado',
+    message: 'Tu usuario no tiene un local asignado. Pide a tu administrador que te asigne uno.',
+  },
   tooManyAttempts: {
     tone: 'warning',
     icon: 'timer',
@@ -85,6 +91,7 @@ const ALERT_BY_CODE: Readonly<Record<string, LoginAlert>> = {
   INVALID_ROLE: LOGIN_ALERTS.userDisabled,
   TWO_FACTOR_REQUIRED: LOGIN_ALERTS.userDisabled,
   STORE_DISABLED: LOGIN_ALERTS.storeDisabled,
+  STORE_UNASSIGNED: LOGIN_ALERTS.storeUnassigned,
   COMPANY_SUSPENDED: LOGIN_ALERTS.companySuspended,
   COMPANY_INACTIVE: LOGIN_ALERTS.companyInactive,
   PLAN_EXPIRED: LOGIN_ALERTS.companyExpired,
