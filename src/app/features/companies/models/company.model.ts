@@ -211,4 +211,39 @@ export interface ChangeCompanyPlanValue {
   readonly startDate: string;
   readonly endDate: string;
   readonly reason: string;
+  readonly keepStoreIds?: readonly string[];
+  readonly keepSellerIds?: readonly string[];
+}
+
+export interface PlanChangeStore {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly userCount: number;
+  readonly openCashSince: string | null;
+  readonly openCashBy: string | null;
+}
+
+export interface PlanChangeFeature {
+  readonly code: string;
+  readonly name: string;
+}
+
+export interface PlanChangeSeller {
+  readonly id: string;
+  readonly fullName: string;
+  readonly email: string | null;
+  readonly storeId: string | null;
+  readonly storeName: string | null;
+}
+
+export interface PlanChangePreview {
+  readonly planId: string;
+  readonly planName: string;
+  readonly samePlan: boolean;
+  readonly maxStores: number | null;
+  readonly maxSellers: number | null;
+  readonly stores: readonly PlanChangeStore[];
+  readonly sellers: readonly PlanChangeSeller[];
+  readonly lostFeatures: readonly PlanChangeFeature[];
 }

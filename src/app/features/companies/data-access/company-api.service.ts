@@ -12,6 +12,7 @@ import {
   CompanyStores,
   CompanySummary,
   CreateCompanyValue,
+  PlanChangePreview,
   UpdateCompanyValue,
 } from '../models/company.model';
 
@@ -55,6 +56,10 @@ export class CompanyApiService {
 
   getPlan(id: string): Observable<CompanyPlan> {
     return this.http.get<CompanyPlan>(`${this.baseUrl}/${id}/plan`);
+  }
+
+  getPlanChangePreview(id: string, planId: string): Observable<PlanChangePreview> {
+    return this.http.get<PlanChangePreview>(`${this.baseUrl}/${id}/plan-change-preview`, { params: { planId } });
   }
 
   getModules(id: string): Observable<CompanyModules> {

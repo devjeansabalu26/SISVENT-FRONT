@@ -1,4 +1,4 @@
-<form class="dialog" [formGroup]="form" (ngSubmit)="confirm()">
+<form class="dialog plan-change" [formGroup]="form" (ngSubmit)="confirm()">
   <header>
     <span class="material-icons">swap_horiz</span>
     <div>
@@ -7,58 +7,190 @@
     </div>
   </header>
 
-  <div class="fields">
-    <label class="wide"
-      ><span>Nuevo plan <span class="required">*</span></span>
-      <select formControlName="planId" [class.invalid]="showError('planId')">
-        @for (plan of plans(); track plan.id) {
-          <option [value]="plan.id">{{ plan.name }} @if (plan.currentPrice != null) { (S/ {{ plan.currentPrice.toFixed(2) }}) }</option>
+  <div class="body">
+    <section class="block">
+      <h3>Datos del plan</h3>
+      <div class="fields two">
+        <label
+          ><span>Nuevo plan <span class="required">*</span></span>
+          <select formControlName="planId" [class.invalid]="showError('planId')">
+            @for (plan of plans(); track plan.id) {
+              <option [value]="plan.id">{{ plan.name }} @if (plan.currentPrice != null) { (S/ {{ plan.currentPrice.toFixed(2) }}) }</option>
+            }
+          </select>
+          @if (showError('planId')) {
+            <small class="hint">Selecciona el nuevo plan.</small>
+          }
+        </label>
+        <label
+          ><span>Precio contratado <span class="required">*</span></span>
+          <input type="number" step="0.01" min="0" formControlName="contractedPrice" placeholder="Escribe el precio contratado (ej. 149.90)" [class.invalid]="showError('contractedPrice')" />
+          @if (showError('contractedPrice')) {
+            <small class="hint">
+              @if (form.controls.contractedPrice.hasError('required')) { Ingresa el precio contratado. }
+              @else if (form.controls.contractedPrice.hasError('min')) { El precio no puede ser negativo. }
+              @else { El precio excede el máximo permitido. }
+            </small>
+          }
+        </label>
+        <label
+          ><span>Fecha de inicio <span class="required">*</span></span>
+          <input type="date" formControlName="startDate" [class.invalid]="showError('startDate')" />
+          @if (showError('startDate')) {
+            <small class="hint">Indica la fecha de inicio.</small>
+          }
+        </label>
+        <label
+          ><span>Fecha de fin <span class="required">*</span></span>
+          <input type="date" formControlName="endDate" [min]="form.controls.startDate.value" [class.invalid]="showError('endDate')" />
+          @if (showError('endDate')) {
+            <small class="hint">
+              @if (form.controls.endDate.hasError('required')) { Indica la fecha de fin. }
+              @else { La fecha de fin no puede ser anterior a la de inicio. }
+            </small>
+          }
+        </label>
+        <label class="wide"
+          ><span>Motivo del cambio <span class="required">*</span></span>
+          <textarea formControlName="reason" maxlength="500" placeholder="Escribe el motivo del cambio de plan…" [class.invalid]="showError('reason')"></textarea>
+          @if (showError('reason')) {
+            <small class="hint">Describe el motivo (mínimo 5 caracteres).</small>
+          }
+        </label>
+      </div>
+    </section>
+
+    <section class="block">
+      <h3>Impacto del cambio</h3>
+      @if (loadingPreview()) {
+        <p>Revisando locales, vendedores y funcionalidades de la empresa…</p>
+      } @else if (previewFailed()) {
+        <p class="hint">
+          No se pudo revisar el impacto del cambio.
+          <button type="button" class="link" (click)="retryPreview()">Reintentar</button>
+        </p>
+      } @else if (preview(); as p) {
+        @if (!hasImpact()) {
+          <p>El plan {{ p.planName }} cubre los locales, vendedores y funcionalidades que la empresa usa hoy. No se desactivará nada.</p>
+        } @else {
+          <div class="impact">
+            <div class="card" [class.warn]="storesOver()">
+              <div class="card-head">
+                <h4><span class="material-icons">store</span>Locales</h4>
+                @if (storesOver()) {
+                  <span class="counter" [class.ok]="storeSelectionValid()">{{ keepStores().size }} de {{ p.maxStores }}</span>
+                } @else {
+                  <span class="counter ok">{{ p.stores.length }} / {{ p.maxStores ?? '∞' }}</span>
+                }
+              </div>
+              @if (storesOver()) {
+                <p>{{ p.planName }} permite {{ p.maxStores }} local(es) activo(s). Marca los que se conservan; los demás se desactivan y sus usuarios quedan sin local, listos para asignarse a otro.</p>
+                <div class="choices">
+                  @for (store of p.stores; track store.id) {
+                    <label class="choice" [class.selected]="keepStores().has(store.id)" [class.disabled]="storeLocked(store.id)">
+                      <input
+                        type="checkbox"
+                        [checked]="keepStores().has(store.id)"
+                        [disabled]="storeLocked(store.id)"
+                        (change)="toggleStore(store.id, $any($event.target).checked)"
+                      />
+                      <span>
+                        <strong>{{ store.code }} · {{ store.name }}</strong>
+                        <small>{{ store.userCount }} usuario(s) asignado(s)</small>
+                        @if (store.openCashSince) {
+                          <small class="cash-tag"><span class="material-icons">point_of_sale</span>Caja abierta desde {{ store.openCashSince | date: 'dd/MM HH:mm' }}</small>
+                        }
+                      </span>
+                    </label>
+                  }
+                </div>
+                @if (!storeSelectionValid()) {
+                  <small class="hint">Selecciona al menos un local para conservar.</small>
+                }
+              } @else {
+                <p>Todos los locales activos se mantienen.</p>
+              }
+            </div>
+
+            <div class="card" [class.warn]="sellersOver()">
+              <div class="card-head">
+                <h4><span class="material-icons">badge</span>Vendedores</h4>
+                @if (sellersOver()) {
+                  <span class="counter" [class.ok]="sellerSelectionValid()">{{ keepSellers().size }} de {{ p.maxSellers }}</span>
+                } @else {
+                  <span class="counter ok">{{ p.sellers.length }} / {{ p.maxSellers ?? '∞' }}</span>
+                }
+              </div>
+              @if (sellersOver()) {
+                <p>{{ p.planName }} permite {{ p.maxSellers }} vendedor(es) activo(s). Marca los que se conservan; los demás se desactivan.</p>
+                <div class="choices">
+                  @for (seller of p.sellers; track seller.id) {
+                    <label class="choice" [class.selected]="keepSellers().has(seller.id)" [class.disabled]="sellerLocked(seller.id)">
+                      <input
+                        type="checkbox"
+                        [checked]="keepSellers().has(seller.id)"
+                        [disabled]="sellerLocked(seller.id)"
+                        (change)="toggleSeller(seller.id, $any($event.target).checked)"
+                      />
+                      <span>
+                        <strong>{{ seller.fullName }}</strong>
+                        <small>{{ seller.email ?? 'Sin correo' }} · {{ seller.storeName ?? 'Sin local' }}</small>
+                      </span>
+                    </label>
+                  }
+                </div>
+                @if (!sellerSelectionValid()) {
+                  <small class="hint">Selecciona al menos un vendedor para conservar.</small>
+                }
+              } @else {
+                <p>Todos los vendedores activos se mantienen.</p>
+              }
+            </div>
+
+            @if (lostFeatures().length > 0) {
+              <div class="card warn full">
+                <div class="card-head">
+                  <h4><span class="material-icons">extension_off</span>Funcionalidades que dejará de tener</h4>
+                  <span class="counter">{{ lostFeatures().length }}</span>
+                </div>
+                <div class="chips">
+                  @for (feature of lostFeatures(); track feature.code) {
+                    <span class="chip">{{ feature.name }}</span>
+                  }
+                </div>
+                <p>La empresa pasa a los procesos de {{ p.planName }}. Lo registrado con estas funcionalidades se conserva y vuelve a estar disponible si sube de plan.</p>
+              </div>
+            }
+          </div>
+
+          @if (removedWithOpenCash().length > 0) {
+            <div class="summary cash">
+              <span class="material-icons">warning</span>
+              <span>
+                Estos locales que se desactivarán tienen una caja abierta. Lo ideal es que se cierre antes de confirmar. Si no, quedará abierta y el administrador de la empresa tendrá que cerrarla con un cierre forzado desde Caja.
+                <ul>
+                  @for (store of removedWithOpenCash(); track store.id) {
+                    <li>{{ store.code }} · {{ store.name }}: abierta desde {{ store.openCashSince | date: 'dd/MM/yyyy HH:mm' }}@if (store.openCashBy) { por {{ store.openCashBy }}}</li>
+                  }
+                </ul>
+              </span>
+            </div>
+          }
+
+          <div class="summary">
+            <span class="material-icons">info</span>
+            <span>
+              Se desactivarán {{ removedStores().length }} local(es) y {{ deactivatedSellerCount() }} vendedor(es);
+              {{ unassignedUserCount() }} usuario(s) quedarán sin local asignado. No se borra ninguna venta, stock ni historial.
+            </span>
+          </div>
         }
-      </select>
-      @if (showError('planId')) {
-        <small class="hint">Selecciona el nuevo plan.</small>
       }
-    </label>
-    <label class="wide"
-      ><span>Precio contratado <span class="required">*</span></span>
-      <input type="number" step="0.01" min="0" formControlName="contractedPrice" placeholder="Escribe el precio contratado (ej. 149.90)" [class.invalid]="showError('contractedPrice')" />
-      @if (showError('contractedPrice')) {
-        <small class="hint">
-          @if (form.controls.contractedPrice.hasError('required')) { Ingresa el precio contratado. }
-          @else if (form.controls.contractedPrice.hasError('min')) { El precio no puede ser negativo. }
-          @else { El precio excede el máximo permitido. }
-        </small>
-      }
-    </label>
-    <label class="wide"
-      ><span>Fecha de inicio <span class="required">*</span></span>
-      <input type="date" formControlName="startDate" [class.invalid]="showError('startDate')" />
-      @if (showError('startDate')) {
-        <small class="hint">Indica la fecha de inicio.</small>
-      }
-    </label>
-    <label class="wide"
-      ><span>Fecha de fin <span class="required">*</span></span>
-      <input type="date" formControlName="endDate" [min]="form.controls.startDate.value" [class.invalid]="showError('endDate')" />
-      @if (showError('endDate')) {
-        <small class="hint">
-          @if (form.controls.endDate.hasError('required')) { Indica la fecha de fin. }
-          @else { La fecha de fin no puede ser anterior a la de inicio. }
-        </small>
-      }
-    </label>
-    <label class="wide"
-      ><span>Motivo del cambio <span class="required">*</span></span>
-      <textarea formControlName="reason" maxlength="500" placeholder="Escribe el motivo del cambio de plan…" [class.invalid]="showError('reason')"></textarea>
-      @if (showError('reason')) {
-        <small class="hint">Describe el motivo (mínimo 5 caracteres).</small>
-      }
-    </label>
-    <p class="muted">El cambio de plan puede afectar funcionalidades activas inmediatamente.</p>
+    </section>
   </div>
 
   <footer>
     <button type="button" (click)="cancel()">Cancelar</button>
-    <button type="submit" class="primary" [disabled]="form.invalid">Confirmar cambio</button>
+    <button type="submit" class="primary" [disabled]="form.invalid || !selectionValid()">Confirmar cambio</button>
   </footer>
 </form>
