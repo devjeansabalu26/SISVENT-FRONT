@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
@@ -32,14 +33,17 @@ export class CustomerFormPage implements OnInit {
       validators: [Validators.required, Validators.pattern(/^\d{8,11}$/)],
     }),
     displayName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    firstName: new FormControl('', { nonNullable: true }),
-    lastName: new FormControl('', { nonNullable: true }),
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.email] }),
     address: new FormControl('', { nonNullable: true }),
     notes: new FormControl('', { nonNullable: true }),
     active: new FormControl(true, { nonNullable: true }),
   });
+
+  private readonly documentType = toSignal(this.form.controls.documentType.valueChanges, {
+    initialValue: this.form.controls.documentType.value,
+  });
+  readonly isCompany = computed(() => this.documentType() === 'RUC');
 
   ngOnInit(): void {
     if (!this.id) return;
@@ -50,8 +54,6 @@ export class CustomerFormPage implements OnInit {
           documentType: customer.documentType ?? 'DNI',
           documentNumber: customer.documentNumber ?? '',
           displayName: customer.displayName,
-          firstName: customer.firstName ?? '',
-          lastName: customer.lastName ?? '',
           phone: customer.phone ?? '',
           email: customer.email ?? '',
           address: customer.address ?? '',
@@ -75,8 +77,8 @@ export class CustomerFormPage implements OnInit {
     const value = this.form.getRawValue();
     const body = {
       displayName: value.displayName.trim(),
-      firstName: value.firstName.trim() || null,
-      lastName: value.lastName.trim() || null,
+      firstName: null,
+      lastName: null,
       documentType: value.documentType.trim() || null,
       documentNumber: value.documentNumber.trim() || null,
       email: value.email.trim() || null,

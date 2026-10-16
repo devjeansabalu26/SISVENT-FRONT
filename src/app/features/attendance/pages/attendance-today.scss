@@ -1,0 +1,55 @@
+.today-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.today-head h2 {
+  margin: 0 auto 0 0;
+  font-size: 16px;
+}
+.today-store {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+.pill--open {
+  color: var(--color-success-text, var(--color-success));
+  background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+}
+.today-table {
+  max-height: 290px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.today-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 10px;
+}
+.today-table td {
+  padding: 6px 10px;
+}
+.today-table tr.done td {
+  color: var(--color-text-muted);
+}
+.today-table .icon-btn {
+  width: 28px;
+  height: 28px;
+}
+.today-table .material-icons {
+  font-size: 18px;
+}
+.shift .empty {
+  padding: 8px 12px;
+  font-size: 13px;
+}

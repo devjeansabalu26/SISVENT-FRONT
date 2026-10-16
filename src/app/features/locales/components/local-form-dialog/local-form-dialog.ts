@@ -19,6 +19,7 @@ export class LocalFormDialog {
     address: new FormControl(this.local?.address ?? '', { nonNullable: true, validators: [Validators.required] }),
     phone: new FormControl(this.local?.phone ?? '', { nonNullable: true }),
     isActive: new FormControl(this.local?.isActive ?? true, { nonNullable: true }),
+    isWaste: new FormControl(this.local?.isWaste ?? false, { nonNullable: true }),
   });
 
   cancel(): void {
@@ -36,6 +37,7 @@ export class LocalFormDialog {
       address: value.address.trim() || null,
       phone: value.phone.trim() || null,
       isActive: value.isActive,
+      isWaste: value.isWaste,
     });
   }
 }

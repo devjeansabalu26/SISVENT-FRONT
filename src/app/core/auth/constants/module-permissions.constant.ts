@@ -12,6 +12,7 @@ export const MODULE_PERMISSIONS: Readonly<Record<string, { readonly view: readon
   POS: { view: [APP_PERMISSIONS.salesCreate], manage: [] },
   SALES: { view: [APP_PERMISSIONS.salesView], manage: [APP_PERMISSIONS.salesManage] },
   CLIENTS: { view: [APP_PERMISSIONS.customersView], manage: [APP_PERMISSIONS.customersManage] },
+  ATTENDANCE: { view: [APP_PERMISSIONS.attendanceView], manage: [APP_PERMISSIONS.attendanceManage] },
   PRODUCTS: { view: [APP_PERMISSIONS.productsView], manage: [APP_PERMISSIONS.productsManage] },
   CATEGORIES: { view: [APP_PERMISSIONS.categoriesView], manage: [APP_PERMISSIONS.categoriesManage] },
   BRANDS: { view: [APP_PERMISSIONS.brandsView], manage: [APP_PERMISSIONS.brandsManage] },

@@ -5,6 +5,7 @@ export interface Store {
   readonly address: string | null;
   readonly phone: string | null;
   readonly isActive: boolean;
+  readonly isWaste?: boolean;
   readonly sellerCount: number;
   readonly version: number;
 }
@@ -25,4 +26,5 @@ export interface StoreFormValue {
   readonly address: string | null;
   readonly phone: string | null;
   readonly isActive: boolean;
+  readonly isWaste: boolean;
 }

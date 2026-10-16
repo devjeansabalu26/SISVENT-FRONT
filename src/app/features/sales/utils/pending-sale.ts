@@ -10,7 +10,7 @@ export interface PendingSale {
 }
 
 export function saleFingerprint(body: PosSaleRequest): string {
-  return JSON.stringify({ ...body, sellerCode: undefined });
+  return JSON.stringify({ ...body, sellerProfileId: undefined });
 }
 
 export function pendingSaleFor(previous: PendingSale | null, body: PosSaleRequest, newKey: () => string): PendingSale {

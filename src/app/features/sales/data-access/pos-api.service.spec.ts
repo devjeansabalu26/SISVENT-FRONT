@@ -6,7 +6,7 @@ import { PosApiService, PosSaleRequest } from './pos-api.service';
 describe('PosApiService', () => {
   const body: PosSaleRequest = {
     storeId: null,
-    sellerCode: '12345',
+    sellerProfileId: null,
     clientId: null,
     paymentMethod: 'CASH',
     discountTotal: 0,

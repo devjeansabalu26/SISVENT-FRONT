@@ -37,7 +37,7 @@ export class CashCloseDialog implements OnInit {
 
   ngOnInit(): void {
     this.storeApi.list().subscribe({
-      next: (response) => this.stores.set(response.items.filter((store) => store.isActive)),
+      next: (response) => this.stores.set(response.items.filter((store) => store.isActive && !store.isWaste)),
       error: () => undefined,
     });
     this.load();

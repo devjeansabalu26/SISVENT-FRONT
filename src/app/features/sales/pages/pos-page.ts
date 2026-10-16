@@ -12,7 +12,12 @@ import { CustomerApiService } from '../../customers/data-access/customer-api.ser
 import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { Product } from '../../products/models/product.model';
 import { ProductApiService } from '../../products/data-access/product-api.service';
-import { SaleConfirmData, SaleConfirmDialog } from '../components/sale-confirm-dialog/sale-confirm-dialog';
+import { SaleConfirmData, SaleConfirmDialog, SaleConfirmResult, SaleConfirmSeller } from '../components/sale-confirm-dialog/sale-confirm-dialog';
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { AttendanceApiService, attendanceErrorMessage } from '../../attendance/data-access/attendance-api.service';
+import { AttendanceMarkDialog, AttendanceMarkDialogData } from '../../attendance/components/attendance-mark-dialog/attendance-mark-dialog';
+import { AttendanceStatus } from '../../attendance/models/attendance.model';
 import { SaleSuccessDialog } from '../components/sale-success-dialog/sale-success-dialog';
 import { PosApiService, PosSaleRequest, PosSettings } from '../data-access/pos-api.service';
 import { CashSessionApiService, StoreCashStatus } from '../data-access/cash-session-api.service';
@@ -44,6 +49,8 @@ export class PosPage implements OnInit {
   private readonly posApi = inject(PosApiService);
   private readonly receiptMailer = inject(ReceiptMailerService);
   private readonly userContext = inject(UserContextService);
+  private readonly attendanceApi = inject(AttendanceApiService);
+  private readonly usesAttendance = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.attendanceView] });
 
   readonly isAdmin = this.userContext.user()?.role === 'ADMIN';
   readonly paymentMethods = signal<readonly PaymentMethodOption[]>([]);
@@ -107,9 +114,9 @@ export class PosPage implements OnInit {
     }
     if (this.isAdmin) {
       this.storeApi.list().subscribe((response) => {
-        this.stores.set(response.items);
+        this.stores.set(response.items.filter((item) => !item.isWaste));
         const preferred = this.storeContext.selectedStoreId();
-        const initial = response.items.find((item) => item.id === preferred) ?? response.items[0];
+        const initial = this.stores().find((item) => item.id === preferred) ?? this.stores()[0];
         if (initial) this.selectedStoreId.set(initial.id);
         this.search('');
       });
@@ -208,9 +215,59 @@ export class PosPage implements OnInit {
       this.notifications.show(error, 'warning');
       return;
     }
+    if (!this.usesAttendance) {
+      this.openConfirm(total, null);
+      return;
+    }
+    this.saving.set(true);
+    this.attendanceApi.status(this.saleStoreId()).subscribe({
+      next: (status) => {
+        this.saving.set(false);
+        if (status.enabled && !status.present.length) this.askAttendance(status, total);
+        else this.openConfirm(total, status);
+      },
+      error: (cause: unknown) => {
+        this.saving.set(false);
+        this.notifications.show(attendanceErrorMessage(cause, 'No se pudo verificar quién está en turno.'), 'error');
+      },
+    });
+  }
+
+  private saleStoreId(): string | null {
+    return this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null);
+  }
+
+  private askAttendance(status: AttendanceStatus, total: number): void {
+    this.dialog
+      .open<AttendanceMarkDialog, AttendanceMarkDialogData, boolean>(AttendanceMarkDialog, {
+        data: {
+          storeId: status.storeId,
+          storeName: status.storeName,
+          present: [],
+          message: 'Para registrar la venta alguien debe estar en turno. Marca tu entrada con tu usuario.',
+        },
+      })
+      .afterClosed()
+      .pipe(filter((marked): marked is true => marked === true))
+      .subscribe(() => this.attendanceApi.status(status.storeId).subscribe({
+        next: (fresh) => this.openConfirm(total, fresh),
+        error: (cause: unknown) => this.notifications.show(attendanceErrorMessage(cause, 'No se pudo verificar quién está en turno.'), 'error'),
+      }));
+  }
+
+  private openConfirm(total: number, status: AttendanceStatus | null): void {
+    const user = this.userContext.user();
+    const present = status?.present ?? [];
+    const seller: SaleConfirmSeller = {
+      attendanceEnabled: !!status?.enabled,
+      present,
+      defaultProfileId: present.some((person) => person.profileId === status?.currentProfileId) ? status!.currentProfileId : (present[0]?.profileId ?? null),
+      loggedUserName: user?.displayName ?? 'Usuario actual',
+      loggedUserRole: user?.role ?? '',
+    };
     const customer = this.selectedCustomer();
     this.dialog
-      .open<SaleConfirmDialog, SaleConfirmData, string | false>(SaleConfirmDialog, {
+      .open<SaleConfirmDialog, SaleConfirmData, SaleConfirmResult | false>(SaleConfirmDialog, {
         data: {
           customer: customer
             ? `${customer.displayName}${customer.documentNumber ? ` (${customer.documentType ?? 'Doc.'} ${customer.documentNumber})` : ''}`
@@ -219,11 +276,12 @@ export class PosPage implements OnInit {
           discount: 0,
           paymentMethod: this.paymentLines().map((line) => this.methodName(line.methodCode)).join(' + '),
           paymentDetails: this.previewPayments(total),
+          seller,
         },
       })
       .afterClosed()
-      .pipe(filter((sellerCode): sellerCode is string => typeof sellerCode === 'string'))
-      .subscribe((sellerCode) => this.register(sellerCode));
+      .pipe(filter((result): result is SaleConfirmResult => !!result))
+      .subscribe((result) => this.register(result.sellerProfileId));
   }
 
   private previewPayments(total: number): readonly string[] {
@@ -256,13 +314,13 @@ export class PosPage implements OnInit {
     return email;
   }
 
-  private register(sellerCode: string): void {
+  private register(sellerProfileId: string | null): void {
     const total = this.subtotal();
     const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
     if (!payments.length) return;
     const body: PosSaleRequest = {
       storeId: this.isAdmin ? this.selectedStoreId() : null,
-      sellerCode,
+      sellerProfileId,
       clientId: this.selectedCustomer()?.id ?? null,
       paymentMethod: payments[0].method,
       discountTotal: 0,

@@ -20,7 +20,7 @@
       <header>
         <div>
           <h3>{{ local.name }}</h3>
-          <small>ID: {{ local.code }}</small>
+          <small>ID: {{ local.code }}{{ local.isWaste ? ' · Local de desechos' : '' }}</small>
         </div>
         <app-status-chip [value]="local.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="local.isActive ? 'ACTIVE' : 'INACTIVE'" />
       </header>

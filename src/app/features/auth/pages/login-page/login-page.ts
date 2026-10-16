@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthApiService } from '../../../../core/auth/services/auth-api.service';
 import { AppSessionService } from '../../../../core/auth/services/app-session.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { AttendanceEntryPromptService } from '../../../attendance/utils/attendance-entry-prompt.service';
 import { AlertBanner } from '../../../../shared/ui/alert-banner/alert-banner';
 import { LoginAlert, loginAlertFor } from './login-alert';
 
@@ -19,6 +20,7 @@ export class LoginPage {
   private readonly authApi = inject(AuthApiService);
   private readonly session = inject(AppSessionService);
   private readonly router = inject(Router);
+  private readonly attendance = inject(AttendanceEntryPromptService);
 
   readonly hidePassword = signal(true);
   readonly submitting = signal(false);
@@ -67,6 +69,7 @@ export class LoginPage {
           });
           return;
         }
+        this.attendance.markOnNextEntry();
         void this.router.navigateByUrl('/app/dashboard');
       },
       error: (cause: unknown) => {

@@ -5,10 +5,7 @@
     <button type="button" class="ghost" [disabled]="sending()" (click)="sendReceipt()" [title]="sale.clientEmail ? 'Enviar a ' + sale.clientEmail : 'Enviar por correo'">
       <span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar comprobante' }}
     </button>
-    @if (credit()?.canIssue) {
-      <button type="button" class="ghost" (click)="issueCreditNote()"><span class="material-icons">assignment_return</span>Nota de crédito</button>
-    }
-    @if (canCancel && sale.status === 'CONFIRMED' && credit()?.cancellable) {
+    @if (canCancel && sale.status === 'CONFIRMED' && annulment()?.canAnnul) {
       <button type="button" class="ghost danger" (click)="annul()"><span class="material-icons">block</span>Anular venta</button>
     }
   </app-page-header>
@@ -18,13 +15,41 @@
     <app-status-chip [value]="sale.status" [label]="sale.status" />
   </div>
 
-  @if (credit(); as c) {
-    @if (c.cashClosed && sale.status === 'CONFIRMED') {
-      <p class="notice"><span class="material-icons">lock</span>Venta cerrada en caja: ya no se puede anular. Para devoluciones emite una nota de crédito.</p>
+  @if (canCancel && sale.status === 'CONFIRMED' && annulment(); as a) {
+    @if (!a.canAnnul && a.blockedReason) {
+      <p class="notice muted-notice"><span class="material-icons">info</span>{{ a.blockedReason }}</p>
+    } @else if (a.cashClosed) {
+      <p class="notice muted-notice"><span class="material-icons">lock</span>La caja de esta venta ya se cerró. Si la anulas, la devolución saldrá de la caja abierta del local.</p>
     }
-    @if (!c.canIssue && c.issueBlockedReason && sale.status === 'CONFIRMED' && c.creditedTotal < c.saleTotal) {
-      <p class="notice muted-notice"><span class="material-icons">info</span>{{ c.issueBlockedReason }}</p>
-    }
+  }
+
+  @if (sale.annulment; as an) {
+    <section class="surface-card annulment">
+      <h3>Anulación</h3>
+      <dl>
+        <div><dt>Anulada por</dt><dd>{{ an.cancelledBy }} · {{ an.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}</dd></div>
+        <div><dt>Motivo</dt><dd>{{ an.reason }}</dd></div>
+        @if (an.refundAmount > 0) {
+          <div><dt>Devolución</dt><dd>S/ {{ an.refundAmount.toFixed(2) }} · {{ an.refundMethod }}{{ an.refundPending ? ' · pendiente hasta abrir caja' : '' }}</dd></div>
+        }
+      </dl>
+      @if (an.items.length) {
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Producto</th><th>Volvió al local</th><th>A desechos</th></tr></thead>
+            <tbody>
+              @for (item of an.items; track item.productId) {
+                <tr>
+                  <td>{{ item.productName }}</td>
+                  <td>{{ item.returnedQuantity }}</td>
+                  <td>{{ item.wastedQuantity }}{{ item.wasteStoreName ? ' (' + item.wasteStoreName + ')' : '' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
   }
 
   <section class="surface-card">

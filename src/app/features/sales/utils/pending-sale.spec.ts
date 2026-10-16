@@ -4,9 +4,9 @@ import { PosSaleRequest } from '../data-access/pos-api.service';
 import { isUncertainSaleFailure, pendingSaleFor } from './pending-sale';
 
 describe('pending-sale', () => {
-  const body = (quantity: number, sellerCode = '12345'): PosSaleRequest => ({
+  const body = (quantity: number, sellerProfileId: string | null = 'seller-1'): PosSaleRequest => ({
     storeId: 's1',
-    sellerCode,
+    sellerProfileId,
     clientId: null,
     paymentMethod: 'CASH',
     discountTotal: 0,
@@ -23,9 +23,9 @@ describe('pending-sale', () => {
     expect(retry.key).toBe(first.key);
   });
 
-  it('reutiliza la clave aunque se vuelva a digitar otro código de vendedor', () => {
-    const first = pendingSaleFor(null, body(1, '11111'), newKey);
-    const retry = pendingSaleFor(first, body(1, '22222'), newKey);
+  it('reutiliza la clave aunque se cambie el vendedor responsable', () => {
+    const first = pendingSaleFor(null, body(1, 'seller-1'), newKey);
+    const retry = pendingSaleFor(first, body(1, 'seller-2'), newKey);
     expect(retry.key).toBe(first.key);
   });
 

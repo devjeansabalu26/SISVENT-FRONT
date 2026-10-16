@@ -45,6 +45,8 @@ export const ROLE_PERMISSIONS: Readonly<Record<AppRole, readonly AppPermission[]
     APP_PERMISSIONS.goodsReceiptsView,
     APP_PERMISSIONS.goodsReceiptsManage,
     APP_PERMISSIONS.replenishmentView,
+    APP_PERMISSIONS.attendanceView,
+    APP_PERMISSIONS.attendanceManage,
   ],
   VENDEDOR: [
     APP_PERMISSIONS.dashboardView,
@@ -54,5 +56,6 @@ export const ROLE_PERMISSIONS: Readonly<Record<AppRole, readonly AppPermission[]
     APP_PERMISSIONS.salesCreate,
     APP_PERMISSIONS.customersView,
     APP_PERMISSIONS.customersManage,
+    APP_PERMISSIONS.attendanceView,
   ],
 };

@@ -1,0 +1,209 @@
+<app-page-header title="Asistencia" description="Marca tu entrada y salida con tu usuario. Solo quien está en turno puede figurar como vendedor responsable de una venta.">
+  <button type="button" class="ghost" (click)="loadStatus()"><span class="material-icons">refresh</span>Actualizar</button>
+  @if (canManage) {
+    <button type="button" class="primary" (click)="edit(null)"><span class="material-icons">more_time</span>Registrar asistencia</button>
+  }
+</app-page-header>
+
+<div class="top" [class.top--single]="canManage">
+  @if (!canManage) {
+  <section class="card mark">
+    <header>
+      <span class="icon material-icons">how_to_reg</span>
+      <div>
+        <h2>Marcar asistencia</h2>
+        <p>Escribe tu usuario de 5 dígitos y presiona Enter para marcar tu entrada.</p>
+      </div>
+    </header>
+
+    @if (stores().length > 1) {
+      <label class="field">Local
+        <select [value]="storeId() ?? ''" (change)="changeStore($any($event.target).value)">
+          @for (store of stores(); track store.id) { <option [value]="store.id">{{ store.name }}</option> }
+        </select>
+      </label>
+    } @else if (storeName()) {
+      <p class="store"><span class="material-icons">store</span>{{ storeName() }}</p>
+    }
+
+    <form class="code" (submit)="$event.preventDefault(); mark('IN')">
+      <input #codeInput type="text" inputmode="numeric" maxlength="5" autocomplete="off" [formControl]="code"
+        placeholder="Usuario" aria-label="Usuario de asistencia" [class.invalid]="code.invalid && code.touched" (input)="digitsOnly($event)" />
+      <div class="code__actions">
+        <button type="submit" class="primary center" [disabled]="marking() !== null || !!openForCode()">
+          <span class="material-icons">login</span>{{ marking() === 'IN' ? 'Marcando…' : 'Marcar entrada' }}
+        </button>
+        <button type="button" class="center" [class.primary]="!!openForCode()" [class.ghost]="!openForCode()"
+          [disabled]="marking() !== null || !codeComplete()" (click)="mark('OUT')">
+          <span class="material-icons">logout</span>{{ marking() === 'OUT' ? 'Marcando…' : 'Marcar salida' }}
+        </button>
+      </div>
+      @if (openForCode(); as open) {
+        <p class="already">
+          <span class="material-icons">schedule</span>
+          <span><strong>{{ open.fullName }}</strong> ya marcó su entrada a las <strong>{{ hour(open.checkInAt) }}</strong>. Solo puede marcar su salida.</span>
+        </p>
+      }
+    </form>
+
+    @if (lastResult(); as result) {
+      <p class="result" [class.result--out]="result.action === 'OUT'">
+        <span class="material-icons">{{ result.action === 'IN' ? 'check_circle' : 'logout' }}</span>
+        {{ result.action === 'IN' ? 'Entrada' : 'Salida' }} de <strong>{{ result.name }}</strong> a las {{ result.at | date: 'HH:mm' }}
+      </p>
+    }
+  </section>
+  }
+
+  <section class="card shift">
+    @if (canManage) {
+      <header class="today-head">
+        <h2>Asistencia de hoy</h2>
+        @if (stores().length > 1) {
+          <select class="today-store" [value]="storeId() ?? ''" (change)="changeStore($any($event.target).value)" aria-label="Local">
+            @for (store of stores(); track store.id) { <option [value]="store.id">{{ store.name }}</option> }
+          </select>
+        } @else if (storeName()) {
+          <span class="muted">{{ storeName() }}</span>
+        }
+        <span class="pill pill--open">{{ present().length }} en turno</span>
+        <span class="pill">{{ today().length - present().length }} salieron</span>
+      </header>
+    } @else {
+      <header class="section-title">
+        <h2>Asistencia de hoy</h2>
+        @if (storeName()) { <span class="muted">{{ storeName() }} · {{ present().length }} en turno</span> }
+      </header>
+    }
+    @if (statusLoading()) {
+      <p class="state">Cargando…</p>
+    } @else if (statusError()) {
+      <p class="state error">{{ statusError() }}</p>
+    } @else {
+      @if (!present().length) {
+        <p class="empty"><span class="material-icons">person_off</span>Nadie está en turno en este local. No se pueden registrar ventas hasta que alguien marque su entrada.</p>
+      }
+      @if (today().length && canManage) {
+        <div class="today-table">
+          <table>
+            <thead><tr><th>Persona</th><th>Usuario</th><th>Entrada</th><th>Salida</th><th>Tiempo</th><th></th></tr></thead>
+            <tbody>
+              @for (row of today(); track row.id) {
+                <tr [class.done]="row.checkOutAt">
+                  <td><strong>{{ row.fullName }}</strong> <small class="muted">{{ roleLabel(row.role) }}</small></td>
+                  <td>{{ row.userCode ?? '—' }}</td>
+                  <td>{{ hour(row.checkInAt) }}</td>
+                  <td>
+                    @if (row.checkOutAt) { {{ hour(row.checkOutAt) }} } @else { <span class="badge badge--open">En turno</span> }
+                  </td>
+                  <td>{{ duration(row) }}</td>
+                  <td class="actions">
+                    @if (!row.checkOutAt) {
+                      <button type="button" class="icon-btn" (click)="closeRecord(row)" title="Marcar salida"><span class="material-icons">logout</span></button>
+                    }
+                    <button type="button" class="icon-btn" (click)="edit(row)" title="Corregir"><span class="material-icons">edit</span></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (today().length) {
+        <ul class="people">
+          @for (row of today(); track row.id) {
+            <li [class.done]="row.checkOutAt">
+              <span class="avatar">{{ row.fullName.charAt(0) }}</span>
+              <div>
+                <strong>{{ row.fullName }}</strong>
+                <small>{{ roleLabel(row.role) }}{{ row.userCode ? ' · ' + row.userCode : '' }}</small>
+              </div>
+              <div class="times">
+                <span class="time"><small>Entrada</small>{{ hour(row.checkInAt) }}</span>
+                @if (row.checkOutAt) {
+                  <span class="time"><small>Salida</small>{{ hour(row.checkOutAt) }}</span>
+                } @else {
+                  <span class="badge badge--open">En turno</span>
+                }
+              </div>
+              @if (canManage && !row.checkOutAt) {
+                <button type="button" class="icon-btn" (click)="closeRecord(row)" title="Marcar salida"><span class="material-icons">logout</span></button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+</div>
+
+@if (canManage) {
+  <section class="history">
+    <header class="section-title"><h2>Historial de asistencia</h2></header>
+    <div class="filters">
+      @if (stores().length > 1) {
+        <label>Local
+          <select [value]="storeFilter()" (change)="storeFilter.set($any($event.target).value)">
+            <option value="">Todos los locales</option>
+            @for (store of stores(); track store.id) { <option [value]="store.id">{{ store.name }}</option> }
+          </select>
+        </label>
+      }
+      <label>Persona
+        <select [value]="personFilter()" (change)="personFilter.set($any($event.target).value)">
+          <option value="">Todas</option>
+          @for (worker of workers(); track worker.profileId) { <option [value]="worker.profileId">{{ worker.fullName }}</option> }
+        </select>
+      </label>
+      <label>Desde <input type="date" [value]="from()" (change)="from.set($any($event.target).value)" /></label>
+      <label>Hasta <input type="date" [value]="to()" (change)="to.set($any($event.target).value)" /></label>
+      <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>
+      <button type="button" class="primary" (click)="loadHistory()">Filtrar</button>
+    </div>
+
+    <div class="table-scroll surface-card">
+      @if (historyLoading()) {
+        <p class="state">Cargando asistencias…</p>
+      } @else if (!history().length) {
+        <p class="state">No hay asistencias en este período.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Local</th><th>Persona</th><th>Rol</th><th>Entrada</th><th>Salida</th><th>Tiempo</th>
+              <th>Origen</th><th>Observaciones</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of history(); track row.id) {
+              <tr>
+                <td>{{ row.workDate.split('-').reverse().join('/') }}</td>
+                <td>{{ row.storeName }}</td>
+                <td>{{ row.fullName }}</td>
+                <td>{{ roleLabel(row.role) }}</td>
+                <td>{{ row.checkInAt | date: 'HH:mm' }}</td>
+                <td>
+                  @if (row.checkOutAt) {
+                    {{ row.checkOutAt | date: 'dd/MM HH:mm' }}
+                    @if (row.autoClosed) { <span class="badge badge--warn" title="No marcó salida; se cerró al final del día">Sin salida</span> }
+                  } @else {
+                    <span class="badge badge--open">En turno</span>
+                  }
+                </td>
+                <td>{{ duration(row) }}</td>
+                <td>{{ row.source === 'ADMIN' ? 'Administrador' : 'Marcado' }}</td>
+                <td class="notes">{{ row.notes ?? '—' }}</td>
+                <td class="actions">
+                  @if (!row.checkOutAt) {
+                    <button type="button" class="icon-btn" title="Marcar salida" (click)="closeRecord(row)"><span class="material-icons">logout</span></button>
+                  }
+                  <button type="button" class="icon-btn" title="Corregir" (click)="edit(row)"><span class="material-icons">edit</span></button>
+                  <button type="button" class="icon-btn danger-text" title="Eliminar" (click)="remove(row)"><span class="material-icons">delete</span></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </section>
+}
