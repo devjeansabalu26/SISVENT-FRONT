@@ -36,4 +36,44 @@ export interface SaleDetail {
   readonly payments?: readonly SalePayment[];
   readonly changeAmount?: number;
   readonly clientEmail?: string | null;
+  readonly annulment?: SaleAnnulment | null;
+}
+
+export interface SaleAnnulmentItem {
+  readonly productId: string;
+  readonly sku: string;
+  readonly productName: string;
+  readonly returnedQuantity: number;
+  readonly wastedQuantity: number;
+  readonly wasteStoreName: string | null;
+}
+
+export interface SaleAnnulment {
+  readonly reason: string;
+  readonly cancelledBy: string;
+  readonly cancelledAt: string;
+  readonly originalCashClosed: boolean;
+  readonly refundAmount: number;
+  readonly refundMethod: string | null;
+  readonly refundPending: boolean;
+  readonly items: readonly SaleAnnulmentItem[];
+}
+
+export interface SaleAnnulmentOptions {
+  readonly saleId: string;
+  readonly status: string;
+  readonly canAnnul: boolean;
+  readonly blockedReason: string | null;
+  readonly cashClosed: boolean;
+  readonly refundAmount: number;
+  readonly defaultRefundMethod: string | null;
+  readonly storeHasOpenCash: boolean;
+  readonly wasteStoreId: string | null;
+  readonly wasteStoreName: string | null;
+}
+
+export interface CancelSaleBody {
+  readonly reason: string;
+  readonly refundMethod: string | null;
+  readonly lines: readonly { readonly productId: string; readonly returnQuantity: number; readonly wasteQuantity: number }[];
 }

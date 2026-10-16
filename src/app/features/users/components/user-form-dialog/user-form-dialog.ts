@@ -42,7 +42,7 @@ export class UserFormDialog implements OnInit {
   });
 
   ngOnInit(): void {
-    this.storeApi.list().subscribe((response) => this.stores.set(response.items));
+    this.storeApi.list().subscribe((response) => this.stores.set(response.items.filter((item) => !item.isWaste)));
     if (this.user) this.form.controls.email.disable();
   }
 

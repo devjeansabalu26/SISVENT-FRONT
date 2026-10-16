@@ -33,6 +33,8 @@ export const APP_PERMISSIONS = {
   goodsReceiptsView: 'goods-receipts.view',
   goodsReceiptsManage: 'goods-receipts.manage',
   replenishmentView: 'replenishment.view',
+  attendanceView: 'attendance.view',
+  attendanceManage: 'attendance.manage',
 } as const;
 
 export type AppPermission = (typeof APP_PERMISSIONS)[keyof typeof APP_PERMISSIONS];

@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
-import { SaleDetail } from '../models/sale-detail.model';
+import { CancelSaleBody, SaleAnnulmentOptions, SaleDetail } from '../models/sale-detail.model';
 import { SalePage } from '../models/sale.model';
 
 interface ListParams {
@@ -48,7 +48,11 @@ export class SaleApiService {
     return this.http.post<{ readonly email: string; readonly sentAt: string }>(`${this.baseUrl}/${id}/send-receipt`, { email, pdfBase64 });
   }
 
-  cancel(id: string, reason: string): Observable<SaleDetail> {
-    return this.http.post<SaleDetail>(`${this.baseUrl}/${id}/cancel`, { reason });
+  cancel(id: string, body: CancelSaleBody): Observable<SaleDetail> {
+    return this.http.post<SaleDetail>(`${this.baseUrl}/${id}/cancel`, body);
+  }
+
+  annulmentOptions(id: string): Observable<SaleAnnulmentOptions> {
+    return this.http.get<SaleAnnulmentOptions>(`${this.baseUrl}/${id}/annulment-options`);
   }
 }

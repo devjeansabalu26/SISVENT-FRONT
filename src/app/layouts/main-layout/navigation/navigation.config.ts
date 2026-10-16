@@ -10,6 +10,7 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
 
   { label: 'Punto de venta', icon: 'shopping_cart', route: '/app/pos', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesCreate], requiredFeature: 'SALES' },
   { label: 'Ventas', icon: 'point_of_sale', route: '/app/sales', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesView], requiredFeature: 'SALES' },
+  { label: 'Asistencia', icon: 'how_to_reg', route: '/app/attendance', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.attendanceView] },
   { label: 'Clientes', icon: 'badge', route: '/app/customers', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.customersView], requiredFeature: 'CLIENTS' },
 
   { label: 'Productos', icon: 'inventory_2', route: '/app/products', group: 'Catálogo', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.productsView], requiredFeature: 'PRODUCTS' },

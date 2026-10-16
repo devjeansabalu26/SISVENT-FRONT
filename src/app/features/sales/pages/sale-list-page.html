@@ -2,7 +2,6 @@
   [title]="isAdmin ? 'Historial de ventas' : scope() === 'STORE' ? 'Ventas del local' : 'Mis ventas'"
   [description]="isAdmin ? 'Registro completo de operaciones de venta' : scope() === 'STORE' ? 'Ventas registradas en tu local' : 'Ventas registradas con tu usuario'"
 >
-  <a class="ghost" routerLink="/app/sales/credit-notes"><span class="material-icons">assignment_return</span>Notas de crédito</a>
   @if (canUseCash) {<a class="ghost" routerLink="/app/sales/cash"><span class="material-icons">point_of_sale</span>Caja</a>}
 </app-page-header>
 @if (isSeller) {

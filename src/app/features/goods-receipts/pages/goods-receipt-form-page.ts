@@ -69,8 +69,9 @@ export class GoodsReceiptFormPage implements OnInit {
 
   ngOnInit(): void {
     this.storeApi.list().subscribe((response) => {
-      this.stores.set(response.items);
-      if (response.items.length === 1) this.form.controls.storeId.setValue(response.items[0].id);
+      const items = response.items.filter((item) => !item.isWaste);
+      this.stores.set(items);
+      if (items.length === 1) this.form.controls.storeId.setValue(items[0].id);
     });
     this.supplierApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.suppliers.set(page.items));
     this.productApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.products.set(page.items));

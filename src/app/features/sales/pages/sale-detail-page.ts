@@ -6,16 +6,16 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../core/notifications/notification.service';
-import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
-import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { SaleApiService } from '../data-access/sale-api.service';
-import { CreditNoteApiService, CreditNoteDetail, CreditNoteListItem, SaleCreditSummary } from '../data-access/credit-note-api.service';
-import { CreditNoteDialog } from '../components/credit-note-dialogs/credit-note-dialog';
+import { CreditNoteApiService, CreditNoteListItem, SaleCreditSummary } from '../data-access/credit-note-api.service';
+import { AnnulSaleDialog, AnnulSaleDialogData } from '../components/annul-sale-dialog/annul-sale-dialog';
+import { PosApiService } from '../data-access/pos-api.service';
+import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { CreditNoteDetailDialog } from '../components/credit-note-dialogs/credit-note-detail-dialog';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
-import { SaleDetail } from '../models/sale-detail.model';
+import { SaleAnnulmentOptions, SaleDetail } from '../models/sale-detail.model';
 import { paymentSummary } from '../utils/payment';
 
 @Component({
@@ -33,7 +33,10 @@ export class SaleDetailPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
-  readonly canCancel = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
+  private readonly posApi = inject(PosApiService);
+  readonly canCancel = inject(UserContextService).user()?.role === 'ADMIN'
+    && inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
+  readonly annulment = signal<SaleAnnulmentOptions | null>(null);
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);
@@ -58,19 +61,9 @@ export class SaleDetailPage implements OnInit {
       error: () => this.loading.set(false),
     });
     this.creditNotes.summary(this.id).subscribe({ next: (summary) => this.credit.set(summary), error: () => undefined });
-  }
-
-  issueCreditNote(): void {
-    const summary = this.credit();
-    if (!summary?.canIssue) return;
-    this.dialog
-      .open<CreditNoteDialog, SaleCreditSummary, CreditNoteDetail>(CreditNoteDialog, { data: summary })
-      .afterClosed()
-      .pipe(filter((note): note is CreditNoteDetail => !!note))
-      .subscribe((note) => {
-        this.notifications.show(`Nota de crédito ${note.note.creditNoteNumber} emitida por S/ ${note.note.total.toFixed(2)}.`, 'success');
-        this.load();
-      });
+    if (this.canCancel) {
+      this.api.annulmentOptions(this.id).subscribe({ next: (options) => this.annulment.set(options), error: () => undefined });
+    }
   }
 
   openCreditNote(note: CreditNoteListItem): void {
@@ -79,32 +72,19 @@ export class SaleDetailPage implements OnInit {
 
   annul(): void {
     const sale = this.sale();
-    if (!sale) return;
-    const data: ReviewDialogData = {
-      title: 'Anular venta',
-      icon: 'receipt_long',
-      meta: [
-        { label: 'Venta', value: sale.saleNumber },
-        { label: 'Cliente', value: sale.clientName ?? 'Cliente general' },
-        { label: 'Total', value: `S/ ${sale.total.toFixed(2)}` },
-      ],
-      banner: { tone: 'danger', text: 'Esta acción revertirá el stock de los productos vendidos y no se puede deshacer.' },
-      reason: { label: 'Motivo de anulación', placeholder: 'Error en el cobro, devolución del cliente…' },
-      confirmLabel: 'Anular venta',
-      destructive: true,
-    };
-    this.dialog
-      .open<ReviewDialog, ReviewDialogData, boolean | string>(ReviewDialog, { data })
-      .afterClosed()
-      .pipe(filter((reason): reason is string => typeof reason === 'string'))
-      .subscribe((reason) => {
-        this.api.cancel(sale.id, reason).subscribe({
-          next: () => {
-            this.notifications.show('Venta anulada. Stock revertido.', 'success');
+    const options = this.annulment();
+    if (!sale || !options?.canAnnul) return;
+    this.posApi.paymentMethods().subscribe({
+      next: (paymentMethods) =>
+        this.dialog
+          .open<AnnulSaleDialog, AnnulSaleDialogData, SaleDetail>(AnnulSaleDialog, { data: { sale, options, paymentMethods } })
+          .afterClosed()
+          .pipe(filter((result): result is SaleDetail => !!result))
+          .subscribe(() => {
+            this.notifications.show('Venta anulada. El stock se repuso según el destino elegido.', 'success');
             this.load();
-          },
-          error: () => this.notifications.show('No se pudo anular la venta.', 'error'),
-        });
-      });
+          }),
+      error: () => this.notifications.show('No se pudieron cargar los métodos de pago.', 'error'),
+    });
   }
 }

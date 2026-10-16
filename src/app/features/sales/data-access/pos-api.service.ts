@@ -18,7 +18,7 @@ export interface PosSaleLineInput {
 
 export interface PosSaleRequest {
   readonly storeId: string | null;
-  readonly sellerCode: string;
+  readonly sellerProfileId: string | null;
   readonly clientId: string | null;
   readonly paymentMethod: string;
   readonly discountTotal: number;

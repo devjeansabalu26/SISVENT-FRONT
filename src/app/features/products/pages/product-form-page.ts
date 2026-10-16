@@ -84,8 +84,9 @@ export class ProductFormPage implements OnInit {
     this.unitApi.list().subscribe((page) => this.units.set(page.items));
     if (!this.isEdit) {
       this.storeApi.list().subscribe((result) => {
-        this.stores.set(result.items);
-        if (result.items.length === 1) this.form.controls.initialStoreId.setValue(result.items[0].id);
+        const items = result.items.filter((item) => !item.isWaste);
+        this.stores.set(items);
+        if (items.length === 1) this.form.controls.initialStoreId.setValue(items[0].id);
       });
     }
 
