@@ -157,6 +157,10 @@ export class NotificationsPage implements OnInit {
           : [];
       case 'sales':
         return id ? [{ label: 'Ver venta', route: ['/app/sales', id] }] : [];
+      case 'cash_sessions':
+        return [{ label: 'Ver caja', route: ['/app/sales/cash'] }];
+      case 'stores':
+        return [{ label: 'Ver asistencia', route: ['/app/attendance'] }, { label: 'Ver caja', route: ['/app/sales/cash'] }];
       case 'companies':
         return id ? [{ label: 'Ver empresa', route: ['/app/companies', id] }] : [];
       case 'plans':

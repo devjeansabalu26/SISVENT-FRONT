@@ -25,4 +25,20 @@ export interface SettingsExtras {
   readonly strongPasswords: boolean;
   readonly passwordExpiryDays: number;
   readonly inactivityLogoutMinutes: number;
+  readonly workDays: string;
+  readonly workStartTime: string;
+  readonly workEndTime: string;
+  readonly lateToleranceMinutes: number;
+  readonly cashDifferenceAlert: number;
+  readonly notifyUnattendedStore: boolean;
 }
+
+export const WEEK_DAYS: readonly { readonly value: number; readonly label: string }[] = [
+  { value: 1, label: 'Lun' },
+  { value: 2, label: 'Mar' },
+  { value: 3, label: 'Mié' },
+  { value: 4, label: 'Jue' },
+  { value: 5, label: 'Vie' },
+  { value: 6, label: 'Sáb' },
+  { value: 7, label: 'Dom' },
+];

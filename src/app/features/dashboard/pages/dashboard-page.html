@@ -165,6 +165,8 @@
       </label>
     </section>
 
+    <app-stores-today />
+
     @if (admin(); as admin) {
       <div class="kpi-grid">
         <app-kpi-card label="Ventas del día" [value]="'S/ ' + admin.salesTodayAmount.toFixed(2)" icon="point_of_sale" [trend]="admin.salesTodayDeltaPercent && admin.salesTodayDeltaPercent >= 0 ? 'up' : 'down'" [delta]="admin.salesTodayDeltaPercent != null ? (admin.salesTodayDeltaPercent.toFixed(1) + '%') : undefined" tone="success" />

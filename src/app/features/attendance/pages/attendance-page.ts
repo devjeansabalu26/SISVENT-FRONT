@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog'
 import { ConfirmDialogData } from '../../../shared/ui/confirm-dialog/confirm-dialog.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { AttendanceEditDialog, AttendanceEditDialogData } from '../components/attendance-edit-dialog/attendance-edit-dialog';
+import { AttendanceReportPanel } from '../components/attendance-report/attendance-report';
 import { AttendanceApiService, attendanceErrorMessage } from '../data-access/attendance-api.service';
 import {
   AttendanceAction,
@@ -31,7 +32,7 @@ function isoDate(date: Date): string {
 
 @Component({
   selector: 'app-attendance-page',
-  imports: [PageHeader, ReactiveFormsModule, DatePipe],
+  imports: [PageHeader, ReactiveFormsModule, DatePipe, AttendanceReportPanel],
   templateUrl: './attendance-page.html',
   styleUrls: ['./attendance-page.scss', './attendance-history.scss', './attendance-today.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -173,6 +174,7 @@ export class AttendancePage implements OnInit {
           `${result.action === 'IN' ? 'Entrada' : 'Salida'} registrada a las ${hourOf(at)}: ${result.record.fullName}.`,
           'success',
         );
+        if (result.warning) this.notifications.show(result.warning, 'warning');
         this.applyLocally(result);
         this.refresh();
         this.codeInput()?.nativeElement.focus();

@@ -40,6 +40,43 @@ export interface AttendanceRecord {
 export interface AttendanceMarkResult {
   readonly action: AttendanceAction;
   readonly record: AttendanceRecord;
+  readonly warning?: string | null;
+}
+
+export interface AttendanceReportRow {
+  readonly profileId: string;
+  readonly fullName: string;
+  readonly role: string;
+  readonly userCode: string | null;
+  readonly storeName: string | null;
+  readonly daysWorked: number;
+  readonly workedMinutes: number;
+  readonly lateDays: number;
+  readonly lateMinutes: number;
+  readonly absences: number;
+  readonly missingCheckOuts: number;
+}
+
+export interface AttendanceReportDay {
+  readonly profileId: string;
+  readonly date: string;
+  readonly firstCheckIn: string | null;
+  readonly lastCheckOut: string | null;
+  readonly workedMinutes: number;
+  readonly lateMinutes: number;
+  readonly absent: boolean;
+  readonly missingCheckOut: boolean;
+}
+
+export interface AttendanceReport {
+  readonly from: string;
+  readonly to: string;
+  readonly workDays: string;
+  readonly workStart: string;
+  readonly workEnd: string;
+  readonly toleranceMinutes: number;
+  readonly rows: readonly AttendanceReportRow[];
+  readonly days: readonly AttendanceReportDay[];
 }
 
 export interface AttendanceAutoResult {

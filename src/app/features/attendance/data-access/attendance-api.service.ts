@@ -6,6 +6,7 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import {
   AttendanceAutoResult,
+  AttendanceReport,
   AttendanceMarkResult,
   AttendanceRecord,
   AttendanceStatus,
@@ -53,6 +54,12 @@ export class AttendanceApiService {
     let params = new HttpParams();
     for (const [key, value] of Object.entries(filters)) if (value) params = params.set(key, value);
     return this.http.get<readonly AttendanceRecord[]>(`${this.baseUrl}/records`, { params, context: this.context });
+  }
+
+  report(filters: { from: string; to: string; storeId?: string }): Observable<AttendanceReport> {
+    let params = new HttpParams().set('from', filters.from).set('to', filters.to);
+    if (filters.storeId) params = params.set('storeId', filters.storeId);
+    return this.http.get<AttendanceReport>(`${this.baseUrl}/report`, { params, context: this.context });
   }
 
   workers(storeId: string | null): Observable<readonly AttendanceWorker[]> {

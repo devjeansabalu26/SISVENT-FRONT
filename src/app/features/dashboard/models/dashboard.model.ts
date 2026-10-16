@@ -101,3 +101,38 @@ export interface PlatformDashboardResponse {
   readonly upcomingExpirations: readonly PlatformUpcomingExpiration[];
   readonly recentActivity: readonly PlatformActivity[];
 }
+
+export interface StoreTodayPerson {
+  readonly fullName: string;
+  readonly role: string;
+  readonly checkInAt: string;
+}
+
+export interface StoreTodayCash {
+  readonly openedBy: string;
+  readonly openedAt: string;
+  readonly expectedCash: number;
+  readonly salesCount: number;
+  readonly totalSales: number;
+}
+
+export interface StoreTodayAlert {
+  readonly code: 'NOBODY_IN_SHIFT' | 'CASH_OPEN_UNATTENDED' | 'CASH_CLOSED_WITH_STAFF';
+  readonly message: string;
+}
+
+export interface StoreTodayItem {
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly present: readonly StoreTodayPerson[];
+  readonly cash: StoreTodayCash | null;
+  readonly salesCount: number;
+  readonly salesTotal: number;
+  readonly alerts: readonly StoreTodayAlert[];
+}
+
+export interface StoresTodayResponse {
+  readonly date: string;
+  readonly attendanceEnabled: boolean;
+  readonly stores: readonly StoreTodayItem[];
+}
