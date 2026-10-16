@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
-import { DashboardResponse, PlatformDashboardResponse } from '../models/dashboard.model';
+import { DashboardResponse, PlatformDashboardResponse, StoresTodayResponse } from '../models/dashboard.model';
 
 export interface DashboardFilters {
   readonly dateFrom?: string;
@@ -23,6 +23,10 @@ export class DashboardApiService {
     if (filters.storeId) params = params.set('storeId', filters.storeId);
     if (filters.sellerId) params = params.set('sellerId', filters.sellerId);
     return this.http.get<DashboardResponse>(`${this.baseUrl}/api/v1/dashboard`, { params });
+  }
+
+  storesToday(): Observable<StoresTodayResponse> {
+    return this.http.get<StoresTodayResponse>(`${this.baseUrl}/api/v1/dashboard/stores-today`);
   }
 
   platform(): Observable<PlatformDashboardResponse> {

@@ -10,7 +10,7 @@ import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog
 import { DiffField, buildDiffRows } from '../../../shared/utils/diff-rows';
 import { SettingsApiService } from '../data-access/settings-api.service';
 import { CompanySettings } from '../models/settings.model';
-import { DateFormat, SettingsExtras, TaxRegime, TicketFormat } from '../models/settings-extras.model';
+import { DateFormat, SettingsExtras, TaxRegime, TicketFormat, WEEK_DAYS } from '../models/settings-extras.model';
 
 const TAX_REGIMES: readonly { readonly value: TaxRegime; readonly label: string }[] = [
   { value: 'RUS', label: 'Nuevo RUS' },
@@ -61,7 +61,18 @@ const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
   { key: 'strongPasswords', label: 'Contraseñas seguras obligatorias' },
   { key: 'passwordExpiryDays', label: 'Caducidad de contraseña (días)' },
   { key: 'inactivityLogoutMinutes', label: 'Cierre por inactividad (min)' },
+  { key: 'workDays', label: 'Días laborables', format: (value) => daysLabel(String(value)) },
+  { key: 'workStartTime', label: 'Hora de entrada' },
+  { key: 'workEndTime', label: 'Hora de salida' },
+  { key: 'lateToleranceMinutes', label: 'Tolerancia de tardanza (min)' },
+  { key: 'cashDifferenceAlert', label: 'Alerta de diferencia de caja', format: (value) => `S/ ${Number(value).toFixed(2)}` },
+  { key: 'notifyUnattendedStore', label: 'Aviso de local sin nadie en turno' },
 ];
+
+function daysLabel(value: string): string {
+  const days = value.split(',').map(Number);
+  return WEEK_DAYS.filter((day) => days.includes(day.value)).map((day) => day.label).join(', ') || '—';
+}
 
 @Component({
   selector: 'app-settings-page',
@@ -82,7 +93,8 @@ export class SettingsPage implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly loadError = signal(false);
-  readonly activeTab = signal<'general' | 'billing' | 'notifications' | 'security'>('general');
+  readonly activeTab = signal<'general' | 'billing' | 'notifications' | 'schedule' | 'security'>('general');
+  readonly weekDays = WEEK_DAYS;
   private version = 0;
   private saved: CompanySettings | null = null;
   private readonly lastSavedAt = signal<string | null>(null);
@@ -151,7 +163,27 @@ export class SettingsPage implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.min(5), Validators.max(240)],
     }),
+    workDays: new FormControl('1,2,3,4,5,6', { nonNullable: true, validators: [Validators.required] }),
+    workStartTime: new FormControl('09:00', { nonNullable: true, validators: [Validators.required] }),
+    workEndTime: new FormControl('18:00', { nonNullable: true, validators: [Validators.required] }),
+    lateToleranceMinutes: new FormControl(10, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0), Validators.max(240)],
+    }),
+    cashDifferenceAlert: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    notifyUnattendedStore: new FormControl(true, { nonNullable: true }),
   });
+
+  hasDay(day: number): boolean {
+    return this.extras.controls.workDays.value.split(',').map(Number).includes(day);
+  }
+
+  toggleDay(day: number, checked: boolean): void {
+    const current = this.extras.controls.workDays.value.split(',').filter(Boolean).map(Number).filter((value) => value !== day);
+    const next = checked ? [...current, day] : current;
+    this.extras.controls.workDays.setValue([...next].sort((a, b) => a - b).join(','));
+    this.extras.controls.workDays.markAsDirty();
+  }
 
   ngOnInit(): void {
     this.load();
@@ -251,6 +283,8 @@ export class SettingsPage implements OnInit {
       maxDiscountPercent: Number(value.maxDiscountPercent),
       passwordExpiryDays: Number(value.passwordExpiryDays),
       inactivityLogoutMinutes: Number(value.inactivityLogoutMinutes),
+      lateToleranceMinutes: Number(value.lateToleranceMinutes),
+      cashDifferenceAlert: Number(value.cashDifferenceAlert),
     };
   }
 
@@ -288,6 +322,12 @@ export class SettingsPage implements OnInit {
       notifyDailySummary: settings.notifyDailySummary,
       strongPasswords: settings.strongPasswords,
       passwordExpiryDays: settings.passwordExpiryDays,
+      workDays: settings.workDays ?? '1,2,3,4,5,6',
+      workStartTime: settings.workStartTime ?? '09:00',
+      workEndTime: settings.workEndTime ?? '18:00',
+      lateToleranceMinutes: settings.lateToleranceMinutes ?? 10,
+      cashDifferenceAlert: settings.cashDifferenceAlert ?? 10,
+      notifyUnattendedStore: settings.notifyUnattendedStore ?? true,
       inactivityLogoutMinutes: settings.inactivityLogoutMinutes,
     });
   }

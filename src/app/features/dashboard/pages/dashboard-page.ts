@@ -16,9 +16,11 @@ import {
   SellerDashboard,
 } from '../models/dashboard.model';
 
+import { StoresTodayPanel } from '../components/stores-today/stores-today';
+
 @Component({
   selector: 'app-dashboard-page',
-  imports: [PageHeader, KpiCard, StatusChip, RouterLink, DatePipe],
+  imports: [PageHeader, KpiCard, StatusChip, RouterLink, DatePipe, StoresTodayPanel],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

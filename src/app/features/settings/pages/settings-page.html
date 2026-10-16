@@ -6,6 +6,7 @@
   <button type="button" [class.active]="activeTab() === 'notifications'" (click)="activeTab.set('notifications')">
     Notificaciones
   </button>
+  <button type="button" [class.active]="activeTab() === 'schedule'" (click)="activeTab.set('schedule')">Horario</button>
   <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Seguridad</button>
 </nav>
 
@@ -222,6 +223,55 @@
             <label class="toggle">
               <span><strong>Resumen diario de ventas</strong><small>Informe al cierre de cada día</small></span>
               <input type="checkbox" role="switch" [formControl]="extras.controls.notifyDailySummary" />
+            </label>
+            <label class="toggle">
+              <span><strong>Local sin nadie en turno</strong><small>Aviso cuando el último en turno marca su salida y la caja del local sigue abierta</small></span>
+              <input type="checkbox" role="switch" [formControl]="extras.controls.notifyUnattendedStore" />
+            </label>
+          </div>
+          <label>
+            Avisar diferencias en el cierre de caja mayores a (S/)
+            <input type="number" min="0" step="0.5" [formControl]="extras.controls.cashDifferenceAlert" />
+            <small class="muted">Faltante o sobrante. 0 = avisar cualquier diferencia.</small>
+            @if (extras.controls.cashDifferenceAlert.touched && extras.controls.cashDifferenceAlert.invalid) {
+              <small class="hint">Ingresa un monto igual o mayor a 0.</small>
+            }
+          </label>
+        </fieldset>
+      }
+
+      @case ('schedule') {
+        <p class="note">Horario de trabajo de la empresa. Se usa para calcular tardanzas, faltas y horas en el reporte de asistencia.</p>
+        <fieldset>
+          <legend>Días laborables</legend>
+          <div class="days">
+            @for (day of weekDays; track day.value) {
+              <label class="day" [class.day--on]="hasDay(day.value)">
+                <input type="checkbox" [checked]="hasDay(day.value)" (change)="toggleDay(day.value, $any($event.target).checked)" />
+                {{ day.label }}
+              </label>
+            }
+          </div>
+          @if (!extras.controls.workDays.value) { <small class="hint">Selecciona al menos un día.</small> }
+        </fieldset>
+        <fieldset>
+          <legend>Horario</legend>
+          <div class="row">
+            <label>
+              Hora de entrada
+              <input type="time" [formControl]="extras.controls.workStartTime" />
+            </label>
+            <label>
+              Hora de salida
+              <input type="time" [formControl]="extras.controls.workEndTime" />
+              @if (extras.controls.workEndTime.value <= extras.controls.workStartTime.value) {
+                <small class="hint">La salida debe ser posterior a la entrada.</small>
+              }
+            </label>
+            <label>
+              Tolerancia de tardanza (minutos)
+              <input type="number" min="0" max="240" [formControl]="extras.controls.lateToleranceMinutes" />
+              <small class="muted">Llegar después de la hora de entrada más esta tolerancia cuenta como tardanza.</small>
             </label>
           </div>
         </fieldset>
