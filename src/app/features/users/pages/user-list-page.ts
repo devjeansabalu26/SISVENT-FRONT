@@ -8,7 +8,7 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { CredentialDialog } from '../../../shared/ui/credential-dialog/credential-dialog';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
-import { resetCredential, resetPasswordReview, userStatusReview } from '../../../shared/ui/review-dialog/status-reviews';
+import { resetCredential, resetPasswordReview, unlockReview, userStatusReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn, DataTableMenuAction } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -18,7 +18,7 @@ import { PlatformUserApiService } from '../data-access/platform-user-api.service
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, PlatformUserItem, UserFormValue, UserRoleLimit } from '../models/user.model';
 
-interface Row { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean }
+interface Row { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean; readonly isLocked: boolean }
 
 @Component({
   selector: 'app-user-list-page',
@@ -37,6 +37,7 @@ export class UserListPage implements OnInit {
   readonly isSuperadmin = inject(UserContextService).user()?.role === 'SUPERADMIN';
 
   readonly menuActions: readonly DataTableMenuAction[] = [
+    { id: 'unlock', label: 'Desbloquear cuenta', icon: 'lock_open' },
     { id: 'toggle', label: 'Activar / desactivar', icon: 'power_settings_new' },
     { id: 'copy-id', label: 'Copiar ID', icon: 'badge' },
     { id: 'copy-email', label: 'Copiar correo', icon: 'mail' },
@@ -67,6 +68,7 @@ export class UserListPage implements OnInit {
           storeName: u.storeName,
           companyName: u.companyName,
           isActive: u.isActive,
+          isLocked: u.isLocked ?? false,
         }
       : {
           id: u.id,
@@ -77,6 +79,7 @@ export class UserListPage implements OnInit {
           role: u.role,
           storeName: u.storeName,
           isActive: u.isActive,
+          isLocked: u.isLocked ?? false,
         };
   }
 
@@ -92,7 +95,7 @@ export class UserListPage implements OnInit {
         { key: 'role', label: 'Rol', value: (row) => row.role },
         { key: 'company', label: 'Empresa', value: (row) => row.companyName ?? '—' },
         { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
-        { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
+        { key: 'status', label: 'Estado', value: (row) => (row.isLocked ? 'LOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       ]
     : [
         { key: 'name', label: 'Nombre', value: (row) => row.fullName },
@@ -101,7 +104,7 @@ export class UserListPage implements OnInit {
         { key: 'document', label: 'Documento', value: (row) => row.document ?? '—' },
         { key: 'role', label: 'Rol', value: (row) => row.role },
         { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
-        { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
+        { key: 'status', label: 'Estado', value: (row) => (row.isLocked ? 'LOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       ];
 
   ngOnInit(): void {
@@ -184,6 +187,9 @@ export class UserListPage implements OnInit {
 
   onMenuAction(event: { action: string; row: Row }): void {
     switch (event.action) {
+      case 'unlock':
+        this.unlock(event.row);
+        return;
       case 'toggle':
         this.toggle(event.row);
         return;
@@ -207,6 +213,27 @@ export class UserListPage implements OnInit {
     );
   }
 
+  unlock(row: Row): void {
+    if (!row.isLocked) {
+      this.notifications.show('La cuenta de este usuario no está bloqueada.', 'info');
+      return;
+    }
+    this.dialog
+      .open(ReviewDialog, { data: unlockReview(row.fullName) })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        const request = this.isSuperadmin ? this.platformApi.unlock(row.id) : this.api.unlock(row.id);
+        request.subscribe({
+          next: () => {
+            this.notifications.show('Cuenta desbloqueada. El usuario ya puede iniciar sesión.', 'success');
+            this.load();
+          },
+          error: () => this.notifications.show('No se pudo desbloquear la cuenta.', 'error'),
+        });
+      });
+  }
+
   changePassword(row: Row): void {
     this.dialog
       .open(ReviewDialog, { data: resetPasswordReview(row.fullName) })
@@ -222,6 +249,7 @@ export class UserListPage implements OnInit {
               data: resetCredential(result.userCode ?? row.userCode ?? row.fullName, result.temporaryPassword),
               disableClose: true,
             });
+            this.load();
           },
           error: () => this.notifications.show('No se pudo generar la contraseña temporal.', 'error'),
         });

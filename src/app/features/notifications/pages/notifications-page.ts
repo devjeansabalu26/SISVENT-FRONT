@@ -164,6 +164,8 @@ export class NotificationsPage implements OnInit {
         return [{ label: 'Ver asistencia', route: ['/app/attendance'] }, { label: 'Ver caja', route: ['/app/sales/cash'] }];
       case 'companies':
         return id ? [{ label: 'Ver empresa', route: ['/app/companies', id] }] : [];
+      case 'user_profiles':
+        return id ? [{ label: 'Ver usuario', route: ['/app/users', id] }] : [];
       case 'plans':
       case 'company_plan_periods':
         if (this.isSuperadmin) return item.companyId ? [{ label: 'Ver empresa', route: ['/app/companies', item.companyId] }] : [];

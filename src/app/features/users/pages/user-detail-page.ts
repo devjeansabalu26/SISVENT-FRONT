@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { filter } from 'rxjs';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
+import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
+import { unlockReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { UserFormDialog } from '../components/user-form-dialog/user-form-dialog';
 import { SellerModulesCard } from '../components/seller-modules-card/seller-modules-card';
@@ -23,6 +26,7 @@ interface UserDetailView {
   readonly companyName: string | null;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string | null;
   readonly editable: AppUser | null;
@@ -77,6 +81,7 @@ export class UserDetailPage implements OnInit {
             companyName: detail.companyName,
             storeName: detail.storeName,
             isActive: detail.isActive,
+            isLocked: detail.isLocked ?? false,
             lastActivityAt: detail.lastActivityAt,
             createdAt: detail.createdAt,
             editable: null,
@@ -99,6 +104,7 @@ export class UserDetailPage implements OnInit {
           companyName: null,
           storeName: detail.storeName,
           isActive: detail.isActive,
+          isLocked: detail.isLocked ?? false,
           lastActivityAt: detail.lastActivityAt,
           createdAt: detail.createdAt,
           editable: {
@@ -118,6 +124,25 @@ export class UserDetailPage implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  unlock(): void {
+    const user = this.user();
+    if (!user?.isLocked) return;
+    this.dialog
+      .open(ReviewDialog, { data: unlockReview(user.fullName) })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        const request = this.isSuperadmin ? this.platformApi.unlock(user.id) : this.api.unlock(user.id);
+        request.subscribe({
+          next: () => {
+            this.notifications.show('Cuenta desbloqueada. El usuario ya puede iniciar sesión.', 'success');
+            this.load();
+          },
+          error: () => this.notifications.show('No se pudo desbloquear la cuenta.', 'error'),
+        });
+      });
   }
 
   edit(): void {

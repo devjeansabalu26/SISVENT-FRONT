@@ -52,6 +52,10 @@ export class PlatformUserApiService {
     return this.http.post<PlatformResetAccessResponse>(`${this.baseUrl}/${profileId}/reset-access`, null);
   }
 
+  unlock(profileId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${profileId}/unlock`, null);
+  }
+
   setStatus(profileId: string, active: boolean, reason: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${profileId}/status`, { active, reason });
   }

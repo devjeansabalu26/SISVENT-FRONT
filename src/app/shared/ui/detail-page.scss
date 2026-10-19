@@ -164,3 +164,16 @@ dd {
     padding: 10px;
   }
 }
+
+.locked-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-md);
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 35%, var(--color-border));
+  border-radius: var(--radius-md);
+  color: var(--color-error-text);
+  background: color-mix(in srgb, var(--color-error) 8%, var(--color-surface));
+  font-size: var(--font-size-sm);
+}
