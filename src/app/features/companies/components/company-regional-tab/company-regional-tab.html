@@ -1,0 +1,103 @@
+@if (loading()) {
+  <p class="muted">Cargando configuración regional…</p>
+} @else if (data(); as info) {
+  <form class="surface-card regional" [formGroup]="form" (ngSubmit)="save()">
+    <header class="regional__head">
+      <div>
+        <h3>Configuración regional</h3>
+        <p>
+          País, moneda, zona horaria, impuesto y régimen con los que opera la empresa. El administrador de la empresa
+          solo puede verlos; cada cambio queda en la auditoría con su motivo.
+        </p>
+      </div>
+      @if (info.regionalUpdatedAt) {
+        <small class="muted">Último cambio: {{ info.regionalUpdatedAt | dateTime }}</small>
+      }
+    </header>
+
+    @if (info.hasSales || info.hasCashActivity) {
+      <p class="notice">
+        <span class="material-icons">lock</span>
+        La empresa ya tiene ventas o movimientos de caja: el país y la moneda no se pueden cambiar.
+      </p>
+    }
+
+    <div class="fields">
+      <label>
+        <span>País <span class="required">*</span></span>
+        <select formControlName="countryCode">
+          @for (item of selectableCountries(); track item.code) {
+            <option [value]="item.code">{{ item.name }}{{ item.isActive ? '' : ' (inactivo)' }}</option>
+          }
+        </select>
+        @if (countryLocked()) { <small class="hint">Bloqueado: la empresa ya tiene ventas.</small> }
+      </label>
+      <label>
+        <span>Moneda <span class="required">*</span></span>
+        <select formControlName="currencyCode">
+          @for (item of selectableCurrencies(); track item.code) {
+            <option [value]="item.code">{{ item.code }} · {{ item.name }} ({{ item.symbol }})</option>
+          }
+        </select>
+        @if (currencyLocked()) { <small class="hint">Bloqueada: la empresa ya tiene ventas.</small> }
+      </label>
+
+      @if (countryChanged()) {
+        <label class="full">
+          <span>{{ country()?.taxIdLabel ?? 'Documento fiscal' }} de la empresa <span class="required">*</span></span>
+          <input formControlName="taxDocument" [placeholder]="country()?.taxIdPlaceholder ?? ''" />
+          <small class="hint">Al cambiar de país se valida el documento fiscal con las reglas de {{ country()?.name }} y se reinician las series de comprobante.</small>
+          @if (form.controls.taxDocument.touched && !form.controls.taxDocument.value.trim()) {
+            <span class="error">Ingresa el {{ country()?.taxIdName ?? 'documento fiscal' }}.</span>
+          }
+        </label>
+      }
+
+      <label>
+        <span>Zona horaria <span class="required">*</span></span>
+        <select formControlName="timezone">
+          @for (zone of timezones(); track zone.timezone) {
+            <option [value]="zone.timezone">{{ zone.name }} ({{ zone.timezone }})</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Idioma / formato regional <span class="required">*</span></span>
+        <input formControlName="locale" placeholder="es-CO" />
+      </label>
+      <label>
+        <span>Formato de fecha <span class="required">*</span></span>
+        <select formControlName="dateFormat">
+          @for (format of dateFormats; track format) {
+            <option [value]="format">{{ format }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Tasa de {{ country()?.taxName ?? 'impuesto' }} (%) <span class="required">*</span></span>
+        <input type="number" min="0" max="99.99" step="0.01" formControlName="taxRatePercent" />
+        <small class="hint">Se aplica a las ventas nuevas; las ventas anteriores conservan su tasa.</small>
+      </label>
+      <label class="full">
+        <span>Régimen tributario <span class="required">*</span></span>
+        <select formControlName="taxRegime">
+          @for (regime of regimes(); track regime.code) {
+            <option [value]="regime.code">{{ regime.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="full">
+        <span>Motivo del cambio <span class="required">*</span></span>
+        <textarea formControlName="reason" maxlength="500" placeholder="Ej. La empresa opera en Colombia desde octubre"></textarea>
+        @if (form.controls.reason.touched && form.controls.reason.invalid) {
+          <span class="error">Indica el motivo (mínimo 5 caracteres).</span>
+        }
+      </label>
+    </div>
+
+    <footer class="regional__foot">
+      <button type="button" class="ghost" (click)="discard()" [disabled]="saving()">Descartar</button>
+      <button type="submit" class="primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar configuración' }}</button>
+    </footer>
+  </form>
+}

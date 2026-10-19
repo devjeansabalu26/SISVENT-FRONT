@@ -13,6 +13,7 @@ import {
   NotificationItem,
   NotificationTab,
 } from '../models/notification-item.model';
+import { formatDate, formatTime } from '../../../core/regional/regional-format';
 
 const EMPTY_COUNTS: NotificationCounts = { all: 0, unread: 0, alerts: 0, critical: 0, updates: 0, system: 0 };
 
@@ -23,9 +24,9 @@ export function timeAgo(iso: string, now = new Date()): string {
   if (minutes < 60) return `Hace ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-  const time = date.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  const time = formatTime(date);
   if (hours < 48) return `Ayer, ${time}`;
-  return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return formatDate(date);
 }
 
 @Component({

@@ -3,7 +3,7 @@
   <article><span>Total clientes</span><strong>{{ summary()?.total ?? '—' }}</strong><i class="material-icons">groups</i></article>
   <article><span>Activos</span><strong>{{ summary()?.active ?? '—' }}</strong><i class="material-icons">check_circle_outline</i></article>
   <article><span>Nuevos este mes</span><strong>{{ summary()?.newThisMonth ?? '—' }}</strong><i class="material-icons">person_add_alt</i></article>
-  <article><span>Compras promedio</span><strong>S/ {{ (summary()?.averagePurchases ?? 0).toFixed(2) }}</strong><i class="material-icons">shopping_cart</i></article>
+  <article><span>Compras promedio</span><strong>{{ (summary()?.averagePurchases ?? 0) | money }}</strong><i class="material-icons">shopping_cart</i></article>
 </section>
 <section class="filters"><label><span class="material-icons">search</span><input #searchBox [value]="search()" (input)="search.set(searchBox.value)" placeholder="Buscar por nombre, documento o correo…" /></label></section>
 <app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showKey]="isSeller" keyLabel="Seleccionar para venta" keyIcon="add_shopping_cart" (key)="selectForSale($event)" editLabel="Ver cliente" editIcon="visibility" removeLabel="Editar cliente" removeIcon="edit" [showRemove]="canManage" (edit)="open($event)" (remove)="edit($event)" [customEmpty]="true">

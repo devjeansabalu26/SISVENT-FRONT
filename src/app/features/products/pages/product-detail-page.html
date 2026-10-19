@@ -17,7 +17,7 @@
 
   <div class="kpi-grid">
     <app-kpi-card label="Stock actual" [value]="product.totalStock + ' u.'" icon="inventory_2" tone="primary" />
-    <app-kpi-card label="Precio de venta" [value]="'S/ ' + product.salePrice.toFixed(2)" icon="sell" tone="success" />
+    <app-kpi-card label="Precio de venta" [value]="(product.salePrice | money)" icon="sell" tone="success" />
     <app-kpi-card label="Stock mínimo" [value]="product.minStock + ' u.'" icon="warning" tone="warning" />
   </div>
 
@@ -55,9 +55,9 @@
             <tbody>
               @for (item of priceHistory(); track item.changedAt) {
                 <tr>
-                  <td>{{ item.changedAt | date: 'short' }}</td>
-                  <td>S/ {{ item.oldPrice.toFixed(2) }}</td>
-                  <td>S/ {{ item.newPrice.toFixed(2) }}</td>
+                  <td>{{ item.changedAt | dateTime }}</td>
+                  <td>{{ item.oldPrice | money }}</td>
+                  <td>{{ item.newPrice | money }}</td>
                   <td>{{ item.reason || '—' }}</td>
                 </tr>
               }

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -17,10 +16,11 @@ import {
 } from '../models/dashboard.model';
 
 import { StoresTodayPanel } from '../components/stores-today/stores-today';
+import { CompactMoneyPipe, DateTimePipe, LocalTimePipe, MoneyPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [PageHeader, KpiCard, StatusChip, RouterLink, DatePipe, StoresTodayPanel],
+  imports: [PageHeader, KpiCard, StatusChip, RouterLink, StoresTodayPanel, MoneyPipe, CompactMoneyPipe, DateTimePipe, ShortDatePipe, LocalTimePipe],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -43,4 +43,4 @@
       actionLabel="Nueva venta" (action)="newSale()" />
   }
 </app-data-table>
-<section class="totals"><span>Operaciones: <strong>{{ totals().operationCount }}</strong></span><span>Total ventas: <strong>S/ {{ totals().totalAmount.toFixed(2) }}</strong></span></section>
+<section class="totals"><span>Operaciones: <strong>{{ totals().operationCount }}</strong></span><span>Total ventas: <strong>{{ totals().totalAmount | money }}</strong></span></section>

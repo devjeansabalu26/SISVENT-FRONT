@@ -3,15 +3,16 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { AppHttpError } from '../../../../core/http/models/app-http-error.model';
 import { StoreApiService } from '../../../locales/data-access/store-api.service';
 import { CashClosure, CashClosureApiService, CashClosurePreview } from '../../data-access/cash-closure-api.service';
+import { MoneyPipe, RegionalPipe } from '../../../../shared/pipes/date-time.pipe';
+import { companyToday } from '../../../../core/regional/regional-format';
 
 function today(): string {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  return companyToday();
 }
 
 @Component({
   selector: 'app-cash-close-dialog',
-  imports: [MatDialogModule],
+  imports: [MatDialogModule, MoneyPipe, RegionalPipe],
   templateUrl: './cash-close-dialog.html',
   styleUrls: ['../../../../shared/forms/dialog-form.scss', './cash-close-dialog.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

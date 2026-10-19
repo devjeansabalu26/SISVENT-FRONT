@@ -7,11 +7,9 @@ import { LoadState, ReplenishmentLoadState, loadStateFor } from '../components/l
 import { ReplenishmentApiService } from '../data-access/replenishment-api.service';
 import { StagnantAnalysis, StagnantItem } from '../models/replenishment.model';
 import { formatQuantity, formatSoles } from '../utils/replenishment-format';
+import { formatDate } from '../../../core/regional/regional-format';
 
 const THRESHOLDS = [30, 60, 90, 120] as const;
-
-const formatDate = (iso: string | null): string =>
-  iso ? new Date(iso).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 
 @Component({
   selector: 'app-stagnant-stock-page',

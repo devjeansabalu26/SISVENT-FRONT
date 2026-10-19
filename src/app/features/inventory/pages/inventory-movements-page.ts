@@ -5,6 +5,7 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { InventoryApiService } from '../data-access/inventory-api.service';
 import { InventoryMovement } from '../models/inventory-movement.model';
+import { formatDateTime } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-inventory-movements-page',
@@ -37,7 +38,7 @@ export class InventoryMovementsPage implements OnInit {
   readonly adjustments = computed(() => this.movements().filter((item) => item.movementType.includes('ADJUSTMENT')).length);
 
   readonly columns: readonly DataTableColumn<InventoryMovement>[] = [
-    { key: 'createdAt', label: 'Fecha / hora', value: (row) => new Date(row.createdAt).toLocaleString('es-PE') },
+    { key: 'createdAt', label: 'Fecha / hora', value: (row) => formatDateTime(row.createdAt) },
     { key: 'code', label: 'Código', value: (row) => row.code },
     { key: 'movementType', label: 'Tipo', value: (row) => row.movementType },
     { key: 'productName', label: 'Producto', value: (row) => row.productName },

@@ -6,6 +6,7 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
 
   { label: 'Empresas', icon: 'business', route: '/app/companies', group: 'Plataforma', roles: ['SUPERADMIN'], permissions: [APP_PERMISSIONS.companiesView] },
   { label: 'Planes y precios', icon: 'sell', route: '/app/plans', group: 'Plataforma', roles: ['SUPERADMIN'], permissions: [APP_PERMISSIONS.plansManage] },
+  { label: 'Países y monedas', icon: 'public', route: '/app/countries', group: 'Plataforma', roles: ['SUPERADMIN'], permissions: [APP_PERMISSIONS.companiesManage] },
   { label: 'Usuarios globales', icon: 'groups', route: '/app/users', group: 'Plataforma', roles: ['SUPERADMIN'], permissions: [APP_PERMISSIONS.usersView] },
 
   { label: 'Punto de venta', icon: 'shopping_cart', route: '/app/pos', group: 'Operaciones', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.salesCreate], requiredFeature: 'SALES' },

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CashSession, CashSessionApiService, cashErrorMessage } from '../../data-access/cash-session-api.service';
+import { RegionalPipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface CashOpenData {
   readonly storeId: string;
@@ -11,7 +12,7 @@ export interface CashOpenData {
 
 @Component({
   selector: 'app-cash-open-dialog',
-  imports: [MatDialogModule, ReactiveFormsModule],
+  imports: [MatDialogModule, ReactiveFormsModule, RegionalPipe],
   template: `
     <form class="dialog" [formGroup]="form" (ngSubmit)="confirm()">
       <header>
@@ -24,8 +25,8 @@ export interface CashOpenData {
 
       <div class="fields">
         <label class="wide"
-          ><span>Monto inicial en caja (S/) <span class="required">*</span></span>
-          <input type="number" min="0" step="0.10" formControlName="amount" placeholder="Escribe el efectivo con el que abres (ej. 100.00)"
+          ><span>Monto inicial en caja ({{ 'currencySymbol' | regional }}) <span class="required">*</span></span>
+          <input type="number" min="0" [step]="'cashStep' | regional" formControlName="amount" placeholder="Escribe el efectivo con el que abres (ej. 100.00)"
             [class.invalid]="showError()" />
           @if (showError()) {
             <small class="hint">

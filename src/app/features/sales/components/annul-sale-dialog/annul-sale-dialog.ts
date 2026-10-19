@@ -4,6 +4,7 @@ import { AppHttpError } from '../../../../core/http/models/app-http-error.model'
 import { SaleApiService } from '../../data-access/sale-api.service';
 import { PaymentMethodOption } from '../../models/payment.model';
 import { SaleAnnulmentOptions, SaleDetail } from '../../models/sale-detail.model';
+import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface AnnulSaleDialogData {
   readonly sale: SaleDetail;
@@ -20,14 +21,14 @@ interface AnnulLine {
 
 @Component({
   selector: 'app-annul-sale-dialog',
-  imports: [MatDialogModule],
+  imports: [MatDialogModule, MoneyPipe],
   template: `
     <form class="dialog review review--danger" (submit)="$event.preventDefault(); confirm()">
       <header>
         <span class="material-icons">block</span>
         <div class="review__title">
           <h2>Anular venta {{ data.sale.saleNumber }}</h2>
-          <p>{{ data.sale.clientName ?? 'Cliente general' }} · S/ {{ data.sale.total.toFixed(2) }} · {{ data.sale.storeName }}</p>
+          <p>{{ data.sale.clientName ?? 'Cliente general' }} · {{ data.sale.total | money }} · {{ data.sale.storeName }}</p>
         </div>
       </header>
 
@@ -67,7 +68,7 @@ interface AnnulLine {
         <div class="refund">
           <p>
             <span class="material-icons">payments</span>
-            La caja de esta venta ya se cerró. Se devolverán <strong>S/ {{ data.options.refundAmount.toFixed(2) }}</strong>
+            La caja de esta venta ya se cerró. Se devolverán <strong>{{ data.options.refundAmount | money }}</strong>
             @if (data.options.storeHasOpenCash) { desde la caja abierta de {{ data.sale.storeName }}. }
             @else { y quedarán pendientes hasta que se abra la caja de {{ data.sale.storeName }}. }
           </p>

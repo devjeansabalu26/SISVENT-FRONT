@@ -1,0 +1,61 @@
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+:where(input, select, textarea, label) {
+  min-width: 0;
+}
+
+select {
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+:where(table) {
+  overflow-wrap: normal;
+}
+
+@media (max-width: 900px) and (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='color'], [type='range'], [type='file'], [type='hidden']),
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-smd);
+  }
+
+  .surface-card {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 360px) {
+  .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mat-mdc-dialog-panel {
+  @media (max-width: 600px) {
+    --mat-dialog-container-max-width: calc(100vw - 16px);
+    --mat-dialog-container-small-max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+}

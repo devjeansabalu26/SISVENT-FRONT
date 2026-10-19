@@ -13,6 +13,46 @@
   <section class="card">
     <h2>1. Datos de la empresa</h2>
     <div class="fields">
+      @if (!isEdit) {
+        <label class="full"
+          ><span>País <span class="required">*</span></span>
+          <select formControlName="countryCode">
+            @for (country of countries(); track country.code) {
+              <option [value]="country.code">{{ country.name }}</option>
+            }
+            @if (!countries().length) {
+              <option value="PE">Perú</option>
+            }
+          </select>
+          @if (countryForm(); as info) {
+            <span class="note">
+              Moneda {{ info.currency.code }} ({{ info.currency.symbol }}) · {{ info.country.taxName }}
+              {{ taxPercent() }} % · Documento fiscal {{ info.country.taxIdName }}
+              @if (info.country.eInvoicingAuthority) { · {{ info.country.eInvoicingAuthority }} }
+            </span>
+          }
+        </label>
+        @if (countryInfo(); as country) {
+          @if (country.timezones.length > 1) {
+            <label
+              ><span>Zona horaria <span class="required">*</span></span>
+              <select formControlName="timezone">
+                @for (zone of country.timezones; track zone.timezone) {
+                  <option [value]="zone.timezone">{{ zone.name }}</option>
+                }
+              </select>
+            </label>
+          }
+          <label
+            ><span>Régimen tributario <span class="required">*</span></span>
+            <select formControlName="taxRegime">
+              @for (regime of country.taxRegimes; track regime.code) {
+                <option [value]="regime.code">{{ regime.name }}</option>
+              }
+            </select>
+          </label>
+        }
+      }
       <label
         ><span>Nombre comercial <span class="required">*</span></span>
         <input formControlName="tradeName" placeholder="Ej. TechStore Perú" />
@@ -23,15 +63,15 @@
       <label><span>Razón social <span class="required">*</span></span> <input formControlName="legalName" placeholder="Ej. Importaciones Tecnológicas S.A.C." /></label>
       @if (!isEdit) {
         <label
-          ><span>RUC <span class="required">*</span></span>
-          <input formControlName="taxId" placeholder="20512345678" />
+          ><span>{{ taxIdLabel() }} <span class="required">*</span></span>
+          <input formControlName="taxId" [placeholder]="countryInfo()?.taxIdPlaceholder ?? '20512345678'" />
           @if (form.controls.taxId.touched && form.controls.taxId.invalid) {
-            <span class="error">11 dígitos.</span>
+            <span class="error">Formato no válido para {{ countryInfo()?.name ?? 'el país' }}@if (countryInfo()?.taxIdPlaceholder) {. Ejemplo: {{ countryInfo()?.taxIdPlaceholder }}}.</span>
           }
         </label>
       }
       <label>Rubro / descripción <input formControlName="businessType" /></label>
-      <label>Teléfono de la empresa <input formControlName="companyPhone" placeholder="+51 999 999 999" /></label>
+      <label>Teléfono de la empresa <input formControlName="companyPhone" [placeholder]="phonePlaceholder()" /></label>
       <label
         ><span>Correo de contacto <span class="required">*</span></span>
         <input type="email" formControlName="companyEmail" placeholder="contacto@empresa.pe" />
@@ -88,7 +128,7 @@
         </label>
       }
       <label>Teléfono <input formControlName="adminPhone" /></label>
-      <label>Documento (DNI/CE) <input formControlName="adminDocument" /></label>
+      <label>Documento ({{ adminDocumentHint() }}) <input formControlName="adminDocument" [placeholder]="personDocuments()[0]?.placeholder ?? ''" /></label>
     </div>
   </section>
 

@@ -21,7 +21,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   businesstype: 'Rubro',
   tradename: 'Nombre comercial',
   legalname: 'Razón social',
-  taxdocument: 'RUC',
+  taxdocument: 'Documento fiscal',
   documenttype: 'Tipo de documento',
   documentnumber: 'N.º de documento',
   displayname: 'Nombre',

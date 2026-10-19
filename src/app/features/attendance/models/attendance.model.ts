@@ -1,3 +1,5 @@
+import { formatTime } from '../../../core/regional/regional-format';
+
 export type AttendanceAction = 'IN' | 'OUT';
 
 export interface AttendancePerson {
@@ -109,7 +111,7 @@ export interface SaveAttendanceBody {
 }
 
 export function hourOf(value: string): string {
-  return new Date(value).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return formatTime(value);
 }
 
 export const ROLE_LABELS: Readonly<Record<string, string>> = { ADMIN: 'Administrador', VENDEDOR: 'Vendedor' };

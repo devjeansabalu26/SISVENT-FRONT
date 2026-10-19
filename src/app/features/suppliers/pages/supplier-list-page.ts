@@ -13,10 +13,12 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { SupplierApiService } from '../data-access/supplier-api.service';
 import { Supplier } from '../models/supplier.model';
+import { currentRegional } from '../../../core/regional/regional-format';
+import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-supplier-list-page',
-  imports: [DataTable, PageHeader, KpiCard, RouterLink],
+  imports: [DataTable, PageHeader, KpiCard, RouterLink, RegionalPipe],
   templateUrl: './supplier-list-page.html',
   styleUrl: '../../../shared/ui/list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,7 +52,7 @@ export class SupplierListPage implements OnInit {
   readonly activeSuppliers = computed(() => this.suppliers().filter((item) => item.isActive).length);
 
   readonly columns: readonly DataTableColumn<Supplier>[] = [
-    { key: 'taxDocument', label: 'RUC / Documento', value: (row) => row.taxDocument ?? '—' },
+    { key: 'taxDocument', label: `${currentRegional().taxIdName} / Documento`, value: (row) => row.taxDocument ?? '—' },
     { key: 'businessName', label: 'Razón social', value: (row) => row.businessName },
     { key: 'contactName', label: 'Contacto', value: (row) => row.contactName ?? '—' },
     { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },

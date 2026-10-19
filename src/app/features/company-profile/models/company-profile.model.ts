@@ -28,6 +28,9 @@ export interface CompanyProfile {
   readonly planName: string | null;
   readonly theme: CompanyTheme;
   readonly fiscal: CompanyFiscal | null;
+  readonly taxIdName?: string;
+  readonly countryCode?: string;
+  readonly countryName?: string;
 }
 
 export interface UpdateCompanyProfile {

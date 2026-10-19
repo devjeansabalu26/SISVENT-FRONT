@@ -1,4 +1,7 @@
 <div class="main-layout">
   <app-sidebar [compact]="navigationClosed()" (navigate)="closeNavigation()" />
+  @if (!navigationClosed()) {
+    <div class="main-layout__backdrop" aria-hidden="true" (click)="closeNavigation()"></div>
+  }
   <section class="main-layout__workspace"><app-header (menuToggle)="toggleNavigation()" /><main><router-outlet /></main></section>
 </div>

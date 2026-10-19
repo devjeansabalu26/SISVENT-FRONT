@@ -11,3 +11,17 @@ header { height: 64px; display: flex; align-items: center; justify-content: spac
 
 .store-name { display: inline-flex; align-items: center; gap: 4px; }
 .store-name .material-icons { font-size: 14px; color: var(--color-primary); }
+.crumb { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.user { flex-shrink: 0; }
+@media (max-width: 600px) {
+  header { gap: 8px; padding: 0 12px; }
+  .user { gap: 4px; }
+  .store-picker + .user { margin-left: 0; }
+  .crumb:has(+ .store-picker) { display: none; }
+  .store-picker { flex: 1 1 auto; min-width: 0; margin-left: 4px; }
+  .store-picker select { width: 100%; max-width: none; }
+}
+@media (max-width: 380px) {
+  .crumb { display: none; }
+  .store-picker .material-icons { display: none; }
+}

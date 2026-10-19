@@ -8,6 +8,7 @@ import { AttendanceMarkDialog, AttendanceMarkDialogData } from '../components/at
 import { AttendanceApiService } from '../data-access/attendance-api.service';
 import { AttendanceStatus, hourOf } from '../models/attendance.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
+import { companyToday } from '../../../core/regional/regional-format';
 
 @Injectable({ providedIn: 'root' })
 export class AttendanceEntryPromptService {
@@ -33,7 +34,7 @@ export class AttendanceEntryPromptService {
     this.checkedFor = user.userId;
     const manages = this.access.canAccess({ permissions: [APP_PERMISSIONS.attendanceManage] });
     const storeId = user.role === 'VENDEDOR' ? (user.branchId ?? null) : (this.storeContext.selectedStoreId() ?? user.branchId ?? null);
-    const today = new Date().toLocaleDateString('en-CA');
+    const today = companyToday();
     const autoKey = `sisvent.attendance.auto.${user.userId}`;
     const shouldAuto = user.role === 'VENDEDOR' && (this.loginPending || this.readAutoDate(autoKey) !== today);
     this.loginPending = false;

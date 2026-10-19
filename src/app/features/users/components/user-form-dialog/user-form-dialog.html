@@ -6,7 +6,7 @@
     <label class="wide">Correo electrónico<input type="email" formControlName="email" placeholder="usuario@empresa.com" />
       @if (user) { <small class="muted">El correo no se puede cambiar una vez creado el usuario.</small> }
     </label>
-    <label>Documento<input inputmode="numeric" formControlName="document" placeholder="DNI o documento" /></label>
+    <label>Documento<input inputmode="numeric" formControlName="document" placeholder="Documento de identidad" /></label>
     <label>Teléfono<input formControlName="phone" placeholder="Teléfono" /></label>
     <label>Rol<select formControlName="role"><option value="ADMIN">Administrador</option><option value="VENDEDOR">Vendedor</option></select></label>
     @if (form.controls.role.value === 'VENDEDOR') {

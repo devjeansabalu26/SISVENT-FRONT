@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,14 +24,12 @@ import {
   ROLE_LABELS,
   hourOf,
 } from '../models/attendance.model';
-
-function isoDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+import { DayMonthTimePipe, LocalTimePipe } from '../../../shared/pipes/date-time.pipe';
+import { addDays, companyToday } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-attendance-page',
-  imports: [PageHeader, ReactiveFormsModule, DatePipe, AttendanceReportPanel],
+  imports: [PageHeader, ReactiveFormsModule, AttendanceReportPanel, LocalTimePipe, DayMonthTimePipe],
   templateUrl: './attendance-page.html',
   styleUrls: ['./attendance-page.scss', './attendance-history.scss', './attendance-today.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,8 +61,8 @@ export class AttendancePage implements OnInit {
   readonly workers = signal<readonly AttendanceWorker[]>([]);
   readonly storeFilter = signal('');
   readonly personFilter = signal('');
-  readonly from = signal(isoDate(new Date(Date.now() - 6 * 86_400_000)));
-  readonly to = signal(isoDate(new Date()));
+  readonly from = signal(addDays(companyToday(), -6));
+  readonly to = signal(companyToday());
 
   readonly present = computed(() => this.status()?.present ?? []);
   readonly today = computed(() => {
@@ -214,8 +211,8 @@ export class AttendancePage implements OnInit {
   clearFilters(): void {
     this.storeFilter.set('');
     this.personFilter.set('');
-    this.from.set(isoDate(new Date(Date.now() - 6 * 86_400_000)));
-    this.to.set(isoDate(new Date()));
+    this.from.set(addDays(companyToday(), -6));
+    this.to.set(companyToday());
     this.loadHistory();
   }
 

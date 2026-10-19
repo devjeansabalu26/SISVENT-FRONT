@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { formatSoles } from '../../../../shared/utils/diff-rows';
+import { formatAmount } from '../../../../shared/utils/diff-rows';
 
 export interface PriceChangeData {
   readonly productName: string;
@@ -71,7 +71,7 @@ export class PriceChangeDialog {
   readonly delta = this.data.newPrice - this.data.previousPrice;
   readonly absDelta = Math.abs(this.delta);
   readonly variation = priceVariation(this.data.previousPrice, this.data.newPrice);
-  readonly soles = formatSoles;
+  readonly soles = formatAmount;
 
   readonly reason = new FormControl('', {
     nonNullable: true,

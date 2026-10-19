@@ -8,7 +8,7 @@
     <app-kpi-card label="Productos" [value]="data.productCount" icon="inventory_2" tone="success" />
     <app-kpi-card label="Clientes" [value]="data.clientCount" icon="people" tone="success" />
     <app-kpi-card label="Ventas" [value]="data.salesCount" icon="point_of_sale" tone="warning" />
-    <app-kpi-card label="Monto vendido" [value]="'S/ ' + data.salesAmount.toFixed(2)" icon="payments" tone="warning" />
+    <app-kpi-card label="Monto vendido" [value]="salesAmount()" icon="payments" tone="warning" />
     <app-kpi-card label="Stock total" [value]="data.totalStockUnits" icon="inventory" tone="default" />
   </div>
 

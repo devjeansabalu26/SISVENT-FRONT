@@ -275,3 +275,34 @@ label.toggle small,
   color: var(--color-primary);
   background: var(--color-primary-soft);
 }
+
+.readonly-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.readonly-note .material-icons {
+  font-size: 16px;
+}
+
+.regional-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: 12px 20px;
+  margin: 4px 0 0;
+}
+
+.regional-grid dt {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.regional-grid dd {
+  margin: 2px 0 0;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}

@@ -6,6 +6,8 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CustomerApiService } from '../data-access/customer-api.service';
+import { RegionalService } from '../../../core/regional/regional.service';
+import { applyDocumentType, defaultDocumentType, documentOptions } from '../../../core/regional/document-types';
 import { CustomerDetail } from '../models/customer.model';
 
 @Component({
@@ -20,6 +22,7 @@ export class CustomerFormPage implements OnInit {
   private readonly api = inject(CustomerApiService);
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
+  private readonly regional = inject(RegionalService);
 
   readonly isEdit = !!this.id;
   readonly loading = signal(this.isEdit);
@@ -28,10 +31,7 @@ export class CustomerFormPage implements OnInit {
 
   readonly form = new FormGroup({
     documentType: new FormControl('DNI', { nonNullable: true, validators: [Validators.required] }),
-    documentNumber: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^\d{8,11}$/)],
-    }),
+    documentNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     displayName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.email] }),
@@ -43,13 +43,24 @@ export class CustomerFormPage implements OnInit {
   private readonly documentType = toSignal(this.form.controls.documentType.valueChanges, {
     initialValue: this.form.controls.documentType.value,
   });
-  readonly isCompany = computed(() => this.documentType() === 'RUC');
+  private readonly loadedType = signal<string | null>(null);
+  readonly documentTypes = computed(() => documentOptions(this.regional.documentTypes(), this.loadedType()));
+  readonly selectedType = computed(() => this.documentTypes().find((type) => type.code === this.documentType()));
+  readonly isCompany = computed(() => this.selectedType()?.isBusiness ?? false);
 
   ngOnInit(): void {
+    this.form.controls.documentType.valueChanges.subscribe(() =>
+      applyDocumentType(this.form.controls.documentNumber, this.selectedType()),
+    );
+    void this.regional.loadDocumentTypes().then((types) => {
+      if (!this.id) this.form.controls.documentType.setValue(defaultDocumentType(types));
+      applyDocumentType(this.form.controls.documentNumber, this.selectedType());
+    });
     if (!this.id) return;
     this.api.get(this.id).subscribe({
       next: (customer) => {
         this.existing = customer;
+        this.loadedType.set(customer.documentType ?? null);
         this.form.patchValue({
           documentType: customer.documentType ?? 'DNI',
           documentNumber: customer.documentNumber ?? '',

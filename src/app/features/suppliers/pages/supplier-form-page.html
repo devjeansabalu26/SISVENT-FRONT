@@ -7,7 +7,7 @@
   <section class="card">
     <h2>Identificación</h2>
     <div class="fields three">
-      <label>RUC / Documento
+      <label>{{ 'taxIdName' | regional }} / Documento
         <input formControlName="taxDocument" />
         @if (form.controls.taxDocument.touched && form.controls.taxDocument.invalid) {
           <span class="error">Ingresa un documento válido.</span>

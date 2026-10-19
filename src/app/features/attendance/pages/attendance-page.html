@@ -49,7 +49,7 @@
     @if (lastResult(); as result) {
       <p class="result" [class.result--out]="result.action === 'OUT'">
         <span class="material-icons">{{ result.action === 'IN' ? 'check_circle' : 'logout' }}</span>
-        {{ result.action === 'IN' ? 'Entrada' : 'Salida' }} de <strong>{{ result.name }}</strong> a las {{ result.at | date: 'HH:mm' }}
+        {{ result.action === 'IN' ? 'Entrada' : 'Salida' }} de <strong>{{ result.name }}</strong> a las {{ result.at | localTime }}
       </p>
     }
   </section>
@@ -180,10 +180,10 @@
                 <td>{{ row.storeName }}</td>
                 <td>{{ row.fullName }}</td>
                 <td>{{ roleLabel(row.role) }}</td>
-                <td>{{ row.checkInAt | date: 'HH:mm' }}</td>
+                <td>{{ row.checkInAt | localTime }}</td>
                 <td>
                   @if (row.checkOutAt) {
-                    {{ row.checkOutAt | date: 'dd/MM HH:mm' }}
+                    {{ row.checkOutAt | dayMonthTime }}
                     @if (row.autoClosed) { <span class="badge badge--warn" title="No marcó salida; se cerró al final del día">Sin salida</span> }
                   } @else {
                     <span class="badge badge--open">En turno</span>

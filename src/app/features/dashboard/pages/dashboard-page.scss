@@ -175,7 +175,7 @@ td small {
 }
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: var(--space-md);
 }
 .quick-grid.stack {
@@ -210,5 +210,26 @@ td small {
 @media (max-width: 1000px) {
   .grid-2 {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 900px) {
+  .dashboard-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-filters {
+    grid-template-columns: 1fr;
+  }
+  .chart-card {
+    padding: var(--space-md);
+  }
+  .card-head {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  .list li {
+    flex-wrap: wrap;
+    gap: 4px var(--space-md);
   }
 }

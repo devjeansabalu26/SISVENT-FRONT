@@ -36,16 +36,16 @@
     <section class="card">
       <h2>Búsqueda de productos</h2>
       <label class="search"><span class="material-icons">search</span><input #query (input)="search(query.value)" placeholder="Código o nombre del producto" /></label>
-      <div class="results">@for (product of products(); track product.id) {<button type="button" (click)="add(product)"><div><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></div><span>Stock: {{ product.totalStock }}</span><b>S/ {{ product.salePrice.toFixed(2) }}</b></button>}</div>
+      <div class="results">@for (product of products(); track product.id) {<button type="button" (click)="add(product)"><div><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></div><span>Stock: {{ product.totalStock }}</span><b>{{ product.salePrice | money }}</b></button>}</div>
     </section>
     <section class="card cart">
       <h2>Lista de venta</h2>
       @if (!cart().length) {<p class="empty">Agrega productos para iniciar la venta.</p>}
-      @for (item of cart(); track item.product.id) {<div class="row"><strong>{{ item.product.name }}</strong><span>S/ {{ item.product.salePrice.toFixed(2) }}</span><div class="quantity"><button type="button" (click)="change(item.product.id, -1)">−</button><b>{{ item.quantity }}</b><button type="button" (click)="change(item.product.id, 1)">+</button></div><b>S/ {{ (item.product.salePrice * item.quantity).toFixed(2) }}</b><button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button></div>}
+      @for (item of cart(); track item.product.id) {<div class="row"><strong>{{ item.product.name }}</strong><span>{{ item.product.salePrice | money }}</span><div class="quantity"><button type="button" (click)="change(item.product.id, -1)">−</button><b>{{ item.quantity }}</b><button type="button" (click)="change(item.product.id, 1)">+</button></div><b>{{ (item.product.salePrice * item.quantity) | money }}</b><button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button></div>}
     </section>
   </div>
   <aside class="summary">
-    <h2>Resumen de venta</h2><div><span>Subtotal</span><b>S/ {{ subtotal().toFixed(2) }}</b></div><div class="total"><strong>Total a pagar</strong><strong>S/ {{ subtotal().toFixed(2) }}</strong></div>
+    <h2>Resumen de venta</h2><div><span>Subtotal</span><b>{{ subtotal() | money }}</b></div><div class="total"><strong>Total a pagar</strong><strong>{{ subtotal() | money }}</strong></div>
     <h3>Método de pago</h3>
     @if (paymentMethodsError()) {
       <p class="pay-error">No se pudieron cargar los métodos de pago. <button type="button" class="link" (click)="loadPaymentMethods()">Reintentar</button></p>

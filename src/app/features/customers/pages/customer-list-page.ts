@@ -9,10 +9,12 @@ import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CustomerApiService } from '../data-access/customer-api.service';
 import { Customer, CustomerSummary } from '../models/customer.model';
+import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-customer-list-page',
-  imports: [DataTable, EmptyState, PageHeader],
+  imports: [DataTable, EmptyState, PageHeader, MoneyPipe],
   templateUrl: './customer-list-page.html',
   styleUrl: './customer-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,9 +44,8 @@ export class CustomerListPage implements OnInit {
     { key: 'document', label: 'Documento', value: (row) => `${row.documentType ?? ''} ${row.documentNumber ?? ''}`.trim() || '—' },
     { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
     { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
-    { key: 'purchases', label: 'Compras total', value: (row) => `S/ ${row.totalPurchases.toFixed(2)}` },
-    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
-  ];
+    { key: 'purchases', label: 'Compras total', value: (row) => formatMoney(row.totalPurchases) },
+    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' }];
 
   ngOnInit(): void {
     this.api.summary().subscribe((summary) => this.summary.set(summary));

@@ -36,7 +36,7 @@ export class PlanCompaniesTab implements OnInit {
 
   readonly columns: readonly DataTableColumn<Row>[] = [
     { key: 'name', label: 'Empresa', value: (row) => row.tradeName },
-    { key: 'ruc', label: 'RUC', value: (row) => row.taxDocument },
+    { key: 'ruc', label: 'Documento fiscal', value: (row) => row.taxDocument },
     { key: 'admin', label: 'Administrador', value: (row) => row.administratorName ?? '—' },
     { key: 'status', label: 'Estado', value: (row) => row.effectiveStatus, type: 'status' },
     { key: 'end', label: 'Vigencia hasta', value: (row) => row.planEnd ?? '—' },

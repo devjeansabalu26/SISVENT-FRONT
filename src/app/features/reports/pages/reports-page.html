@@ -28,7 +28,7 @@
   <div class="kpi-grid">
     <app-kpi-card
       label="Ventas totales"
-      [value]="'S/ ' + report.totalSales.value.toLocaleString('es-PE')"
+      [value]="(report.totalSales.value | money)"
       icon="payments"
       [trend]="report.totalSales.deltaPercent && report.totalSales.deltaPercent >= 0 ? 'up' : 'down'"
       [delta]="report.totalSales.deltaPercent != null ? (report.totalSales.deltaPercent.toFixed(1) + '%') : undefined"
@@ -46,7 +46,7 @@
     />
     <app-kpi-card
       label="Ticket promedio"
-      [value]="'S/ ' + report.averageTicket.value.toFixed(2)"
+      [value]="(report.averageTicket.value | money)"
       icon="monitoring"
       [trend]="report.averageTicket.deltaPercent && report.averageTicket.deltaPercent >= 0 ? 'up' : 'down'"
       [delta]="report.averageTicket.deltaPercent != null ? (report.averageTicket.deltaPercent.toFixed(1) + '%') : undefined"
@@ -55,7 +55,7 @@
     />
     <app-kpi-card
       label="Productos vendidos"
-      [value]="report.unitsSold.value.toLocaleString('es-PE')"
+      [value]="(report.unitsSold.value | quantity)"
       icon="inventory_2"
       [trend]="report.unitsSold.deltaPercent && report.unitsSold.deltaPercent >= 0 ? 'up' : 'down'"
       [delta]="report.unitsSold.deltaPercent != null ? (report.unitsSold.deltaPercent.toFixed(1) + '%') : undefined"
@@ -71,7 +71,7 @@
     <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
       @for (point of report.dailySeries; track point.date) {
         <div class="bar-column">
-          <span class="amount">S/ {{ (point.amount / 1000).toFixed(1) }}k</span>
+          <span class="amount">{{ point.amount | compactMoney }}</span>
           <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
           <small>{{ point.date }}</small>
         </div>
@@ -96,7 +96,7 @@
       <ul class="shares">
         @for (item of report.bySeller; track item.name) {
           <li>
-            <div class="shares__label"><span>{{ item.name }}</span><strong>S/ {{ item.amount.toFixed(2) }} ({{ item.percent.toFixed(1) }}%)</strong></div>
+            <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.amount | money }} ({{ item.percent.toFixed(1) }}%)</strong></div>
             <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
           </li>
         }

@@ -62,8 +62,8 @@
                   </select>
                 </td>
                 <td><input type="number" min="0" step="0.001" formControlName="quantity" (input)="recalc()" /></td>
-                <td><input type="number" min="0" step="0.01" formControlName="unitCost" (input)="recalc()" /></td>
-                <td class="subtotal">S/ {{ (line.controls.quantity.value * line.controls.unitCost.value).toFixed(2) }}</td>
+                <td><input type="number" min="0" [step]="'moneyStep' | regional" formControlName="unitCost" (input)="recalc()" /></td>
+                <td class="subtotal">{{ (line.controls.quantity.value * line.controls.unitCost.value) | money }}</td>
                 <td>
                   <button type="button" class="remove" (click)="removeLine(i)" aria-label="Eliminar fila">
                     <span class="material-icons">delete_outline</span>
@@ -78,7 +78,7 @@
     <div class="totals">
       <span>Total productos: {{ totals().count }}</span>
       <span>Total unidades: {{ totals().units }}</span>
-      <strong>Costo total: S/ {{ totals().cost.toFixed(2) }}</strong>
+      <strong>Costo total: {{ totals().cost | money }}</strong>
     </div>
   </section>
 

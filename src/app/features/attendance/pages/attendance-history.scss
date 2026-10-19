@@ -71,3 +71,12 @@ td.actions {
   color: var(--color-warning);
   background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
 }
+@media (max-width: 600px) {
+  .filters > * {
+    flex: 1 1 140px;
+  }
+  .filters input,
+  .filters select {
+    width: 100%;
+  }
+}

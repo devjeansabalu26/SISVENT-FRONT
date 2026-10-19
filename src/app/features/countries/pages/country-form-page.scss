@@ -1,0 +1,109 @@
+.status-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-card p {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.blocker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-danger);
+}
+
+.blocker .material-icons {
+  font-size: 18px;
+}
+
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  padding: 6px 6px 8px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+td {
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+td input:not([type='checkbox']):not([type='radio']),
+td select {
+  min-width: 90px;
+  padding: 7px 9px;
+}
+
+td input[type='checkbox'],
+td input[type='radio'] {
+  width: auto;
+  box-shadow: none;
+}
+
+.ghost,
+.primary {
+  padding: 8px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  color: var(--color-text-secondary);
+  background: var(--control-bg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  border-color: var(--color-primary);
+  color: var(--color-on-primary, white);
+  background: var(--color-primary);
+}
+
+.icon {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  color: var(--color-text-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+@media (max-width: 900px) {
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+}

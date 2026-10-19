@@ -1,11 +1,11 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../../data-access/cash-session-api.service';
+import { DateTimePipe, DayMonthTimePipe, MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-cash-session-detail-dialog',
-  imports: [MatDialogModule, DatePipe],
+  imports: [MatDialogModule, MoneyPipe, DateTimePipe, DayMonthTimePipe],
   template: `
     <section class="dialog detail">
       <header>
@@ -13,8 +13,8 @@ import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../.
         <div>
           <h2>Ventas de la caja</h2>
           @if (detail(); as d) {
-            <p>{{ d.session.storeName }} · {{ d.session.openedBy }} · {{ d.session.openedAt | date: 'dd/MM/yyyy HH:mm' }}
-              @if (d.session.closedAt) { — {{ d.session.closedAt | date: 'dd/MM HH:mm' }} }</p>
+            <p>{{ d.session.storeName }} · {{ d.session.openedBy }} · {{ d.session.openedAt | dateTime }}
+              @if (d.session.closedAt) { — {{ d.session.closedAt | dayMonthTime }} }</p>
           }
         </div>
       </header>
@@ -26,13 +26,13 @@ import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../.
       } @else if (detail(); as d) {
         <dl class="summary">
           <div><dt>Estado</dt><dd>{{ d.session.status === 'OPEN' ? 'Abierta' : d.session.forced ? 'Cerrada (forzado)' : 'Cerrada' }}</dd></div>
-          <div><dt>Fondo inicial</dt><dd>S/ {{ d.session.openingAmount.toFixed(2) }}</dd></div>
-          <div><dt>Total ventas</dt><dd>S/ {{ d.session.totalSales.toFixed(2) }}</dd></div>
-          @if (d.session.totalRefunds > 0) { <div><dt>Devoluciones</dt><dd class="bad">- S/ {{ d.session.totalRefunds.toFixed(2) }}</dd></div> }
-          <div><dt>Efectivo esperado</dt><dd>S/ {{ d.session.expectedCash.toFixed(2) }}</dd></div>
+          <div><dt>Fondo inicial</dt><dd>{{ d.session.openingAmount | money }}</dd></div>
+          <div><dt>Total ventas</dt><dd>{{ d.session.totalSales | money }}</dd></div>
+          @if (d.session.totalRefunds > 0) { <div><dt>Devoluciones</dt><dd class="bad">- {{ d.session.totalRefunds | money }}</dd></div> }
+          <div><dt>Efectivo esperado</dt><dd>{{ d.session.expectedCash | money }}</dd></div>
           @if (d.session.countedCash !== null) {
-            <div><dt>Contado</dt><dd>S/ {{ d.session.countedCash.toFixed(2) }}</dd></div>
-            <div><dt>Diferencia</dt><dd [class.bad]="d.session.difference !== 0">S/ {{ (d.session.difference ?? 0).toFixed(2) }}</dd></div>
+            <div><dt>Contado</dt><dd>{{ d.session.countedCash | money }}</dd></div>
+            <div><dt>Diferencia</dt><dd [class.bad]="d.session.difference !== 0">{{ (d.session.difference ?? 0) | money }}</dd></div>
           }
           @if (d.session.closedBy) { <div><dt>Cerrada por</dt><dd>{{ d.session.closedBy }}</dd></div> }
         </dl>
@@ -46,11 +46,11 @@ import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../.
               @for (sale of d.sales; track sale.id) {
                 <tr [class.cancelled]="sale.status !== 'CONFIRMED'">
                   <td>{{ sale.saleNumber }}</td>
-                  <td>{{ sale.saleDate | date: 'dd/MM HH:mm' }}</td>
+                  <td>{{ sale.saleDate | dayMonthTime }}</td>
                   <td>{{ sale.clientName ?? 'Cliente general' }}</td>
                   <td>{{ sale.sellerName }}</td>
                   <td>{{ sale.paymentMethod }}</td>
-                  <td>S/ {{ sale.total.toFixed(2) }}</td>
+                  <td>{{ sale.total | money }}</td>
                   <td>{{ sale.status === 'CONFIRMED' ? 'Confirmada' : 'Anulada' }}</td>
                 </tr>
               } @empty {
@@ -66,8 +66,8 @@ import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../.
               <thead><tr><th>N.º nota</th><th>Hora</th><th>Venta</th><th>Reembolso</th><th>Total</th><th>Emitida por</th></tr></thead>
               <tbody>
                 @for (refund of d.refunds; track refund.id) {
-                  <tr><td>{{ refund.creditNoteNumber }}</td><td>{{ refund.issuedAt | date: 'dd/MM HH:mm' }}</td><td>{{ refund.saleNumber }}</td>
-                    <td>{{ refund.refundMethod }}</td><td>- S/ {{ refund.total.toFixed(2) }}</td><td>{{ refund.createdBy }}</td></tr>
+                  <tr><td>{{ refund.creditNoteNumber }}</td><td>{{ refund.issuedAt | dayMonthTime }}</td><td>{{ refund.saleNumber }}</td>
+                    <td>{{ refund.refundMethod }}</td><td>- {{ refund.total | money }}</td><td>{{ refund.createdBy }}</td></tr>
                 }
               </tbody>
             </table>
@@ -81,7 +81,7 @@ import { CashSessionApiService, CashSessionDetail, cashErrorMessage } from '../.
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   styles: `
     .detail { width: min(860px, calc(100vw - 40px)); }
-    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; margin: 0; }
     .summary div { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-secondary); }
     .summary dt { color: var(--color-text-muted); font-size: 12px; }
     .summary dd { margin: 0; font-weight: 700; }

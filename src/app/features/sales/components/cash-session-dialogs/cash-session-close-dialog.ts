@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CashSession, CashSessionApiService, cashErrorMessage } from '../../data-access/cash-session-api.service';
+import { MoneyPipe, RegionalPipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface CashSessionCloseData {
   readonly session: CashSession;
@@ -16,7 +17,7 @@ function trimmedMinLength(min: number) {
 
 @Component({
   selector: 'app-cash-session-close-dialog',
-  imports: [MatDialogModule, ReactiveFormsModule],
+  imports: [MatDialogModule, ReactiveFormsModule, MoneyPipe, RegionalPipe],
   template: `
     <form class="dialog" [formGroup]="form" (ngSubmit)="confirm()">
       <header>
@@ -28,21 +29,21 @@ function trimmedMinLength(min: number) {
       </header>
 
       <dl class="expected">
-        <div><dt>Fondo inicial</dt><dd>S/ {{ s.openingAmount.toFixed(2) }}</dd></div>
-        <div><dt>{{ s.salesCount }} {{ s.salesCount === 1 ? 'venta' : 'ventas' }} del turno</dt><dd>S/ {{ s.totalSales.toFixed(2) }}</dd></div>
+        <div><dt>Fondo inicial</dt><dd>{{ s.openingAmount | money }}</dd></div>
+        <div><dt>{{ s.salesCount }} {{ s.salesCount === 1 ? 'venta' : 'ventas' }} del turno</dt><dd>{{ s.totalSales | money }}</dd></div>
         @for (method of s.byMethod; track method.code) {
-          <div><dt>— {{ method.name }}</dt><dd>S/ {{ method.amount.toFixed(2) }}</dd></div>
+          <div><dt>— {{ method.name }}</dt><dd>{{ method.amount | money }}</dd></div>
         }
         @if (s.totalRefunds > 0) {
-          <div><dt>Devoluciones (notas de crédito)</dt><dd>- S/ {{ s.totalRefunds.toFixed(2) }}</dd></div>
+          <div><dt>Devoluciones (notas de crédito)</dt><dd>- {{ s.totalRefunds | money }}</dd></div>
         }
-        <div class="strong"><dt>Efectivo esperado en caja</dt><dd>S/ {{ s.expectedCash.toFixed(2) }}</dd></div>
+        <div class="strong"><dt>Efectivo esperado en caja</dt><dd>{{ s.expectedCash | money }}</dd></div>
       </dl>
 
       <div class="fields">
         <label class="wide"
-          ><span>Efectivo contado en caja (S/) <span class="required">*</span></span>
-          <input type="number" min="0" step="0.10" formControlName="countedCash" placeholder="Escribe el efectivo que hay en caja"
+          ><span>Efectivo contado en caja ({{ 'currencySymbol' | regional }}) <span class="required">*</span></span>
+          <input type="number" min="0" [step]="'cashStep' | regional" formControlName="countedCash" placeholder="Escribe el efectivo que hay en caja"
             [class.invalid]="showError('countedCash')" />
           @if (showError('countedCash')) {
             <small class="hint">
@@ -54,7 +55,7 @@ function trimmedMinLength(min: number) {
         </label>
         @if (difference() !== null) {
           <p class="difference" [class.difference--ok]="difference() === 0">
-            Diferencia: S/ {{ difference()!.toFixed(2) }}
+            Diferencia: {{ difference()! | money }}
             {{ difference() === 0 ? '· Cuadra' : difference()! > 0 ? '· Sobrante' : '· Faltante' }}
           </p>
         }

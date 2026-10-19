@@ -6,10 +6,11 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { SupplierApiService } from '../data-access/supplier-api.service';
 import { Supplier } from '../models/supplier.model';
+import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-supplier-form-page',
-  imports: [ReactiveFormsModule, RouterLink, PageHeader],
+  imports: [ReactiveFormsModule, RouterLink, PageHeader, RegionalPipe],
   templateUrl: './supplier-form-page.html',
   styleUrl: '../../../shared/forms/form-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

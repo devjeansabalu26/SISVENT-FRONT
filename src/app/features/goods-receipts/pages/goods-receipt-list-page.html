@@ -5,7 +5,7 @@
 <div class="kpi-grid">
   <app-kpi-card label="Ingresos del mes" [value]="summary()?.monthCount ?? '—'" icon="move_to_inbox" tone="primary" />
   <app-kpi-card label="Unidades recibidas" [value]="(summary()?.unitsReceived ?? 0) + ' u.'" icon="inventory_2" tone="info" />
-  <app-kpi-card label="Valor total" [value]="'S/ ' + (summary()?.totalValue ?? 0).toLocaleString('es-PE')" icon="payments" tone="success" />
+  <app-kpi-card label="Valor total" [value]="((summary()?.totalValue ?? 0) | money)" icon="payments" tone="success" />
   <app-kpi-card label="Pendientes" [value]="summary()?.pending ?? '—'" icon="pending_actions" tone="warning" />
 </div>
 

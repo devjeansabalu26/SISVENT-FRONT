@@ -64,10 +64,10 @@ describe('POS payments', () => {
 
   it('summarizes each payment', () => {
     expect(paymentSummary({ methodName: 'Efectivo', amount: 800, amountReceived: 1000, changeAmount: 200 })).toBe(
-      'Efectivo S/ 800.00 · Recibido S/ 1000.00 · Vuelto S/ 200.00',
+      'Efectivo S/ 800.00 · Recibido S/ 1,000.00 · Vuelto S/ 200.00',
     );
     expect(paymentSummary({ methodName: 'Tarjeta', amount: 6000, cardBrand: 'VISA', cardLast4: '4242', reference: '004512', authorizationCode: 'A1' })).toBe(
-      'Tarjeta S/ 6000.00 · Visa •••• 4242 · Op. 004512 · Aut. A1',
+      'Tarjeta S/ 6,000.00 · Visa •••• 4242 · Op. 004512 · Aut. A1',
     );
   });
 });

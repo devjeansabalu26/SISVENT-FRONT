@@ -21,6 +21,7 @@ const CLASS_THRESHOLDS = [
   selector: 'app-pareto-chart',
   template: `
     <figure class="pareto">
+      <div class="pareto__scroll">
       <svg [attr.viewBox]="viewBox" role="img" [attr.aria-label]="ariaLabel()" (mouseleave)="active.set(null)">
         @for (tick of ticks; track tick) {
           <line class="grid" [attr.x1]="pad.left" [attr.x2]="pad.left + plotW" [attr.y1]="y(tick)" [attr.y2]="y(tick)" />
@@ -60,12 +61,14 @@ const CLASS_THRESHOLDS = [
           </g>
         }
       </svg>
+      </div>
       <figcaption>Eje X: % acumulado de productos · Eje Y: % acumulado del valor de inventario</figcaption>
     </figure>
   `,
   styles: `
     .pareto { margin: 0; }
-    svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .pareto__scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+    svg { display: block; width: 100%; min-width: 480px; max-width: none; height: auto; overflow: visible; }
     .grid { stroke: var(--color-border); stroke-width: 1; }
     .axis { fill: var(--color-text-muted); font-size: 11px; }
     .threshold { stroke: var(--color-text-muted); stroke-width: 1; stroke-dasharray: 4 4; }

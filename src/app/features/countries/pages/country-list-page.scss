@@ -1,0 +1,110 @@
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: white;
+  background: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ghost {
+  padding: 10px 16px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  background: var(--control-bg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.intro {
+  margin: 0 0 var(--space-md);
+  max-width: 820px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.currencies {
+  display: grid;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.currencies header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.currencies h2 {
+  margin: 0 0 4px;
+}
+
+.currencies header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.currency-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+
+.currency-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.currency-form label.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currency-form input:not([type='checkbox']) {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  font: inherit;
+  color: var(--color-text-primary);
+  background: var(--control-bg);
+}
+
+.currency-form__actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .currency-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .currency-form {
+    grid-template-columns: 1fr;
+  }
+  .currency-form__actions > * {
+    flex: 1;
+  }
+}

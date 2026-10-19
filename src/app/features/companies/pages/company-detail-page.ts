@@ -15,6 +15,7 @@ import {
 } from '../components/validity-change-dialog/validity-change-dialog';
 import { CompanyHistoryTab } from '../components/company-history-tab/company-history-tab';
 import { CompanyPlanTab } from '../components/company-plan-tab/company-plan-tab';
+import { CompanyRegionalTab } from '../components/company-regional-tab/company-regional-tab';
 import { CompanyModulesTab } from '../components/company-modules-tab/company-modules-tab';
 import { CompanyStoresTab } from '../components/company-stores-tab/company-stores-tab';
 import { CompanySummaryTab } from '../components/company-summary-tab/company-summary-tab';
@@ -28,8 +29,8 @@ import { PlatformUserApiService } from '../../users/data-access/platform-user-ap
 import { CompanyApiService } from '../data-access/company-api.service';
 import { CompanyDetail } from '../models/company.model';
 
-type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'history';
-const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'history'];
+type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'history';
+const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'history'];
 
 @Component({
   selector: 'app-company-detail-page',
@@ -46,6 +47,7 @@ const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users'
     CompanyStoresTab,
     CompanySummaryTab,
     CompanyHistoryTab,
+    CompanyRegionalTab,
   ],
   templateUrl: './company-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './company-detail-page.scss'],
@@ -87,6 +89,11 @@ export class CompanyDetailPage implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  onRegionalChanged(): void {
+    this.load();
+    this.invalidateTabs(['history']);
   }
 
   private load(): void {

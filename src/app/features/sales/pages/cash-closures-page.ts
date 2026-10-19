@@ -1,5 +1,4 @@
 import { localIsoDate } from '../../../shared/utils/date-format';
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -7,10 +6,12 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CashCloseDialog } from '../components/cash-close-dialog/cash-close-dialog';
 import { CashClosure, CashClosureApiService } from '../data-access/cash-closure-api.service';
+import { CalendarDatePipe, DayMonthTimePipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-cash-closures-page',
-  imports: [PageHeader, RouterLink, DatePipe],
+  imports: [PageHeader, RouterLink, MoneyPipe, DayMonthTimePipe, CalendarDatePipe],
   template: `
     <app-page-header title="Cierres de caja" description="Historial de cierres por local y día">
       <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Ventas</a>
@@ -25,8 +26,8 @@ import { CashClosure, CashClosureApiService } from '../data-access/cash-closure-
 
     <div class="kpis">
       <article><span>Cierres</span><strong>{{ rows().length }}</strong></article>
-      <article><span>Ventas del período</span><strong>S/ {{ totals().sales.toFixed(2) }}</strong></article>
-      <article [class.bad]="totals().difference !== 0"><span>Diferencia acumulada</span><strong>S/ {{ totals().difference.toFixed(2) }}</strong></article>
+      <article><span>Ventas del período</span><strong>{{ totals().sales | money }}</strong></article>
+      <article [class.bad]="totals().difference !== 0"><span>Diferencia acumulada</span><strong>{{ totals().difference | money }}</strong></article>
     </div>
 
     <div class="table-scroll surface-card">
@@ -42,14 +43,14 @@ import { CashClosure, CashClosureApiService } from '../data-access/cash-closure-
           <tbody>
             @for (row of rows(); track row.id) {
               <tr>
-                <td>{{ row.businessDate | date: 'dd/MM/yyyy' : 'UTC' }}</td>
+                <td>{{ row.businessDate | calendarDate }}</td>
                 <td>{{ row.storeName }}</td>
                 <td>{{ row.salesCount }}</td>
-                <td>S/ {{ row.totalSales.toFixed(2) }}</td>
-                <td>S/ {{ row.expectedCash.toFixed(2) }}</td>
-                <td>S/ {{ row.countedCash.toFixed(2) }}</td>
-                <td [class.ok]="row.difference === 0" [class.bad]="row.difference !== 0">S/ {{ row.difference.toFixed(2) }}</td>
-                <td>{{ row.closedBy }} <small>{{ row.createdAt | date: 'dd/MM HH:mm' }}</small></td>
+                <td>{{ row.totalSales | money }}</td>
+                <td>{{ row.expectedCash | money }}</td>
+                <td>{{ row.countedCash | money }}</td>
+                <td [class.ok]="row.difference === 0" [class.bad]="row.difference !== 0">{{ row.difference | money }}</td>
+                <td>{{ row.closedBy }} <small>{{ row.createdAt | dayMonthTime }}</small></td>
                 <td>{{ row.notes ?? '—' }}</td>
               </tr>
             }
@@ -61,11 +62,12 @@ import { CashClosure, CashClosureApiService } from '../data-access/cash-closure-
   styles: `
     .filters { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: var(--space-md); }
     .filters label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+    @media (max-width: 600px) { .filters > * { flex: 1 1 140px; } .filters input { width: 100%; } }
     input { padding: 9px 11px; border: 1px solid var(--color-border); border-radius: var(--radius-md); font: inherit; }
     .ghost, .primary { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--radius-md); font-weight: 600; text-decoration: none; cursor: pointer; }
     .ghost { border: 1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface); }
     .primary { border: 0; color: var(--color-on-primary, white); background: var(--color-primary); }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: var(--space-md); }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 12px; margin-bottom: var(--space-md); }
     .kpis article { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
     .kpis span { color: var(--color-text-muted); font-size: 12px; }
     .kpis strong { font-size: 18px; }
@@ -118,7 +120,7 @@ export class CashClosuresPage implements OnInit {
       .afterClosed()
       .subscribe((closure) => {
         if (!closure) return;
-        this.notifications.show(`Caja cerrada: diferencia S/ ${closure.difference.toFixed(2)}.`, closure.difference === 0 ? 'success' : 'warning');
+        this.notifications.show(`Caja cerrada: diferencia ${formatMoney(closure.difference)}.`, closure.difference === 0 ? 'success' : 'warning');
         this.load();
       });
   }

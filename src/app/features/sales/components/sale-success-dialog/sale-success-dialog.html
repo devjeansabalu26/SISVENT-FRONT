@@ -7,14 +7,14 @@
     <div><dt>Operación</dt><dd>{{ data.saleNumber }}</dd></div>
     <div><dt>Cliente</dt><dd>{{ data.customer }}</dd></div>
     <div><dt>Método de pago</dt><dd>{{ data.paymentMethod }}</dd></div>
-    <div><dt>Monto total</dt><dd>S/ {{ data.total.toFixed(2) }}</dd></div>
+    <div><dt>Monto total</dt><dd>{{ data.total | money }}</dd></div>
     @for (detail of data.paymentDetails ?? []; track $index) {
       <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>
     }
   </dl>
 
   @if (data.change != null && data.change > 0) {
-    <p class="change">Entregar vuelto: <strong>S/ {{ data.change.toFixed(2) }}</strong></p>
+    <p class="change">Entregar vuelto: <strong>{{ data.change | money }}</strong></p>
   }
 
   @if (data.autoEmailedTo) {

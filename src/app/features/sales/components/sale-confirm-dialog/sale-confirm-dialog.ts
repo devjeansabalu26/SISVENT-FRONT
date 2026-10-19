@@ -1,8 +1,8 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { formatSoles } from '../../../../shared/utils/diff-rows';
+import { formatAmount } from '../../../../shared/utils/diff-rows';
 import { AttendancePerson, ROLE_LABELS } from '../../../attendance/models/attendance.model';
+import { LocalTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface SaleConfirmLine {
   readonly name: string;
@@ -33,7 +33,7 @@ export interface SaleConfirmResult {
 
 @Component({
   selector: 'app-sale-confirm-dialog',
-  imports: [MatDialogModule, DatePipe],
+  imports: [MatDialogModule, LocalTimePipe],
   template: `
     <form class="dialog review" (submit)="confirm($event)">
       <header>
@@ -81,7 +81,7 @@ export interface SaleConfirmResult {
           <div class="seller__data">
             <strong>{{ responsibleName() }}</strong>
             @if (selected(); as person) {
-              <small>{{ roleLabel(person.role) }}{{ person.userCode ? ' · Usuario ' + person.userCode : '' }} · en turno desde {{ person.checkInAt | date: 'HH:mm' }}</small>
+              <small>{{ roleLabel(person.role) }}{{ person.userCode ? ' · Usuario ' + person.userCode : '' }} · en turno desde {{ person.checkInAt | localTime }}</small>
             } @else {
               <small>{{ roleLabel(data.seller.loggedUserRole) }} · sesión actual</small>
             }
@@ -97,7 +97,7 @@ export interface SaleConfirmResult {
             @for (person of others(); track person.profileId) {
               <button type="button" (click)="choose(person.profileId)">
                 <span class="material-icons">person</span>{{ person.fullName }}
-                <small>{{ roleLabel(person.role) }} · desde {{ person.checkInAt | date: 'HH:mm' }}</small>
+                <small>{{ roleLabel(person.role) }} · desde {{ person.checkInAt | localTime }}</small>
               </button>
             }
           </div>
@@ -138,7 +138,7 @@ export interface SaleConfirmResult {
 export class SaleConfirmDialog {
   readonly data = inject<SaleConfirmData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<SaleConfirmDialog, SaleConfirmResult | false>);
-  readonly soles = formatSoles;
+  readonly soles = formatAmount;
   readonly subtotal = this.data.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
 
   private readonly present = this.data.seller.attendanceEnabled ? this.data.seller.present : [];

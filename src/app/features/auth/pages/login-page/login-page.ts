@@ -57,8 +57,9 @@ export class LoginPage {
 
     this.authApi.login(this.form.getRawValue()).subscribe({
       next: (result) => {
+        let ready: Promise<void>;
         try {
-          this.session.start(result);
+          ready = this.session.start(result);
         } catch {
           this.submitting.set(false);
           this.error.set({
@@ -70,7 +71,7 @@ export class LoginPage {
           return;
         }
         this.attendance.markOnNextEntry();
-        void this.router.navigateByUrl('/app/dashboard');
+        void ready.then(() => this.router.navigateByUrl('/app/dashboard'));
       },
       error: (cause: unknown) => {
         this.submitting.set(false);

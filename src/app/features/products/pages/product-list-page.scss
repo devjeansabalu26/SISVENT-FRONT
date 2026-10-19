@@ -59,3 +59,11 @@
   color: var(--color-primary);
   background: var(--color-primary-soft);
 }
+.low-stock-row {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .low-stock-row .spacer {
+    display: none;
+  }
+}

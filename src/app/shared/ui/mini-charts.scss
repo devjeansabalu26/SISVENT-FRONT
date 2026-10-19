@@ -5,18 +5,25 @@
   gap: 18px;
   padding: 36px 12px 0;
   border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
 .bar-column {
   display: grid;
   grid-template-rows: 20px 1fr 24px;
   align-items: end;
-  flex: 1;
+  flex: 1 0 40px;
+  min-width: 40px;
   height: 100%;
   text-align: center;
 }
 .bar-column .amount {
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .bar-column .bar {
   height: var(--bar-height);
@@ -25,8 +32,11 @@
   background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover));
 }
 .bar-column small {
+  overflow: hidden;
   padding-top: 7px;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .shares {
@@ -38,7 +48,9 @@
 }
 .shares__label {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 4px 12px;
   margin-bottom: 6px;
   font-size: var(--font-size-sm);
 }
@@ -57,8 +69,9 @@
 
 @media (max-width: 760px) {
   .chart {
+    height: 220px;
     gap: 8px;
-    overflow-x: auto;
+    padding: 28px 4px 0;
   }
   .bar-column {
     min-width: 48px;

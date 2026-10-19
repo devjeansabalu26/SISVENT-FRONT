@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +11,7 @@ import { SellerModulesCard } from '../components/seller-modules-card/seller-modu
 import { PlatformUserApiService } from '../data-access/platform-user-api.service';
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, UserFormValue } from '../models/user.model';
+import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface UserDetailView {
   readonly id: string;
@@ -30,7 +30,7 @@ interface UserDetailView {
 
 @Component({
   selector: 'app-user-detail-page',
-  imports: [PageHeader, StatusChip, RouterLink, DatePipe, SellerModulesCard],
+  imports: [PageHeader, StatusChip, RouterLink, SellerModulesCard, DateTimePipe],
   templateUrl: './user-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,8 +55,7 @@ export class UserDetailPage implements OnInit {
       { label: 'Documento', value: user.document ?? '—' },
       { label: 'Rol', value: user.role },
       ...(this.isSuperadmin ? [{ label: 'Empresa', value: user.companyName ?? '—' }] : []),
-      { label: 'Local asignado', value: user.storeName ?? '—' },
-    ];
+      { label: 'Local asignado', value: user.storeName ?? '—' }];
   });
 
   ngOnInit(): void {

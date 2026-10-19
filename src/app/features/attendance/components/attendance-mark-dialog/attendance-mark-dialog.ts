@@ -1,10 +1,10 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { AttendanceApiService, attendanceErrorMessage } from '../../data-access/attendance-api.service';
 import { AttendancePerson, ROLE_LABELS, hourOf } from '../../models/attendance.model';
+import { LocalTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface AttendanceMarkDialogData {
   readonly storeId: string | null;
@@ -15,7 +15,7 @@ export interface AttendanceMarkDialogData {
 
 @Component({
   selector: 'app-attendance-mark-dialog',
-  imports: [MatDialogModule, ReactiveFormsModule, DatePipe],
+  imports: [MatDialogModule, ReactiveFormsModule, LocalTimePipe],
   template: `
     <form class="dialog" (submit)="$event.preventDefault(); mark()">
       <header>
@@ -33,7 +33,7 @@ export interface AttendanceMarkDialogData {
             <div class="present__row">
               <span class="material-icons">person</span>
               <strong>{{ person.fullName }}</strong>
-              <small>{{ roleLabel(person.role) }} · desde {{ person.checkInAt | date: 'HH:mm' }}</small>
+              <small>{{ roleLabel(person.role) }} · desde {{ person.checkInAt | localTime }}</small>
             </div>
           }
         </div>

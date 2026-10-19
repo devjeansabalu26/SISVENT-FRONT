@@ -26,13 +26,13 @@
     <p class="muted">Calculando totales del día…</p>
   } @else if (preview(); as summary) {
     <dl class="expected">
-      <div><dt>{{ summary.storeName }} · {{ summary.salesCount }} {{ summary.salesCount === 1 ? 'venta' : 'ventas' }}</dt><dd>S/ {{ summary.totalSales.toFixed(2) }}</dd></div>
+      <div><dt>{{ summary.storeName }} · {{ summary.salesCount }} {{ summary.salesCount === 1 ? 'venta' : 'ventas' }}</dt><dd>{{ summary.totalSales | money }}</dd></div>
       @for (method of summary.byMethod; track method.code) {
-        <div><dt>— {{ method.name }}</dt><dd>S/ {{ method.amount.toFixed(2) }}</dd></div>
+        <div><dt>— {{ method.name }}</dt><dd>{{ method.amount | money }}</dd></div>
       } @empty {
-        <div><dt>— Sin ventas confirmadas</dt><dd>S/ 0.00</dd></div>
+        <div><dt>— Sin ventas confirmadas</dt><dd>{{ 0 | money }}</dd></div>
       }
-      <div class="strong"><dt>Efectivo esperado en caja</dt><dd>S/ {{ summary.expectedCash.toFixed(2) }}</dd></div>
+      <div class="strong"><dt>Efectivo esperado en caja</dt><dd>{{ summary.expectedCash | money }}</dd></div>
     </dl>
 
     @if (summary.existing; as closure) {
@@ -40,16 +40,16 @@
         <span class="material-icons">lock</span>
         <div>
           <strong>Caja cerrada por {{ closure.closedBy }}</strong>
-          <p>Contado S/ {{ closure.countedCash.toFixed(2) }} · Diferencia S/ {{ closure.difference.toFixed(2) }}</p>
+          <p>Contado {{ closure.countedCash | money }} · Diferencia {{ closure.difference | money }}</p>
           @if (closure.notes) { <p class="muted">{{ closure.notes }}</p> }
         </div>
       </div>
     } @else {
-      <label class="wide">Efectivo real en caja (S/)
-        <input type="number" min="0" step="0.10" [value]="countedCash()" (input)="countedCash.set(+$any($event.target).value)" />
+      <label class="wide">Efectivo real en caja ({{ 'currencySymbol' | regional }})
+        <input type="number" min="0" [step]="'cashStep' | regional" [value]="countedCash()" (input)="countedCash.set(+$any($event.target).value)" />
       </label>
       <p class="difference" [class.difference--ok]="difference() === 0" [class.difference--bad]="difference() !== 0">
-        Diferencia: S/ {{ difference().toFixed(2) }}
+        Diferencia: {{ difference() | money }}
         {{ difference() === 0 ? '· Cuadra' : difference() > 0 ? '· Sobrante' : '· Faltante' }}
       </p>
       <label class="wide">Observaciones

@@ -30,10 +30,11 @@ import { CartItem } from '../models/cart-item.model';
 import { PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../models/payment.model';
 import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../utils/payment';
 import { PendingSale, SALE_CONFIRM_TIMEOUT_MS, isUncertainSaleFailure, pendingSaleFor } from '../utils/pending-sale';
+import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-pos-page',
-  imports: [PosPaymentPanel, RouterLink],
+  imports: [PosPaymentPanel, RouterLink, MoneyPipe],
   templateUrl: './pos-page.html',
   styleUrl: './pos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
