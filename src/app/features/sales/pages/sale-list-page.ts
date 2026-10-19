@@ -10,10 +10,12 @@ import { canUseCash } from '../cash-access';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { PosApiService } from '../data-access/pos-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
+import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatDateTime, formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-sale-list-page',
-  imports: [DataTable, EmptyState, PageHeader, FormsModule, RouterLink],
+  imports: [DataTable, EmptyState, PageHeader, FormsModule, RouterLink, MoneyPipe],
   templateUrl: './sale-list-page.html',
   styleUrl: './sale-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,14 +43,13 @@ export class SaleListPage implements OnInit {
 
   readonly columns: readonly DataTableColumn<Sale>[] = [
     { key: 'number', label: 'Nro venta', value: (row) => row.saleNumber },
-    { key: 'date', label: 'Fecha', value: (row) => new Date(row.saleDate).toLocaleString('es-PE') },
+    { key: 'date', label: 'Fecha', value: (row) => formatDateTime(row.saleDate) },
     { key: 'customer', label: 'Cliente', value: (row) => row.clientName ?? 'Cliente general' },
     { key: 'seller', label: 'Vendedor', value: (row) => row.sellerName },
     { key: 'branch', label: 'Local', value: (row) => row.storeName },
     { key: 'payment', label: 'Método pago', value: (row) => row.paymentMethod },
-    { key: 'total', label: 'Total', value: (row) => `S/ ${row.total.toFixed(2)}` },
-    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
-  ];
+    { key: 'total', label: 'Total', value: (row) => formatMoney(row.total) },
+    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' }];
 
   ngOnInit(): void {
     this.posApi.paymentMethods().subscribe({

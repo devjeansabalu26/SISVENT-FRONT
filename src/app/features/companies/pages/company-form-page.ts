@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -29,6 +30,8 @@ import {
   matchThemePreset,
 } from '../constants/company-theme-presets.constant';
 import { CompanyApiService } from '../data-access/company-api.service';
+import { CountryApiService } from '../../countries/data-access/country-api.service';
+import { CountryForm, CountryListItem, problemTitle } from '../../countries/models/country.model';
 import { CompanyDetail } from '../models/company.model';
 
 type ThemeColorField = 'primaryColor' | 'secondaryColor' | 'backgroundColor';
@@ -44,6 +47,7 @@ export class CompanyFormPage implements OnInit {
   private readonly router = inject(Router);
   private readonly api = inject(CompanyApiService);
   private readonly planApi = inject(PlanApiService);
+  private readonly countryApi = inject(CountryApiService);
   private readonly notifications = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
@@ -53,6 +57,15 @@ export class CompanyFormPage implements OnInit {
   readonly loading = signal(this.isEdit);
   readonly saving = signal(false);
   readonly plans = signal<readonly Plan[]>([]);
+  readonly countries = signal<readonly CountryListItem[]>([]);
+  readonly countryForm = signal<CountryForm | null>(null);
+  readonly countryInfo = computed(() => this.countryForm()?.country ?? null);
+  readonly taxIdLabel = computed(() => this.countryInfo()?.taxIdLabel ?? 'RUC');
+  readonly taxIdName = computed(() => this.countryInfo()?.taxIdName ?? 'RUC');
+  readonly personDocuments = computed(() => (this.countryInfo()?.documentTypes ?? []).filter((d) => !d.isBusiness));
+  readonly adminDocumentHint = computed(() => this.personDocuments().map((d) => d.code).join(' / ') || 'DNI/CE');
+  readonly taxPercent = computed(() => Math.round((this.countryInfo()?.defaultTaxRate ?? 0) * 10000) / 100);
+  readonly phonePlaceholder = computed(() => `${this.countryInfo()?.phonePrefix ?? '+51'} 999 999 999`);
   readonly steps = ['Empresa', 'Administrador', 'Vigencia'];
   private existing: CompanyDetail | null = null;
   private initialValue: CompanyFormValue | null = null;
@@ -82,6 +95,9 @@ export class CompanyFormPage implements OnInit {
   readonly form = new FormGroup({
     tradeName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     legalName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    countryCode: new FormControl('PE', { nonNullable: true, validators: [Validators.required] }),
+    timezone: new FormControl('', { nonNullable: true }),
+    taxRegime: new FormControl('', { nonNullable: true }),
     taxId: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{11}$/)] }),
     businessType: new FormControl('', { nonNullable: true }),
     companyPhone: new FormControl('', { nonNullable: true }),
@@ -118,6 +134,7 @@ export class CompanyFormPage implements OnInit {
 
     if (!this.isEdit) {
       this.addCreateValidators();
+      this.watchCountry();
       return;
     }
     this.api.get(this.id!).subscribe({
@@ -196,6 +213,34 @@ export class CompanyFormPage implements OnInit {
     this.form.controls.taxId.addValidators(Validators.required);
     this.form.controls.adminPassword.addValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
     this.form.updateValueAndValidity();
+  }
+
+  private watchCountry(): void {
+    this.countryApi.list().subscribe({
+      next: (rows) => this.countries.set(rows.filter((row) => row.isActive)),
+      error: () => this.countries.set([]),
+    });
+    this.form.controls.countryCode.valueChanges
+      .pipe(startWith(this.form.controls.countryCode.value), takeUntilDestroyed(this.destroyRef))
+      .subscribe((code) => this.loadCountry(code));
+  }
+
+  private loadCountry(code: string): void {
+    if (!code) return;
+    this.countryApi.form(code).subscribe({
+      next: (form) => {
+        this.countryForm.set(form);
+        const country = form.country;
+        const taxId = this.form.controls.taxId;
+        taxId.setValidators([Validators.required, Validators.pattern(new RegExp(country.taxIdPattern))]);
+        taxId.updateValueAndValidity();
+        this.form.patchValue({
+          timezone: country.defaultTimezone,
+          taxRegime: country.defaultTaxRegimeCode ?? country.taxRegimes[0]?.code ?? '',
+        });
+      },
+      error: () => this.notifications.show('No se pudo cargar la configuración del país.', 'error'),
+    });
   }
 
   private watchStepCompletion(): void {
@@ -277,7 +322,8 @@ export class CompanyFormPage implements OnInit {
       intro: 'Verifique los datos principales antes de crear la empresa:',
       meta: [
         { label: 'Empresa', value: value.tradeName.trim() },
-        { label: 'RUC', value: value.taxId.trim() },
+        { label: 'País', value: this.countryInfo()?.name ?? value.countryCode },
+        { label: this.taxIdName(), value: value.taxId.trim() },
         { label: 'Plan', value: this.planName(value.planId) },
         { label: 'Vigencia', value: `${value.startDate} — ${value.endDate}` },
         { label: 'Administrador', value: `${value.adminFirstName.trim()} ${value.adminLastName.trim()}` },
@@ -392,6 +438,9 @@ export class CompanyFormPage implements OnInit {
         accentColor: value.accentColor,
         backgroundColor: value.backgroundColor,
         firstStoreName: value.firstStoreName.trim() || 'Local Principal',
+        countryCode: value.countryCode,
+        timezone: value.timezone || null,
+        taxRegime: value.taxRegime || null,
       })
       .subscribe({
         next: () => {
@@ -421,8 +470,8 @@ export class CompanyFormPage implements OnInit {
 
   private messageFor(cause: unknown): string {
     if (cause instanceof AppHttpError) {
-      if (cause.status === 409) return 'Conflicto: el RUC, el correo del administrador o la contraseña no son válidos.';
-      if (cause.status === 400) return 'Revisa los datos ingresados (la contraseña del administrador debe cumplir la política de seguridad).';
+      if (cause.status === 409) return problemTitle(cause, `Conflicto: el ${this.taxIdName()}, el correo del administrador o la contraseña no son válidos.`);
+      if (cause.status === 400) return problemTitle(cause, 'Revisa los datos ingresados (la contraseña del administrador debe cumplir la política de seguridad).');
     }
     return `No se pudo ${this.isEdit ? 'actualizar' : 'crear'} la empresa.`;
   }

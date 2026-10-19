@@ -3,6 +3,7 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, retry, throwError, timer } from 'rxjs';
 import { CompanyContextService } from '../../context/company-context/company-context.service';
+import { RegionalService } from '../../regional/regional.service';
 import { UserContextService } from '../../context/user-context/user-context.service';
 import { ThemeService } from '../../theme/theme.service';
 import { isAppRole } from '../constants/app-role.constant';
@@ -21,6 +22,7 @@ export class AppSessionService {
   private readonly users = inject(UserContextService);
   private readonly companies = inject(CompanyContextService);
   private readonly theme = inject(ThemeService);
+  private readonly regional = inject(RegionalService);
   private readonly injector = inject(Injector);
 
   constructor() {
@@ -39,7 +41,9 @@ export class AppSessionService {
     }
 
     try {
-      this.applyProfile(await firstValueFrom(this.authApi.me().pipe(retry({ count: 5, delay: retryUnlessRejected }))));
+      const user = await firstValueFrom(this.authApi.me().pipe(retry({ count: 5, delay: retryUnlessRejected })));
+      this.applyProfile(user);
+      await this.loadRegional(user);
       this.auth.markAuthenticated();
     } catch (cause: unknown) {
       if (isRejected(cause)) this.clear();
@@ -47,7 +51,7 @@ export class AppSessionService {
     }
   }
 
-  start(result: LoginResult): void {
+  start(result: LoginResult): Promise<void> {
     this.token.set(result.accessToken, result.expiresAt);
     try {
       this.applyProfile(result.user);
@@ -56,12 +60,20 @@ export class AppSessionService {
       throw error;
     }
     this.auth.markAuthenticated();
+    return this.loadRegional(result.user);
+  }
+
+  private loadRegional(user: SessionUser): Promise<void> {
+    if (user.companyId && user.company) return this.regional.load();
+    this.regional.clear();
+    return Promise.resolve();
   }
 
   clear(): void {
     this.token.clear();
     this.users.clear();
     this.companies.clear();
+    this.regional.clear();
     this.theme.reset();
     this.auth.markUnauthenticated();
   }

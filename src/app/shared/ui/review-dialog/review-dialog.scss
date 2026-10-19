@@ -24,7 +24,7 @@
 
 .review__meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 12px;
   margin: 0;
   padding: 14px 16px;
@@ -71,7 +71,7 @@
 
 .review__kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
   gap: 12px;
 }
 .review__kpis > div {

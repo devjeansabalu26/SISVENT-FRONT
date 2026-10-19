@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,12 +12,14 @@ import { CashSessionDetailDialog } from '../components/cash-session-dialogs/cash
 import {
   CashSession, CashSessionApiService, StoreCashStatus, cashErrorMessage,
 } from '../data-access/cash-session-api.service';
+import { DateTimePipe, DayMonthTimePipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 const REFRESH_MS = 30_000;
 
 @Component({
   selector: 'app-cash-register-page',
-  imports: [PageHeader, RouterLink, DatePipe],
+  imports: [PageHeader, RouterLink, MoneyPipe, DateTimePipe, DayMonthTimePipe],
   templateUrl: './cash-register-page.html',
   styleUrl: './cash-register-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,7 +111,7 @@ export class CashRegisterPage implements OnInit {
       .subscribe((closed) => {
         const difference = closed.difference ?? 0;
         this.notifications.show(
-          `Caja cerrada: diferencia S/ ${difference.toFixed(2)}.`,
+          `Caja cerrada: diferencia ${formatMoney(difference)}.`,
           difference === 0 ? 'success' : 'warning',
         );
         this.refresh();

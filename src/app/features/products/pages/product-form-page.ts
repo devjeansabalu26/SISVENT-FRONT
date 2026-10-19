@@ -8,7 +8,7 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
-import { DiffField, buildDiffRows, formatSoles } from '../../../shared/utils/diff-rows';
+import { DiffField, buildDiffRows, formatAmount } from '../../../shared/utils/diff-rows';
 import { MARGIN_STATUS_LABEL, marginStatus } from '../../../shared/utils/margin-status';
 import { BrandApiService } from '../../brands/data-access/brand-api.service';
 import { CategoryApiService } from '../../categories/data-access/category-api.service';
@@ -19,10 +19,11 @@ import { PriceChangeData, PriceChangeDialog } from '../components/price-change-d
 import { ProductApiService } from '../data-access/product-api.service';
 import { UnitApiService, UnitOption } from '../data-access/unit-api.service';
 import { ProductDetail } from '../models/product.model';
+import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-product-form-page',
-  imports: [ReactiveFormsModule, RouterLink, PageHeader],
+  imports: [ReactiveFormsModule, RouterLink, PageHeader, RegionalPipe],
   templateUrl: './product-form-page.html',
   styleUrls: ['../../../shared/forms/form-page.scss', './product-form-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -170,8 +171,8 @@ export class ProductFormPage implements OnInit {
       { key: 'categoryId', label: 'Categoría', format: nameOf(this.categories()) },
       { key: 'brandId', label: 'Marca', format: nameOf(this.brands()) },
       { key: 'unitId', label: 'Unidad', format: (id) => this.units().find((unit) => unit.id === id)?.name ?? '—' },
-      { key: 'referenceCost', label: 'Costo de referencia', format: formatSoles },
-      { key: 'salePrice', label: 'Precio', format: formatSoles },
+      { key: 'referenceCost', label: 'Costo de referencia', format: formatAmount },
+      { key: 'salePrice', label: 'Precio', format: formatAmount },
       { key: 'active', label: 'Estado', format: (active) => (active ? 'Activo' : 'Inactivo') },
       { key: 'imageUrl', label: 'Imagen' },
     ];

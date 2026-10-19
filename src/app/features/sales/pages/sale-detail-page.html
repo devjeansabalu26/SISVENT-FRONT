@@ -11,7 +11,7 @@
   </app-page-header>
 
   <div class="summary surface-card">
-    <div><span class="code">{{ sale.saleDate | date: 'medium' }}</span><h2>{{ sale.saleNumber }}</h2></div>
+    <div><span class="code">{{ sale.saleDate | dateTime }}</span><h2>{{ sale.saleNumber }}</h2></div>
     <app-status-chip [value]="sale.status" [label]="sale.status" />
   </div>
 
@@ -27,10 +27,10 @@
     <section class="surface-card annulment">
       <h3>Anulación</h3>
       <dl>
-        <div><dt>Anulada por</dt><dd>{{ an.cancelledBy }} · {{ an.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}</dd></div>
+        <div><dt>Anulada por</dt><dd>{{ an.cancelledBy }} · {{ an.cancelledAt | dateTime }}</dd></div>
         <div><dt>Motivo</dt><dd>{{ an.reason }}</dd></div>
         @if (an.refundAmount > 0) {
-          <div><dt>Devolución</dt><dd>S/ {{ an.refundAmount.toFixed(2) }} · {{ an.refundMethod }}{{ an.refundPending ? ' · pendiente hasta abrir caja' : '' }}</dd></div>
+          <div><dt>Devolución</dt><dd>{{ an.refundAmount | money }} · {{ an.refundMethod }}{{ an.refundPending ? ' · pendiente hasta abrir caja' : '' }}</dd></div>
         }
       </dl>
       @if (an.items.length) {
@@ -65,9 +65,9 @@
               <td>{{ line.productName }}</td>
               <td>{{ line.sku }}</td>
               <td>{{ line.quantity }}</td>
-              <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
-              <td>S/ {{ line.discountAmount.toFixed(2) }}</td>
-              <td>S/ {{ line.subtotal.toFixed(2) }}</td>
+              <td>{{ line.unitPrice | money }}</td>
+              <td>{{ line.discountAmount | money }}</td>
+              <td>{{ line.subtotal | money }}</td>
             </tr>
           }
         </tbody>
@@ -77,7 +77,7 @@
 
   @if (credit()?.creditNotes?.length) {
     <section class="surface-card">
-      <h3>Notas de crédito · devuelto S/ {{ credit()!.creditedTotal.toFixed(2) }} de S/ {{ credit()!.saleTotal.toFixed(2) }}</h3>
+      <h3>Notas de crédito · devuelto {{ credit()!.creditedTotal | money }} de {{ credit()!.saleTotal | money }}</h3>
       <div class="table-scroll">
         <table>
           <thead><tr><th>N.º nota</th><th>Fecha</th><th>Reembolso</th><th>Total</th><th>Emitida por</th><th>Motivo</th></tr></thead>
@@ -85,9 +85,9 @@
             @for (note of credit()!.creditNotes; track note.id) {
               <tr class="clickable" (click)="openCreditNote(note)">
                 <td>{{ note.creditNoteNumber }}</td>
-                <td>{{ note.issuedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ note.issuedAt | dateTime }}</td>
                 <td>{{ note.refundMethod }}</td>
-                <td>S/ {{ note.total.toFixed(2) }}</td>
+                <td>{{ note.total | money }}</td>
                 <td>{{ note.createdBy }}</td>
                 <td>{{ note.reason }}</td>
               </tr>
@@ -102,10 +102,10 @@
     <section class="surface-card">
       <h3>Resumen financiero</h3>
       <dl>
-        <div><dt>Subtotal</dt><dd>S/ {{ sale.subtotal.toFixed(2) }}</dd></div>
-        <div><dt>Descuento</dt><dd>S/ {{ sale.discountTotal.toFixed(2) }}</dd></div>
-        <div><dt>IGV (referencial)</dt><dd>S/ {{ sale.tax.toFixed(2) }}</dd></div>
-        <div><dt>Total</dt><dd>S/ {{ sale.total.toFixed(2) }}</dd></div>
+        <div><dt>Subtotal</dt><dd>{{ sale.subtotal | money }}</dd></div>
+        <div><dt>Descuento</dt><dd>{{ sale.discountTotal | money }}</dd></div>
+        <div><dt>{{ 'taxName' | regional }} (referencial)</dt><dd>{{ sale.tax | money }}</dd></div>
+        <div><dt>Total</dt><dd>{{ sale.total | money }}</dd></div>
         <div><dt>Método de pago</dt><dd>{{ sale.paymentMethod }}</dd></div>
         @for (detail of paymentDetails(); track $index) {
           <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>

@@ -48,9 +48,9 @@ export const LOGIN_ALERTS = {
   },
   accountLocked: {
     tone: 'warning',
-    icon: 'lock_clock',
-    title: 'Cuenta bloqueada temporalmente',
-    message: 'Se superó el número de intentos fallidos. Espera unos minutos e inténtalo de nuevo.',
+    icon: 'lock',
+    title: 'Cuenta bloqueada',
+    message: 'Se superó el número de intentos fallidos. Pide al administrador de tu empresa que desbloquee tu cuenta.',
   },
   storeDisabled: {
     tone: 'warning',

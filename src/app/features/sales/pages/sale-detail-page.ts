@@ -1,6 +1,5 @@
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,10 +16,11 @@ import { CreditNoteDetailDialog } from '../components/credit-note-dialogs/credit
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { SaleAnnulmentOptions, SaleDetail } from '../models/sale-detail.model';
 import { paymentSummary } from '../utils/payment';
+import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-sale-detail-page',
-  imports: [PageHeader, StatusChip, RouterLink, DatePipe],
+  imports: [PageHeader, StatusChip, RouterLink, MoneyPipe, DateTimePipe, RegionalPipe],
   templateUrl: './sale-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './sale-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -3,7 +3,7 @@
 .cal {
   display: grid;
   gap: 8px;
-  width: 296px;
+  width: min(296px, calc(100vw - 16px));
   padding: 12px;
 }
 

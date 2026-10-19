@@ -10,6 +10,7 @@ export interface AppUser {
   readonly storeId: string | null;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
 }
 
@@ -41,6 +42,7 @@ export interface UserDetail {
   readonly storeId: string | null;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string;
 }
@@ -82,6 +84,7 @@ export interface PlatformUserDetail {
   readonly storeId: string | null;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string;
 }
@@ -99,5 +102,6 @@ export interface PlatformUserItem {
   readonly storeId: string | null;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
 }

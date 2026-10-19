@@ -5,6 +5,9 @@ export interface Company {
   readonly tradeName: string;
   readonly legalName: string | null;
   readonly taxDocument: string;
+  readonly countryCode?: string;
+  readonly countryName?: string;
+  readonly taxIdName?: string;
   readonly status: string;
   readonly administratorName: string | null;
   readonly administratorEmail: string | null;
@@ -37,6 +40,9 @@ export interface CompanyDetail {
   readonly tradeName: string;
   readonly legalName: string | null;
   readonly taxDocument: string;
+  readonly countryCode?: string;
+  readonly countryName?: string;
+  readonly taxIdName?: string;
   readonly businessType: string | null;
   readonly phone: string | null;
   readonly email: string | null;
@@ -180,6 +186,9 @@ export interface CreateCompanyValue {
   readonly accentColor: string | null;
   readonly backgroundColor: string | null;
   readonly firstStoreName: string;
+  readonly countryCode?: string;
+  readonly timezone?: string | null;
+  readonly taxRegime?: string | null;
 }
 
 export interface UpdateCompanyValue {

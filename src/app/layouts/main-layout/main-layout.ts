@@ -10,6 +10,7 @@ import { AttendanceEntryPromptService } from '../../features/attendance/utils/at
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown.escape)': 'closeNavigation()' },
 })
 export class MainLayout {
   readonly navigationClosed = signal(true);

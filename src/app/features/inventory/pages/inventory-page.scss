@@ -4,3 +4,8 @@
 
 .hint-general{margin:10px 0 0;color:var(--color-text-muted);font-size:13px}
 button.ghost{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text-secondary);font:inherit;font-weight:600;cursor:pointer}
+@media (max-width: 900px) and (min-width: 701px) {
+  .metrics article {
+    padding: 14px;
+  }
+}

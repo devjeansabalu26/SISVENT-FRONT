@@ -80,3 +80,10 @@
   background: color-mix(in srgb, var(--color-info) 12%, var(--color-surface));
 }
 .kpi__caption{color:var(--color-text-muted);font-size:var(--font-size-xs)}
+.kpi__value{overflow-wrap:anywhere}
+@media (max-width: 600px) {
+  .kpi { padding: var(--space-md); }
+  .kpi__label { font-size: var(--font-size-xxs); }
+  .kpi__icon { width: 30px; height: 30px; font-size: 18px; }
+  .kpi__value { font-size: var(--font-size-lg); }
+}

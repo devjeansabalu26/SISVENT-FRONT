@@ -8,6 +8,8 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { SalesReportApiService } from '../data-access/sales-report-api.service';
 import { SalesReport, TopProduct } from '../models/sales-report.model';
+import { CompactMoneyPipe, MoneyPipe, QuantityPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 type TopProductRow = TopProduct & { readonly id: string };
 
@@ -15,7 +17,7 @@ const PERIOD_DAYS: Readonly<Record<string, number>> = { '30': 30, '90': 90, '180
 
 @Component({
   selector: 'app-reports-page',
-  imports: [DataTable, PageHeader, KpiCard],
+  imports: [DataTable, PageHeader, KpiCard, MoneyPipe, CompactMoneyPipe, QuantityPipe],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,9 +43,8 @@ export class ReportsPage implements OnInit {
     { key: 'name', label: 'Producto', value: (row) => row.name },
     { key: 'category', label: 'Categoría', value: (row) => row.category ?? '—' },
     { key: 'units', label: 'Unidades', value: (row) => row.units },
-    { key: 'revenue', label: 'Ingresos', value: (row) => `S/ ${row.revenue.toFixed(2)}` },
-    { key: 'margin', label: 'Margen', value: (row) => (row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—') },
-  ];
+    { key: 'revenue', label: 'Ingresos', value: (row) => formatMoney(row.revenue) },
+    { key: 'margin', label: 'Margen', value: (row) => (row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—') }];
 
   ngOnInit(): void {
     this.storeApi.list().subscribe((response) => this.stores.set(response.items));
@@ -84,8 +85,7 @@ export class ReportsPage implements OnInit {
     if (!report) return;
     const lines = [
       'Fecha,Monto',
-      ...report.dailySeries.map((point) => `${point.date},${point.amount}`),
-    ];
+      ...report.dailySeries.map((point) => `${point.date},${point.amount}`)];
     const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
     const link = this.document.createElement('a');
     link.href = url;

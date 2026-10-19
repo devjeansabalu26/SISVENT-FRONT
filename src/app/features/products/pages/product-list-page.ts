@@ -20,6 +20,7 @@ import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { ProductApiService } from '../data-access/product-api.service';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { Product } from '../models/product.model';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-product-list-page',
@@ -64,7 +65,7 @@ export class ProductListPage implements OnInit {
       { key: 'name', label: 'Producto', value: (r) => r.name },
       { key: 'category', label: 'Categoría', value: (r) => r.categoryName ?? '—' },
       { key: 'brand', label: 'Marca', value: (r) => r.brandName ?? '—' },
-      { key: 'price', label: 'Precio', value: (r) => `S/ ${r.salePrice.toFixed(2)}` },
+      { key: 'price', label: 'Precio', value: (r) => formatMoney(r.salePrice) },
       { key: 'status', label: 'Estado', value: (r) => (r.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       {
         key: 'stock', label: general ? 'Stock total' : 'Stock del local',

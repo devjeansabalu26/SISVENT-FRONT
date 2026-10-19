@@ -1,4 +1,10 @@
+import { CompanyRegional } from '../../../core/regional/regional.model';
 import { SettingsExtras } from './settings-extras.model';
+
+export interface ReceiptSeriesValue {
+  readonly receiptTypeCode: string;
+  readonly series: string;
+}
 
 export interface CompanySettings extends SettingsExtras {
   readonly currencyCode: string;
@@ -9,4 +15,6 @@ export interface CompanySettings extends SettingsExtras {
   readonly notifyManualAdjustment: boolean;
   readonly version: number;
   readonly updatedAt?: string;
+  readonly regional?: CompanyRegional;
+  readonly series?: readonly ReceiptSeriesValue[];
 }

@@ -137,6 +137,7 @@ textarea {
 
 footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
 }
@@ -171,4 +172,17 @@ textarea.invalid:focus {
 footer button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .dialog {
+    width: min(560px, calc(100vw - 16px));
+    padding: var(--space-md);
+  }
+  .fields.two {
+    grid-template-columns: 1fr;
+  }
+  footer button {
+    flex: 1 1 auto;
+  }
 }

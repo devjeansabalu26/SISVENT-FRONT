@@ -1,6 +1,9 @@
 import { CARD_BRANDS, MAX_PAYMENTS, PaymentDraftLine, PaymentKind, PosPaymentLine } from '../models/payment.model';
+import { currentRegional, formatMoney, roundMoney } from '../../../core/regional/regional-format';
 
-const round2 = (value: number): number => Math.round(value * 100) / 100;
+const round2 = (value: number): number => roundMoney(value);
+const CASH_BILLS = [10, 20, 50, 100, 200];
+const WHOLE_CURRENCY_BILLS = [1000, 2000, 5000, 10000, 20000, 50000, 100000];
 
 function parseAmount(text: string): number | null {
   const clean = text.trim().replace(',', '.');
@@ -74,9 +77,9 @@ export function paymentsError(lines: readonly PaymentDraftLine[], kindOf: (code:
     if (result.cashReceived === null || !Number.isFinite(result.cashReceived) || result.cashReceived < 0) {
       return 'Ingresa un monto recibido válido.';
     }
-    if (round2(result.cashReceived) < result.due) return `El efectivo no cubre lo que falta (S/ ${result.due.toFixed(2)}).`;
+    if (round2(result.cashReceived) < result.due) return `El efectivo no cubre lo que falta (${formatMoney(result.due)}).`;
   } else if (result.due > 0) {
-    return `Falta cubrir S/ ${result.due.toFixed(2)} del total.`;
+    return `Falta cubrir ${formatMoney(result.due)} del total.`;
   }
   return null;
 }
@@ -109,7 +112,7 @@ export function toPaymentLines(
 
 export function quickCashAmounts(due: number): readonly number[] {
   if (due <= 0) return [];
-  const bills = [10, 20, 50, 100, 200];
+  const bills = currentRegional().currencyDecimals === 0 ? WHOLE_CURRENCY_BILLS : CASH_BILLS;
   const rounded = bills.map((bill) => Math.ceil(due / bill) * bill).filter((amount) => amount > due);
   return [round2(due), ...new Set(rounded)].slice(0, 4);
 }
@@ -127,10 +130,10 @@ interface PaymentSummarySource {
 
 export function paymentSummary(source: PaymentSummarySource): string {
   const parts: string[] = [];
-  if (source.methodName) parts.push(source.amount != null ? `${source.methodName} S/ ${source.amount.toFixed(2)}` : source.methodName);
+  if (source.methodName) parts.push(source.amount != null ? `${source.methodName} ${formatMoney(source.amount)}` : source.methodName);
   if (source.amountReceived != null) {
-    parts.push(`Recibido S/ ${source.amountReceived.toFixed(2)}`);
-    parts.push(`Vuelto S/ ${(source.changeAmount ?? 0).toFixed(2)}`);
+    parts.push(`Recibido ${formatMoney(source.amountReceived)}`);
+    parts.push(`Vuelto ${formatMoney((source.changeAmount ?? 0))}`);
   }
   if (source.cardBrand) {
     const brand = CARD_BRANDS.find((item) => item.value === source.cardBrand)?.label ?? source.cardBrand;

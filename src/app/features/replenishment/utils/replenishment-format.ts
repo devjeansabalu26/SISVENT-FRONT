@@ -1,11 +1,12 @@
 import { StockRiskItem } from '../models/replenishment.model';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 export function formatQuantity(value: number): string {
   return Number.isInteger(value) ? String(value) : String(Math.round(value * 100) / 100);
 }
 
 export function formatSoles(value: number): string {
-  return `S/ ${value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return formatMoney(value);
 }
 
 const csvCell = (value: string | number): string => {

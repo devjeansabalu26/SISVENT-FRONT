@@ -4,10 +4,12 @@ import { RouterLink } from '@angular/router';
 import { interval } from 'rxjs';
 import { DashboardApiService } from '../../data-access/dashboard-api.service';
 import { StoresTodayResponse } from '../../models/dashboard.model';
+import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
+import { formatTime } from '../../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-stores-today',
-  imports: [RouterLink],
+  imports: [RouterLink, MoneyPipe],
   template: `
     @if (data(); as d) {
       <section class="today surface-card">
@@ -25,9 +27,9 @@ import { StoresTodayResponse } from '../../models/dashboard.model';
                 <span class="chip" [class.chip--ok]="store.cash">{{ store.cash ? 'Caja abierta' : 'Caja cerrada' }}</span>
               </header>
               <dl>
-                <div><dt>Ventas de hoy</dt><dd>{{ store.salesCount }} · S/ {{ store.salesTotal.toFixed(2) }}</dd></div>
+                <div><dt>Ventas de hoy</dt><dd>{{ store.salesCount }} · {{ store.salesTotal | money }}</dd></div>
                 @if (store.cash; as cash) {
-                  <div><dt>Efectivo esperado</dt><dd>S/ {{ cash.expectedCash.toFixed(2) }}</dd></div>
+                  <div><dt>Efectivo esperado</dt><dd>{{ cash.expectedCash | money }}</dd></div>
                   <div><dt>Abrió</dt><dd>{{ cash.openedBy }} · {{ hour(cash.openedAt) }}</dd></div>
                 }
               </dl>
@@ -62,7 +64,7 @@ import { StoresTodayResponse } from '../../models/dashboard.model';
     .today__head h2 { margin: 0 auto 0 0; font-size: 16px; }
     .link { color: var(--color-primary); font-size: 13px; font-weight: 600; text-decoration: none; }
     .muted { color: var(--color-text-muted); font-size: 12px; }
-    .today__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .today__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 12px; }
     .store { display: grid; align-content: start; gap: 8px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
     .store--alert { border-color: color-mix(in srgb, var(--color-warning) 55%, var(--color-border)); }
     .store header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -94,7 +96,7 @@ export class StoresTodayPanel implements OnInit {
   }
 
   hour(value: string): string {
-    return new Date(value).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return formatTime(value);
   }
 
   private load(): void {

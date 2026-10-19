@@ -1,6 +1,5 @@
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,10 +13,12 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { ProductApiService } from '../data-access/product-api.service';
 import { ProductDetail, ProductPriceHistoryItem } from '../models/product.model';
+import { DateTimePipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-product-detail-page',
-  imports: [PageHeader, StatusChip, KpiCard, RouterLink, DatePipe],
+  imports: [PageHeader, StatusChip, KpiCard, RouterLink, MoneyPipe, DateTimePipe],
   templateUrl: './product-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './product-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,8 +41,7 @@ export class ProductDetailPage implements OnInit {
       { label: 'Descripción', value: product.description ?? '—' },
       { label: 'Categoría', value: product.categoryName ?? '—' },
       { label: 'Marca', value: product.brandName ?? '—' },
-      { label: 'Unidad', value: product.unitName ?? '—' },
-    ];
+      { label: 'Unidad', value: product.unitName ?? '—' }];
   });
 
   readonly finance = computed(() => {
@@ -52,10 +52,9 @@ export class ProductDetailPage implements OnInit {
         ? `${(((product.salePrice - product.referenceCost) / product.salePrice) * 100).toFixed(1)}%`
         : '—';
     return [
-      { label: 'Costo de referencia', value: product.referenceCost != null ? `S/ ${product.referenceCost.toFixed(2)}` : '—' },
-      { label: 'Precio de venta', value: `S/ ${product.salePrice.toFixed(2)}` },
-      { label: 'Margen de utilidad', value: margin },
-    ];
+      { label: 'Costo de referencia', value: product.referenceCost != null ? formatMoney(product.referenceCost) : '—' },
+      { label: 'Precio de venta', value: formatMoney(product.salePrice) },
+      { label: 'Margen de utilidad', value: margin }];
   });
 
   readonly stock = computed(() => {
@@ -64,8 +63,7 @@ export class ProductDetailPage implements OnInit {
     return [
       { label: 'Stock actual', value: `${product.totalStock}` },
       { label: 'Stock mínimo', value: `${product.minStock}` },
-      { label: 'SKU', value: product.sku },
-    ];
+      { label: 'SKU', value: product.sku }];
   });
 
   ngOnInit(): void {

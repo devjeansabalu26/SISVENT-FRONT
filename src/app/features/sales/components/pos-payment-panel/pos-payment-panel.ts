@@ -1,8 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
+import { cashStep, moneyInput } from '../../../../core/regional/regional-format';
+import { RegionalService } from '../../../../core/regional/regional.service';
 import { CARD_BRANDS, MAX_PAYMENTS, PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../../models/payment.model';
 import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment';
+import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
+  imports: [MoneyPipe],
   selector: 'app-pos-payment-panel',
   template: `
     @for (line of lines(); track line.key; let index = $index) {
@@ -25,18 +29,18 @@ import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment'
             <label class="field">
               Monto recibido
               <span class="money">
-                <em>S/</em>
-                <input type="number" inputmode="decimal" min="0" step="0.10" [placeholder]="summary().due.toFixed(2)"
+                <em>{{ regional().currencySymbol }}</em>
+                <input type="number" inputmode="decimal" min="0" [step]="step()" [placeholder]="asInput(summary().due)"
                   [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
               </span>
             </label>
             @if (lines().length > 1) {
-              <small class="hint">Cubre lo que falta: S/ {{ summary().due.toFixed(2) }}</small>
+              <small class="hint">Cubre lo que falta: {{ summary().due | money }}</small>
             }
             <div class="quick" role="group" aria-label="Montos rápidos">
               @for (amount of quickAmounts(); track amount; let first = $first) {
-                <button type="button" [class.active]="isReceived(line, amount)" (click)="patch(index, { amountReceived: amount.toFixed(2) })">
-                  {{ first ? 'Exacto' : 'S/ ' + amount }}
+                <button type="button" [class.active]="isReceived(line, amount)" (click)="patch(index, { amountReceived: asInput(amount) })">
+                  {{ first ? 'Exacto' : (amount | money) }}
                 </button>
               }
             </div>
@@ -44,8 +48,8 @@ import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment'
           @case ('CARD') {
             @if (lines().length > 1) {
               <label class="field">Monto con tarjeta *
-                <span class="money"><em>S/</em>
-                  <input type="number" inputmode="decimal" min="0" step="0.10" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
+                <span class="money"><em>{{ regional().currencySymbol }}</em>
+                  <input type="number" inputmode="decimal" min="0" [step]="step()" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
                 </span>
               </label>
             }
@@ -71,8 +75,8 @@ import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment'
           @case ('DIGITAL') {
             @if (lines().length > 1) {
               <label class="field">Monto *
-                <span class="money"><em>S/</em>
-                  <input type="number" inputmode="decimal" min="0" step="0.10" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
+                <span class="money"><em>{{ regional().currencySymbol }}</em>
+                  <input type="number" inputmode="decimal" min="0" [step]="step()" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
                 </span>
               </label>
             }
@@ -90,9 +94,9 @@ import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment'
 
     <div class="status" [class.status--pending]="summary().pending > 0">
       @if (summary().pending > 0) {
-        <span>Por cubrir</span><strong>S/ {{ summary().pending.toFixed(2) }}</strong>
+        <span>Por cubrir</span><strong>{{ summary().pending | money }}</strong>
       } @else {
-        <span>Vuelto</span><strong>S/ {{ summary().change.toFixed(2) }}</strong>
+        <span>Vuelto</span><strong>{{ summary().change | money }}</strong>
       }
     </div>
 
@@ -135,6 +139,9 @@ export class PosPaymentPanel {
   readonly showErrors = input(false);
   readonly lines = model.required<readonly PaymentDraftLine[]>();
 
+  protected readonly regional = inject(RegionalService).regional;
+  protected readonly step = computed(() => cashStep(this.regional()));
+  protected readonly asInput = (value: number): string => moneyInput(value, this.regional());
   readonly brands = CARD_BRANDS;
   readonly maxPayments = MAX_PAYMENTS;
   readonly kindOf = (code: string): PaymentKind => this.methods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
@@ -157,14 +164,14 @@ export class PosPaymentPanel {
     const total = this.total();
     const current =
       lines.length === 1 && this.kindOf(lines[0].methodCode) !== 'CASH' && !lines[0].amount.trim()
-        ? [{ ...lines[0], amount: total.toFixed(2) }]
+        ? [{ ...lines[0], amount: moneyInput(total) }]
         : lines;
     const usedCash = current.some((line) => this.kindOf(line.methodCode) === 'CASH');
     const next = this.methods().find((method) => method.kind === 'CASH' && !usedCash)
       ?? this.methods().find((method) => !current.some((line) => line.methodCode === method.code))
       ?? this.methods()[0];
     const pending = breakdown(current, this.kindOf, total).due;
-    this.lines.set([...current, newPaymentLine(next.code, next.kind === 'CASH' ? '' : pending.toFixed(2))]);
+    this.lines.set([...current, newPaymentLine(next.code, next.kind === 'CASH' ? '' : moneyInput(pending))]);
   }
 
   remove(index: number): void {

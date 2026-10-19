@@ -31,7 +31,8 @@ export class CompanyListPage implements OnInit {
   readonly columns: readonly DataTableColumn<Company>[] = [
     { key: 'name', label: 'Nombre comercial', value: (row) => row.tradeName },
     { key: 'legal', label: 'Razón social', value: (row) => row.legalName ?? '—' },
-    { key: 'tax', label: 'RUC', value: (row) => row.taxDocument },
+    { key: 'tax', label: 'Documento fiscal', value: (row) => `${row.taxIdName ?? 'RUC'} ${row.taxDocument}` },
+    { key: 'country', label: 'País', value: (row) => row.countryName ?? 'Perú' },
     { key: 'admin', label: 'Administrador', value: (row) => row.administratorName ?? '—' },
     { key: 'email', label: 'Correo', value: (row) => row.administratorEmail ?? '—' },
     { key: 'plan', label: 'Plan', value: (row) => row.planName ?? '—' },

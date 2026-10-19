@@ -8,10 +8,12 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { GoodsReceiptApiService } from '../data-access/goods-receipt-api.service';
 import { GoodsReceiptListItem, GoodsReceiptSummary } from '../models/goods-receipt.model';
+import { formatDate, formatMoney } from '../../../core/regional/regional-format';
+import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-goods-receipt-list-page',
-  imports: [DataTable, PageHeader, KpiCard, RouterLink],
+  imports: [DataTable, PageHeader, KpiCard, RouterLink, MoneyPipe],
   templateUrl: './goods-receipt-list-page.html',
   styleUrl: '../../../shared/ui/list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,10 +40,10 @@ export class GoodsReceiptListPage implements OnInit {
 
   readonly columns: readonly DataTableColumn<GoodsReceiptListItem>[] = [
     { key: 'receiptNumber', label: 'Código', value: (row) => row.receiptNumber },
-    { key: 'receiptDate', label: 'Fecha', value: (row) => new Date(row.receiptDate).toLocaleDateString('es-PE') },
+    { key: 'receiptDate', label: 'Fecha', value: (row) => formatDate(row.receiptDate) },
     { key: 'supplierName', label: 'Proveedor', value: (row) => row.supplierName ?? '—' },
     { key: 'itemCount', label: 'Items', value: (row) => `${row.itemCount} items` },
-    { key: 'totalCost', label: 'Valor total', value: (row) => `S/ ${row.totalCost.toLocaleString('es-PE', { minimumFractionDigits: 2 })}` },
+    { key: 'totalCost', label: 'Valor total', value: (row) => formatMoney(row.totalCost) },
     { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
     { key: 'receivedBy', label: 'Recibido por', value: (row) => row.receivedBy },
   ];

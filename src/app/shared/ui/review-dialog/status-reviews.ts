@@ -48,6 +48,20 @@ export function userStatusReview(user: { readonly fullName: string; readonly rol
   };
 }
 
+export function unlockReview(fullName: string): ReviewDialogData {
+  return {
+    title: 'Desbloquear cuenta',
+    icon: 'lock_open',
+    meta: [{ label: 'Usuario', value: fullName }],
+    transition: { fromLabel: 'Estado', from: 'Bloqueado', toLabel: 'Nuevo estado', to: 'Puede iniciar sesión' },
+    banner: {
+      tone: 'info',
+      text: 'La cuenta se bloqueó por intentos fallidos. Podrá entrar con su clave actual; si no la recuerda, restablece su acceso.',
+    },
+    confirmLabel: 'Desbloquear',
+  };
+}
+
 export function resetPasswordReview(fullName: string): ReviewDialogData {
   return {
     title: 'Restablecer acceso',
@@ -55,7 +69,7 @@ export function resetPasswordReview(fullName: string): ReviewDialogData {
     meta: [{ label: 'Usuario', value: fullName }],
     banner: {
       tone: 'warning',
-      text: 'Se generará una contraseña temporal. La contraseña actual dejará de funcionar y la nueva se mostrará una sola vez.',
+      text: 'Se generará una contraseña temporal y se desbloqueará la cuenta si estaba bloqueada. La contraseña actual dejará de funcionar y la nueva se mostrará una sola vez.',
     },
     confirmLabel: 'Generar contraseña temporal',
   };

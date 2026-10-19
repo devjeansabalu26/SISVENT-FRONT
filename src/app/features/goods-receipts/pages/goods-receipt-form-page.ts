@@ -10,12 +10,13 @@ import { ConfirmDialogData } from '../../../shared/ui/confirm-dialog/confirm-dia
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
-import { formatSoles } from '../../../shared/utils/diff-rows';
+import { formatAmount } from '../../../shared/utils/diff-rows';
 import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { ProductApiService } from '../../products/data-access/product-api.service';
 import { SupplierApiService } from '../../suppliers/data-access/supplier-api.service';
 import { GoodsReceiptApiService } from '../data-access/goods-receipt-api.service';
 import { GoodsReceiptLineInput } from '../models/goods-receipt.model';
+import { MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 type LineGroup = FormGroup<{
   productId: FormControl<string>;
@@ -25,7 +26,7 @@ type LineGroup = FormGroup<{
 
 @Component({
   selector: 'app-goods-receipt-form-page',
-  imports: [ReactiveFormsModule, PageHeader],
+  imports: [ReactiveFormsModule, PageHeader, MoneyPipe, RegionalPipe],
   templateUrl: './goods-receipt-form-page.html',
   styleUrls: ['../../../shared/forms/form-page.scss', './goods-receipt-form-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -140,13 +141,11 @@ export class GoodsReceiptFormPage implements OnInit {
           meta: [
             { label: 'Proveedor', value: this.suppliers().find((s) => s.id === value.supplierId)?.businessName ?? 'Sin proveedor' },
             { label: 'Local destino', value: this.stores().find((s) => s.id === value.storeId)?.name ?? '—' },
-            { label: 'Documento', value: document || 'Sin documento' },
-          ],
+            { label: 'Documento', value: document || 'Sin documento' }],
           kpis: [
             { label: 'Productos', value: `${totals.count} items` },
             { label: 'Unidades', value: `${totals.units} unids.` },
-            { label: 'Costo total', value: formatSoles(totals.cost) },
-          ],
+            { label: 'Costo total', value: formatAmount(totals.cost) }],
           banner: {
             tone: 'warning',
             text: 'Al confirmar, se incrementará de manera inmediata el stock físico en el inventario. Esta acción no se puede deshacer de forma automática.',

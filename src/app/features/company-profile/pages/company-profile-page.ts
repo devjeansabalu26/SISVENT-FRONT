@@ -7,6 +7,7 @@ import { CompanyProfileEditDialog } from '../components/company-profile-edit-dia
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CompanyProfileApiService } from '../data-access/company-profile-api.service';
 import { CompanyProfile } from '../models/company-profile.model';
+import { RegionalService } from '../../../core/regional/regional.service';
 
 interface Field {
   readonly label: string;
@@ -19,8 +20,6 @@ const TAX_REGIMES: Readonly<Record<string, string>> = {
   RMT: 'Régimen MYPE Tributario (RMT)',
   GENERAL: 'Régimen General',
 };
-
-const CURRENCIES: Readonly<Record<string, string>> = { PEN: 'Sol peruano (S/)', USD: 'Dólar estadounidense (US$)' };
 
 const STATUS: Readonly<Record<string, string>> = {
   ACTIVE: 'Activa',
@@ -43,6 +42,7 @@ export class CompanyProfilePage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly theme = inject(ThemeService);
+  private readonly regional = inject(RegionalService).regional;
 
   readonly loading = signal(true);
   readonly loadError = signal(false);
@@ -54,7 +54,8 @@ export class CompanyProfilePage implements OnInit {
     return [
       { label: 'Nombre comercial', value: p.tradeName },
       { label: 'Razón social', value: orDash(p.legalName) },
-      { label: 'RUC', value: p.taxDocument },
+      { label: p.taxIdName ?? 'RUC', value: p.taxDocument },
+      { label: 'País', value: p.countryName ?? 'Perú' },
       { label: 'Rubro comercial', value: orDash(p.businessType) },
       { label: 'Estado', value: STATUS[p.status] ?? p.status },
       { label: 'Plan vigente', value: orDash(p.planName) },
@@ -74,11 +75,18 @@ export class CompanyProfilePage implements OnInit {
   readonly fiscal = computed<readonly Field[]>(() => {
     const f = this.profile()?.fiscal;
     if (!f) return [];
+    const regional = this.regional();
+    const series = regional.series.length
+      ? regional.series.map((s) => ({ label: `${s.seriesLabel} de ${s.name}`, value: s.series ?? '—' }))
+      : [
+          { label: 'Serie de boletas', value: f.receiptSeries },
+          { label: 'Serie de facturas', value: f.invoiceSeries },
+        ];
     return [
-      { label: 'Régimen tributario', value: TAX_REGIMES[f.taxRegime] ?? f.taxRegime },
-      { label: 'Moneda de facturación', value: CURRENCIES[f.currencyCode] ?? f.currencyCode },
-      { label: 'Serie de boletas', value: f.receiptSeries },
-      { label: 'Serie de facturas', value: f.invoiceSeries },
+      { label: 'Régimen tributario', value: regional.taxRegimeName ?? TAX_REGIMES[f.taxRegime] ?? f.taxRegime },
+      { label: 'Moneda', value: `${regional.currencyCode} (${regional.currencySymbol})` },
+      { label: 'Impuesto', value: `${regional.taxName} ${Math.round(regional.taxRate * 10000) / 100} %` },
+      ...series,
     ];
   });
 

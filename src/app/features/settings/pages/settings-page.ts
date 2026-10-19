@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormRecord, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -11,6 +11,11 @@ import { DiffField, buildDiffRows } from '../../../shared/utils/diff-rows';
 import { SettingsApiService } from '../data-access/settings-api.service';
 import { CompanySettings } from '../models/settings.model';
 import { DateFormat, SettingsExtras, TaxRegime, TicketFormat, WEEK_DAYS } from '../models/settings-extras.model';
+import { formatDateTime, formatMoney } from '../../../core/regional/regional-format';
+import { RegionalService } from '../../../core/regional/regional.service';
+import { CompanyRegional, RegionalReceiptSeries } from '../../../core/regional/regional.model';
+import { DiffRow } from '../../../shared/utils/diff-rows';
+import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 const TAX_REGIMES: readonly { readonly value: TaxRegime; readonly label: string }[] = [
   { value: 'RUS', label: 'Nuevo RUS' },
@@ -25,7 +30,6 @@ const TICKET_FORMATS: readonly { readonly value: TicketFormat; readonly label: s
   { value: 'A4', label: 'Hoja A4' },
 ];
 
-const DATE_FORMATS: readonly DateFormat[] = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
 
 const labelOf =
   (options: readonly { readonly value: string; readonly label: string }[]) =>
@@ -33,13 +37,6 @@ const labelOf =
     options.find((option) => option.value === value)?.label ?? String(value);
 
 const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
-  { key: 'taxRegime', label: 'Régimen tributario', format: labelOf(TAX_REGIMES) },
-  { key: 'receiptSeries', label: 'Serie de boletas' },
-  { key: 'invoiceSeries', label: 'Serie de facturas' },
-  { key: 'timezone', label: 'Zona horaria' },
-  { key: 'currencyCode', label: 'Moneda' },
-  { key: 'dateFormat', label: 'Formato de fecha' },
-  { key: 'locale', label: 'Idioma / formato regional' },
   { key: 'strictStockControl', label: 'Control estricto de stock' },
   { key: 'lowStockAlertEnabled', label: 'Alertas de stock mínimo' },
   { key: 'notifyManualAdjustment', label: 'Notificar ajustes manuales' },
@@ -48,7 +45,7 @@ const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
   { key: 'offlineMode', label: 'Operación offline' },
   { key: 'maxDiscountPercent', label: 'Descuento máximo', format: (value) => `${Number(value).toFixed(2)}%` },
   { key: 'ticketFormat', label: 'Formato de comprobante', format: labelOf(TICKET_FORMATS) },
-  { key: 'pricesIncludeTax', label: 'Precios incluyen IGV' },
+  { key: 'pricesIncludeTax', label: 'Precios incluyen el impuesto' },
   { key: 'showLogoOnReceipt', label: 'Logo en comprobante' },
   { key: 'receiptFooter', label: 'Mensaje al pie del comprobante' },
   { key: 'autoEmailReceipt', label: 'Enviar comprobante por correo automáticamente' },
@@ -65,7 +62,7 @@ const DIFF_FIELDS: readonly DiffField<CompanySettings>[] = [
   { key: 'workStartTime', label: 'Hora de entrada' },
   { key: 'workEndTime', label: 'Hora de salida' },
   { key: 'lateToleranceMinutes', label: 'Tolerancia de tardanza (min)' },
-  { key: 'cashDifferenceAlert', label: 'Alerta de diferencia de caja', format: (value) => `S/ ${Number(value).toFixed(2)}` },
+  { key: 'cashDifferenceAlert', label: 'Alerta de diferencia de caja', format: (value) => formatMoney(Number(value)) },
   { key: 'notifyUnattendedStore', label: 'Aviso de local sin nadie en turno' },
 ];
 
@@ -76,7 +73,7 @@ function daysLabel(value: string): string {
 
 @Component({
   selector: 'app-settings-page',
-  imports: [ReactiveFormsModule, PageHeader],
+  imports: [ReactiveFormsModule, PageHeader, RegionalPipe],
   templateUrl: './settings-page.html',
   styleUrls: ['../../../shared/forms/switch.scss', './settings-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -85,10 +82,18 @@ export class SettingsPage implements OnInit {
   private readonly api = inject(SettingsApiService);
   private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly regionalService = inject(RegionalService);
 
-  readonly taxRegimes = TAX_REGIMES;
   readonly ticketFormats = TICKET_FORMATS;
-  readonly dateFormats = DATE_FORMATS;
+  readonly regional = signal<CompanyRegional | null>(null);
+  readonly seriesTypes = computed<readonly RegionalReceiptSeries[]>(() => this.regional()?.series ?? []);
+  readonly seriesForm = new FormRecord<FormControl<string>>({});
+  readonly taxRegimeLabel = computed(() => {
+    const regional = this.regional();
+    const code = regional?.taxRegime ?? '';
+    return regional?.taxRegimeName ?? TAX_REGIMES.find((regime) => regime.value === code)?.label ?? code;
+  });
+  readonly taxPercent = computed(() => Math.round((this.regional()?.taxRate ?? 0) * 10000) / 100);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -101,7 +106,7 @@ export class SettingsPage implements OnInit {
   readonly lastSavedLabel = computed(() => {
     const at = this.lastSavedAt();
     if (!at) return '';
-    return `Último cambio guardado: ${new Date(at).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' })}`;
+    return `Último cambio guardado: ${formatDateTime(at)}`;
   });
 
   readonly form = new FormGroup({
@@ -124,14 +129,8 @@ export class SettingsPage implements OnInit {
 
   readonly extras = new FormGroup({
     taxRegime: new FormControl<TaxRegime>('RMT', { nonNullable: true }),
-    receiptSeries: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^[Bb][A-Za-z0-9]{3}$/)],
-    }),
-    invoiceSeries: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^[Ff][A-Za-z0-9]{3}$/)],
-    }),
+    receiptSeries: new FormControl('', { nonNullable: true }),
+    invoiceSeries: new FormControl('', { nonNullable: true }),
     dateFormat: new FormControl<DateFormat>('DD/MM/YYYY', { nonNullable: true }),
     autoPrintReceipt: new FormControl(true, { nonNullable: true }),
     soundEffects: new FormControl(true, { nonNullable: true }),
@@ -200,7 +199,8 @@ export class SettingsPage implements OnInit {
         this.loading.set(false);
         this.form.enable();
         this.extras.enable();
-        this.extras.controls.pricesIncludeTax.disable(); // siempre activo (ver TaxRules en el backend)
+        this.extras.controls.pricesIncludeTax.disable();
+        this.lockRegionalControls();
       },
       error: () => {
         this.loading.set(false);
@@ -210,18 +210,30 @@ export class SettingsPage implements OnInit {
   }
 
   save(): void {
-    if (this.form.invalid || this.extras.invalid) {
+    if (this.form.invalid || this.extras.invalid || this.seriesForm.invalid) {
       this.form.markAllAsTouched();
       this.extras.markAllAsTouched();
+      this.seriesForm.markAllAsTouched();
       this.notifications.show('Revisa los campos marcados antes de guardar (pueden estar en otra pestaña).', 'warning');
       return;
     }
 
     const value = this.form.getRawValue();
+    const series = this.seriesTypes()
+      .map((type) => ({
+        receiptTypeCode: type.receiptTypeCode,
+        series: (this.seriesForm.controls[type.receiptTypeCode]?.value ?? '').trim().toUpperCase(),
+      }))
+      .filter((item) => item.series.length > 0);
+    const extras = this.normalizedExtras();
+    const boleta = series.find((item) => item.receiptTypeCode === 'BOLETA')?.series;
+    const factura = series.find((item) => item.receiptTypeCode === 'FACTURA')?.series;
     const request: CompanySettings = {
       ...value,
-      ...this.normalizedExtras(),
-      currencyCode: value.currencyCode.toUpperCase(),
+      ...extras,
+      receiptSeries: boleta ?? (undefined as unknown as string),
+      invoiceSeries: factura ?? (undefined as unknown as string),
+      series,
       version: this.version,
     };
 
@@ -229,7 +241,7 @@ export class SettingsPage implements OnInit {
       this.persist(request);
       return;
     }
-    const rows = buildDiffRows(this.saved, request, DIFF_FIELDS);
+    const rows = [...this.seriesDiff(series), ...buildDiffRows(this.saved, request, DIFF_FIELDS)];
     if (!rows.length) {
       this.notifications.show('No hay cambios por guardar.', 'info');
       return;
@@ -272,6 +284,40 @@ export class SettingsPage implements OnInit {
     });
   }
 
+  private seriesDiff(series: readonly { receiptTypeCode: string; series: string }[]): readonly DiffRow[] {
+    return this.seriesTypes()
+      .map((type) => ({
+        field: `${type.seriesLabel} de ${type.name}`,
+        before: type.series ?? '—',
+        after: series.find((item) => item.receiptTypeCode === type.receiptTypeCode)?.series || '—',
+      }))
+      .filter((row) => row.before !== row.after);
+  }
+
+  private lockRegionalControls(): void {
+    this.form.controls.currencyCode.disable({ emitEvent: false });
+    this.form.controls.locale.disable({ emitEvent: false });
+    this.form.controls.timezone.disable({ emitEvent: false });
+    this.extras.controls.taxRegime.disable({ emitEvent: false });
+    this.extras.controls.dateFormat.disable({ emitEvent: false });
+  }
+
+  private applyRegional(settings: CompanySettings): void {
+    const regional = settings.regional ?? null;
+    this.regional.set(regional);
+    if (regional) this.regionalService.apply(regional);
+    for (const key of Object.keys(this.seriesForm.controls)) this.seriesForm.removeControl(key);
+    for (const type of regional?.series ?? []) {
+      this.seriesForm.addControl(
+        type.receiptTypeCode,
+        new FormControl(type.series ?? '', {
+          nonNullable: true,
+          validators: [Validators.maxLength(20), Validators.pattern(new RegExp(type.seriesPattern, 'i'))],
+        }),
+      );
+    }
+  }
+
   private normalizedExtras(): SettingsExtras {
     const value = { ...this.extras.getRawValue(), pricesIncludeTax: true };
     return {
@@ -291,6 +337,7 @@ export class SettingsPage implements OnInit {
   private apply(settings: CompanySettings): void {
     this.version = settings.version;
     this.saved = settings;
+    this.applyRegional(settings);
     this.lastSavedAt.set(settings.updatedAt ?? null);
     this.form.reset({
       currencyCode: settings.currencyCode,

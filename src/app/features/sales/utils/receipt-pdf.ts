@@ -1,4 +1,5 @@
 import { SaleDetail } from '../models/sale-detail.model';
+import { currentRegional, formatDateTime, formatMoney, receiptNote } from '../../../core/regional/regional-format';
 
 const WIDTH = 80;
 const MARGIN = 5;
@@ -11,11 +12,11 @@ type Row =
   | { readonly kind: 'rule' }
   | { readonly kind: 'space' };
 
-const money = (value: number): string => `S/ ${value.toFixed(2)}`;
+const money = (value: number): string => formatMoney(value);
 const quantity = (value: number): string => (Number.isInteger(value) ? String(value) : value.toFixed(2));
 
 export function receiptRows(sale: SaleDetail, companyName: string): readonly Row[] {
-  const date = new Date(sale.saleDate).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' });
+  const date = formatDateTime(sale.saleDate);
   const rows: Row[] = [
     { kind: 'text', text: companyName, align: 'center', bold: true, size: 11 },
     { kind: 'text', text: 'Comprobante interno de venta', align: 'center' },
@@ -39,7 +40,7 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
     { kind: 'rule' },
     { kind: 'pair', left: 'Subtotal', right: money(sale.subtotal) },
     { kind: 'pair', left: 'Descuento', right: `-${money(sale.discountTotal)}` },
-    { kind: 'pair', left: 'IGV (referencial)', right: money(sale.tax) },
+    { kind: 'pair', left: `${currentRegional().taxName} (referencial)`, right: money(sale.tax) },
     { kind: 'pair', left: 'TOTAL', right: money(sale.total), bold: true, size: 11 },
     { kind: 'rule' },
     { kind: 'text', text: 'Pagos', bold: true },
@@ -63,7 +64,7 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
   rows.push(
     { kind: 'rule' },
     { kind: 'text', text: '¡Gracias por su compra!', align: 'center', bold: true },
-    { kind: 'text', text: 'Comprobante interno; no reemplaza un comprobante electrónico SUNAT.', align: 'center', size: 7 },
+    { kind: 'text', text: receiptNote(), align: 'center', size: 7 },
   );
   return rows;
 }

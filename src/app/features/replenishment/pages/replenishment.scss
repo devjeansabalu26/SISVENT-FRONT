@@ -96,7 +96,7 @@
 }
 .abc-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--space-md);
 }
 .abc-cards article {
@@ -151,4 +151,15 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--color-primary);
+}
+.coverage__head,
+.coverage__row {
+  flex-wrap: wrap;
+  gap: 4px var(--space-md);
+}
+@media (max-width: 600px) {
+  .suggestions li {
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-md);
+  }
 }

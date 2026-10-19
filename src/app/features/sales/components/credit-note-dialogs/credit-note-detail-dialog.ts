@@ -1,20 +1,20 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { cashErrorMessage } from '../../data-access/cash-session-api.service';
 import { CreditNoteApiService, CreditNoteDetail } from '../../data-access/credit-note-api.service';
+import { DateTimePipe, MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-credit-note-detail-dialog',
-  imports: [MatDialogModule, DatePipe, RouterLink],
+  imports: [MatDialogModule, RouterLink, MoneyPipe, DateTimePipe],
   template: `
     <section class="dialog detail">
       <header>
         <span class="material-icons">assignment_return</span>
         <div>
           <h2>Nota de crédito {{ detail()?.note?.creditNoteNumber ?? '' }}</h2>
-          @if (detail(); as d) { <p>{{ d.note.issuedAt | date: 'dd/MM/yyyy HH:mm' }} · {{ d.note.storeName }} · {{ d.note.createdBy }}</p> }
+          @if (detail(); as d) { <p>{{ d.note.issuedAt | dateTime }} · {{ d.note.storeName }} · {{ d.note.createdBy }}</p> }
         </div>
       </header>
 
@@ -27,7 +27,7 @@ import { CreditNoteApiService, CreditNoteDetail } from '../../data-access/credit
           <div><dt>Venta</dt><dd><a [routerLink]="['/app/sales', d.note.saleId]" (click)="close()">{{ d.note.saleNumber }}</a></dd></div>
           <div><dt>Cliente</dt><dd>{{ d.note.clientName ?? 'Cliente general' }}</dd></div>
           <div><dt>Reembolso</dt><dd>{{ d.note.refundMethod }}</dd></div>
-          <div><dt>Total</dt><dd>S/ {{ d.note.total.toFixed(2) }}</dd></div>
+          <div><dt>Total</dt><dd>{{ d.note.total | money }}</dd></div>
         </dl>
         <p class="muted">Motivo: {{ d.note.reason }}</p>
         <div class="table-scroll">
@@ -36,7 +36,7 @@ import { CreditNoteApiService, CreditNoteDetail } from '../../data-access/credit
             <tbody>
               @for (line of d.lines; track line.productId) {
                 <tr><td>{{ line.productName }}</td><td>{{ line.sku }}</td><td>{{ line.quantity }}</td>
-                  <td>S/ {{ line.unitPrice.toFixed(2) }}</td><td>S/ {{ line.subtotal.toFixed(2) }}</td></tr>
+                  <td>{{ line.unitPrice | money }}</td><td>{{ line.subtotal | money }}</td></tr>
               }
             </tbody>
           </table>
@@ -48,7 +48,7 @@ import { CreditNoteApiService, CreditNoteDetail } from '../../data-access/credit
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   styles: `
     .detail { width: min(720px, calc(100vw - 40px)); }
-    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; margin: 0; }
     .summary div { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-secondary); }
     .summary dt { color: var(--color-text-muted); font-size: 12px; }
     .summary dd { margin: 0; font-weight: 700; }

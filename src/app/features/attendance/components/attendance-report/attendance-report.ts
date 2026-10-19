@@ -4,10 +4,7 @@ import { NotificationService } from '../../../../core/notifications/notification
 import { AttendanceApiService, attendanceErrorMessage } from '../../data-access/attendance-api.service';
 import { AttendanceReport, AttendanceStoreOption, ROLE_LABELS } from '../../models/attendance.model';
 import { formatMinutes, reportCsv, reportPdf, reportTitle } from '../../utils/attendance-report-export';
-
-function isoDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+import { addDays, companyToday } from '../../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-attendance-report',
@@ -100,8 +97,8 @@ export class AttendanceReportPanel implements OnInit {
   private readonly document = inject(DOCUMENT);
 
   readonly storeId = signal('');
-  readonly from = signal(isoDate(new Date(Date.now() - 6 * 86_400_000)));
-  readonly to = signal(isoDate(new Date()));
+  readonly from = signal(addDays(companyToday(), -6));
+  readonly to = signal(companyToday());
   readonly report = signal<AttendanceReport | null>(null);
   readonly loading = signal(false);
   readonly exporting = signal(false);

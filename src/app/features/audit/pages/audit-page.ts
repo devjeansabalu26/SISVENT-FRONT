@@ -13,6 +13,7 @@ import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { AuditDetailDialog } from '../components/audit-detail-dialog/audit-detail-dialog';
 import { AuditApiService } from '../data-access/audit-api.service';
 import { AuditEvent } from '../models/audit-event.model';
+import { formatDateTime } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-audit-page',
@@ -48,7 +49,7 @@ export class AuditPage implements OnInit {
   private readonly search$ = new Subject<void>();
 
   readonly columns: readonly DataTableColumn<AuditEvent>[] = [
-    { key: 'date', label: 'Fecha / hora', value: (row) => new Date(row.createdAt).toLocaleString('es-PE') },
+    { key: 'date', label: 'Fecha / hora', value: (row) => formatDateTime(row.createdAt) },
     { key: 'user', label: 'Usuario', value: (row) => `${row.actorName ?? '—'} (${row.actorRole ?? '—'})` },
     ...(this.isSuperadmin
       ? [{ key: 'company', label: 'Empresa', value: (row: AuditEvent) => row.companyName ?? '—' }]

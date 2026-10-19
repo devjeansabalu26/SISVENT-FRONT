@@ -6,7 +6,7 @@ import { Subject, debounceTime, filter } from 'rxjs';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { CredentialDialog } from '../../../../shared/ui/credential-dialog/credential-dialog';
 import { ReviewDialog } from '../../../../shared/ui/review-dialog/review-dialog';
-import { resetCredential, resetPasswordReview, userStatusReview } from '../../../../shared/ui/review-dialog/status-reviews';
+import { resetCredential, resetPasswordReview, unlockReview, userStatusReview } from '../../../../shared/ui/review-dialog/status-reviews';
 import { DataTable } from '../../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../../shared/ui/data-table/data-table.model';
 import { Paginator } from '../../../../shared/ui/paginator/paginator';
@@ -24,6 +24,7 @@ interface Row {
   readonly role: string;
   readonly storeName: string | null;
   readonly isActive: boolean;
+  readonly isLocked: boolean;
   readonly lastActivityAt: string | null;
 }
 
@@ -65,7 +66,7 @@ export class CompanyUsersTab implements OnInit {
     { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
     { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
     { key: 'document', label: 'Documento', value: (row) => row.document ?? '—' },
-    { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
+    { key: 'status', label: 'Estado', value: (row) => (row.isLocked ? 'LOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
     { key: 'lastActivity', label: 'Última actividad', value: (row) => formatDateTime(row.lastActivityAt) },
   ];
 
@@ -106,6 +107,7 @@ export class CompanyUsersTab implements OnInit {
               role: u.role,
               storeName: u.storeName,
               isActive: u.isActive,
+              isLocked: u.isLocked ?? false,
               lastActivityAt: u.lastActivityAt,
             })),
           );
@@ -139,6 +141,27 @@ export class CompanyUsersTab implements OnInit {
   onMenuAction(event: { action: string; row: Row }): void {
     if (event.action === 'toggle') this.toggle(event.row);
     if (event.action === 'reset') this.resetAccess(event.row);
+    if (event.action === 'unlock') this.unlock(event.row);
+  }
+
+  private unlock(row: Row): void {
+    if (!row.isLocked) {
+      this.notifications.show('La cuenta de este usuario no está bloqueada.', 'info');
+      return;
+    }
+    this.dialog
+      .open(ReviewDialog, { data: unlockReview(row.fullName) })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.api.unlock(row.id).subscribe({
+          next: () => {
+            this.notifications.show('Cuenta desbloqueada. El usuario ya puede iniciar sesión.', 'success');
+            this.load();
+          },
+          error: () => this.notifications.show('No se pudo desbloquear la cuenta.', 'error'),
+        });
+      });
   }
 
   private toggle(row: Row): void {
@@ -165,11 +188,13 @@ export class CompanyUsersTab implements OnInit {
       .pipe(filter(Boolean))
       .subscribe(() => {
         this.api.resetAccess(row.id).subscribe({
-          next: (result) =>
+          next: (result) => {
             this.dialog.open(CredentialDialog, {
               data: resetCredential(result.userCode ?? row.userCode ?? row.fullName, result.temporaryPassword),
               disableClose: true,
-            }),
+            });
+            this.load();
+          },
           error: () => this.notifications.show('No se pudo generar la contraseña temporal.', 'error'),
         });
       });

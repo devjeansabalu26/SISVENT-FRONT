@@ -9,13 +9,13 @@ const TONE_BY_STATUS: Readonly<Record<string, StatusTone>> = {
   WARNING: 'warning', MODERADO: 'warning', PARCIAL: 'warning',
   INACTIVE: 'neutral', INACTIVA: 'neutral', INACTIVO: 'neutral', SUSPENDED: 'neutral', SUSPENDIDA: 'neutral', BORRADOR: 'neutral',
   EXPIRED: 'danger', VENCIDA: 'danger', OUT_OF_STOCK: 'danger', ERROR: 'danger', ANULADO: 'danger', ANULADA: 'danger',
-  CRITICO: 'danger', 'CRÍTICO': 'danger', FALLIDO: 'danger', RECHAZADO: 'danger',
+  CRITICO: 'danger', 'CRÍTICO': 'danger', FALLIDO: 'danger', RECHAZADO: 'danger', LOCKED: 'danger',
 };
 
 const LABEL_BY_STATUS: Readonly<Record<string, string>> = {
   ACTIVE: 'Activo', INACTIVE: 'Inactivo', AVAILABLE: 'Disponible', LOW_STOCK: 'Stock bajo',
   OUT_OF_STOCK: 'Sin stock', PENDING: 'Pendiente', EXPIRED: 'Vencido', SUSPENDED: 'Suspendido',
-  SUCCESS: 'Correcto', WARNING: 'Advertencia', ERROR: 'Error', NORMAL: 'Normal',
+  SUCCESS: 'Correcto', WARNING: 'Advertencia', ERROR: 'Error', NORMAL: 'Normal', LOCKED: 'Bloqueado',
 };
 
 @Component({

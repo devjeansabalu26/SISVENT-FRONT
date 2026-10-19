@@ -146,3 +146,11 @@
   background: var(--color-surface);
   text-align: center;
 }
+.note {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .note__head {
+    flex-wrap: wrap;
+  }
+}

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -8,10 +7,11 @@ import { SaleApiService } from '../data-access/sale-api.service';
 import { SaleDetail } from '../models/sale-detail.model';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { downloadReceiptPdf } from '../utils/receipt-pdf';
+import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-receipt-page',
-  imports: [DatePipe],
+  imports: [MoneyPipe, DateTimePipe, RegionalPipe],
   templateUrl: './receipt-page.html',
   styleUrl: './receipt-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

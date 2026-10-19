@@ -1,3 +1,5 @@
+import { formatMoney } from '../../core/regional/regional-format';
+
 export interface DiffRow {
   readonly field: string;
   readonly before: string;
@@ -28,6 +30,12 @@ export function buildDiffRows<T>(before: T, after: T, fields: readonly DiffField
     if (previous !== next) rows.push({ field: field.label, before: previous, after: next });
   }
   return rows;
+}
+
+export function formatAmount(value: unknown): string {
+  if (value === null || value === undefined || value === '') return EMPTY;
+  const amount = Number(value);
+  return Number.isFinite(amount) ? formatMoney(amount) : EMPTY;
 }
 
 export function formatSoles(value: unknown): string {

@@ -1,5 +1,5 @@
-export type TaxRegime = 'RUS' | 'RER' | 'RMT' | 'GENERAL';
-export type DateFormat = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
+export type TaxRegime = string;
+export type DateFormat = string;
 export type TicketFormat = 'TICKET_80' | 'TICKET_58' | 'A4';
 
 export interface SettingsExtras {

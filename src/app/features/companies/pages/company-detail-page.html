@@ -11,7 +11,7 @@
 
   <div class="summary surface-card">
     <div>
-      <span class="code">RUC: {{ company.taxDocument }} · Plan {{ company.planName ?? 'Sin plan' }}</span>
+      <span class="code">{{ company.taxIdName ?? 'RUC' }}: {{ company.taxDocument }} · {{ company.countryName ?? 'Perú' }} · Plan {{ company.planName ?? 'Sin plan' }}</span>
       <h2>{{ company.legalName ?? company.tradeName }}</h2>
     </div>
     <app-status-chip [value]="company.effectiveStatus" [label]="company.effectiveStatus" />
@@ -31,6 +31,7 @@
     <button type="button" [class.active]="activeTab() === 'users'" (click)="setTab('users')">Usuarios</button>
     <button type="button" [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">Locales</button>
     <button type="button" [class.active]="activeTab() === 'summary'" (click)="setTab('summary')">Resumen</button>
+    <button type="button" [class.active]="activeTab() === 'regional'" (click)="setTab('regional')">Configuración regional</button>
     <button type="button" [class.active]="activeTab() === 'history'" (click)="setTab('history')">Historial</button>
   </nav>
 
@@ -43,7 +44,8 @@
           <dl>
             <div><dt>Nombre comercial</dt><dd>{{ company.tradeName }}</dd></div>
             <div><dt>Razón social</dt><dd>{{ company.legalName ?? '—' }}</dd></div>
-            <div><dt>RUC</dt><dd>{{ company.taxDocument }}</dd></div>
+            <div><dt>{{ company.taxIdName ?? 'RUC' }}</dt><dd>{{ company.taxDocument }}</dd></div>
+            <div><dt>País</dt><dd>{{ company.countryName ?? 'Perú' }}</dd></div>
             <div><dt>Rubro</dt><dd>{{ company.businessType ?? '—' }}</dd></div>
           </dl>
         </section>
@@ -160,6 +162,11 @@
   @if (activatedTabs().has('summary')) {
     <div [hidden]="activeTab() !== 'summary'">
       <app-company-summary-tab [companyId]="company.id" />
+    </div>
+  }
+  @if (activatedTabs().has('regional')) {
+    <div [hidden]="activeTab() !== 'regional'">
+      <app-company-regional-tab [companyId]="company.id" (changed)="onRegionalChanged()" />
     </div>
   }
   @if (activatedTabs().has('history')) {

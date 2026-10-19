@@ -12,8 +12,8 @@
     <section class="surface-card">
       <h3>Cabecera</h3>
       <dl>
-        <div><dt>Fecha</dt><dd>{{ receipt.receiptDate | date: 'medium' }}</dd></div>
-        <div><dt>Proveedor</dt><dd>{{ receipt.supplierName ?? '—' }} @if (receipt.supplierTaxDocument) { (RUC {{ receipt.supplierTaxDocument }}) }</dd></div>
+        <div><dt>Fecha</dt><dd>{{ receipt.receiptDate | dateTime }}</dd></div>
+        <div><dt>Proveedor</dt><dd>{{ receipt.supplierName ?? '—' }} @if (receipt.supplierTaxDocument) { ({{ 'taxIdName' | regional }} {{ receipt.supplierTaxDocument }}) }</dd></div>
         <div><dt>Documento referencia</dt><dd>{{ receipt.documentType ?? '—' }} Nº {{ receipt.documentNumber ?? '—' }}</dd></div>
         <div><dt>Local destino</dt><dd>{{ receipt.storeName }}</dd></div>
         <div><dt>Usuario receptor</dt><dd>{{ receipt.receivedBy }}</dd></div>
@@ -24,7 +24,7 @@
       <dl>
         <div><dt>Items totales</dt><dd>{{ receipt.itemCount }}</dd></div>
         <div><dt>Unidades registradas</dt><dd>{{ receipt.totalUnits }}</dd></div>
-        <div><dt>Costo de operación</dt><dd>S/ {{ receipt.totalCost.toLocaleString('es-PE', { minimumFractionDigits: 2 }) }}</dd></div>
+        <div><dt>Costo de operación</dt><dd>{{ receipt.totalCost | money }}</dd></div>
       </dl>
       <p class="muted">{{ receipt.notes }}</p>
     </section>
@@ -43,8 +43,8 @@
               <td>{{ line.productName }}</td>
               <td>{{ line.sku }}</td>
               <td>{{ line.quantity }}</td>
-              <td>S/ {{ line.unitCost.toFixed(2) }}</td>
-              <td>S/ {{ line.subtotal.toFixed(2) }}</td>
+              <td>{{ line.unitCost | money }}</td>
+              <td>{{ line.subtotal | money }}</td>
               <td>{{ line.stockBefore ?? '—' }} → {{ line.stockAfter ?? '—' }}</td>
             </tr>
           }

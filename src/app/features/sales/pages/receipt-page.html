@@ -22,7 +22,7 @@
     </header>
 
     <section class="receipt__meta">
-      <div><span>Fecha emisión:</span> {{ sale.saleDate | date: 'medium' }}</div>
+      <div><span>Fecha emisión:</span> {{ sale.saleDate | dateTime }}</div>
       <div><span>Local:</span> {{ sale.storeName }}</div>
       <div><span>Cliente:</span> {{ sale.clientName ?? 'Cliente general' }}</div>
       <div><span>Vendedor:</span> {{ sale.sellerName }}</div>
@@ -38,8 +38,8 @@
             <tr>
               <td>{{ line.quantity }}</td>
               <td>{{ line.productName }}</td>
-              <td>S/ {{ line.unitPrice.toFixed(2) }}</td>
-              <td>S/ {{ line.subtotal.toFixed(2) }}</td>
+              <td>{{ line.unitPrice | money }}</td>
+              <td>{{ line.subtotal | money }}</td>
             </tr>
           }
         </tbody>
@@ -49,10 +49,10 @@
     <section class="receipt__totals">
       <div><span>Método:</span> {{ sale.paymentMethod }}</div>
       @for (payment of sale.payments ?? []; track $index) {
-        <div><span>{{ payment.methodName }}:</span> S/ {{ payment.amount.toFixed(2) }}</div>
+        <div><span>{{ payment.methodName }}:</span> {{ payment.amount | money }}</div>
         @if (payment.amountReceived != null) {
-          <div><span>&nbsp;&nbsp;Recibido:</span> S/ {{ payment.amountReceived.toFixed(2) }}</div>
-          <div><span>&nbsp;&nbsp;Vuelto:</span> S/ {{ (payment.changeAmount ?? 0).toFixed(2) }}</div>
+          <div><span>&nbsp;&nbsp;Recibido:</span> {{ payment.amountReceived | money }}</div>
+          <div><span>&nbsp;&nbsp;Vuelto:</span> {{ (payment.changeAmount ?? 0) | money }}</div>
         }
         @if (payment.cardBrand) {
           <div><span>&nbsp;&nbsp;Tarjeta:</span> {{ payment.cardBrand }}@if (payment.cardLast4) { •••• {{ payment.cardLast4 }} }</div>
@@ -65,15 +65,15 @@
         }
       }
       <div class="sep"></div>
-      <div><span>Subtotal:</span> S/ {{ sale.subtotal.toFixed(2) }}</div>
-      <div><span>Descuento:</span> S/ {{ sale.discountTotal.toFixed(2) }}</div>
-      <div><span>IGV (referencial):</span> S/ {{ sale.tax.toFixed(2) }}</div>
-      <div class="grand"><span>TOTAL:</span> S/ {{ sale.total.toFixed(2) }}</div>
+      <div><span>Subtotal:</span> {{ sale.subtotal | money }}</div>
+      <div><span>Descuento:</span> {{ sale.discountTotal | money }}</div>
+      <div><span>{{ 'taxName' | regional }} (referencial):</span> {{ sale.tax | money }}</div>
+      <div class="grand"><span>TOTAL:</span> {{ sale.total | money }}</div>
     </section>
 
     <footer class="receipt__foot">
       <p>¡Gracias por su compra!</p>
-      <p class="muted">Comprobante interno; no reemplaza un comprobante electrónico SUNAT homologado.</p>
+      <p class="muted">{{ 'receiptNote' | regional }}</p>
     </footer>
   </article>
 } @else if (loading()) {

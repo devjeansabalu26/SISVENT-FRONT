@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 export interface SaleSuccessData {
   readonly saleNumber: string;
@@ -16,7 +17,7 @@ export type SaleSuccessAction = 'print' | 'detail' | 'email' | 'new';
 
 @Component({
   selector: 'app-sale-success-dialog',
-  imports: [MatDialogModule],
+  imports: [MatDialogModule, MoneyPipe],
   templateUrl: './sale-success-dialog.html',
   styleUrl: './sale-success-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

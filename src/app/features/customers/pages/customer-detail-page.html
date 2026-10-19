@@ -11,9 +11,9 @@
 
   <div class="kpi-grid">
     <app-kpi-card label="Total compras" [value]="customer.purchaseCount + ''" icon="shopping_bag" tone="primary" />
-    <app-kpi-card label="Monto total" [value]="'S/ ' + customer.totalAmount.toFixed(2)" icon="payments" tone="success" />
-    <app-kpi-card label="Última compra" [value]="(customer.lastPurchaseAt ? (customer.lastPurchaseAt | date: 'short') : null) ?? 'Sin compras'" icon="event" tone="info" />
-    <app-kpi-card label="Ticket promedio" [value]="'S/ ' + customer.averageTicket.toFixed(2)" icon="receipt" tone="warning" />
+    <app-kpi-card label="Monto total" [value]="(customer.totalAmount | money)" icon="payments" tone="success" />
+    <app-kpi-card label="Última compra" [value]="(customer.lastPurchaseAt ? (customer.lastPurchaseAt | dateTime) : null) ?? 'Sin compras'" icon="event" tone="info" />
+    <app-kpi-card label="Ticket promedio" [value]="(customer.averageTicket | money)" icon="receipt" tone="warning" />
   </div>
 
   <div class="cards">

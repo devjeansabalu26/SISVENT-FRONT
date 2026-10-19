@@ -27,7 +27,7 @@
                   <tr>
                     <td><strong>{{ row.tradeName }}</strong></td>
                     <td>{{ row.administratorName ?? '—' }}</td>
-                    <td>{{ row.createdAt | date: 'mediumDate' }}</td>
+                    <td>{{ row.createdAt | shortDate }}</td>
                     <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
                   </tr>
                 }
@@ -56,7 +56,7 @@
             @for (item of platform.recentActivity; track item.at) {
               <li>
                 <span class="material-icons">history</span>
-                <div><p>{{ item.action }} · {{ item.entityName }} @if (item.companyName) { ({{ item.companyName }}) }</p><small>{{ item.actorName ?? 'Sistema' }} · {{ item.at | date: 'short' }}</small></div>
+                <div><p>{{ item.action }} · {{ item.entityName }} @if (item.companyName) { ({{ item.companyName }}) }</p><small>{{ item.actorName ?? 'Sistema' }} · {{ item.at | dateTime }}</small></div>
               </li>
             }
             @if (!platform.recentActivity.length) {
@@ -87,8 +87,8 @@
     @if (seller(); as seller) {
       <div class="kpi-grid">
         <app-kpi-card label="Ventas hoy" [value]="seller.salesToday + ' operaciones'" icon="receipt_long" tone="primary" />
-        <app-kpi-card label="Importe hoy" [value]="'S/ ' + seller.amountToday.toFixed(2)" icon="payments" tone="success" />
-        <app-kpi-card label="Última venta" [value]="(seller.lastSaleAt ? (seller.lastSaleAt | date: 'short') : null) ?? 'Sin ventas'" icon="schedule" tone="info" />
+        <app-kpi-card label="Importe hoy" [value]="(seller.amountToday | money)" icon="payments" tone="success" />
+        <app-kpi-card label="Última venta" [value]="(seller.lastSaleAt ? (seller.lastSaleAt | dateTime) : null) ?? 'Sin ventas'" icon="schedule" tone="info" />
         <app-kpi-card label="Clientes atendidos" [value]="seller.clientsToday + ' clientes'" icon="groups" tone="warning" />
       </div>
     }
@@ -97,7 +97,7 @@
       <h2>Operaciones rápidas</h2>
       <div class="quick-grid">
         <a routerLink="/app/pos" class="quick-card"><span class="material-icons">point_of_sale</span><strong>Nueva venta (F1)</strong><small>Genera boletas y facturas</small></a>
-        <a routerLink="/app/customers" class="quick-card"><span class="material-icons">person_search</span><strong>Buscar / registrar cliente</strong><small>Por DNI o RUC</small></a>
+        <a routerLink="/app/customers" class="quick-card"><span class="material-icons">person_search</span><strong>Buscar / registrar cliente</strong><small>Por documento de identidad</small></a>
         <a routerLink="/app/products" class="quick-card"><span class="material-icons">inventory_2</span><strong>Consultar stock</strong><small>Disponibilidad y precios</small></a>
         <a routerLink="/app/sales" class="quick-card"><span class="material-icons">print</span><strong>Mis ventas recientes</strong><small>Reimprimir comprobantes</small></a>
       </div>
@@ -116,9 +116,9 @@
               @for (row of seller.recentSales; track row.saleNumber) {
                 <tr>
                   <td>{{ row.saleNumber }}</td>
-                  <td>{{ row.saleDate | date: 'shortTime' }}</td>
+                  <td>{{ row.saleDate | localTime }}</td>
                   <td>{{ row.clientName ?? 'Cliente general' }}</td>
-                  <td>S/ {{ row.total.toFixed(2) }}</td>
+                  <td>{{ row.total | money }}</td>
                   <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
                 </tr>
               }
@@ -169,8 +169,8 @@
 
     @if (admin(); as admin) {
       <div class="kpi-grid">
-        <app-kpi-card label="Ventas del día" [value]="'S/ ' + admin.salesTodayAmount.toFixed(2)" icon="point_of_sale" [trend]="admin.salesTodayDeltaPercent && admin.salesTodayDeltaPercent >= 0 ? 'up' : 'down'" [delta]="admin.salesTodayDeltaPercent != null ? (admin.salesTodayDeltaPercent.toFixed(1) + '%') : undefined" tone="success" />
-        <app-kpi-card label="Ventas del período" [value]="'S/ ' + admin.salesPeriodAmount.toFixed(2)" icon="calendar_month" tone="primary" />
+        <app-kpi-card label="Ventas del día" [value]="(admin.salesTodayAmount | money)" icon="point_of_sale" [trend]="admin.salesTodayDeltaPercent && admin.salesTodayDeltaPercent >= 0 ? 'up' : 'down'" [delta]="admin.salesTodayDeltaPercent != null ? (admin.salesTodayDeltaPercent.toFixed(1) + '%') : undefined" tone="success" />
+        <app-kpi-card label="Ventas del período" [value]="(admin.salesPeriodAmount | money)" icon="calendar_month" tone="primary" />
         <app-kpi-card label="Operaciones" [value]="admin.operationsPeriod" icon="receipt_long" tone="info" />
         <app-kpi-card label="Productos" [value]="admin.activeProducts" icon="inventory_2" tone="primary" />
         <app-kpi-card label="Clientes" [value]="admin.activeClients" icon="groups" tone="info" />
@@ -192,9 +192,9 @@
                   @for (row of admin.recentSales; track row.saleNumber) {
                     <tr>
                       <td>{{ row.saleNumber }}</td>
-                      <td>{{ row.saleDate | date: 'short' }}</td>
+                      <td>{{ row.saleDate | dateTime }}</td>
                       <td>{{ row.clientName ?? 'Cliente general' }}</td>
-                      <td>S/ {{ row.total.toFixed(2) }}</td>
+                      <td>{{ row.total | money }}</td>
                       <td><app-status-chip [value]="row.status" [label]="row.status" /></td>
                     </tr>
                   }
@@ -212,9 +212,9 @@
             <div class="chart" role="img" aria-label="Evolución de ventas del período">
               @for (point of admin.salesEvolution; track point.date) {
                 <div class="bar-column">
-                  <span class="amount">S/ {{ (point.amount / 1000).toFixed(1) }}k</span>
+                  <span class="amount">{{ point.amount | compactMoney }}</span>
                   <div class="bar" [style.--bar-height.%]="(point.amount / maxSalesEvolution()) * 100"></div>
-                  <small>{{ point.date | date: 'shortDate' }}</small>
+                  <small>{{ point.date | shortDate }}</small>
                 </div>
               }
             </div>
@@ -231,7 +231,7 @@
             <ul class="shares">
               @for (item of admin.salesByCategory; track item.categoryName) {
                 <li>
-                  <div class="shares__label"><span>{{ item.categoryName }}</span><strong>S/ {{ item.amount.toFixed(2) }}</strong></div>
+                  <div class="shares__label"><span>{{ item.categoryName }}</span><strong>{{ item.amount | money }}</strong></div>
                   <div class="shares__track"><span class="shares__fill" [style.width.%]="categoryPercent(item.amount)"></span></div>
                 </li>
               }
@@ -248,7 +248,7 @@
               @for (row of admin.topProducts; track row.sku) {
                 <li>
                   <div><strong>{{ row.name }}</strong><small>{{ row.units }} u. vendidos</small></div>
-                  <span>S/ {{ row.revenue.toFixed(2) }}</span>
+                  <span>{{ row.revenue | money }}</span>
                 </li>
               }
             </ul>

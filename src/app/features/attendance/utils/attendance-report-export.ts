@@ -1,4 +1,5 @@
 import { AttendanceReport } from '../models/attendance.model';
+import { formatTime } from '../../../core/regional/regional-format';
 
 const ROLE: Readonly<Record<string, string>> = { ADMIN: 'Administrador', VENDEDOR: 'Vendedor' };
 
@@ -41,7 +42,7 @@ export function reportCsv(report: AttendanceReport): string {
 }
 
 function hour(value: string): string {
-  return new Date(value).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return formatTime(value);
 }
 
 export async function reportPdf(report: AttendanceReport, title: string): Promise<Blob> {

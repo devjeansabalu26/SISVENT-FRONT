@@ -1,17 +1,27 @@
 @if (user(); as user) {
   <app-page-header [title]="user.fullName" description="Detalle del usuario (solo lectura)">
     <a class="ghost" routerLink="/app/users"><span class="material-icons">arrow_back</span>Usuarios</a>
+    @if (user.isLocked) {
+      <button type="button" class="primary" (click)="unlock()"><span class="material-icons">lock_open</span>Desbloquear cuenta</button>
+    }
     @if (user.editable) {
       <button type="button" class="ghost" (click)="edit()"><span class="material-icons">edit</span>Editar usuario</button>
     }
   </app-page-header>
+
+  @if (user.isLocked) {
+    <p class="locked-banner" role="status">
+      <span class="material-icons" aria-hidden="true">lock</span>
+      Esta cuenta está bloqueada por demasiados intentos fallidos de inicio de sesión. No podrá entrar hasta que la desbloquees.
+    </p>
+  }
 
   <div class="summary surface-card">
     <div>
       <span class="code">{{ user.email ?? 'Sin correo' }}</span>
       <h2>{{ user.fullName }}</h2>
     </div>
-    <app-status-chip [value]="user.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="user.isActive ? 'ACTIVE' : 'INACTIVE'" />
+    <app-status-chip [value]="user.isLocked ? 'LOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="user.isLocked ? 'LOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'" />
   </div>
 
   <div class="cards">
@@ -26,9 +36,9 @@
     <section class="surface-card">
       <h3>Actividad</h3>
       <dl>
-        <div><dt>Estado</dt><dd>{{ user.isActive ? 'Activo' : 'Inactivo' }}</dd></div>
-        <div><dt>Última actividad</dt><dd>{{ user.lastActivityAt ? (user.lastActivityAt | date: 'medium') : 'Sin registro' }}</dd></div>
-        <div><dt>Registrado</dt><dd>{{ user.createdAt ? (user.createdAt | date: 'medium') : '—' }}</dd></div>
+        <div><dt>Estado</dt><dd>{{ user.isLocked ? 'Bloqueado' : user.isActive ? 'Activo' : 'Inactivo' }}</dd></div>
+        <div><dt>Última actividad</dt><dd>{{ user.lastActivityAt ? (user.lastActivityAt | dateTime) : 'Sin registro' }}</dd></div>
+        <div><dt>Registrado</dt><dd>{{ user.createdAt ? (user.createdAt | dateTime) : '—' }}</dd></div>
       </dl>
     </section>
   </div>

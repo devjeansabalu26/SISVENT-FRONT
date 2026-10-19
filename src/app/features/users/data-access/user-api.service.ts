@@ -64,6 +64,10 @@ export class UserApiService {
     return this.http.post<void>(`${this.baseUrl}/${id}/deactivate`, null);
   }
 
+  unlock(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/unlock`, null);
+  }
+
   resetAccess(id: string): Observable<ResetAccessResponse> {
     return this.http.post<ResetAccessResponse>(`${this.baseUrl}/${id}/reset-access`, null);
   }

@@ -1,0 +1,53 @@
+<app-page-header title="Países y monedas" description="Catálogo regional de la plataforma: lo que se precarga al crear una empresa en cada país">
+  <a class="primary" routerLink="/app/countries/new"><span class="material-icons">add</span>Nuevo país</a>
+</app-page-header>
+
+<p class="intro">
+  Solo los países activos aparecen al crear una empresa. Antes de activar un país, revisa sus tasas y reglas con un contador
+  local. Los cambios del catálogo no modifican empresas existentes: cada empresa guarda su propia copia.
+</p>
+
+<app-data-table
+  [columns]="countryColumns"
+  [rows]="countries()"
+  [loading]="loading()"
+  [showView]="false"
+  [showRemove]="false"
+  editLabel="Ver y editar país"
+  emptyMessage="No hay países registrados."
+  (edit)="open($event)"
+/>
+
+<section class="currencies surface-card">
+  <header>
+    <div>
+      <h2>Monedas</h2>
+      <p>Los decimales definen cómo se redondean los cobros y el vuelto. No se pueden cambiar si la moneda ya la usan empresas.</p>
+    </div>
+    <button type="button" class="primary" (click)="newCurrency()"><span class="material-icons">add</span>Nueva moneda</button>
+  </header>
+
+  @if (editingCurrency() !== null) {
+    <form class="currency-form" [formGroup]="currencyForm" (ngSubmit)="saveCurrency()">
+      <label>Código (ISO 4217)<input formControlName="code" maxlength="3" placeholder="COP" /></label>
+      <label>Nombre<input formControlName="name" placeholder="Peso colombiano" /></label>
+      <label>Símbolo<input formControlName="symbol" maxlength="8" placeholder="$" /></label>
+      <label>Decimales<input type="number" min="0" max="4" formControlName="decimals" /></label>
+      <label class="check"><input type="checkbox" formControlName="isActive" /> Activa</label>
+      <div class="currency-form__actions">
+        <button type="button" class="ghost" (click)="cancelCurrency()">Cancelar</button>
+        <button type="submit" class="primary" [disabled]="savingCurrency()">{{ editingCurrency() ? 'Guardar moneda' : 'Crear moneda' }}</button>
+      </div>
+    </form>
+  }
+
+  <app-data-table
+    [columns]="currencyColumns"
+    [rows]="currencies()"
+    [showRemove]="false"
+    [showFooter]="false"
+    editLabel="Editar moneda"
+    emptyMessage="No hay monedas registradas."
+    (edit)="editCurrency($event)"
+  />
+</section>

@@ -26,7 +26,7 @@
             <div>
               <h3>{{ status.storeName }}</h3>
               @if (status.current; as s) {
-                <p>Abierta por <strong>{{ s.openedBy }}</strong> · desde {{ s.openedAt | date: 'dd/MM HH:mm' }}</p>
+                <p>Abierta por <strong>{{ s.openedBy }}</strong> · desde {{ s.openedAt | dayMonthTime }}</p>
               } @else {
                 <p>Sin turno abierto</p>
               }
@@ -36,15 +36,15 @@
 
           @if (status.current; as s) {
             <dl>
-              <div><dt>Fondo inicial</dt><dd>S/ {{ s.openingAmount.toFixed(2) }}</dd></div>
-              <div><dt>Ventas</dt><dd>{{ s.salesCount }} · S/ {{ s.totalSales.toFixed(2) }}</dd></div>
+              <div><dt>Fondo inicial</dt><dd>{{ s.openingAmount | money }}</dd></div>
+              <div><dt>Ventas</dt><dd>{{ s.salesCount }} · {{ s.totalSales | money }}</dd></div>
               @for (method of s.byMethod; track method.code) {
-                <div class="method"><dt>{{ method.name }}</dt><dd>S/ {{ method.amount.toFixed(2) }}</dd></div>
+                <div class="method"><dt>{{ method.name }}</dt><dd>{{ method.amount | money }}</dd></div>
               }
               @if (s.totalRefunds > 0) {
-                <div class="refund"><dt>Devoluciones (notas de crédito)</dt><dd>- S/ {{ s.totalRefunds.toFixed(2) }}</dd></div>
+                <div class="refund"><dt>Devoluciones (notas de crédito)</dt><dd>- {{ s.totalRefunds | money }}</dd></div>
               }
-              <div class="strong"><dt>Efectivo esperado</dt><dd>S/ {{ s.expectedCash.toFixed(2) }}</dd></div>
+              <div class="strong"><dt>Efectivo esperado</dt><dd>{{ s.expectedCash | money }}</dd></div>
             </dl>
             <footer>
               <button type="button" class="ghost" (click)="detail(s)"><span class="material-icons">receipt_long</span>Ver ventas</button>
@@ -111,17 +111,17 @@
           @for (row of history(); track row.id) {
             <tr (click)="detail(row)" title="Ver ventas de la caja">
               @if (isAdmin) { <td>{{ row.storeName }}</td> }
-              <td>{{ row.openedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ row.openedAt | dateTime }}</td>
               <td>{{ row.openedBy }}</td>
-              <td>S/ {{ row.openingAmount.toFixed(2) }}</td>
-              <td>{{ row.closedAt ? (row.closedAt | date: 'dd/MM HH:mm') : '—' }}</td>
+              <td>{{ row.openingAmount | money }}</td>
+              <td>{{ row.closedAt ? (row.closedAt | dayMonthTime) : '—' }}</td>
               <td>{{ row.closedBy ?? '—' }}</td>
               <td>{{ row.salesCount }}</td>
-              <td>S/ {{ row.totalSales.toFixed(2) }}</td>
-              <td>S/ {{ row.expectedCash.toFixed(2) }}</td>
-              <td>{{ row.countedCash !== null ? 'S/ ' + row.countedCash.toFixed(2) : '—' }}</td>
+              <td>{{ row.totalSales | money }}</td>
+              <td>{{ row.expectedCash | money }}</td>
+              <td>{{ row.countedCash !== null ? (row.countedCash | money) : '—' }}</td>
               <td [class.ok]="row.difference === 0" [class.bad]="row.difference !== null && row.difference !== 0">
-                {{ row.difference !== null ? 'S/ ' + row.difference.toFixed(2) : '—' }}
+                {{ row.difference !== null ? (row.difference | money) : '—' }}
               </td>
               <td>
                 <span class="badge" [class.badge--open]="row.status === 'OPEN'" [class.badge--forced]="row.forced">

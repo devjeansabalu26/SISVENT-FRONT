@@ -41,7 +41,7 @@ import { AvailablePlan, MyPlan } from '../models/company-plan.model';
   `,
   styles: `
     .upgrade {
-      display: grid; justify-items: center; gap: 12px; max-width: 560px; margin: 40px auto; padding: 32px 24px;
+      display: grid; justify-items: center; gap: 12px; max-width: 560px; margin: clamp(16px, 5vw, 40px) auto; padding: clamp(20px, 5vw, 32px) clamp(16px, 4vw, 24px);
       border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); text-align: center;
     }
     .upgrade__icon {

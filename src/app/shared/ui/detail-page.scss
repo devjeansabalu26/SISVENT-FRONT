@@ -58,7 +58,7 @@
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: var(--space-md);
 }
 .cards .wide {
@@ -67,7 +67,7 @@
 
 .feature-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: var(--space-md);
 }
 .feature-group h4 {
@@ -141,4 +141,39 @@ thead th {
 }
 .muted {
   color: var(--color-text-muted);
+}
+dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .summary {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .cards {
+    gap: var(--space-smd);
+  }
+  dl > div {
+    flex-wrap: wrap;
+    gap: 2px var(--space-md);
+  }
+  th,
+  td {
+    padding: 10px;
+  }
+}
+
+.locked-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-md);
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 35%, var(--color-border));
+  border-radius: var(--radius-md);
+  color: var(--color-error-text);
+  background: color-mix(in srgb, var(--color-error) 8%, var(--color-surface));
+  font-size: var(--font-size-sm);
 }

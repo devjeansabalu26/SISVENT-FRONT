@@ -1,0 +1,179 @@
+<form class="form-page" [formGroup]="form" (ngSubmit)="save()">
+  <app-page-header
+    [title]="isEdit ? (country()?.name ?? 'País') : 'Nuevo país'"
+    description="Valores que se copian a cada empresa nueva de este país, documentos, regímenes, zonas horarias y comprobantes"
+  />
+
+  @if (loading()) {
+    <p class="muted">Cargando país…</p>
+  } @else {
+    @if (country(); as current) {
+      <section class="card status-card">
+        <div>
+          <strong>{{ current.isActive ? 'Activo' : 'Inactivo' }}</strong>
+          <span class="muted"> · {{ current.companyCount }} {{ current.companyCount === 1 ? 'empresa' : 'empresas' }}</span>
+          @if (current.activationBlocker) {
+            <p class="blocker"><span class="material-icons">block</span>{{ current.activationBlocker }}</p>
+          } @else if (!current.isActive) {
+            <p class="muted">Revisa tasas y reglas con un contador local antes de activarlo.</p>
+          }
+        </div>
+        <button type="button" [class.primary]="!current.isActive" [class.ghost]="current.isActive"
+          [disabled]="saving() || (!current.isActive && !!current.activationBlocker)" (click)="toggleActive()">
+          {{ current.isActive ? 'Desactivar país' : 'Activar país' }}
+        </button>
+      </section>
+    }
+
+    <section class="card">
+      <h2>1. País y valores por defecto</h2>
+      <div class="fields three">
+        <label><span>Código ISO <span class="required">*</span></span><input formControlName="code" maxlength="2" placeholder="CO" /></label>
+        <label><span>Nombre <span class="required">*</span></span><input formControlName="name" placeholder="Colombia" /></label>
+        <label><span>Moneda <span class="required">*</span></span>
+          <select formControlName="defaultCurrencyCode">
+            <option value="" disabled>Elige una moneda</option>
+            @for (currency of currencies(); track currency.code) {
+              <option [value]="currency.code">{{ currency.code }} · {{ currency.name }} ({{ currency.symbol }}, {{ currency.decimals }} dec.)</option>
+            }
+          </select>
+        </label>
+        <label><span>Locale <span class="required">*</span></span><input formControlName="defaultLocale" placeholder="es-CO" /></label>
+        <label><span>Zona horaria por defecto <span class="required">*</span></span>
+          <select formControlName="defaultTimezone">
+            <option value="" disabled>Elige de la lista de zonas</option>
+            @for (zone of zones.controls; track $index) {
+              @if (zone.controls.timezone.value) { <option [value]="zone.controls.timezone.value">{{ zone.controls.name.value || zone.controls.timezone.value }}</option> }
+            }
+          </select>
+        </label>
+        <label><span>Formato de fecha <span class="required">*</span></span>
+          <select formControlName="defaultDateFormat">
+            @for (format of dateFormats; track format) { <option [value]="format">{{ format }}</option> }
+          </select>
+        </label>
+        <label>Teléfono: prefijo<input formControlName="phonePrefix" placeholder="+57" /></label>
+        <label>Autoridad de facturación<input formControlName="eInvoicingAuthority" placeholder="DIAN" /></label>
+        <label>Régimen por defecto
+          <select formControlName="defaultTaxRegimeCode">
+            <option value="">Primero de la lista</option>
+            @for (regime of regimes.controls; track $index) {
+              @if (regime.controls.code.value) { <option [value]="regime.controls.code.value">{{ regime.controls.name.value || regime.controls.code.value }}</option> }
+            }
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Impuesto y documento fiscal</h2>
+      <div class="fields three">
+        <label><span>Nombre del impuesto <span class="required">*</span></span><input formControlName="taxName" placeholder="IVA" /></label>
+        <label><span>Tasa general (%) <span class="required">*</span></span><input type="number" min="0" max="99.99" step="0.01" formControlName="taxRatePercent" /></label>
+        <label class="switch"><input type="checkbox" formControlName="pricesIncludeTaxDefault" /> Los precios incluyen el impuesto</label>
+        <label><span>Documento fiscal (corto) <span class="required">*</span></span><input formControlName="taxIdName" placeholder="NIT" /></label>
+        <label><span>Etiqueta del formulario <span class="required">*</span></span><input formControlName="taxIdLabel" placeholder="NIT (con dígito de verificación)" /></label>
+        <label>Ejemplo<input formControlName="taxIdPlaceholder" placeholder="900123456-8" /></label>
+        <label class="full"><span>Formato (expresión regular) <span class="required">*</span></span><input formControlName="taxIdPattern" placeholder="^\d{8,10}-?\d$" /></label>
+        <label>Dígito verificador
+          <select formControlName="taxIdCheckDigit">
+            @for (option of checkDigits; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+          </select>
+        </label>
+        <label class="full">Motivo por el que no se puede activar (opcional)<input formControlName="activationBlocker" placeholder="Ej. Requiere impuestos por estado y por producto" /></label>
+      </div>
+      <p class="note">El ejemplo debe cumplir su propio formato y dígito verificador; el sistema lo valida al guardar.</p>
+    </section>
+
+    <section class="card">
+      <div class="list-head"><h2>3. Tipos de documento de clientes y personas</h2><button type="button" class="ghost" (click)="addDocument()">Agregar</button></div>
+      <div class="table-scroll">
+        <table formArrayName="documentTypes">
+          <thead><tr><th>Código</th><th>Nombre</th><th>Ejemplo</th><th>Formato</th><th>Dígito verificador</th><th>Empresa</th><th>Por defecto</th><th>Activo</th><th></th></tr></thead>
+          <tbody>
+            @for (row of documents.controls; track row; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input formControlName="code" maxlength="10" /></td>
+                <td><input formControlName="name" /></td>
+                <td><input formControlName="placeholder" /></td>
+                <td><input formControlName="pattern" /></td>
+                <td><select formControlName="checkDigit">@for (option of checkDigits; track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select></td>
+                <td><input type="checkbox" formControlName="isBusiness" /></td>
+                <td><input type="radio" name="defaultDocument" [checked]="row.controls.isDefault.value" (change)="markDefault(i)" /></td>
+                <td><input type="checkbox" formControlName="isActive" /></td>
+                <td><button type="button" class="icon" (click)="removeAt(documents, i)" aria-label="Quitar"><span class="material-icons">delete_outline</span></button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Si un tipo ya lo usan clientes, desactívalo en lugar de quitarlo.</p>
+    </section>
+
+    <div class="two-columns">
+      <section class="card">
+        <div class="list-head"><h2>4. Regímenes tributarios</h2><button type="button" class="ghost" (click)="addRegime()">Agregar</button></div>
+        <div class="table-scroll"><table formArrayName="taxRegimes">
+          <thead><tr><th>Código</th><th>Nombre</th><th>Activo</th><th></th></tr></thead>
+          <tbody>
+            @for (row of regimes.controls; track row; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input formControlName="code" maxlength="20" /></td>
+                <td><input formControlName="name" /></td>
+                <td><input type="checkbox" formControlName="isActive" /></td>
+                <td><button type="button" class="icon" (click)="removeAt(regimes, i)" aria-label="Quitar"><span class="material-icons">delete_outline</span></button></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      </section>
+
+      <section class="card">
+        <div class="list-head"><h2>5. Zonas horarias</h2><button type="button" class="ghost" (click)="addZone()">Agregar</button></div>
+        <div class="table-scroll"><table formArrayName="timezones">
+          <thead><tr><th>Zona IANA</th><th>Nombre visible</th><th></th></tr></thead>
+          <tbody>
+            @for (row of zones.controls; track row; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input formControlName="timezone" placeholder="America/Bogota" /></td>
+                <td><input formControlName="name" placeholder="Colombia" /></td>
+                <td><button type="button" class="icon" (click)="removeAt(zones, i)" aria-label="Quitar"><span class="material-icons">delete_outline</span></button></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+        <p class="note">No se puede quitar una zona que ya usan empresas.</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="list-head"><h2>6. Tipos de comprobante y series</h2><button type="button" class="ghost" (click)="addReceipt()">Agregar</button></div>
+      <div class="table-scroll">
+        <table formArrayName="receiptTypes">
+          <thead><tr><th>Código</th><th>Nombre</th><th>Etiqueta</th><th>Formato de serie</th><th>Ejemplo</th><th>Serie inicial</th><th>Cliente empresa</th><th>Activo</th><th></th></tr></thead>
+          <tbody>
+            @for (row of receipts.controls; track row; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input formControlName="code" maxlength="20" /></td>
+                <td><input formControlName="name" /></td>
+                <td><input formControlName="seriesLabel" placeholder="Serie" /></td>
+                <td><input formControlName="seriesPattern" /></td>
+                <td><input formControlName="seriesPlaceholder" /></td>
+                <td><input formControlName="defaultSeries" /></td>
+                <td><input type="checkbox" formControlName="forBusinessClient" /></td>
+                <td><input type="checkbox" formControlName="isActive" /></td>
+                <td><button type="button" class="icon" (click)="removeAt(receipts, i)" aria-label="Quitar"><span class="material-icons">delete_outline</span></button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Las series las configura el administrador de cada empresa; aquí se define su formato y la serie inicial.</p>
+    </section>
+
+    <footer class="actions">
+      <a routerLink="/app/countries">Volver</a>
+      <button class="primary" type="submit" [disabled]="saving()">{{ isEdit ? 'Guardar cambios' : 'Crear país' }}</button>
+    </footer>
+  }
+</form>
