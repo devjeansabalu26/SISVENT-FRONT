@@ -12,7 +12,7 @@
 
   <div class="summary surface-card">
     <div><span class="code">{{ sale.saleDate | dateTime }}</span><h2>{{ sale.saleNumber }}</h2></div>
-    <app-status-chip [value]="sale.status" [label]="sale.status" />
+    <app-status-chip [value]="sale.status" [label]="sale.status" [hint]="sale.annulment ? 'Anulada por ' + sale.annulment.cancelledBy + '. Motivo: ' + sale.annulment.reason : null" />
   </div>
 
   @if (canCancel && sale.status === 'CONFIRMED' && annulment(); as a) {

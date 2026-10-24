@@ -14,7 +14,7 @@
       <span class="code">{{ company.taxIdName ?? 'RUC' }}: {{ company.taxDocument }} · {{ company.countryName ?? 'Perú' }} · Plan {{ company.planName ?? 'Sin plan' }}</span>
       <h2>{{ company.legalName ?? company.tradeName }}</h2>
     </div>
-    <app-status-chip [value]="company.effectiveStatus" [label]="company.effectiveStatus" />
+    <app-status-chip [value]="company.effectiveStatus" [label]="company.effectiveStatus" [hint]="statusHint(company)" />
   </div>
 
   <div class="kpi-grid">

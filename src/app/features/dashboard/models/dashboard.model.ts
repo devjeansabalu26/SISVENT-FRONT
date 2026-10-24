@@ -11,6 +11,8 @@ export interface DashboardTopProduct {
   readonly name: string;
   readonly units: number;
   readonly revenue: number;
+  readonly marginPercent?: number | null;
+  readonly stockDays?: number | null;
 }
 
 export interface DashboardLowStock {
@@ -44,6 +46,38 @@ export interface AdminDashboard {
   readonly lowStockAlerts: readonly DashboardLowStock[];
   readonly salesEvolution: readonly DashboardSalesPoint[];
   readonly salesByCategory: readonly DashboardCategorySales[];
+  readonly salesPeriodDeltaPercent?: number | null;
+  readonly operationsDeltaPercent?: number | null;
+  readonly averageTicket?: number;
+  readonly averageTicketDeltaPercent?: number | null;
+  readonly grossProfit?: number | null;
+  readonly grossProfitDeltaPercent?: number | null;
+  readonly grossProfitMissingCost?: boolean;
+  readonly actions?: DashboardActions | null;
+  readonly month?: DashboardMonthProjection | null;
+  readonly todayByHour?: readonly DashboardHourPoint[] | null;
+}
+
+export interface DashboardMonthProjection {
+  readonly monthStart: string;
+  readonly daysElapsed: number;
+  readonly daysInMonth: number;
+  readonly amountToDate: number;
+  readonly projectedAmount: number;
+  readonly previousMonthAmount: number;
+}
+
+export interface DashboardHourPoint {
+  readonly hour: number;
+  readonly transactions: number;
+  readonly amount: number;
+}
+
+export interface DashboardActions {
+  readonly reorderNow: number | null;
+  readonly reorderSoon: number | null;
+  readonly outOfStock: number;
+  readonly ordersInTransit: number;
 }
 
 export interface SellerDashboard {
@@ -52,6 +86,10 @@ export interface SellerDashboard {
   readonly lastSaleAt: string | null;
   readonly clientsToday: number;
   readonly recentSales: readonly DashboardRecentSale[];
+  readonly amountSameTimeLastWeek?: number;
+  readonly amountDeltaPercent?: number | null;
+  readonly lowStockCount?: number;
+  readonly lowStockAlerts?: readonly DashboardLowStock[] | null;
 }
 
 export interface DashboardResponse {

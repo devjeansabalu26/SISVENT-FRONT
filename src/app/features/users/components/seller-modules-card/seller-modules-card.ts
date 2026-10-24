@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
 import { ModuleLevel } from '../../../../core/auth/constants/module-permissions.constant';
 import { AppHttpError } from '../../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../../core/notifications/notification.service';
@@ -20,6 +21,7 @@ function groupModules(modules: readonly SellerModule[]): readonly ModuleGroup[] 
 
 @Component({
   selector: 'app-seller-modules-card',
+  imports: [MatTooltip],
   templateUrl: './seller-modules-card.html',
   styleUrl: './seller-modules-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -31,7 +31,7 @@
                 <p>Sin turno abierto</p>
               }
             </div>
-            <span class="badge" [class.badge--open]="status.current">{{ status.current ? 'Abierta' : 'Cerrada' }}</span>
+            <span class="badge" [class.badge--open]="status.current" [matTooltip]="status.current ? 'Hay un turno de caja abierto: las ventas en efectivo se suman a esta caja.' : 'No hay turno abierto. Ábrelo con el efectivo inicial para empezar a vender.'" matTooltipClass="status-chip-tooltip" matTooltipPosition="above" tabindex="0">{{ status.current ? 'Abierta' : 'Cerrada' }}</span>
           </header>
 
           @if (status.current; as s) {
@@ -124,7 +124,7 @@
                 {{ row.difference !== null ? (row.difference | money) : '—' }}
               </td>
               <td>
-                <span class="badge" [class.badge--open]="row.status === 'OPEN'" [class.badge--forced]="row.forced">
+                <span class="badge" [class.badge--open]="row.status === 'OPEN'" [class.badge--forced]="row.forced" [matTooltip]="cashStatusHint(row)" matTooltipClass="status-chip-tooltip" matTooltipPosition="above" tabindex="0">
                   {{ row.status === 'OPEN' ? 'Abierta' : row.forced ? 'Cierre forzado' : 'Cerrada' }}
                 </span>
               </td>

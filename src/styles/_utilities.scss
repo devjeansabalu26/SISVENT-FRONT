@@ -51,3 +51,45 @@ article,
   cursor: not-allowed !important;
   filter: grayscale(0.4);
 }
+
+.print-area {
+  display: none;
+}
+@media print {
+  body.print-mode * {
+    visibility: hidden;
+  }
+  body.print-mode .print-area,
+  body.print-mode .print-area * {
+    visibility: visible;
+  }
+  body.print-mode .print-area {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px;
+    color: #111;
+    background: white;
+    font-size: 12pt;
+  }
+  body.print-mode .print-area h1 {
+    margin: 0 0 4px;
+    font-size: 18pt;
+  }
+  body.print-mode .print-area table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+  }
+  body.print-mode .print-area th,
+  body.print-mode .print-area td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+  }
+  body.print-mode .print-area tfoot td {
+    font-weight: 700;
+  }
+}

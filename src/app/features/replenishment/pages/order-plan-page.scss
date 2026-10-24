@@ -1,0 +1,117 @@
+.plan-filters {
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+}
+.supplier-orders {
+  display: grid;
+  gap: 16px;
+}
+.supplier-order {
+  padding: 18px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.supplier-order header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.supplier-order h2 {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+.supplier-order header p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.supplier-order ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.supplier-order li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 150px 120px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+.supplier-order__product {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.supplier-order__product small {
+  color: var(--color-text-muted);
+}
+.supplier-order__qty {
+  font-weight: 700;
+  text-align: right;
+}
+.supplier-order__date {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.supplier-order__date--late {
+  color: var(--color-error-text);
+  font-weight: 600;
+}
+.empty-plan {
+  padding: 24px;
+  text-align: center;
+}
+.plan-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 18px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.plan-note .material-icons {
+  font-size: 18px;
+  color: var(--color-info, var(--color-primary));
+}
+@media (max-width: 760px) {
+  .plan-filters {
+    grid-template-columns: 1fr;
+  }
+  .supplier-order li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .supplier-order__date {
+    grid-column: 1;
+  }
+}
+.supplier-order__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.supplier-order__actions .ghost,
+.supplier-order__actions .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+}
+.supplier-order__actions .material-icons {
+  font-size: 18px;
+}
+@media (max-width: 760px) {
+  .supplier-order header {
+    flex-direction: column;
+  }
+  .supplier-order__actions {
+    justify-content: flex-start;
+  }
+}

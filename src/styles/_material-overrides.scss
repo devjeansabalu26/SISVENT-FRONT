@@ -97,3 +97,11 @@
 .mat-mdc-dialog-surface {
   overflow-x: hidden;
 }
+
+.status-chip-tooltip .mdc-tooltip__surface {
+  max-width: 280px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}

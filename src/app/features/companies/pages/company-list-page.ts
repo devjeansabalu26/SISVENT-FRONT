@@ -6,7 +6,7 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { CompanyApiService } from '../data-access/company-api.service';
-import { Company, CompanySummary } from '../models/company.model';
+import { Company, CompanySummary, companyStatusHint } from '../models/company.model';
 
 @Component({
   selector: 'app-company-list-page',
@@ -37,7 +37,7 @@ export class CompanyListPage implements OnInit {
     { key: 'email', label: 'Correo', value: (row) => row.administratorEmail ?? '—' },
     { key: 'plan', label: 'Plan', value: (row) => row.planName ?? '—' },
     { key: 'expiration', label: 'Vencimiento', value: (row) => row.planEnd ?? '—' },
-    { key: 'status', label: 'Estado', value: (row) => row.effectiveStatus, type: 'status' },
+    { key: 'status', label: 'Estado', value: (row) => row.effectiveStatus, type: 'status', hint: companyStatusHint },
     { key: 'stores', label: 'Locales', value: (row) => row.storeCount },
     { key: 'users', label: 'Usuarios', value: (row) => row.userCount },
   ];

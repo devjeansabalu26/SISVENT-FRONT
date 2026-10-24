@@ -34,6 +34,7 @@
             ],
             "allowedCommonJsDependencies": [
               "canvg",
+              "exceljs",
               "core-js",
               "html2canvas",
               "raf",

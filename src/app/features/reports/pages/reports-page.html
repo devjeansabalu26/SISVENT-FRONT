@@ -1,113 +1,98 @@
-<app-page-header title="Reportes" description="Análisis y métricas clave del rendimiento de tu negocio">
-  <button type="button" class="primary" (click)="exportCsv()" [disabled]="!report()">
-    <span class="material-icons">download</span>Exportar CSV
+<app-page-header title="Resumen" description="Cómo va tu negocio en el periodo, comparado con el periodo anterior">
+  <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!state.report()">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!state.report()">
+    <span class="material-icons">table_view</span>Exportar Excel
   </button>
 </app-page-header>
 
-<section class="filters">
-  <label
-    >Periodo
-    <select #periodFilter (change)="onPeriodChange(periodFilter.value)">
-      <option value="30">Últimos 30 días</option>
-      <option value="90" selected>Últimos 90 días</option>
-      <option value="180">Últimos 180 días</option>
-    </select>
-  </label>
-  <label
-    >Local
-    <select #storeFilter (change)="onStoreChange(storeFilter.value)">
-      <option value="">Todos los locales</option>
-      @for (store of stores(); track store.id) {
-        <option [value]="store.id">{{ store.name }}</option>
-      }
-    </select>
-  </label>
-</section>
+<app-report-toolbar />
 
-@if (report(); as report) {
-  <div class="kpi-grid">
-    <app-kpi-card
-      label="Ventas totales"
-      [value]="(report.totalSales.value | money)"
-      icon="payments"
-      [trend]="report.totalSales.deltaPercent && report.totalSales.deltaPercent >= 0 ? 'up' : 'down'"
-      [delta]="report.totalSales.deltaPercent != null ? (report.totalSales.deltaPercent.toFixed(1) + '%') : undefined"
-      deltaCaption="vs periodo anterior"
-      tone="success"
-    />
-    <app-kpi-card
-      label="Transacciones"
-      [value]="report.transactions.value"
-      icon="receipt_long"
-      [trend]="report.transactions.deltaPercent && report.transactions.deltaPercent >= 0 ? 'up' : 'down'"
-      [delta]="report.transactions.deltaPercent != null ? (report.transactions.deltaPercent.toFixed(1) + '%') : undefined"
-      deltaCaption="vs periodo anterior"
-      tone="primary"
-    />
-    <app-kpi-card
-      label="Ticket promedio"
-      [value]="(report.averageTicket.value | money)"
-      icon="monitoring"
-      [trend]="report.averageTicket.deltaPercent && report.averageTicket.deltaPercent >= 0 ? 'up' : 'down'"
-      [delta]="report.averageTicket.deltaPercent != null ? (report.averageTicket.deltaPercent.toFixed(1) + '%') : undefined"
-      deltaCaption="vs periodo anterior"
-      tone="info"
-    />
-    <app-kpi-card
-      label="Productos vendidos"
-      [value]="(report.unitsSold.value | quantity)"
-      icon="inventory_2"
-      [trend]="report.unitsSold.deltaPercent && report.unitsSold.deltaPercent >= 0 ? 'up' : 'down'"
-      [delta]="report.unitsSold.deltaPercent != null ? (report.unitsSold.deltaPercent.toFixed(1) + '%') : undefined"
-      deltaCaption="vs periodo anterior"
-      tone="warning"
-    />
+@if (state.report(); as report) {
+  <div class="kpi-grid" [class.is-loading]="state.loading()">
+    <app-kpi-card label="Ventas totales" [value]="(report.totalSales.value | money)" icon="payments" tone="success"
+      [trend]="trend(report.totalSales)" [delta]="delta(report.totalSales)" deltaCaption="vs periodo anterior" />
+    <app-kpi-card label="Transacciones" [value]="report.transactions.value" icon="receipt_long" tone="primary"
+      [trend]="trend(report.transactions)" [delta]="delta(report.transactions)" deltaCaption="vs periodo anterior" />
+    <app-kpi-card label="Ticket promedio" [value]="(report.averageTicket.value | money)" icon="monitoring" tone="info"
+      [trend]="trend(report.averageTicket)" [delta]="delta(report.averageTicket)" deltaCaption="vs periodo anterior" />
+    <app-kpi-card label="Productos vendidos" [value]="(report.unitsSold.value | quantity)" icon="inventory_2" tone="warning"
+      [trend]="trend(report.unitsSold)" [delta]="delta(report.unitsSold)" deltaCaption="vs periodo anterior" />
   </div>
 
   <section class="chart-card">
-    <header>
-      <div><h2>Ventas por día (tendencia)</h2><p>Ingresos del periodo seleccionado</p></div>
+    <header class="card-head">
+      <div><h2>Ventas por día</h2><p>{{ periodLabel() }}</p></div>
+      <a class="link" routerLink="/app/reports/sales" queryParamsHandling="preserve">Ver detalle de ventas</a>
     </header>
-    <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
-      @for (point of report.dailySeries; track point.date) {
-        <div class="bar-column">
-          <span class="amount">{{ point.amount | compactMoney }}</span>
-          <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
-          <small>{{ point.date }}</small>
-        </div>
-      }
-    </div>
+    @if (report.dailySeries.length) {
+      <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
+        @for (point of report.dailySeries; track point.date) {
+          <div class="bar-column">
+            <span class="amount">{{ point.amount | compactMoney }}</span>
+            <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
+            <small>{{ point.date }}</small>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="muted empty">No hay ventas en este periodo.</p>
+    }
   </section>
 
-  <div class="split">
-    <section class="chart-card">
-      <h2>Ventas por categoría</h2>
-      <ul class="shares">
-        @for (item of report.byCategory; track item.name) {
-          <li>
-            <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.percent.toFixed(1) }}%</strong></div>
-            <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
-          </li>
+  <div class="highlights">
+    <article>
+      <span class="material-icons" aria-hidden="true">category</span>
+      <div>
+        <small>Categoría que más vende</small>
+        <strong>{{ topCategory()?.name ?? '—' }}</strong>
+        @if (topCategory(); as category) {
+          <p>{{ category.amount | money }} · {{ category.percent.toFixed(1) }}% de las ventas</p>
         }
-      </ul>
-    </section>
-    <section class="chart-card">
-      <h2>Ventas por vendedor</h2>
-      <ul class="shares">
-        @for (item of report.bySeller; track item.name) {
-          <li>
-            <div class="shares__label"><span>{{ item.name }}</span><strong>{{ item.amount | money }} ({{ item.percent.toFixed(1) }}%)</strong></div>
-            <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
-          </li>
+      </div>
+    </article>
+    <article>
+      <span class="material-icons" aria-hidden="true">star</span>
+      <div>
+        <small>Producto estrella</small>
+        <strong>{{ topProduct()?.name ?? '—' }}</strong>
+        @if (topProduct(); as product) {
+          <p>{{ product.units | quantity }} uds · {{ product.revenue | money }}</p>
         }
-      </ul>
-    </section>
+      </div>
+    </article>
+    <article>
+      <span class="material-icons" aria-hidden="true">emoji_events</span>
+      <div>
+        <small>Vendedor del periodo</small>
+        <strong>{{ topSeller()?.name ?? '—' }}</strong>
+        @if (topSeller(); as seller) {
+          <p>{{ seller.amount | money }} · {{ seller.percent.toFixed(1) }}%</p>
+        }
+      </div>
+    </article>
   </div>
 
-  <section class="detail">
-    <h2>Top productos</h2>
-    <app-data-table [columns]="topProductColumns" [rows]="topProductRows()" [showEdit]="false" [showRemove]="false" />
-  </section>
-} @else if (loading()) {
-  <p class="muted">Cargando reporte…</p>
+  <div class="shortcuts">
+    <a routerLink="/app/reports/sales" queryParamsHandling="preserve">
+      <span class="material-icons" aria-hidden="true">trending_up</span>
+      <div><strong>Ventas</strong><small>Tendencia, categorías y vendedores</small></div>
+      <span class="material-icons" aria-hidden="true">chevron_right</span>
+    </a>
+    <a routerLink="/app/reports/products" queryParamsHandling="preserve">
+      <span class="material-icons" aria-hidden="true">inventory_2</span>
+      <div><strong>Productos</strong><small>Más vendidos, más ingresos y mejor margen</small></div>
+      <span class="material-icons" aria-hidden="true">chevron_right</span>
+    </a>
+    <a routerLink="/app/purchase-plan">
+      <span class="material-icons" aria-hidden="true">event_available</span>
+      <div><strong>Qué pedir y cuándo</strong><small>Fecha límite y cantidad para no quedarte sin stock</small></div>
+      <span class="material-icons" aria-hidden="true">chevron_right</span>
+    </a>
+  </div>
+} @else if (state.failed()) {
+  <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="link" (click)="state.reload()">Reintentar</button></p>
+} @else {
+  <p class="muted empty">Cargando reporte…</p>
 }

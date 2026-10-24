@@ -11,6 +11,7 @@ export interface NavigationItem {
   readonly permissions?: readonly AppPermission[];
   readonly plans?: readonly CompanyPlan[];
   readonly requiredFeature?: string;
+  readonly exact?: boolean;
   readonly children?: readonly NavigationItem[];
 }
 

@@ -1,0 +1,69 @@
+<app-page-header title="Productos" description="Qué productos rotan más, cuáles traen más dinero y cuáles dejan más ganancia">
+  <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!rows().length">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!rows().length">
+    <span class="material-icons">table_view</span>Exportar Excel
+  </button>
+</app-page-header>
+
+<app-report-toolbar />
+<app-view-tabs [tabs]="views" [active]="view()" label="Vistas de productos" (select)="state.setView($event)" />
+
+@if (state.report()) {
+  <div class="kpi-grid">
+    <app-kpi-card label="Productos vendidos" [value]="totals().products" icon="inventory_2" tone="primary" caption="Con ventas en el periodo" />
+    <app-kpi-card label="Unidades" [value]="(totals().units | quantity)" icon="shopping_basket" tone="info" />
+    <app-kpi-card label="Ingresos" [value]="(totals().revenue | money)" icon="payments" tone="success" />
+    <app-kpi-card label="Margen promedio" [value]="totals().margin !== null ? totals().margin!.toFixed(1) + '%' : '—'" icon="percent" tone="warning"
+      [caption]="totals().withoutCost ? totals().withoutCost + ' sin costo registrado' : 'Ponderado por ingresos'" />
+  </div>
+
+  @if (view() === 'matrix') {
+    @if (matrix(); as m) {
+      <p class="muted matrix-intro">
+        {{ description() }} Mediana: {{ quantity(m.unitsThreshold) }} uds vendidas y {{ m.marginThreshold.toFixed(1) }}% de margen.
+      </p>
+      <div class="matrix">
+        @for (group of m.groups; track group.quadrant) {
+          <section class="matrix__quadrant" [attr.data-quadrant]="group.quadrant">
+            <header>
+              <span class="material-icons" aria-hidden="true">{{ group.icon }}</span>
+              <div><h2>{{ group.title }} <small>({{ group.products.length }})</small></h2><p>{{ group.hint }}</p></div>
+            </header>
+            @if (group.products.length) {
+              <ul>
+                @for (product of group.products.slice(0, 8); track product.sku) {
+                  <li>
+                    <span class="matrix__name" [title]="product.name">{{ product.name }}</span>
+                    <span class="matrix__meta">{{ quantity(product.units) }} uds · {{ product.marginPercent?.toFixed(1) }}%</span>
+                  </li>
+                }
+              </ul>
+              @if (group.products.length > 8) {
+                <p class="matrix__more">y {{ group.products.length - 8 }} más (en el Excel)</p>
+              }
+            } @else {
+              <p class="matrix__more">Ningún producto en este grupo.</p>
+            }
+          </section>
+        }
+      </div>
+      @if (m.withoutCost.length) {
+        <p class="muted">{{ m.withoutCost.length }} productos no tienen costo registrado y no entran en la matriz. Agrega su costo de referencia en el producto.</p>
+      }
+    }
+  } @else {
+    <section class="detail">
+      <header class="card-head"><div><h2>{{ title() }}</h2><p class="muted">{{ description() }}</p></div></header>
+      <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" emptyMessage="No hay ventas en este periodo." />
+    </section>
+  }
+  @if (view() === 'margin' && totals().withoutCost) {
+    <p class="muted">Los productos "Sin costo" no tienen costo de referencia ni ingresos de mercadería registrados; agrégalo en el producto para ver su margen.</p>
+  }
+} @else if (state.failed()) {
+  <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="link" (click)="state.reload()">Reintentar</button></p>
+} @else {
+  <p class="muted empty">Cargando reporte…</p>
+}

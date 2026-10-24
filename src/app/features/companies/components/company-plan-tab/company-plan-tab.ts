@@ -3,7 +3,7 @@ import { DateTimePipe, ShortDatePipe } from '../../../../shared/pipes/date-time.
 import { StatusChip } from '../../../../shared/ui/status-chip/status-chip';
 import { groupFeaturesByDomain } from '../../../../shared/utils/group-features';
 import { CompanyApiService } from '../../data-access/company-api.service';
-import { CompanyPlan } from '../../models/company.model';
+import { CompanyPlan, companyStatusHint } from '../../models/company.model';
 
 const LIMIT_LABELS: Record<string, string> = {
   MAX_ADMINS: 'Administradores máximos',
@@ -24,6 +24,7 @@ export class CompanyPlanTab implements OnInit {
 
   readonly companyId = input.required<string>();
 
+  readonly statusHint = companyStatusHint;
   readonly loading = signal(true);
   readonly plan = signal<CompanyPlan | null>(null);
 

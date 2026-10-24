@@ -1,3 +1,4 @@
+import { formatQuantity } from '../../../core/regional/regional-format';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
@@ -97,7 +98,7 @@ export class InventoryPage {
     { key: 'store', label: 'Local', value: (row) => row.storeName },
     { key: 'stock', label: 'Stock', value: (row) => row.currentStock },
     { key: 'minimum', label: 'Mínimo', value: (row) => row.minStock },
-    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status' },
+    { key: 'status', label: 'Estado', value: (row) => row.status, type: 'status', hint: stockHint },
   ];
 
   constructor() {
@@ -173,4 +174,12 @@ export class InventoryPage {
         });
       });
   }
+}
+
+function stockHint(row: StockRow): string {
+  const stock = formatQuantity(row.currentStock);
+  const minimum = formatQuantity(row.minStock);
+  if (row.currentStock <= 0) return `No quedan unidades en ${row.storeName}. El mínimo configurado es ${minimum}.`;
+  if (row.currentStock <= row.minStock) return `Quedan ${stock} unidades en ${row.storeName} y el mínimo es ${minimum}. Conviene reponer.`;
+  return `Quedan ${stock} unidades en ${row.storeName}, por encima del mínimo (${minimum}).`;
 }

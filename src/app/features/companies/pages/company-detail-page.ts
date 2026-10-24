@@ -29,7 +29,7 @@ import { DateTimePipe, ShortDatePipe } from '../../../shared/pipes/date-time.pip
 import { groupFeaturesByDomain } from '../../../shared/utils/group-features';
 import { PlatformUserApiService } from '../../users/data-access/platform-user-api.service';
 import { CompanyApiService } from '../data-access/company-api.service';
-import { CompanyDetail } from '../models/company.model';
+import { CompanyDetail, companyStatusHint } from '../models/company.model';
 
 type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'history';
 const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'history'];
@@ -65,6 +65,7 @@ export class CompanyDetailPage implements OnInit {
   private readonly router = inject(Router);
   private readonly id = this.route.snapshot.paramMap.get('id')!;
 
+  readonly statusHint = companyStatusHint;
   readonly loading = signal(true);
   readonly savingLogo = signal(false);
   readonly company = signal<CompanyDetail | null>(null);

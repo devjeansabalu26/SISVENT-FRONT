@@ -43,4 +43,12 @@ export class GoodsReceiptApiService {
   create(body: GoodsReceiptCreateValue): Observable<GoodsReceiptDetail> {
     return this.http.post<GoodsReceiptDetail>(this.baseUrl, body);
   }
+
+  receive(id: string, updateReferenceCost: boolean): Observable<GoodsReceiptDetail> {
+    return this.http.post<GoodsReceiptDetail>(`${this.baseUrl}/${id}/receive`, { updateReferenceCost });
+  }
+
+  cancelOrder(id: string, reason: string | null): Observable<GoodsReceiptDetail> {
+    return this.http.post<GoodsReceiptDetail>(`${this.baseUrl}/${id}/cancel`, { reason });
+  }
 }

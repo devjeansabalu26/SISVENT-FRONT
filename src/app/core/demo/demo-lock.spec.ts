@@ -18,6 +18,7 @@ describe('isDemoAction', () => {
       '<button title="Marcar salida"><span class="material-icons">logout</span></button>',
       '<button><span class="material-icons">edit</span></button>',
       '<button mat-menu-item>Desactivar</button>',
+      '<button class="primary"><span class="material-icons">inventory</span>Recibir mercadería</button>',
     ].forEach((html) => expect(isDemoAction(element(html))).withContext(html).toBeTrue());
   });
 

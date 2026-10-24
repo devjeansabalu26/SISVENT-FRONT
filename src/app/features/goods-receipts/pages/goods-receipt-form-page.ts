@@ -17,6 +17,8 @@ import { SupplierApiService } from '../../suppliers/data-access/supplier-api.ser
 import { GoodsReceiptApiService } from '../data-access/goods-receipt-api.service';
 import { GoodsReceiptLineInput } from '../models/goods-receipt.model';
 import { MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
+import { DOCUMENT } from '@angular/common';
+import { GoodsReceiptPrefill } from '../../replenishment/utils/order-plan';
 
 type LineGroup = FormGroup<{
   productId: FormControl<string>;
@@ -39,6 +41,7 @@ export class GoodsReceiptFormPage implements OnInit {
   private readonly productApi = inject(ProductApiService);
   private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly document = inject(DOCUMENT);
 
   readonly saving = signal(false);
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
@@ -52,6 +55,7 @@ export class GoodsReceiptFormPage implements OnInit {
     documentNumber: new FormControl('', { nonNullable: true }),
     notes: new FormControl('', { nonNullable: true }),
     updateReferenceCost: new FormControl(true, { nonNullable: true }),
+    asOrder: new FormControl(false, { nonNullable: true }),
     lines: new FormArray<LineGroup>([]),
   });
 
@@ -74,9 +78,36 @@ export class GoodsReceiptFormPage implements OnInit {
       this.stores.set(items);
       if (items.length === 1) this.form.controls.storeId.setValue(items[0].id);
     });
-    this.supplierApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.suppliers.set(page.items));
+    const prefill = this.prefill();
+    this.supplierApi.list({ pageSize: 100, isActive: true }).subscribe((page) => {
+      this.suppliers.set(page.items);
+      const supplier = prefill?.supplierName ? page.items.find((item) => item.businessName === prefill.supplierName) : undefined;
+      if (supplier) this.form.controls.supplierId.setValue(supplier.id);
+    });
     this.productApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.products.set(page.items));
-    this.addLine();
+    if (prefill?.lines.length) this.applyPrefill(prefill);
+    else this.addLine();
+  }
+
+  private prefill(): GoodsReceiptPrefill | null {
+    const state = this.document.defaultView?.history.state as { prefill?: GoodsReceiptPrefill } | null;
+    return state?.prefill?.lines ? state.prefill : null;
+  }
+
+  private applyPrefill(prefill: GoodsReceiptPrefill): void {
+    for (const line of prefill.lines) {
+      this.lines.push(
+        new FormGroup({
+          productId: new FormControl(line.productId, { nonNullable: true, validators: [Validators.required] }),
+          quantity: new FormControl(line.quantity, { nonNullable: true, validators: [Validators.required, Validators.min(0.001)] }),
+          unitCost: new FormControl(line.unitCost ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
+        }),
+      );
+    }
+    this.form.controls.notes.setValue(prefill.notes);
+    this.form.controls.asOrder.setValue(prefill.asOrder ?? false);
+    if (prefill.lines.some((line) => line.unitCost === null)) this.form.controls.updateReferenceCost.setValue(false);
+    this.linesVersion.update((value) => value + 1);
   }
 
   get lines(): FormArray<LineGroup> {
@@ -132,10 +163,11 @@ export class GoodsReceiptFormPage implements OnInit {
     const value = this.form.getRawValue();
     const totals = this.totals();
     const document = [value.documentType.trim(), value.documentNumber.trim()].filter(Boolean).join(' ');
+    const asOrder = value.asOrder;
     this.dialog
       .open<ReviewDialog, ReviewDialogData, boolean>(ReviewDialog, {
         data: {
-          title: 'Confirmar ingreso',
+          title: asOrder ? 'Registrar pedido en camino' : 'Confirmar ingreso',
           code: 'MOD-PR-01',
           icon: 'local_shipping',
           meta: [
@@ -146,11 +178,16 @@ export class GoodsReceiptFormPage implements OnInit {
             { label: 'Productos', value: `${totals.count} items` },
             { label: 'Unidades', value: `${totals.units} unids.` },
             { label: 'Costo total', value: formatAmount(totals.cost) }],
-          banner: {
-            tone: 'warning',
-            text: 'Al confirmar, se incrementará de manera inmediata el stock físico en el inventario. Esta acción no se puede deshacer de forma automática.',
-          },
-          confirmLabel: 'Confirmar ingreso',
+          banner: asOrder
+            ? {
+                tone: 'info',
+                text: 'El pedido queda "En camino": no cambia el stock y "Qué pedir y cuándo" ya lo descuenta de las sugerencias. Cuando llegue la mercadería, ábrelo y pulsa "Recibir mercadería".',
+              }
+            : {
+                tone: 'warning',
+                text: 'Al confirmar, se incrementará de manera inmediata el stock físico en el inventario. Esta acción no se puede deshacer de forma automática.',
+              },
+          confirmLabel: asOrder ? 'Registrar pedido' : 'Confirmar ingreso',
         },
       })
       .afterClosed()
@@ -175,12 +212,13 @@ export class GoodsReceiptFormPage implements OnInit {
         receiptDate: null,
         notes: value.notes.trim() || null,
         updateReferenceCost: value.updateReferenceCost,
+        asOrder: value.asOrder,
         lines,
       })
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.notifications.show('Ingreso de mercadería registrado correctamente.', 'success');
+          this.notifications.show(value.asOrder ? 'Pedido registrado: queda en camino hasta que lo recibas.' : 'Ingreso de mercadería registrado correctamente.', 'success');
           void this.router.navigateByUrl('/app/goods-receipts');
         },
         error: (cause: unknown) => {
