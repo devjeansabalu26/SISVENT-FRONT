@@ -41,6 +41,8 @@ export class Sidebar {
 
   readonly brandName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly brandInitial = computed(() => this.brandName().trim().charAt(0).toUpperCase() || 'S');
+  readonly logoUrl = computed(() => this.company()?.logoUrl ?? null);
+  readonly userCode = computed(() => this.users.user()?.userCode ?? null);
   readonly roleLabel = computed(() => {
     const role = this.users.user()?.role;
     return role ? ROLE_LABEL[role] : '';

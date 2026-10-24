@@ -28,7 +28,7 @@ export class AttendanceEntryPromptService {
 
   checkOnEntry(): void {
     const user = this.users.user();
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'VENDEDOR')) return;
+    if (!user || user.readOnly || (user.role !== 'ADMIN' && user.role !== 'VENDEDOR')) return;
     if (this.checkedFor === user.userId) return;
     if (!this.access.canAccess({ permissions: [APP_PERMISSIONS.attendanceView] })) return;
     this.checkedFor = user.userId;

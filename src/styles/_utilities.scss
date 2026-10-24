@@ -45,3 +45,9 @@ article,
 .required {
   color: var(--color-error-text);
 }
+
+.demo-locked {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.4);
+}

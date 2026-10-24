@@ -7,7 +7,7 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
-import { unlockReview } from '../../../shared/ui/review-dialog/status-reviews';
+import { readOnlyReview, unlockReview } from '../../../shared/ui/review-dialog/status-reviews';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { UserFormDialog } from '../components/user-form-dialog/user-form-dialog';
 import { SellerModulesCard } from '../components/seller-modules-card/seller-modules-card';
@@ -27,6 +27,7 @@ interface UserDetailView {
   readonly storeName: string | null;
   readonly isActive: boolean;
   readonly isLocked: boolean;
+  readonly readOnly: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string | null;
   readonly editable: AppUser | null;
@@ -82,6 +83,7 @@ export class UserDetailPage implements OnInit {
             storeName: detail.storeName,
             isActive: detail.isActive,
             isLocked: detail.isLocked ?? false,
+            readOnly: detail.readOnly ?? false,
             lastActivityAt: detail.lastActivityAt,
             createdAt: detail.createdAt,
             editable: null,
@@ -105,6 +107,7 @@ export class UserDetailPage implements OnInit {
           storeName: detail.storeName,
           isActive: detail.isActive,
           isLocked: detail.isLocked ?? false,
+          readOnly: false,
           lastActivityAt: detail.lastActivityAt,
           createdAt: detail.createdAt,
           editable: {
@@ -141,6 +144,25 @@ export class UserDetailPage implements OnInit {
             this.load();
           },
           error: () => this.notifications.show('No se pudo desbloquear la cuenta.', 'error'),
+        });
+      });
+  }
+
+  toggleReadOnly(): void {
+    const user = this.user();
+    if (!user || !this.isSuperadmin) return;
+    const enable = !user.readOnly;
+    this.dialog
+      .open(ReviewDialog, { data: readOnlyReview(user.fullName, enable) })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.platformApi.setReadOnly(user.id, enable).subscribe({
+          next: () => {
+            this.notifications.show(enable ? 'Modo demostración activado.' : 'Modo demostración quitado.', 'success');
+            this.load();
+          },
+          error: () => this.notifications.show('No se pudo cambiar el modo del usuario.', 'error'),
         });
       });
   }

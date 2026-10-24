@@ -73,6 +73,7 @@ export interface CompanyDetail {
   readonly secondaryColor: string | null;
   readonly accentColor: string | null;
   readonly backgroundColor: string | null;
+  readonly logoUrl?: string | null;
   readonly recentAccess: readonly CompanyAccessEntry[];
   readonly planFeatures: readonly PlanFeatureRow[];
 }

@@ -54,6 +54,16 @@ export class CompanyApiService {
     return this.http.get<CompanyDetail>(`${this.baseUrl}/${id}`);
   }
 
+  uploadLogo(id: string, file: File): Observable<{ readonly logoUrl: string | null }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ readonly logoUrl: string | null }>(`${this.baseUrl}/${id}/logo`, form);
+  }
+
+  removeLogo(id: string): Observable<{ readonly logoUrl: string | null }> {
+    return this.http.delete<{ readonly logoUrl: string | null }>(`${this.baseUrl}/${id}/logo`);
+  }
+
   getPlan(id: string): Observable<CompanyPlan> {
     return this.http.get<CompanyPlan>(`${this.baseUrl}/${id}/plan`);
   }
