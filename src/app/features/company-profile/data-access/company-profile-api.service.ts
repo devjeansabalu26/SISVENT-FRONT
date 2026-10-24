@@ -16,4 +16,14 @@ export class CompanyProfileApiService {
   update(body: UpdateCompanyProfile): Observable<CompanyProfile> {
     return this.http.put<CompanyProfile>(this.baseUrl, body);
   }
+
+  uploadLogo(file: File): Observable<{ readonly logoUrl: string | null }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ readonly logoUrl: string | null }>(`${this.baseUrl}/logo`, form);
+  }
+
+  removeLogo(): Observable<{ readonly logoUrl: string | null }> {
+    return this.http.delete<{ readonly logoUrl: string | null }>(`${this.baseUrl}/logo`);
+  }
 }

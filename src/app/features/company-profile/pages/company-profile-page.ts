@@ -8,6 +8,10 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CompanyProfileApiService } from '../data-access/company-profile-api.service';
 import { CompanyProfile } from '../models/company-profile.model';
 import { RegionalService } from '../../../core/regional/regional.service';
+import { Observable } from 'rxjs';
+import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { LogoUploader } from '../../../shared/ui/logo-uploader/logo-uploader';
 
 interface Field {
   readonly label: string;
@@ -32,7 +36,7 @@ const orDash = (value: string | null | undefined): string => (value && value.tri
 
 @Component({
   selector: 'app-company-profile-page',
-  imports: [PageHeader, RouterLink],
+  imports: [PageHeader, RouterLink, LogoUploader],
   templateUrl: './company-profile-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './company-profile-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +48,8 @@ export class CompanyProfilePage implements OnInit {
   private readonly theme = inject(ThemeService);
   private readonly regional = inject(RegionalService).regional;
 
+  private readonly companies = inject(CompanyContextService);
+  readonly savingLogo = signal(false);
   readonly loading = signal(true);
   readonly loadError = signal(false);
   readonly profile = signal<CompanyProfile | null>(null);
@@ -118,6 +124,30 @@ export class CompanyProfilePage implements OnInit {
         });
         this.notifications.show('Datos de la empresa actualizados.', 'success');
       });
+  }
+
+  uploadLogo(file: File, uploader: LogoUploader): void {
+    this.saveLogo(this.api.uploadLogo(file), uploader, 'Logo actualizado.');
+  }
+
+  removeLogo(uploader: LogoUploader): void {
+    this.saveLogo(this.api.removeLogo(), uploader, 'Logo quitado.');
+  }
+
+  private saveLogo(request: Observable<{ readonly logoUrl: string | null }>, uploader: LogoUploader, message: string): void {
+    this.savingLogo.set(true);
+    request.subscribe({
+      next: ({ logoUrl }) => {
+        this.savingLogo.set(false);
+        this.profile.update((p) => (p ? { ...p, theme: { ...p.theme, logoUrl } } : p));
+        this.companies.setLogo(logoUrl);
+        this.notifications.show(message, 'success');
+      },
+      error: (cause: unknown) => {
+        this.savingLogo.set(false);
+        uploader.showError(cause instanceof AppHttpError && cause.message ? cause.message : 'No se pudo guardar el logo.');
+      },
+    });
   }
 
   ngOnInit(): void {

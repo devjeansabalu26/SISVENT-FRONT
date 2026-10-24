@@ -10,6 +10,10 @@ export class CompanyContextService {
     this.companyState.set(company);
   }
 
+  setLogo(logoUrl: string | null): void {
+    this.companyState.update((company) => (company ? { ...company, logoUrl: logoUrl ?? undefined } : company));
+  }
+
   clear(): void {
     this.companyState.set(null);
   }

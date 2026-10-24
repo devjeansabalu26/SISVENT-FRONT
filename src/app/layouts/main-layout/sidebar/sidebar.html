@@ -1,10 +1,17 @@
 <aside class="sidebar" [class.sidebar--compact]="compact()">
   <a class="brand" routerLink="/app/dashboard" aria-label="Ir al inicio" (click)="navigate.emit()">
-    <span class="brand__mark">{{ brandInitial() }}</span>
+    @if (logoUrl(); as logo) {
+      <span class="brand__mark brand__mark--logo"><img [src]="logo" [alt]="'Logo de ' + brandName()" width="40" height="40" /></span>
+    } @else {
+      <span class="brand__mark">{{ brandInitial() }}</span>
+    }
     <span class="brand__info">
-      <strong>{{ brandName() }}</strong>
+      <strong [title]="brandName()">{{ brandName() }}</strong>
       @if (roleLabel()) {
         <span class="brand__role">{{ roleLabel() }}</span>
+      }
+      @if (userCode()) {
+        <span class="brand__code">Código {{ userCode() }}</span>
       }
     </span>
   </a>

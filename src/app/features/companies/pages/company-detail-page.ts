@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { filter } from 'rxjs';
+import { Observable, filter } from 'rxjs';
+import { AppHttpError } from '../../../core/http/models/app-http-error.model';
+import { LogoUploader } from '../../../shared/ui/logo-uploader/logo-uploader';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
@@ -48,6 +50,7 @@ const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users'
     CompanySummaryTab,
     CompanyHistoryTab,
     CompanyRegionalTab,
+    LogoUploader,
   ],
   templateUrl: './company-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './company-detail-page.scss'],
@@ -63,6 +66,7 @@ export class CompanyDetailPage implements OnInit {
   private readonly id = this.route.snapshot.paramMap.get('id')!;
 
   readonly loading = signal(true);
+  readonly savingLogo = signal(false);
   readonly company = signal<CompanyDetail | null>(null);
 
   private readonly initialTab = ((): CompanyTab => {
@@ -89,6 +93,30 @@ export class CompanyDetailPage implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  uploadLogo(file: File, uploader: LogoUploader): void {
+    this.saveLogo(this.api.uploadLogo(this.id, file), uploader, 'Logo actualizado.');
+  }
+
+  removeLogo(uploader: LogoUploader): void {
+    this.saveLogo(this.api.removeLogo(this.id), uploader, 'Logo quitado.');
+  }
+
+  private saveLogo(request: Observable<{ readonly logoUrl: string | null }>, uploader: LogoUploader, message: string): void {
+    this.savingLogo.set(true);
+    request.subscribe({
+      next: ({ logoUrl }) => {
+        this.savingLogo.set(false);
+        this.company.update((company) => (company ? { ...company, logoUrl } : company));
+        this.notifications.show(message, 'success');
+        this.invalidateTabs(['history']);
+      },
+      error: (cause: unknown) => {
+        this.savingLogo.set(false);
+        uploader.showError(cause instanceof AppHttpError && cause.message ? cause.message : 'No se pudo guardar el logo.');
+      },
+    });
   }
 
   onRegionalChanged(): void {

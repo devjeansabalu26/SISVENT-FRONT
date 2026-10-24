@@ -100,6 +100,7 @@ export class AppSessionService {
       canViewAllStores: user.canViewAllStores ?? false,
       visibleStores: user.visibleStores ?? [],
       readOnly: user.readOnly ?? false,
+      userCode: user.userCode ?? undefined,
     });
 
     if (user.companyId && user.company) {
@@ -108,6 +109,7 @@ export class AppSessionService {
         commercialName: user.company.tradeName,
         plan: user.company.planCode ?? '',
         features: user.company.features,
+        logoUrl: user.company.logoUrl ?? undefined,
       });
       this.theme.applyCompanyTheme({
         primary: user.company.primaryColor,

@@ -82,6 +82,8 @@
         </section>
         <section class="surface-card">
           <h3>Identidad visual de la app</h3>
+          <app-logo-uploader #uploader [logoUrl]="company.logoUrl ?? null" [companyName]="company.tradeName" [busy]="savingLogo()"
+            (selected)="uploadLogo($event, uploader)" (remove)="removeLogo(uploader)" />
           @if (company.primaryColor || company.secondaryColor || company.accentColor || company.backgroundColor) {
             <dl>
               @if (company.primaryColor) {

@@ -47,9 +47,8 @@
 
     <section class="surface-card">
       <h3>Identidad visual</h3>
-      @if (company.theme.logoUrl) {
-        <img class="logo" [src]="company.theme.logoUrl" [alt]="'Logo de ' + company.tradeName" />
-      }
+      <app-logo-uploader #uploader [logoUrl]="company.theme.logoUrl" [companyName]="company.tradeName" [busy]="savingLogo()"
+        (selected)="uploadLogo($event, uploader)" (remove)="removeLogo(uploader)" />
       <div class="swatches">
         @for (color of brandColors(); track color.label) {
           <div class="swatch">

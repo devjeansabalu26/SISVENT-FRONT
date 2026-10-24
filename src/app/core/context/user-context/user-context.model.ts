@@ -12,4 +12,5 @@ export interface UserContext {
   readonly canViewAllStores?: boolean;
   readonly visibleStores?: readonly { readonly id: string; readonly name: string }[];
   readonly readOnly?: boolean;
+  readonly userCode?: string;
 }

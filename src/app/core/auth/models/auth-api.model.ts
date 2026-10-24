@@ -16,6 +16,7 @@ export interface SessionCompany {
   readonly accentColor: string | null;
   readonly backgroundColor: string | null;
   readonly modules?: readonly SessionModule[];
+  readonly logoUrl?: string | null;
 }
 
 export interface SessionUser {
@@ -30,6 +31,7 @@ export interface SessionUser {
   readonly canViewAllStores?: boolean;
   readonly visibleStores?: readonly { readonly id: string; readonly name: string }[];
   readonly readOnly?: boolean;
+  readonly userCode?: string | null;
   readonly company: SessionCompany | null;
 }
 
