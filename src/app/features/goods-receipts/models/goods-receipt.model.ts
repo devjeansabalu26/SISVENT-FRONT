@@ -71,4 +71,22 @@ export interface GoodsReceiptCreateValue {
   readonly notes: string | null;
   readonly updateReferenceCost: boolean;
   readonly lines: readonly GoodsReceiptLineInput[];
+  readonly asOrder?: boolean;
+}
+
+export function receiptStatusLabel(status: string): string {
+  return status === 'DRAFT' ? 'En camino' : status;
+}
+
+export function receiptStatusHint(status: string): string | null {
+  switch (status) {
+    case 'DRAFT':
+      return 'Es un pedido al proveedor que aún no llega. No mueve el stock hasta que lo recibas.';
+    case 'CONFIRMED':
+      return 'La mercadería se recibió: el stock ya subió y quedó en el kárdex.';
+    case 'CANCELLED':
+      return 'Se anuló: no movió el stock y ya no cuenta como pedido en camino.';
+    default:
+      return null;
+  }
 }

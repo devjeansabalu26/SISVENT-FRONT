@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { ExcelExportService, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,8 +26,8 @@ export class AuditPage implements OnInit {
   private readonly api = inject(AuditApiService);
   private readonly companyApi = inject(CompanyApiService);
   private readonly dialog = inject(MatDialog);
-  private readonly document = inject(DOCUMENT);
   private readonly notifications = inject(NotificationService);
+  private readonly excel = inject(ExcelExportService);
   private readonly destroyRef = inject(DestroyRef);
   readonly isSuperadmin = inject(UserContextService).user()?.role === 'SUPERADMIN';
 
@@ -156,19 +156,23 @@ export class AuditPage implements OnInit {
         return;
       }
 
-      const lines = [
-        'Fecha,Usuario,Empresa,Accion,Entidad,IP,Nivel,Detalle',
-        ...collected.map(
-          (row) =>
-            `"${row.createdAt}","${row.actorName ?? ''}","${row.companyName ?? ''}","${row.action}","${row.entityName}","${row.ipAddress ?? ''}","${row.level}","${(row.detail ?? '').replace(/"/g, '""')}"`,
-        ),
-      ];
-      const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
-      const link = this.document.createElement('a');
-      link.href = url;
-      link.download = 'auditoria.csv';
-      link.click();
-      URL.revokeObjectURL(url);
+      await this.excel.export({
+        fileName: 'auditoria',
+        title: 'Historial de auditoría',
+        subtitle: `${collected.length} registros con los filtros aplicados`,
+        sheets: [
+          excelTable({ name: 'Auditoría', rows: collected, columns: [
+            { header: 'Fecha', value: (row) => row.createdAt, type: 'datetime' },
+            { header: 'Usuario', value: (row) => row.actorName ?? '' },
+            { header: 'Empresa', value: (row) => row.companyName ?? '' },
+            { header: 'Acción', value: (row) => row.action },
+            { header: 'Entidad', value: (row) => row.entityName },
+            { header: 'IP', value: (row) => row.ipAddress ?? '' },
+            { header: 'Nivel', value: (row) => row.level },
+            { header: 'Detalle', value: (row) => row.detail ?? '', width: 60 },
+          ] }),
+        ],
+      });
       this.notifications.show(`Historial exportado (${collected.length} registros).`, 'success');
     } catch {
       this.notifications.show('No se pudo exportar el historial.', 'error');

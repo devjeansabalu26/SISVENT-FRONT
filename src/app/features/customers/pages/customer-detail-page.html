@@ -26,6 +26,132 @@
       </dl>
     </section>
   </div>
+
+  <section class="surface-card history">
+    <div class="history__head">
+      <div>
+        <h3>Historial de compras</h3>
+        <p class="muted">Cada compra con sus productos. Las anuladas se muestran, pero no suman.</p>
+      </div>
+      <div class="history__actions">
+        <label>
+          <span class="sr-only">Período</span>
+          <select #periodSelect [value]="historyPeriod()" (change)="setPeriod(periodSelect.value)">
+            @for (period of periods; track period.id) { <option [value]="period.id">{{ period.label }}</option> }
+          </select>
+        </label>
+        <button type="button" class="ghost" (click)="exportHistory('pdf')" [disabled]="exporting() || !historyTotal()">
+          <span class="material-icons">picture_as_pdf</span>PDF
+        </button>
+        <button type="button" class="ghost" (click)="exportHistory()" [disabled]="exporting() || !historyTotal()">
+          <span class="material-icons">table_view</span>{{ exporting() ? 'Exportando…' : 'Excel' }}
+        </button>
+      </div>
+    </div>
+
+    @if (historyTotals(); as totals) {
+      <div class="history__totals">
+        <div><small>Compras</small><strong>{{ totals.operationCount }}</strong></div>
+        <div><small>Monto</small><strong>{{ totals.totalAmount | money }}</strong></div>
+        <div><small>Ticket promedio</small><strong>{{ historyAverage() | money }}</strong></div>
+        <div><small>Productos distintos</small><strong>{{ purchases()?.products?.length ?? '—' }}</strong></div>
+        <div><small>Unidades</small><strong>{{ purchases() ? productUnits() : '—' }}</strong></div>
+      </div>
+    }
+
+    <app-view-tabs [tabs]="historyViews" [active]="historyView()" label="Vistas del historial" (select)="setView($event)" />
+
+    @switch (historyView()) {
+      @case ('sales') {
+        @if (historyLoading() && !history().length) {
+          <p class="muted">Cargando compras…</p>
+        } @else if (historyError()) {
+          <p class="muted">No tienes acceso al historial de ventas o no se pudo cargar. <button type="button" class="ghost" (click)="loadHistory()">Reintentar</button></p>
+        } @else if (!history().length) {
+          <p class="muted">Este cliente no tiene compras en el período elegido.</p>
+        } @else {
+          <div class="table-scroll" [class.is-loading]="historyLoading()">
+            <table class="history-table">
+              <thead><tr><th></th><th>Comprobante</th><th>Fecha</th><th>Local</th><th>Vendedor</th><th>Pago</th><th class="num">Total</th><th>Estado</th></tr></thead>
+              <tbody>
+                @for (sale of history(); track sale.id) {
+                  <tr class="history-row" [class.is-open]="isOpen(sale.id)" [class.is-cancelled]="sale.status !== 'CONFIRMED'">
+                    <td>
+                      <button type="button" class="expand" (click)="toggle(sale.id)" [attr.aria-expanded]="isOpen(sale.id)"
+                        [attr.aria-label]="(isOpen(sale.id) ? 'Ocultar' : 'Ver') + ' productos de ' + sale.saleNumber">
+                        <span class="material-icons">{{ isOpen(sale.id) ? 'expand_less' : 'expand_more' }}</span>
+                      </button>
+                    </td>
+                    <td><a [routerLink]="['/app/sales', sale.id]"><strong>{{ sale.saleNumber }}</strong></a></td>
+                    <td>{{ sale.saleDate | dateTime }}</td>
+                    <td>{{ sale.storeName }}</td>
+                    <td>{{ sale.sellerName }}</td>
+                    <td>{{ sale.paymentMethod }}</td>
+                    <td class="num"><strong>{{ sale.total | money }}</strong></td>
+                    <td><app-status-chip [value]="sale.status === 'CONFIRMED' ? 'CONFIRMED' : 'ANULADA'" [label]="sale.status === 'CONFIRMED' ? 'Confirmada' : 'Anulada'" /></td>
+                  </tr>
+                  @if (isOpen(sale.id)) {
+                    <tr class="history-items">
+                      <td></td>
+                      <td colspan="7">
+                        @if (itemsBySale().get(sale.id); as items) {
+                          <ul>
+                            @for (item of items; track $index) {
+                              <li>
+                                <span class="history-items__name">{{ item.productName }} <small>{{ item.sku }}</small></span>
+                                <span>{{ item.quantity }} × {{ item.unitPrice | money }}</span>
+                                <span class="muted">{{ item.discount > 0 ? '− ' + (item.discount | money) : '' }}</span>
+                                <strong>{{ item.subtotal | money }}</strong>
+                              </li>
+                            }
+                          </ul>
+                        } @else if (purchasesLoading()) {
+                          <small class="muted">Cargando productos…</small>
+                        } @else {
+                          <small class="muted">No se encontró el detalle. <a [routerLink]="['/app/sales', sale.id]">Ver la venta</a></small>
+                        }
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+          <app-paginator [pageNumber]="historyPage()" [pageSize]="pageSize" [total]="historyTotal()" itemNoun="compras"
+            [disabled]="historyLoading()" (pageChange)="goToPage($event)" />
+        }
+      }
+      @case ('products') {
+        @if (purchasesLoading() && !purchases()) {
+          <p class="muted">Cargando productos…</p>
+        } @else if (!purchases()?.products?.length) {
+          <p class="muted">Este cliente no compró productos en el período elegido.</p>
+        } @else {
+          <div class="table-scroll">
+            <table class="history-table">
+              <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Veces</th><th class="num">Unidades</th><th class="num">Precio promedio</th><th class="num">Monto</th><th>Última compra</th></tr></thead>
+              <tbody>
+                @for (product of purchases()!.products; track product.productId) {
+                  <tr>
+                    <td><strong>{{ product.name }}</strong><small class="block">{{ product.sku }}</small></td>
+                    <td>{{ product.category ?? '—' }}</td>
+                    <td class="num">{{ product.purchases }}</td>
+                    <td class="num">{{ product.units }}</td>
+                    <td class="num">{{ product.averagePrice | money }}</td>
+                    <td class="num"><strong>{{ product.amount | money }}</strong></td>
+                    <td>{{ product.lastPurchaseAt | dateTime }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (purchases()!.truncated) {
+            <p class="muted">Se consideran las 5000 líneas de compra más recientes. Elige un período más corto para ver el detalle completo.</p>
+          }
+        }
+      }
+    }
+  </section>
 } @else if (loading()) {
   <p class="muted">Cargando cliente…</p>
 } @else {

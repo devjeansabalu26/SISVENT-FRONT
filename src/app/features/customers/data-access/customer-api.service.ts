@@ -6,6 +6,7 @@ import {
   CustomerDetail,
   CustomerFormValue,
   CustomerPage,
+  CustomerPurchases,
   CustomerSummary,
 } from '../models/customer.model';
 
@@ -38,6 +39,12 @@ export class CustomerApiService {
 
   get(id: string): Observable<CustomerDetail> {
     return this.http.get<CustomerDetail>(`${this.baseUrl}/${id}`);
+  }
+
+  purchases(id: string, from?: string): Observable<CustomerPurchases> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    return this.http.get<CustomerPurchases>(`${this.baseUrl}/${id}/purchases`, { params });
   }
 
   create(body: CustomerFormValue): Observable<CustomerDetail> {

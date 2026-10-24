@@ -1,0 +1,130 @@
+<app-page-header title="Ventas" description="Cómo y dónde se vende: tendencia diaria, categorías y vendedores">
+  <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!state.report()">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!state.report()">
+    <span class="material-icons">table_view</span>Exportar Excel
+  </button>
+</app-page-header>
+
+<app-report-toolbar />
+<app-view-tabs [tabs]="views" [active]="view()" label="Vistas de ventas" (select)="state.setView($event)" />
+
+@if (state.report(); as report) {
+  @switch (view()) {
+    @case ('trend') {
+      <div class="kpi-grid">
+        <app-kpi-card label="Ventas del periodo" [value]="(report.totalSales.value | money)" icon="payments" tone="success" [caption]="periodLabel()" />
+        <app-kpi-card label="Promedio por día" [value]="(averageDay() | money)" icon="calendar_today" tone="primary" />
+        <app-kpi-card label="Mejor día" [value]="bestDay() ? (bestDay()!.amount | money) : '—'" icon="emoji_events" tone="warning" [caption]="bestDay()?.date ?? ''" />
+        <app-kpi-card label="Días con ventas" [value]="daysWithSales()" icon="event_available" tone="info" [caption]="'de ' + series().length + ' días'" />
+      </div>
+      <section class="chart-card">
+        <header class="card-head"><div><h2>Ventas por día</h2><p>{{ periodLabel() }}</p></div></header>
+        @if (series().length) {
+          <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
+            @for (point of series(); track point.date) {
+              <div class="bar-column">
+                <span class="amount">{{ point.amount | compactMoney }}</span>
+                <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
+                <small>{{ point.date }}</small>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="muted empty">No hay ventas en este periodo.</p>
+        }
+      </section>
+    }
+    @case ('hours') {
+      @if (heatmap(); as map) {
+        @if (map.rows.length) {
+          <div class="kpi-grid">
+            <app-kpi-card label="Hora pico" [value]="hourLabel(map.peak!.hour)" icon="schedule" tone="warning"
+              [caption]="'Los ' + map.peak!.weekday + ' · ' + map.peak!.transactions + ' ventas'" />
+            <app-kpi-card label="Día más fuerte" [value]="map.strongestDay?.label ?? '—'" icon="event" tone="success"
+              [caption]="map.strongestDay ? money(map.strongestDay.amount) + ' en el periodo' : ''" />
+          </div>
+          <section class="chart-card" [class.is-loading]="heatmapLoading()">
+            <header class="card-head"><div><h2>Ventas por día y hora</h2><p>Más oscuro = más ventas. Úsalo para planear turnos, horarios y reposición en góndola.</p></div></header>
+            <div class="heatmap" role="table" aria-label="Ventas por día de la semana y hora">
+              <div class="heatmap__row heatmap__row--head" role="row">
+                <span role="columnheader"></span>
+                @for (hour of map.hours; track hour) {
+                  <span role="columnheader" class="heatmap__hour">{{ hour }}</span>
+                }
+              </div>
+              @for (row of map.rows; track row.weekday) {
+                <div class="heatmap__row" role="row">
+                  <span role="rowheader" class="heatmap__day">{{ row.label }}</span>
+                  @for (cell of row.cells; track cell.hour) {
+                    <span role="cell" class="heatmap__cell" [attr.data-level]="cell.level" [title]="cellTitle(row, cell)">
+                      @if (cell.transactions) { {{ cell.transactions }} }
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+            <div class="heatmap__legend" aria-hidden="true">
+              <span>Menos</span>
+              @for (level of [0, 1, 2, 3, 4]; track level) { <span class="heatmap__cell" [attr.data-level]="level"></span> }
+              <span>Más</span>
+            </div>
+          </section>
+        } @else {
+          <p class="muted empty">No hay ventas en este periodo.</p>
+        }
+      } @else if (heatmapLoading()) {
+        <p class="muted empty">Cargando mapa de calor…</p>
+      } @else {
+        <p class="muted empty">No se pudo cargar el mapa de calor.</p>
+      }
+    }
+    @case ('categories') {
+      <section class="chart-card">
+        <header class="card-head"><div><h2>Ventas por categoría</h2><p>Qué parte de tus ventas aporta cada categoría</p></div></header>
+        @if (report.byCategory.length) {
+          <ol class="ranking">
+            @for (item of report.byCategory; track item.name; let i = $index) {
+              <li>
+                <span class="ranking__pos">{{ i + 1 }}</span>
+                <div class="ranking__body">
+                  <span>{{ item.name }}</span>
+                  <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
+                </div>
+                <span class="ranking__value">{{ money(item.amount) }}<small>{{ item.percent.toFixed(1) }}%</small></span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="muted empty">No hay ventas en este periodo.</p>
+        }
+      </section>
+    }
+    @case ('sellers') {
+      <section class="chart-card">
+        <header class="card-head"><div><h2>Ventas por vendedor</h2><p>Quién vendió más en el periodo</p></div></header>
+        @if (report.bySeller.length) {
+          <ol class="ranking">
+            @for (item of report.bySeller; track item.name; let i = $index) {
+              <li>
+                <span class="ranking__pos">{{ i + 1 }}</span>
+                <div class="ranking__body">
+                  <span>{{ item.name }}</span>
+                  <div class="shares__track"><span class="shares__fill" [style.width.%]="item.percent"></span></div>
+                </div>
+                <span class="ranking__value">{{ money(item.amount) }}<small>{{ item.percent.toFixed(1) }}%</small></span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="muted empty">No hay ventas en este periodo.</p>
+        }
+      </section>
+    }
+  }
+} @else if (state.failed()) {
+  <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="link" (click)="state.reload()">Reintentar</button></p>
+} @else {
+  <p class="muted empty">Cargando reporte…</p>
+}

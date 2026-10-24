@@ -1,97 +1,89 @@
-import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
-import { StoreApiService } from '../../locales/data-access/store-api.service';
-import { DataTable } from '../../../shared/ui/data-table/data-table';
-import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { SalesReportApiService } from '../data-access/sales-report-api.service';
-import { SalesReport, TopProduct } from '../models/sales-report.model';
 import { CompactMoneyPipe, MoneyPipe, QuantityPipe } from '../../../shared/pipes/date-time.pipe';
-import { formatMoney } from '../../../core/regional/regional-format';
-
-type TopProductRow = TopProduct & { readonly id: string };
-
-const PERIOD_DAYS: Readonly<Record<string, number>> = { '30': 30, '90': 90, '180': 180 };
+import { ReportToolbar } from '../components/report-toolbar';
+import { ReportState } from '../data-access/report-state';
+import { MetricDelta } from '../models/sales-report.model';
+import { periodLabel } from '../utils/report-period';
 
 @Component({
   selector: 'app-reports-page',
-  imports: [DataTable, PageHeader, KpiCard, MoneyPipe, CompactMoneyPipe, QuantityPipe],
+  imports: [PageHeader, KpiCard, RouterLink, ReportToolbar, MoneyPipe, CompactMoneyPipe, QuantityPipe],
+  providers: [ReportState],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReportsPage implements OnInit {
-  private readonly document = inject(DOCUMENT);
+export class ReportsPage {
   private readonly notifications = inject(NotificationService);
-  private readonly api = inject(SalesReportApiService);
-  private readonly storeApi = inject(StoreApiService);
+  private readonly excel = inject(ExcelExportService);
+  readonly state = inject(ReportState);
 
-  readonly loading = signal(false);
-  readonly period = signal('90');
-  readonly storeId = signal('');
-  readonly stores = signal<readonly { id: string; name: string }[]>([]);
-  readonly report = signal<SalesReport | null>(null);
-
-  readonly maxAmount = computed(() =>
-    Math.max(...(this.report()?.dailySeries.map((point) => point.amount) ?? [0]), 1),
-  );
-
-  readonly topProductColumns: readonly DataTableColumn<TopProductRow>[] = [
-    { key: 'rank', label: '#', value: (row) => row.rank },
-    { key: 'name', label: 'Producto', value: (row) => row.name },
-    { key: 'category', label: 'Categoría', value: (row) => row.category ?? '—' },
-    { key: 'units', label: 'Unidades', value: (row) => row.units },
-    { key: 'revenue', label: 'Ingresos', value: (row) => formatMoney(row.revenue) },
-    { key: 'margin', label: 'Margen', value: (row) => (row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—') }];
-
-  ngOnInit(): void {
-    this.storeApi.list().subscribe((response) => this.stores.set(response.items));
-    this.load();
+  constructor() {
+    this.state.topCount = 5;
   }
 
-  onPeriodChange(value: string): void {
-    this.period.set(value);
-    this.load();
+  readonly periodLabel = computed(() => periodLabel(this.state.period()));
+  readonly maxAmount = computed(() => Math.max(...(this.state.report()?.dailySeries.map((point) => point.amount) ?? [0]), 1));
+  readonly topCategory = computed(() => this.state.report()?.byCategory[0] ?? null);
+  readonly topProduct = computed(() => this.state.report()?.topProducts[0] ?? null);
+  readonly topSeller = computed(() => this.state.report()?.bySeller[0] ?? null);
+
+  trend(metric: MetricDelta): 'up' | 'down' | 'flat' {
+    if (metric.deltaPercent === null) return 'flat';
+    return metric.deltaPercent >= 0 ? 'up' : 'down';
   }
 
-  onStoreChange(value: string): void {
-    this.storeId.set(value);
-    this.load();
+  delta(metric: MetricDelta): string | undefined {
+    return metric.deltaPercent === null ? undefined : `${metric.deltaPercent.toFixed(1)}%`;
   }
 
-  load(): void {
-    const days = PERIOD_DAYS[this.period()] ?? 90;
-    const to = new Date();
-    const from = new Date();
-    from.setDate(from.getDate() - days);
-    this.loading.set(true);
-    this.api.get({ from: from.toISOString(), to: to.toISOString(), storeId: this.storeId() || undefined, topCount: 10 }).subscribe({
-      next: (report) => {
-        this.report.set(report);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
-  }
 
-  readonly topProductRows = computed<readonly TopProductRow[]>(() =>
-    (this.report()?.topProducts ?? []).map((item) => ({ ...item, id: item.sku })),
-  );
-
-  exportCsv(): void {
-    const report = this.report();
+  async exportExcel(format: ExportFormat = 'xlsx'): Promise<void> {
+    const report = this.state.report();
     if (!report) return;
-    const lines = [
-      'Fecha,Monto',
-      ...report.dailySeries.map((point) => `${point.date},${point.amount}`)];
-    const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
-    const link = this.document.createElement('a');
-    link.href = url;
-    link.download = 'reporte-ventas.csv';
-    link.click();
-    URL.revokeObjectURL(url);
-    this.notifications.show('Reporte exportado correctamente.', 'success');
+    const delta = (metric: { readonly deltaPercent: number | null }) =>
+      metric.deltaPercent == null ? 'Sin datos del período anterior' : `${metric.deltaPercent > 0 ? '+' : ''}${metric.deltaPercent.toFixed(1)}% vs el período anterior`;
+    await this.excel.export({
+      fileName: 'reporte-resumen',
+      title: 'Reporte de resumen',
+      subtitle: this.state.exportContext(),
+      sheets: [
+        { name: 'Resumen', items: [
+          { label: 'Ventas totales', value: report.totalSales.value, type: 'money', detail: delta(report.totalSales) },
+          { label: 'Transacciones', value: report.transactions.value, type: 'integer', detail: delta(report.transactions) },
+          { label: 'Ticket promedio', value: report.averageTicket.value, type: 'money', detail: delta(report.averageTicket) },
+          { label: 'Productos vendidos', value: report.unitsSold.value, type: 'number', detail: delta(report.unitsSold) },
+        ] },
+        excelTable({ name: 'Ventas por día', rows: report.dailySeries, totals: true, columns: [
+          { header: 'Fecha', value: (row) => row.date, type: 'date' },
+          { header: 'Monto', value: (row) => row.amount, type: 'money' },
+        ] }),
+        excelTable({ name: 'Por categoría', rows: report.byCategory, totals: true, columns: [
+          { header: 'Categoría', value: (row) => row.name },
+          { header: 'Ventas', value: (row) => row.amount, type: 'money' },
+          { header: '% del total', value: (row) => row.percent, type: 'percent', total: false },
+        ] }),
+        excelTable({ name: 'Por vendedor', rows: report.bySeller, totals: true, columns: [
+          { header: 'Vendedor', value: (row) => row.name },
+          { header: 'Ventas', value: (row) => row.amount, type: 'money' },
+          { header: '% del total', value: (row) => row.percent, type: 'percent', total: false },
+        ] }),
+        excelTable({ name: 'Productos', rows: report.topProducts, columns: [
+          { header: '#', value: (row) => row.rank, type: 'integer', total: false },
+          { header: 'SKU', value: (row) => row.sku },
+          { header: 'Producto', value: (row) => row.name },
+          { header: 'Categoría', value: (row) => row.category ?? '' },
+          { header: 'Unidades', value: (row) => row.units, type: 'number' },
+          { header: 'Ingresos', value: (row) => row.revenue, type: 'money' },
+          { header: 'Margen', value: (row) => row.marginPercent, type: 'percent' },
+        ] }),
+      ],
+    }, format);
+    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

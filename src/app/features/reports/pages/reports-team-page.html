@@ -1,0 +1,131 @@
+<app-page-header title="Equipo" description="Cuánto vende cada persona por hora trabajada, su ticket y sus descuentos y anulaciones">
+  <a class="ghost" routerLink="/app/attendance"><span class="material-icons">event_available</span>Asistencia y tardanzas</a>
+  <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!report()">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!report()">
+    <span class="material-icons">table_view</span>Exportar Excel
+  </button>
+</app-page-header>
+
+<app-report-toolbar />
+<app-view-tabs [tabs]="views" [active]="view()" label="Vistas de equipo" (select)="state.setView($event)" />
+
+@if (report(); as report) {
+  <div class="kpi-grid" [class.is-loading]="loading()">
+    <app-kpi-card label="Ventas del equipo" [value]="(report.summary.amount | money)" icon="payments" tone="success"
+      [caption]="report.summary.sales + ' ventas · ' + periodLabel()" />
+    <app-kpi-card label="Horas trabajadas" [value]="report.summary.hours != null ? report.summary.hours.toFixed(1) + ' h' : 'Sin asistencia'" icon="schedule" tone="primary"
+      [caption]="report.summary.shiftsWithoutCheckout ? report.summary.shiftsWithoutCheckout + ' turnos sin salida (no suman)' : report.summary.members + ' personas'" />
+    <app-kpi-card label="Venta por hora" [value]="report.summary.amountPerHour != null ? (report.summary.amountPerHour | money) : '—'" icon="speed" tone="info" caption="Del equipo completo" />
+    <app-kpi-card label="Mejor por hora" [value]="report.summary.bestPerHourName ?? '—'" icon="emoji_events" tone="warning"
+      [caption]="report.summary.bestPerHour != null ? (report.summary.bestPerHour | money) + ' por hora' : 'Necesita asistencia registrada'" />
+    <app-kpi-card label="Descuentos y anulaciones" [value]="(report.summary.discounts + report.summary.cancelledAmount | money)" icon="money_off"
+      [tone]="report.summary.cancelled > 0 ? 'warning' : 'default'"
+      [caption]="(report.summary.discounts | money) + ' en descuentos · ' + report.summary.cancelled + ' anuladas'" />
+  </div>
+
+  @if (!report.attendanceEnabled) {
+    <p class="customer-tip">
+      <span class="material-icons" aria-hidden="true">info</span>
+      El módulo de asistencia está desactivado para tu empresa, así que no hay horas trabajadas. Pide al equipo de Savix que lo active para ver la venta por hora.
+    </p>
+  } @else if (noShifts()) {
+    <p class="customer-tip">
+      <span class="material-icons" aria-hidden="true">info</span>
+      Nadie marcó entrada y salida en este período, así que no se puede calcular la venta por hora. Pide a tu equipo marcar su asistencia al llegar y al salir.
+    </p>
+  }
+
+  @switch (view()) {
+    @case ('productivity') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div><h2>Venta por hora trabajada</h2><p>Compara a cada persona por lo que vende en el tiempo que trabajó, no solo por el total. Es más justo cuando los turnos son distintos.</p></div>
+        </header>
+        @if (byRate().length) {
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead><tr><th>Persona</th><th>Horas</th><th>Venta por hora</th><th>Ventas por hora</th><th>Ventas</th><th>Monto</th></tr></thead>
+              <tbody>
+                @for (row of byRate(); track row.profileId) {
+                  <tr>
+                    <td>
+                      <strong>{{ row.name }}</strong>
+                      @if (row.shiftsWithoutCheckout) { <app-status-chip value="SIN SALIDA" [label]="row.shiftsWithoutCheckout + ' sin salida'" [hint]="missingHint(row)" /> }
+                    </td>
+                    <td>{{ hoursText(row) }}<small>{{ row.shifts }} {{ row.shifts === 1 ? 'turno' : 'turnos' }}</small></td>
+                    <td>
+                      @if (row.amountPerHour != null) {
+                        <app-status-chip value="RATE" [label]="(row.amountPerHour | money) + ' / h'" [hint]="rateHint(row, report.minHoursForRate)" />
+                      } @else { <span class="muted">—</span> }
+                    </td>
+                    <td>{{ row.salesPerHour != null ? row.salesPerHour.toFixed(1) : '—' }}</td>
+                    <td>{{ row.sales }}</td>
+                    <td><strong>{{ row.amount | money }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">No hubo ventas ni asistencia en este período.</p>
+        }
+      </section>
+    }
+    @case ('sales') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div><h2>Ventas por persona</h2><p>Monto, ticket promedio y unidades por venta. Un ticket alto suele indicar que ofrece más productos al cliente.</p></div>
+        </header>
+        @if (report.members.length) {
+          <ol class="ranking">
+            @for (row of report.members; track row.profileId; let i = $index) {
+              <li>
+                <span class="ranking__pos">{{ i + 1 }}</span>
+                <div class="ranking__body">
+                  <span>{{ row.name }} <small class="muted">· {{ row.sales }} ventas · ticket {{ row.averageTicket | money }} · {{ row.unitsPerSale.toFixed(1) }} u. por venta</small></span>
+                  <div class="shares__track"><span class="shares__fill" [style.width.%]="row.share"></span></div>
+                </div>
+                <span class="ranking__value">{{ row.amount | money }}<small>{{ row.share.toFixed(1) }}%</small></span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="muted empty">No hubo ventas en este período.</p>
+        }
+      </section>
+    }
+    @case ('discounts') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div><h2>Descuentos y anulaciones por persona</h2><p>Cuánto se dejó de cobrar en descuentos y cuánto se anuló. Montos altos o que se repiten conviene revisarlos.</p></div>
+        </header>
+        @if (byDiscounts().length) {
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead><tr><th>Persona</th><th>Descuentos</th><th>% de su venta</th><th>Anuladas</th><th>Monto anulado</th></tr></thead>
+              <tbody>
+                @for (row of byDiscounts(); track row.profileId) {
+                  <tr>
+                    <td><strong>{{ row.name }}</strong></td>
+                    <td [class.amount--over]="row.discounts > 0">{{ row.discounts | money }}</td>
+                    <td>{{ row.amount > 0 ? ((row.discounts / (row.amount + row.discounts)) * 100).toFixed(1) + '%' : '—' }}</td>
+                    <td>{{ row.cancelled }}</td>
+                    <td [class.amount--short]="row.cancelledAmount > 0">{{ row.cancelledAmount | money }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">No hubo ventas en este período.</p>
+        }
+      </section>
+    }
+  }
+} @else if (loading()) {
+  <p class="muted empty">Cargando reporte de equipo…</p>
+} @else if (failed()) {
+  <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="ghost" (click)="reload()">Reintentar</button></p>
+}

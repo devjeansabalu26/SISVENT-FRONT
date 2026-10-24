@@ -1,9 +1,9 @@
-import { DOCUMENT } from '@angular/common';
+import { ExcelExportService, ExportFormat, excelTable } from '../../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { AttendanceApiService, attendanceErrorMessage } from '../../data-access/attendance-api.service';
 import { AttendanceReport, AttendanceStoreOption, ROLE_LABELS } from '../../models/attendance.model';
-import { formatMinutes, reportCsv, reportPdf, reportTitle } from '../../utils/attendance-report-export';
+import { formatMinutes, reportTitle } from '../../utils/attendance-report-export';
 import { addDays, companyToday } from '../../../../core/regional/regional-format';
 
 @Component({
@@ -94,7 +94,7 @@ export class AttendanceReportPanel implements OnInit {
   readonly stores = input<readonly AttendanceStoreOption[]>([]);
   private readonly api = inject(AttendanceApiService);
   private readonly notifications = inject(NotificationService);
-  private readonly document = inject(DOCUMENT);
+  private readonly excel = inject(ExcelExportService);
 
   readonly storeId = signal('');
   readonly from = signal(addDays(companyToday(), -6));
@@ -137,33 +137,62 @@ export class AttendanceReportPanel implements OnInit {
     });
   }
 
-  exportExcel(): void {
+  async exportExcel(format: ExportFormat = 'xlsx'): Promise<void> {
     const report = this.report();
     if (!report) return;
-    this.download(new Blob([reportCsv(report)], { type: 'text/csv;charset=utf-8' }), `asistencia-${report.from}-${report.to}.csv`);
+    const store = this.stores().find((item) => item.id === this.storeId())?.name ?? null;
+    const names = new Map(report.rows.map((row) => [row.profileId, row.fullName]));
+    const totalMinutes = report.rows.reduce((sum, row) => sum + row.workedMinutes, 0);
+    try {
+      await this.excel.export({
+        fileName: `asistencia-${report.from}-${report.to}`,
+        title: 'Reporte de asistencia',
+        subtitle: reportTitle(report, store),
+        sheets: [
+          { name: 'Resumen', items: [
+            { label: 'Horario', value: `${report.workStart} a ${report.workEnd}`, detail: `Tolerancia de ${report.toleranceMinutes} min` },
+            { label: 'Personas', value: report.rows.length, type: 'integer' },
+            { label: 'Horas trabajadas', value: Math.round((totalMinutes / 60) * 10) / 10, type: 'number', detail: formatMinutes(totalMinutes) },
+            { label: 'Tardanzas', value: report.rows.reduce((sum, row) => sum + row.lateDays, 0), type: 'integer' },
+            { label: 'Faltas', value: report.rows.reduce((sum, row) => sum + row.absences, 0), type: 'integer' },
+            { label: 'Salidas sin marcar', value: report.rows.reduce((sum, row) => sum + row.missingCheckOuts, 0), type: 'integer' },
+          ] },
+          excelTable({ name: 'Por persona', rows: report.rows, totals: true, columns: [
+            { header: 'Persona', value: (row) => row.fullName },
+            { header: 'Rol', value: (row) => (row.role === 'ADMIN' ? 'Administrador' : row.role === 'VENDEDOR' ? 'Vendedor' : row.role) },
+            { header: 'Usuario', value: (row) => row.userCode ?? '' },
+            { header: 'Local', value: (row) => row.storeName ?? '' },
+            { header: 'Días trabajados', value: (row) => row.daysWorked, type: 'integer' },
+            { header: 'Horas trabajadas', value: (row) => Math.round((row.workedMinutes / 60) * 10) / 10, type: 'number' },
+            { header: 'Tardanzas', value: (row) => row.lateDays, type: 'integer' },
+            { header: 'Minutos de tardanza', value: (row) => row.lateMinutes, type: 'integer' },
+            { header: 'Faltas', value: (row) => row.absences, type: 'integer' },
+            { header: 'Salidas sin marcar', value: (row) => row.missingCheckOuts, type: 'integer' },
+          ] }),
+          excelTable({ name: 'Detalle por día', rows: report.days, columns: [
+            { header: 'Persona', value: (day) => names.get(day.profileId) ?? '' },
+            { header: 'Fecha', value: (day) => day.date, type: 'date' },
+            { header: 'Entrada', value: (day) => day.firstCheckIn, type: 'datetime' },
+            { header: 'Salida', value: (day) => day.lastCheckOut, type: 'datetime' },
+            { header: 'Horas', value: (day) => Math.round((day.workedMinutes / 60) * 10) / 10, type: 'number' },
+            { header: 'Minutos de tardanza', value: (day) => day.lateMinutes, type: 'integer' },
+            { header: 'Estado', value: (day) => (day.absent ? 'Falta' : day.missingCheckOut ? 'Sin salida' : day.lateMinutes > 0 ? 'Tardanza' : 'Asistió') },
+          ] }),
+        ],
+      }, format);
+      this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    } catch {
+      this.notifications.show(format === 'pdf' ? 'No se pudo generar el PDF.' : 'No se pudo generar el Excel.', 'error');
+    }
   }
 
   async exportPdf(): Promise<void> {
-    const report = this.report();
-    if (!report) return;
     this.exporting.set(true);
     try {
-      const store = this.stores().find((item) => item.id === this.storeId())?.name ?? null;
-      this.download(await reportPdf(report, reportTitle(report, store)), `asistencia-${report.from}-${report.to}.pdf`);
-    } catch {
-      this.notifications.show('No se pudo generar el PDF.', 'error');
+      await this.exportExcel('pdf');
     } finally {
       this.exporting.set(false);
     }
   }
 
-  private download(blob: Blob, name: string): void {
-    const url = URL.createObjectURL(blob);
-    const link = this.document.createElement('a');
-    link.href = url;
-    link.download = name;
-    link.click();
-    URL.revokeObjectURL(url);
-    this.notifications.show('Reporte exportado.', 'success');
-  }
 }

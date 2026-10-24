@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -31,7 +32,7 @@ export function timeAgo(iso: string, now = new Date()): string {
 
 @Component({
   selector: 'app-notifications-page',
-  imports: [PageHeader, EmptyState],
+  imports: [PageHeader, EmptyState, MatTooltip],
   templateUrl: './notifications-page.html',
   styleUrl: './notifications-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,12 @@ export class NotificationsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly isSuperadmin = inject(UserContextService).user()?.role === 'SUPERADMIN';
 
+  readonly priorityHint: Readonly<Record<string, string>> = {
+    ALTA: 'Requiere atención pronto: puede afectar la venta o la operación.',
+    MEDIA: 'Conviene revisarla, pero no es urgente.',
+    INFO: 'Es solo informativa: no requiere ninguna acción.',
+    SISTEMA: 'Aviso automático de la plataforma.',
+  };
   readonly loading = signal(true);
   readonly loadError = signal(false);
   readonly items = signal<readonly NotificationItem[]>([]);
@@ -160,6 +167,8 @@ export class NotificationsPage implements OnInit {
         return id ? [{ label: 'Ver venta', route: ['/app/sales', id] }] : [];
       case 'cash_sessions':
         return [{ label: 'Ver caja', route: ['/app/sales/cash'] }];
+      case 'purchase_plan':
+        return [{ label: 'Ver qué pedir', route: ['/app/purchase-plan'] }];
       case 'stores':
         return [{ label: 'Ver asistencia', route: ['/app/attendance'] }, { label: 'Ver caja', route: ['/app/sales/cash'] }];
       case 'companies':

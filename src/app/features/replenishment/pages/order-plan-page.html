@@ -1,0 +1,113 @@
+<app-page-header
+  title="Qué pedir y cuándo"
+  description="Fecha límite y cantidad para que no te quedes sin stock, según tu venta de los últimos 30 días y los días de entrega de cada proveedor"
+>
+  <a class="ghost" routerLink="/app/replenishment"><span class="material-icons">arrow_back</span>Reabastecimiento</a>
+  <button type="button" class="ghost" (click)="exportExcel(undefined, 'pdf')" [disabled]="!suppliers().length">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!suppliers().length">
+    <span class="material-icons">table_view</span>Exportar pedido
+  </button>
+</app-page-header>
+
+@if (state() !== 'ready') {
+  <app-replenishment-load-state [state]="state()" (retry)="load()" />
+} @else {
+  <div class="kpi-grid">
+    <app-kpi-card label="Pedir ya" [value]="counts().ORDER_NOW" icon="report" tone="danger" caption="Hoy o ya pasó la fecha" />
+    <app-kpi-card label="Pedir pronto" [value]="counts().ORDER_SOON" icon="schedule" tone="warning" caption="En los próximos 3 días" />
+    <app-kpi-card label="Al día" [value]="counts().OK" icon="check_circle" tone="success" caption="Aún hay tiempo" />
+    <app-kpi-card label="Sin ventas" [value]="counts().NO_SALES" icon="inventory" tone="info" caption="Sin ventas en 30 días" />
+  </div>
+
+  <app-view-tabs [tabs]="views" [active]="view()" label="Vistas del plan de pedidos" (select)="setView($event)" />
+
+  @if (view() === 'urgency') {
+    <section class="filters plan-filters">
+      <label>
+        <span class="material-icons">search</span>
+        <input #searchBox [value]="search()" (input)="search.set(searchBox.value)" placeholder="Buscar producto o proveedor…" />
+      </label>
+      <select #statusSelect aria-label="Estado" [value]="statusFilter()" (change)="statusFilter.set($any(statusSelect.value))">
+        <option value="PENDING">Por pedir (ya y pronto)</option>
+        <option value="">Todos</option>
+        @for (option of statusOptions; track option[0]) {
+          <option [value]="option[0]">{{ option[1] }}</option>
+        }
+      </select>
+    </section>
+    <app-data-table
+      [columns]="columns"
+      [rows]="rows()"
+      [showEdit]="false"
+      [showRemove]="false"
+      emptyMessage="No hay productos por pedir con este filtro. ¡Buen trabajo!"
+    />
+  } @else {
+    @if (suppliers().length) {
+      <div class="supplier-orders">
+        @for (order of suppliers(); track order.supplier) {
+          <section class="supplier-order">
+            <header>
+              <div>
+                <h2>{{ order.supplier }}</h2>
+                <p>{{ order.items.length }} {{ order.items.length === 1 ? 'producto' : 'productos' }} · {{ quantity(order.units) }} uds · pedir antes del {{ formatDate(order.earliest) }}</p>
+              </div>
+              <div class="supplier-order__actions">
+                <a class="ghost" [href]="whatsapp(order)" target="_blank" rel="noopener" title="Abre WhatsApp con el pedido listo para enviar">
+                  <span class="material-icons" aria-hidden="true">chat</span>WhatsApp
+                </a>
+                <button type="button" class="ghost" (click)="print(order)" title="Imprimir o guardar como PDF">
+                  <span class="material-icons" aria-hidden="true">print</span>Imprimir
+                </button>
+                <button type="button" class="ghost" (click)="exportExcel(order.supplier)">
+                  <span class="material-icons" aria-hidden="true">table_view</span>Excel
+                </button>
+                <button type="button" class="primary" (click)="createReceipt(order)" title="Registra el pedido como &quot;En camino&quot; para no volver a pedirlo; súmalo al stock al recibirlo">
+                  <span class="material-icons" aria-hidden="true">move_to_inbox</span>Registrar pedido
+                </button>
+              </div>
+            </header>
+            <ul>
+              @for (item of order.items; track item.productId) {
+                <li>
+                  <div class="supplier-order__product">
+                    <strong>{{ item.name }}</strong>
+                    <small>Stock {{ quantity(item.currentStock) }} · vende {{ quantity(item.averageDailySales) }}/día</small>
+                  </div>
+                  <span class="supplier-order__qty">{{ item.orderQuantity }} uds</span>
+                  <span class="supplier-order__date" [class.supplier-order__date--late]="deadline(item).overdue">{{ deadline(item).label }}</span>
+                  <app-status-chip [value]="statusLabel(item)" [label]="statusLabel(item)" [hint]="statusHint(item)" />
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    } @else {
+      <p class="muted empty-plan">No hay productos por pedir en los próximos 3 días.</p>
+    }
+  }
+
+  @if (printing(); as order) {
+    <section class="print-area" aria-hidden="true">
+      <h1>Pedido a {{ order.supplier }}</h1>
+      <p>{{ companyName() }} · {{ formatDate(today) }}</p>
+      <table>
+        <thead><tr><th>SKU</th><th>Producto</th><th>Cantidad</th><th>Pedir antes del</th></tr></thead>
+        <tbody>
+          @for (item of order.items; track item.productId) {
+            <tr><td>{{ item.sku }}</td><td>{{ item.name }}</td><td>{{ item.orderQuantity }} uds</td><td>{{ deadline(item).label }}</td></tr>
+          }
+        </tbody>
+        <tfoot><tr><td colspan="2">Total</td><td>{{ quantity(order.units) }} uds</td><td></td></tr></tfoot>
+      </table>
+    </section>
+  }
+
+  <p class="plan-note">
+    <span class="material-icons" aria-hidden="true">info</span>
+    Se pide cuando el stock llega al <strong>punto de pedido</strong> (venta diaria × días de entrega + stock mínimo). La cantidad cubre los días de entrega y una semana más hasta el próximo pedido. Lo que ya pediste y está "En camino" se suma al stock para no pedirlo dos veces. Configura los días de entrega en cada proveedor y el stock mínimo en cada producto.
+  </p>
+}

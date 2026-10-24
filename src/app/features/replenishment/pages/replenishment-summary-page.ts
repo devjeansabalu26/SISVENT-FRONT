@@ -1,4 +1,4 @@
-import { localIsoDate } from '../../../shared/utils/date-format';
+import { ExcelExportService, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -14,7 +14,8 @@ import {
 } from '../components/recommendation-explain-dialog/recommendation-explain-dialog';
 import { ReplenishmentApiService } from '../data-access/replenishment-api.service';
 import { PRIORITY_LABELS, RISK_LABELS, ReplenishmentSummary, StockRiskItem } from '../models/replenishment.model';
-import { formatQuantity, purchaseOrderCsv } from '../utils/replenishment-format';
+import { formatQuantity } from '../utils/replenishment-format';
+import { riskHint } from '../utils/status-hints';
 
 const RECOMMENDATION_METHOD = 'SAVIX Smart Stock (ventas de los últimos 30 días)';
 
@@ -28,6 +29,7 @@ const RECOMMENDATION_METHOD = 'SAVIX Smart Stock (ventas de los últimos 30 día
 export class ReplenishmentSummaryPage implements OnInit {
   private readonly api = inject(ReplenishmentApiService);
   private readonly notifications = inject(NotificationService);
+  private readonly excel = inject(ExcelExportService);
   private readonly dialog = inject(MatDialog);
 
   readonly state = signal<LoadState>('loading');
@@ -54,7 +56,7 @@ export class ReplenishmentSummaryPage implements OnInit {
     { key: 'stock', label: 'Stock actual', value: (row) => `${formatQuantity(row.currentStock)} uds (mín. ${formatQuantity(row.minStock)})` },
     { key: 'avgSales', label: 'Ventas promedio', value: (row) => `${formatQuantity(row.averageDailySales)} uds/día` },
     { key: 'coverageDays', label: 'Cobertura', value: (row) => (row.coverageDays === null ? 'Sin ventas' : `${row.coverageDays} días`) },
-    { key: 'risk', label: 'Riesgo', value: (row) => RISK_LABELS[row.risk], type: 'status' },
+    { key: 'risk', label: 'Riesgo', value: (row) => RISK_LABELS[row.risk], type: 'status', hint: riskHint },
   ];
 
   readonly criticalRows = computed(() => (this.data()?.critical ?? []).map((item) => ({ ...item, id: item.productId })));
@@ -89,19 +91,33 @@ export class ReplenishmentSummaryPage implements OnInit {
     });
   }
 
-  processAll(): void {
-    const suggestions = this.data()?.suggestions ?? [];
+  async processAll(): Promise<void> {
+    const suggestions = [...(this.data()?.suggestions ?? [])]
+      .filter((item) => item.suggestedQuantity > 0)
+      .sort((a, b) => (a.supplierName ?? '').localeCompare(b.supplierName ?? '', 'es') || a.name.localeCompare(b.name, 'es'));
     if (!suggestions.length) {
       this.notifications.show('No hay compras sugeridas por procesar.', 'info');
       return;
     }
-    const blob = new Blob([purchaseOrderCsv(suggestions)], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `orden-compra-sugerida-${localIsoDate()}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    await this.excel.export({
+      fileName: 'orden-compra-sugerida',
+      title: 'Orden de compra sugerida',
+      subtitle: `Reabastecimiento · ${suggestions.length} productos`,
+      sheets: [
+        excelTable({ name: 'Compras sugeridas', rows: suggestions, totals: true, columns: [
+          { header: 'Proveedor', value: (item) => item.supplierName ?? 'Sin proveedor asignado' },
+          { header: 'SKU', value: (item) => item.sku },
+          { header: 'Producto', value: (item) => item.name },
+          { header: 'Cantidad sugerida', value: (item) => item.suggestedQuantity, type: 'number' },
+          { header: 'Costo referencial', value: (item) => item.referenceCost ?? null, type: 'money', total: false },
+          { header: 'Subtotal estimado', value: (item) => (item.referenceCost != null ? item.suggestedQuantity * item.referenceCost : null), type: 'money' },
+          { header: 'Stock actual', value: (item) => item.currentStock, type: 'number', total: false },
+          { header: 'Stock mínimo', value: (item) => item.minStock, type: 'number', total: false },
+          { header: 'Venta diaria', value: (item) => item.averageDailySales, type: 'number', total: false },
+          { header: 'Reposición (días)', value: (item) => item.leadTimeDays, type: 'integer', total: false },
+        ] }),
+      ],
+    });
     this.notifications.show(`Orden de compra sugerida descargada (${suggestions.length} productos).`, 'success');
   }
 }

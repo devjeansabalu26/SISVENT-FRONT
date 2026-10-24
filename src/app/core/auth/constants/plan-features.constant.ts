@@ -11,6 +11,9 @@ export const PLAN_FEATURES = {
   supplyAnalytics: 'SUPPLY_ANALYTICS',
   abcAnalysis: 'ABC_ANALYSIS',
   reports: 'REPORTS',
+  reportsCash: 'REPORTS_CASH',
+  reportsCustomers: 'REPORTS_CUSTOMERS',
+  reportsTeam: 'REPORTS_TEAM',
   audit: 'AUDIT',
   notifications: 'NOTIFICATIONS',
 } as const;
@@ -28,6 +31,9 @@ export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   SUPPLY_ANALYTICS: 'Abastecimiento y rotación',
   ABC_ANALYSIS: 'Clasificación ABC',
   REPORTS: 'Reportes',
+  REPORTS_CASH: 'Reporte de caja y pagos',
+  REPORTS_CUSTOMERS: 'Reporte de clientes',
+  REPORTS_TEAM: 'Reporte de equipo',
   AUDIT: 'Auditoría',
   NOTIFICATIONS: 'Notificaciones',
 };

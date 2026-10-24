@@ -8,7 +8,7 @@ import { StatusChip } from '../../../../shared/ui/status-chip/status-chip';
 import { KpiCard } from '../../../../shared/ui/kpi-card/kpi-card';
 import { friendlyAction, friendlyEntity } from '../../../../shared/utils/audit-labels';
 import { CompanyApiService } from '../../data-access/company-api.service';
-import { CompanyOverview } from '../../models/company.model';
+import { CompanyOverview, companyStatusHint } from '../../models/company.model';
 
 @Component({
   selector: 'app-company-summary-tab',
@@ -25,6 +25,7 @@ export class CompanySummaryTab implements OnInit {
 
   readonly companyId = input.required<string>();
 
+  readonly statusHint = companyStatusHint;
   readonly loading = signal(true);
   readonly overview = signal<CompanyOverview | null>(null);
 

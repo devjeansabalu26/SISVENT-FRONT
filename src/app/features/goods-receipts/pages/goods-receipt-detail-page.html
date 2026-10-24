@@ -1,11 +1,23 @@
 @if (receipt(); as receipt) {
-  <app-page-header [title]="'Ingreso ' + receipt.receiptNumber" description="Detalle y kárdex del ingreso de mercadería">
+  <app-page-header [title]="(receipt.status === 'DRAFT' ? 'Pedido ' : 'Ingreso ') + receipt.receiptNumber"
+    [description]="receipt.status === 'DRAFT' ? 'Pedido enviado al proveedor que aún no llega' : 'Detalle y kárdex del ingreso de mercadería'">
     <a class="ghost" routerLink="/app/goods-receipts"><span class="material-icons">arrow_back</span>Volver</a>
+    @if (receipt.status === 'DRAFT') {
+      <button type="button" class="ghost danger" [disabled]="working()" (click)="cancelOrder(receipt)"><span class="material-icons">block</span>Anular pedido</button>
+      <button type="button" class="primary" [disabled]="working()" (click)="receive(receipt)"><span class="material-icons">inventory</span>Recibir mercadería</button>
+    }
   </app-page-header>
+
+  @if (receipt.status === 'DRAFT') {
+    <p class="order-banner" role="status">
+      <span class="material-icons" aria-hidden="true">local_shipping</span>
+      Este pedido está <strong>en camino</strong>: todavía no suma al stock. Cuando llegue, revisa las cantidades y pulsa "Recibir mercadería".
+    </p>
+  }
 
   <div class="summary surface-card">
     <div><span class="code">{{ receipt.documentType }} · Nº {{ receipt.documentNumber }}</span><h2>{{ receipt.supplierName ?? 'Sin proveedor' }}</h2></div>
-    <app-status-chip [value]="receipt.status" [label]="receipt.status" />
+    <app-status-chip [value]="statusLabel(receipt.status)" [label]="statusLabel(receipt.status)" [hint]="statusHint(receipt.status)" />
   </div>
 
   <div class="cards">

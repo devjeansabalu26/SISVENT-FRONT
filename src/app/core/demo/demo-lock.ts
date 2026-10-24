@@ -1,5 +1,5 @@
 const ACTION_WORDS =
-  /^(\+\s*)?(nuev[oa]|crear|guardar|editar|eliminar|borrar|desactivar|activar|reactivar|suspender|anular|registrar|abrir caja|cerrar caja|confirmar|habilitar|deshabilitar|desbloquear|restablecer|ajustar|corregir|marcar|quitar|cobrar|agregar|asignar|cambiar|subir|cargar|importar|transferir|devolver|enviar|generar|aplicar cambios)\b/;
+  /^(\+\s*)?(nuev[oa]|crear|guardar|editar|eliminar|borrar|desactivar|activar|reactivar|suspender|anular|registrar|abrir caja|cerrar caja|confirmar|habilitar|deshabilitar|desbloquear|restablecer|ajustar|corregir|marcar|quitar|cobrar|recibir|agregar|asignar|cambiar|subir|cargar|importar|transferir|devolver|enviar|generar|aplicar cambios)\b/;
 
 const ACTION_ICONS = new Set([
   'add', 'add_circle', 'edit', 'delete', 'delete_outline', 'block', 'person_add', 'lock_open', 'more_time',

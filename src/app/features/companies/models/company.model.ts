@@ -1,3 +1,4 @@
+import { formatCalendarDate } from '../../../core/regional/regional-format';
 import { PlanFeatureRow, PlanLimitRow } from '../../plans/models/plan.model';
 
 export interface Company {
@@ -256,4 +257,23 @@ export interface PlanChangePreview {
   readonly stores: readonly PlanChangeStore[];
   readonly sellers: readonly PlanChangeSeller[];
   readonly lostFeatures: readonly PlanChangeFeature[];
+}
+
+export function companyStatusHint(row: {
+  readonly effectiveStatus: string;
+  readonly planName?: string | null;
+  readonly planStart?: string | null;
+  readonly planEnd?: string | null;
+}): string | null {
+  const plan = row.planName ? `El plan ${row.planName}` : 'El plan';
+  switch (row.effectiveStatus.toUpperCase()) {
+    case 'ACTIVE':
+      return row.planEnd ? `${plan} está vigente hasta el ${formatCalendarDate(row.planEnd)}.` : null;
+    case 'EXPIRED':
+      return row.planEnd ? `${plan} venció el ${formatCalendarDate(row.planEnd)}. Hay que renovarlo para seguir usando el sistema.` : null;
+    case 'PENDING':
+      return row.planStart ? `${plan} empieza el ${formatCalendarDate(row.planStart)}.` : null;
+    default:
+      return null;
+  }
 }

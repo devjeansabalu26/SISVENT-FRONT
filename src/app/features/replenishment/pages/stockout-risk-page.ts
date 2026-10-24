@@ -7,6 +7,9 @@ import { LoadState, ReplenishmentLoadState, loadStateFor } from '../components/l
 import { ReplenishmentApiService } from '../data-access/replenishment-api.service';
 import { RISK_LABELS, RiskCode, StockRiskItem, StockoutRisk } from '../models/replenishment.model';
 import { formatQuantity } from '../utils/replenishment-format';
+import { orderDeadline } from '../utils/order-plan';
+import { companyToday } from '../../../core/regional/regional-format';
+import { riskHint } from '../utils/status-hints';
 
 type RiskRow = StockRiskItem & { readonly id: string };
 
@@ -25,6 +28,7 @@ export class StockoutRiskPage implements OnInit {
   readonly riskFilter = signal<RiskCode | ''>('');
   readonly search = signal('');
   readonly riskOptions = Object.entries(RISK_LABELS) as [RiskCode, string][];
+  private readonly today = companyToday();
 
   readonly rows = computed<readonly RiskRow[]>(() => {
     const risk = this.riskFilter();
@@ -43,7 +47,8 @@ export class StockoutRiskPage implements OnInit {
     { key: 'avgSales', label: 'Ritmo de consumo', value: (row) => `${formatQuantity(row.averageDailySales)} uds/día` },
     { key: 'coverageDays', label: 'Cobertura', value: (row) => (row.coverageDays === null ? '—' : `${row.coverageDays} días`) },
     { key: 'suggested', label: 'Compra sugerida', value: (row) => (row.suggestedQuantity ? `${row.suggestedQuantity} uds` : '—') },
-    { key: 'risk', label: 'Riesgo', value: (row) => RISK_LABELS[row.risk], type: 'status' },
+    { key: 'deadline', label: 'Pedir antes del', value: (row) => orderDeadline(row, this.today).label },
+    { key: 'risk', label: 'Riesgo', value: (row) => RISK_LABELS[row.risk], type: 'status', hint: riskHint },
   ];
 
   ngOnInit(): void {

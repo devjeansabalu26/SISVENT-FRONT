@@ -87,7 +87,7 @@
     @if (seller(); as seller) {
       <div class="kpi-grid">
         <app-kpi-card label="Ventas hoy" [value]="seller.salesToday + ' operaciones'" icon="receipt_long" tone="primary" />
-        <app-kpi-card label="Importe hoy" [value]="(seller.amountToday | money)" icon="payments" tone="success" />
+        <app-kpi-card label="Importe hoy" [value]="(seller.amountToday | money)" icon="payments" tone="success" [trend]="deltaTrend(seller.amountDeltaPercent)" [delta]="deltaText(seller.amountDeltaPercent)" deltaCaption="vs la semana pasada a esta hora" />
         <app-kpi-card label="Última venta" [value]="(seller.lastSaleAt ? (seller.lastSaleAt | dateTime) : null) ?? 'Sin ventas'" icon="schedule" tone="info" />
         <app-kpi-card label="Clientes atendidos" [value]="seller.clientsToday + ' clientes'" icon="groups" tone="warning" />
       </div>
@@ -104,6 +104,23 @@
     </section>
 
     @if (seller(); as seller) {
+      @if (seller.lowStockAlerts?.length) {
+        <section class="surface-card seller-stock">
+          <div class="card-head">
+            <h2>Productos por agotarse</h2>
+            <small class="muted">{{ plural(seller.lowStockCount ?? 0, 'producto en el mínimo', 'productos en el mínimo') }}. Avísale al administrador para reponer.</small>
+          </div>
+          <ul class="list">
+            @for (row of seller.lowStockAlerts; track row.productName + row.storeName) {
+              <li>
+                <div><strong>{{ row.productName }}</strong><small>{{ row.storeName }} · mínimo {{ row.minStock }}</small></div>
+                <span class="warn">{{ row.currentStock <= 0 ? 'Agotado' : row.currentStock + ' unidades' }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       <section class="surface-card">
         <div class="card-head">
           <h2>Últimas ventas realizadas</h2>
@@ -165,13 +182,63 @@
       </label>
     </section>
 
+    @if (admin(); as admin) {
+      @if (admin.actions; as actions) {
+        <section class="todo" aria-labelledby="todo-title">
+          <h2 id="todo-title">Para hacer hoy</h2>
+          <div class="todo__grid">
+            @if (actions.reorderNow != null) {
+              <a routerLink="/app/purchase-plan" class="todo-card" [attr.data-tone]="actions.reorderNow > 0 ? 'danger' : 'ok'">
+                <span class="material-icons" aria-hidden="true">{{ actions.reorderNow > 0 ? 'shopping_cart' : 'task_alt' }}</span>
+                <div>
+                  <strong>{{ actions.reorderNow > 0 ? plural(actions.reorderNow, 'producto para pedir hoy', 'productos para pedir hoy') : 'Nada que pedir hoy' }}</strong>
+                  <small>{{ actions.reorderSoon ? actions.reorderSoon + ' más para pedir pronto' : 'Según tu venta y los días de entrega' }}</small>
+                </div>
+                <span class="todo-card__cta">{{ actions.reorderNow > 0 ? 'Ver qué pedir' : 'Ver plan de pedidos' }}</span>
+              </a>
+            } @else {
+              <a routerLink="/app/inventory" class="todo-card" [attr.data-tone]="admin.lowStockCount > 0 ? 'warning' : 'ok'">
+                <span class="material-icons" aria-hidden="true">{{ admin.lowStockCount > 0 ? 'warning' : 'task_alt' }}</span>
+                <div>
+                  <strong>{{ admin.lowStockCount > 0 ? plural(admin.lowStockCount, 'producto con stock bajo', 'productos con stock bajo') : 'Stock en orden' }}</strong>
+                  <small>En el mínimo o por debajo</small>
+                </div>
+                <span class="todo-card__cta">Ver inventario</span>
+              </a>
+            }
+            <a routerLink="/app/inventory" class="todo-card" [attr.data-tone]="actions.outOfStock > 0 ? 'danger' : 'ok'">
+              <span class="material-icons" aria-hidden="true">{{ actions.outOfStock > 0 ? 'remove_shopping_cart' : 'inventory_2' }}</span>
+              <div>
+                <strong>{{ actions.outOfStock > 0 ? plural(actions.outOfStock, 'producto agotado', 'productos agotados') : 'Sin productos agotados' }}</strong>
+                <small>Productos con stock en cero</small>
+              </div>
+              <span class="todo-card__cta">Ver inventario</span>
+            </a>
+            <a routerLink="/app/goods-receipts" class="todo-card" [attr.data-tone]="actions.ordersInTransit > 0 ? 'info' : 'ok'">
+              <span class="material-icons" aria-hidden="true">local_shipping</span>
+              <div>
+                <strong>{{ actions.ordersInTransit > 0 ? plural(actions.ordersInTransit, 'pedido en camino', 'pedidos en camino') : 'Sin pedidos en camino' }}</strong>
+                <small>{{ actions.ordersInTransit > 0 ? 'Recíbelos al llegar para subir el stock' : 'Pedidos a proveedores pendientes' }}</small>
+              </div>
+              <span class="todo-card__cta">Ver ingresos</span>
+            </a>
+          </div>
+        </section>
+      }
+    }
+
     <app-stores-today />
 
     @if (admin(); as admin) {
       <div class="kpi-grid">
-        <app-kpi-card label="Ventas del día" [value]="(admin.salesTodayAmount | money)" icon="point_of_sale" [trend]="admin.salesTodayDeltaPercent && admin.salesTodayDeltaPercent >= 0 ? 'up' : 'down'" [delta]="admin.salesTodayDeltaPercent != null ? (admin.salesTodayDeltaPercent.toFixed(1) + '%') : undefined" tone="success" />
-        <app-kpi-card label="Ventas del período" [value]="(admin.salesPeriodAmount | money)" icon="calendar_month" tone="primary" />
-        <app-kpi-card label="Operaciones" [value]="admin.operationsPeriod" icon="receipt_long" tone="info" />
+        <app-kpi-card label="Ventas del día" [value]="(admin.salesTodayAmount | money)" icon="point_of_sale" [trend]="deltaTrend(admin.salesTodayDeltaPercent)" [delta]="deltaText(admin.salesTodayDeltaPercent)" deltaCaption="vs ayer" tone="success" />
+        <app-kpi-card label="Ventas del período" [value]="(admin.salesPeriodAmount | money)" icon="calendar_month" tone="primary" [trend]="deltaTrend(admin.salesPeriodDeltaPercent)" [delta]="deltaText(admin.salesPeriodDeltaPercent)" [deltaCaption]="comparisonCaption()" />
+        <app-kpi-card label="Operaciones" [value]="admin.operationsPeriod" icon="receipt_long" tone="info" [trend]="deltaTrend(admin.operationsDeltaPercent)" [delta]="deltaText(admin.operationsDeltaPercent)" [deltaCaption]="comparisonCaption()" />
+        <app-kpi-card label="Ticket promedio" [value]="((admin.averageTicket ?? 0) | money)" icon="shopping_bag" tone="primary" [trend]="deltaTrend(admin.averageTicketDeltaPercent)" [delta]="deltaText(admin.averageTicketDeltaPercent)" [deltaCaption]="comparisonCaption()" />
+        <app-kpi-card label="Ganancia estimada" [value]="admin.grossProfit != null ? (admin.grossProfit | money) : 'Sin costos'" icon="savings" tone="success" [trend]="deltaTrend(admin.grossProfitDeltaPercent)" [delta]="deltaText(admin.grossProfitDeltaPercent)" [deltaCaption]="comparisonCaption()" [caption]="admin.grossProfit == null ? 'Registra el costo de tus productos' : admin.grossProfitMissingCost ? 'Hay productos vendidos sin costo' : 'Con el costo de referencia'" />
+      </div>
+
+      <div class="kpi-grid kpi-grid--secondary">
         <app-kpi-card label="Productos" [value]="admin.activeProducts" icon="inventory_2" tone="primary" />
         <app-kpi-card label="Clientes" [value]="admin.activeClients" icon="groups" tone="info" />
         <app-kpi-card label="Stock bajo" [value]="admin.lowStockCount" icon="warning" [tone]="admin.lowStockCount > 0 ? 'warning' : 'default'" />
@@ -208,6 +275,20 @@
 
         <section class="chart-card">
           <header><h2>Evolución de ventas</h2></header>
+          @if (admin.month; as month) {
+            <p class="projection">
+              <span class="material-icons" aria-hidden="true">insights</span>
+              <span>
+                A este ritmo cerrarás {{ monthName() }} en <strong>{{ month.projectedAmount | money }}</strong>
+                <small>
+                  Llevas {{ month.amountToDate | money }} en {{ month.daysElapsed }} de {{ month.daysInMonth }} días
+                  @if (monthVsPrevious() != null) {
+                    · <span [class.up]="monthVsPrevious()! >= 0" [class.down]="monthVsPrevious()! < 0">{{ deltaText(monthVsPrevious()) }}</span> vs el mes pasado ({{ month.previousMonthAmount | money }})
+                  }
+                </small>
+              </span>
+            </p>
+          }
           @if (admin.salesEvolution.length) {
             <div class="chart" role="img" aria-label="Evolución de ventas del período">
               @for (point of admin.salesEvolution; track point.date) {
@@ -223,6 +304,30 @@
           }
         </section>
       </div>
+
+      @if (datePreset() === 'today' || hourSeries().length) {
+        <section class="surface-card hours-card">
+          <div class="card-head">
+            <h2>Ventas de hoy por hora</h2>
+            @if (peakHour(); as peak) {
+              <small class="muted">Hora pico: <strong>{{ hourLabel(peak.hour) }}</strong> · {{ peak.amount | money }} en {{ peak.transactions }} {{ peak.transactions === 1 ? 'venta' : 'ventas' }}</small>
+            }
+          </div>
+          @if (hourSeries().length) {
+            <div class="chart chart--hours" role="img" aria-label="Ventas de hoy por hora">
+              @for (point of hourSeries(); track point.hour) {
+                <div class="bar-column" [title]="hourLabel(point.hour) + ' · ' + point.transactions + ' ventas'">
+                  <span class="amount">{{ point.amount ? (point.amount | compactMoney) : '' }}</span>
+                  <div class="bar" [class.bar--peak]="point.hour === peakHour()?.hour" [style.--bar-height.%]="(point.amount / maxHourAmount()) * 100"></div>
+                  <small>{{ point.hour }}h</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">Todavía no hay ventas hoy.</p>
+          }
+        </section>
+      }
 
       <div class="grid-2">
         <section class="surface-card">
@@ -247,7 +352,14 @@
             <ul class="list">
               @for (row of admin.topProducts; track row.sku) {
                 <li>
-                  <div><strong>{{ row.name }}</strong><small>{{ row.units }} u. vendidos</small></div>
+                  <div>
+                    <strong>{{ row.name }}</strong>
+                    <small>
+                      {{ row.units }} u. vendidos
+                      @if (row.marginPercent != null) { · margen {{ row.marginPercent }}% }
+                      @if (stockDaysText(row.stockDays); as stock) { · <span [class.warn]="row.stockDays! < 7">{{ stock }}</span> }
+                    </small>
+                  </div>
                   <span>{{ row.revenue | money }}</span>
                 </li>
               }

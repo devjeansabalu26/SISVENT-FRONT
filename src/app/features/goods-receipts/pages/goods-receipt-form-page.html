@@ -36,6 +36,7 @@
       <label>Número documento <input formControlName="documentNumber" placeholder="F001-00245" /></label>
       <label class="full">Observaciones <textarea formControlName="notes"></textarea></label>
       <label class="check"><input type="checkbox" formControlName="updateReferenceCost" /> Actualizar costo de referencia de los productos</label>
+      <label class="check full"><input type="checkbox" formControlName="asOrder" /> Es un pedido al proveedor que aún no llega: queda <strong>"En camino"</strong> y suma al stock recién cuando lo recibas</label>
     </div>
   </section>
 
@@ -84,6 +85,6 @@
 
   <footer class="actions">
     <button type="button" (click)="cancel()">Cancelar</button>
-    <button class="primary" type="submit" [disabled]="saving()">Confirmar ingreso</button>
+    <button class="primary" type="submit" [disabled]="saving()">{{ form.controls.asOrder.value ? 'Registrar pedido' : 'Confirmar ingreso' }}</button>
   </footer>
 </form>

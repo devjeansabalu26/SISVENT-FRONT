@@ -8,7 +8,7 @@
       </p>
     </div>
     @if (data(); as info) {
-      <span class="badge" [class.badge--custom]="info.customized">
+      <span class="badge" [class.badge--custom]="info.customized" [matTooltip]="info.customized ? 'Se cambiaron los menús de este vendedor; ya no usa los de por defecto.' : 'Usa los menús por defecto para vendedores.'" matTooltipClass="status-chip-tooltip" matTooltipPosition="above" tabindex="0">
         {{ info.customized ? 'Personalizado' : 'Menús por defecto' }} · {{ assignedCount() }} asignados
       </span>
     }

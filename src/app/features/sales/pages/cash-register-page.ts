@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
@@ -19,7 +20,7 @@ const REFRESH_MS = 30_000;
 
 @Component({
   selector: 'app-cash-register-page',
-  imports: [PageHeader, RouterLink, MoneyPipe, DateTimePipe, DayMonthTimePipe],
+  imports: [PageHeader, RouterLink, MoneyPipe, DateTimePipe, DayMonthTimePipe, MatTooltip],
   templateUrl: './cash-register-page.html',
   styleUrl: './cash-register-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +42,14 @@ export class CashRegisterPage implements OnInit {
   readonly from = signal('');
   readonly to = signal('');
   readonly storeFilter = signal('');
+
+  cashStatusHint(row: CashSession): string {
+    if (row.status === 'OPEN') return 'El turno sigue abierto: todavía no se cuenta el efectivo.';
+    if (row.forced) {
+      return `Lo cerró una persona distinta a quien lo abrió.${row.forceReason ? ` Motivo: ${row.forceReason}` : ''}`;
+    }
+    return 'Quien abrió el turno lo cerró y contó el efectivo.';
+  }
 
   readonly openCount = computed(() => this.statuses().filter((s) => s.current).length);
 

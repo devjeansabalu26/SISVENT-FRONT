@@ -42,3 +42,16 @@ export interface SalesReport {
   readonly topProducts: readonly TopProduct[];
   readonly bySeller: readonly SellerShare[];
 }
+
+export interface HourlyCell {
+  readonly weekday: number;
+  readonly hour: number;
+  readonly transactions: number;
+  readonly amount: number;
+}
+
+export interface SalesHeatmap {
+  readonly from: string;
+  readonly to: string;
+  readonly cells: readonly HourlyCell[];
+}

@@ -16,7 +16,7 @@
     <section class="surface-card">
       <h3>Estado de la cuenta</h3>
       <dl>
-        <div><dt>Estado</dt><dd><app-status-chip [value]="data.effectiveStatus" [label]="data.effectiveStatus" /></dd></div>
+        <div><dt>Estado</dt><dd><app-status-chip [value]="data.effectiveStatus" [label]="data.effectiveStatus" [hint]="statusHint(data)" /></dd></div>
         <div><dt>Plan</dt><dd>{{ data.planName ?? 'Sin plan' }}</dd></div>
         <div><dt>Vencimiento</dt><dd>{{ data.planEnd | shortDate }}</dd></div>
         <div><dt>Días restantes</dt><dd>{{ data.daysRemaining }} días</dd></div>

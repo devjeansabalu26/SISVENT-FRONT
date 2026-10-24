@@ -9,7 +9,7 @@
         <div><dt>Nombre del plan</dt><dd>{{ plan.planName ?? 'Sin plan' }}</dd></div>
         <div><dt>Precio actual del plan</dt><dd>{{ plan.currentPrice != null ? ('S/ ' + plan.currentPrice.toFixed(2)) : '—' }}</dd></div>
         <div><dt>Precio contratado</dt><dd>{{ plan.contractedPrice != null ? ('S/ ' + plan.contractedPrice.toFixed(2)) : '—' }}</dd></div>
-        <div><dt>Estado de la suscripción</dt><dd><app-status-chip [value]="plan.effectiveStatus" [label]="plan.effectiveStatus" /></dd></div>
+        <div><dt>Estado de la suscripción</dt><dd><app-status-chip [value]="plan.effectiveStatus" [label]="plan.effectiveStatus" [hint]="statusHint(plan)" /></dd></div>
         <div><dt>Fecha inicio</dt><dd>{{ plan.planStart | shortDate }}</dd></div>
         <div><dt>Fecha vencimiento</dt><dd>{{ plan.planEnd | shortDate }}</dd></div>
         <div><dt>Días restantes</dt><dd>{{ plan.daysRemaining }} días</dd></div>

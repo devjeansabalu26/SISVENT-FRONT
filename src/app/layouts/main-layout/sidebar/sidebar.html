@@ -46,7 +46,7 @@
         ><span class="material-icons lock" aria-label="Bloqueado por plan">lock</span></a
       >
     } @else {
-      <a [routerLink]="item.route" routerLinkActive="active" [attr.tabindex]="tabbable ? null : -1" (click)="navigate.emit()"
+      <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!item.exact }" [attr.tabindex]="tabbable ? null : -1" (click)="navigate.emit()"
         ><span class="material-icons" aria-hidden="true">{{ item.icon }}</span
         ><span>{{ item.label }}</span></a
       >

@@ -16,7 +16,7 @@
             @for (column of columns(); track column.key) {
               <td>
                 @if (column.type === 'status') {
-                  <app-status-chip [value]="column.value(row).toString()" [label]="column.value(row).toString()" />
+                  <app-status-chip [value]="column.value(row).toString()" [label]="column.value(row).toString()" [hint]="column.hint?.(row)" />
                 } @else {
                   {{ column.value(row) }}
                 }

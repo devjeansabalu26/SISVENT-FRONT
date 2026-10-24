@@ -1,5 +1,5 @@
 import { AttendanceReport } from '../models/attendance.model';
-import { formatMinutes, reportCsv, reportTitle } from './attendance-report-export';
+import { formatMinutes, reportTitle } from './attendance-report-export';
 
 describe('attendance-report-export', () => {
   const report: AttendanceReport = {
@@ -23,14 +23,6 @@ describe('attendance-report-export', () => {
   it('formatea minutos como horas y minutos', () => {
     expect(formatMinutes(1230)).toBe('20 h 30 min');
     expect(formatMinutes(5)).toBe('0 h 05 min');
-  });
-
-  it('genera un CSV para Excel con BOM, punto y coma y texto escapado', () => {
-    const csv = reportCsv(report);
-    expect(csv.startsWith('﻿')).toBeTrue();
-    expect(csv).toContain('"Ana; Ruiz";Vendedor;12345;Centro;3;20 h 30 min;1230;1;30;2;1');
-    expect(csv).toContain('15/10/2026');
-    expect(csv).toContain('Falta');
   });
 
   it('arma el título con el rango y el local', () => {

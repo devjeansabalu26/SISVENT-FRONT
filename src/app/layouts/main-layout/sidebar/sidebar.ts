@@ -37,7 +37,7 @@ export class Sidebar {
     ),
     { initialValue: this.router.url },
   );
-  readonly openGroups = signal<ReadonlySet<string>>(new Set());
+  readonly closedGroups = signal<ReadonlySet<string>>(new Set());
 
   readonly brandName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly brandInitial = computed(() => this.brandName().trim().charAt(0).toUpperCase() || 'S');
@@ -78,17 +78,23 @@ export class Sidebar {
   constructor() {
     effect(() => {
       const active = this.activeGroup();
-      if (active) this.openGroups.update((open) => (open.has(active) ? open : new Set(open).add(active)));
+      if (!active) return;
+      this.closedGroups.update((closed) => {
+        if (!closed.has(active)) return closed;
+        const next = new Set(closed);
+        next.delete(active);
+        return next;
+      });
     });
   }
 
   isOpen(label: string): boolean {
-    return this.openGroups().has(label);
+    return !this.closedGroups().has(label);
   }
 
   toggleGroup(label: string): void {
-    this.openGroups.update((open) => {
-      const next = new Set(open);
+    this.closedGroups.update((closed) => {
+      const next = new Set(closed);
       if (!next.delete(label)) next.add(label);
       return next;
     });

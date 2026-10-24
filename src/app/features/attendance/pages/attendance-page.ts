@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -29,7 +30,7 @@ import { addDays, companyToday } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-attendance-page',
-  imports: [PageHeader, ReactiveFormsModule, AttendanceReportPanel, LocalTimePipe, DayMonthTimePipe],
+  imports: [PageHeader, ReactiveFormsModule, AttendanceReportPanel, LocalTimePipe, DayMonthTimePipe, MatTooltip],
   templateUrl: './attendance-page.html',
   styleUrls: ['./attendance-page.scss', './attendance-history.scss', './attendance-today.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

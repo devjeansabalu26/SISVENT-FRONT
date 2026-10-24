@@ -16,7 +16,22 @@ export interface StockRiskItem {
   readonly safetyStock: number;
   readonly suggestedQuantity: number;
   readonly priority: PurchasePriority | null;
+  readonly reorderPoint?: number;
+  readonly daysToOrder?: number | null;
+  readonly orderStatus?: OrderStatus;
+  readonly orderQuantity?: number;
+  readonly referenceCost?: number | null;
+  readonly onOrder?: number;
 }
+
+export type OrderStatus = 'ORDER_NOW' | 'ORDER_SOON' | 'OK' | 'NO_SALES';
+
+export const ORDER_STATUS_LABELS: Readonly<Record<OrderStatus, string>> = {
+  ORDER_NOW: 'Pedir ya',
+  ORDER_SOON: 'Pedir pronto',
+  OK: 'Al día',
+  NO_SALES: 'Sin ventas',
+};
 
 export interface CoverageBreakdown {
   readonly sufficient: number;

@@ -1,0 +1,139 @@
+<app-page-header title="Clientes" description="Quiénes te compran, quiénes dejaron de venir y cuánto pesan tus clientes empresa">
+  <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!report()">
+    <span class="material-icons">picture_as_pdf</span>PDF
+  </button>
+  <button type="button" class="primary" (click)="exportExcel()" [disabled]="!report()">
+    <span class="material-icons">table_view</span>Exportar Excel
+  </button>
+</app-page-header>
+
+<app-report-toolbar />
+<app-view-tabs [tabs]="views" [active]="view()" label="Vistas de clientes" (select)="state.setView($event)" />
+
+@if (report(); as report) {
+  <div class="kpi-grid" [class.is-loading]="loading()">
+    <app-kpi-card label="Clientes que compraron" [value]="report.summary.identifiedCustomers" icon="groups" tone="primary"
+      [caption]="report.summary.newCustomers + ' nuevos · ' + periodLabel()" />
+    <app-kpi-card label="Venta con cliente registrado" [value]="report.summary.identifiedPercent + '%'" icon="how_to_reg"
+      [tone]="report.summary.identifiedPercent < 30 ? 'warning' : 'success'"
+      [caption]="(report.summary.identifiedAmount | money) + ' de ' + (report.summary.totalAmount | money)" />
+    <app-kpi-card label="Ticket con cliente" [value]="(report.summary.averageTicketIdentified | money)" icon="receipt_long" tone="info"
+      [caption]="'Cliente general: ' + (report.summary.averageTicketGeneral | money)" />
+    <app-kpi-card label="Clientes empresa" [value]="report.summary.businessCustomers" icon="business" tone="primary"
+      [caption]="(report.summary.businessAmount | money) + ' · ' + businessPercent() + '% de la venta'" />
+    <app-kpi-card label="Dejaron de comprar" [value]="report.summary.lapsedCustomers" icon="person_off"
+      [tone]="report.summary.lapsedCustomers > 0 ? 'warning' : 'default'" [caption]="'Sin volver hace más de ' + report.lapsedAfterDays + ' días'" />
+  </div>
+
+  @switch (view()) {
+    @case ('frequent') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div><h2>Clientes frecuentes</h2><p>Los que más compraron en el período. Cuídalos: son la base de tu venta.</p></div>
+        </header>
+        @if (report.frequent.length) {
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead><tr><th>#</th><th>Cliente</th><th>Compras</th><th>Monto</th><th>Ticket promedio</th><th>Frecuencia</th><th>Última compra</th></tr></thead>
+              <tbody>
+                @for (row of report.frequent; track row.id; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                      <a class="customer-link" [routerLink]="['/app/customers', row.id]"><strong>{{ row.name }}</strong></a>
+                      @if (row.isBusiness) { <app-status-chip value="EMPRESA" label="Empresa" hint="Su documento es de empresa (por ejemplo, RUC)." /> }
+                      <small>{{ documentText(row) }}@if (row.phone) { · {{ row.phone }} }</small>
+                    </td>
+                    <td>{{ row.purchases }}</td>
+                    <td><strong>{{ row.amount | money }}</strong></td>
+                    <td>{{ row.averageTicket | money }}</td>
+                    <td>{{ frequencyText(row.averageDaysBetween) }}</td>
+                    <td>{{ row.lastPurchaseAt ? (row.lastPurchaseAt | dateTime) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">Ninguna venta del período tiene un cliente registrado.</p>
+        }
+        @if (report.summary.identifiedPercent < 30) {
+          <p class="customer-tip">
+            <span class="material-icons" aria-hidden="true">lightbulb</span>
+            Solo el {{ report.summary.identifiedPercent }}% de la venta tiene cliente registrado. Pedir el documento en caja te permite saber quién vuelve y quién no.
+          </p>
+        }
+      </section>
+    }
+    @case ('lapsed') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div>
+            <h2>Clientes que dejaron de comprar</h2>
+            <p>Compraron {{ report.minPurchasesForLapsed }} veces o más en los últimos {{ report.lookbackDays }} días y no vuelven hace más de {{ report.lapsedAfterDays }} días. Llámalos o envíales una promoción.</p>
+          </div>
+        </header>
+        @if (report.lapsed.length) {
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead><tr><th>Cliente</th><th>Teléfono</th><th>Compras</th><th>Monto</th><th>Solía comprar</th><th>Última compra</th><th>Sin volver</th></tr></thead>
+              <tbody>
+                @for (row of report.lapsed; track row.id) {
+                  <tr>
+                    <td>
+                      <a class="customer-link" [routerLink]="['/app/customers', row.id]"><strong>{{ row.name }}</strong></a>
+                      <small>{{ documentText(row) }}</small>
+                    </td>
+                    <td>{{ row.phone ?? '—' }}</td>
+                    <td>{{ row.purchases }}</td>
+                    <td>{{ row.amount | money }}</td>
+                    <td>{{ frequencyText(row.averageDaysBetween) }}</td>
+                    <td>{{ row.lastPurchaseAt | dateTime }}</td>
+                    <td><app-status-chip value="SIN VOLVER" [label]="row.daysSinceLastPurchase + ' días'" [hint]="lapsedHint(row)" /></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">Ningún cliente habitual dejó de venir. ¡Bien!</p>
+        }
+      </section>
+    }
+    @case ('business') {
+      <section class="chart-card">
+        <header class="card-head">
+          <div><h2>Clientes empresa</h2><p>Bares, restaurantes, negocios y eventos que compran con documento de empresa. Sirve para decidir crédito o precios por volumen.</p></div>
+        </header>
+        @if (report.business.length) {
+          <div class="table-scroll">
+            <table class="cash-table">
+              <thead><tr><th>Empresa</th><th>Compras</th><th>Monto</th><th>Ticket promedio</th><th>Frecuencia</th><th>Última compra</th></tr></thead>
+              <tbody>
+                @for (row of report.business; track row.id) {
+                  <tr>
+                    <td>
+                      <a class="customer-link" [routerLink]="['/app/customers', row.id]"><strong>{{ row.name }}</strong></a>
+                      <small>{{ documentText(row) }}@if (row.phone) { · {{ row.phone }} }</small>
+                    </td>
+                    <td>{{ row.purchases }}</td>
+                    <td><strong>{{ row.amount | money }}</strong></td>
+                    <td>{{ row.averageTicket | money }}</td>
+                    <td>{{ frequencyText(row.averageDaysBetween) }}</td>
+                    <td>{{ row.lastPurchaseAt ? (row.lastPurchaseAt | dateTime) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">No hubo compras de clientes empresa en este período.</p>
+        }
+      </section>
+    }
+  }
+} @else if (loading()) {
+  <p class="muted empty">Cargando reporte de clientes…</p>
+} @else if (failed()) {
+  <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="ghost" (click)="reload()">Reintentar</button></p>
+}

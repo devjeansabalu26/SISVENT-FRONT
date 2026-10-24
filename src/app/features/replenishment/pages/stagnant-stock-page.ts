@@ -8,6 +8,7 @@ import { ReplenishmentApiService } from '../data-access/replenishment-api.servic
 import { StagnantAnalysis, StagnantItem } from '../models/replenishment.model';
 import { formatQuantity, formatSoles } from '../utils/replenishment-format';
 import { formatDate } from '../../../core/regional/regional-format';
+import { stagnantHint } from '../utils/status-hints';
 
 const THRESHOLDS = [30, 60, 90, 120] as const;
 
@@ -37,7 +38,7 @@ export class StagnantStockPage implements OnInit {
     { key: 'value', label: 'Valor', value: (row) => formatSoles(row.value) },
     { key: 'lastMovement', label: 'Último mov.', value: (row) => formatDate(row.lastMovementAt) },
     { key: 'cause', label: 'Causa', value: (row) => row.cause },
-    { key: 'suggestedAction', label: 'Acción sugerida', value: (row) => row.suggestedAction, type: 'status' },
+    { key: 'suggestedAction', label: 'Acción sugerida', value: (row) => row.suggestedAction, type: 'status', hint: stagnantHint },
   ];
 
   ngOnInit(): void {

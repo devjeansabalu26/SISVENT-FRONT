@@ -9,6 +9,27 @@
   --control-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
+:where(button, a):where(.primary, .ghost) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+:where(a):where(.primary, .ghost) {
+  min-height: var(--control-height);
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+:where(button, a):where(.primary, .ghost) > :where(.material-icons) {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
 :is(button, a).primary.primary.primary {
   border: 1px solid color-mix(in srgb, var(--color-primary) 80%, black);
   border-radius: var(--control-radius);
