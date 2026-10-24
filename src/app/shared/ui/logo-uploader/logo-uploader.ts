@@ -22,7 +22,7 @@ export function logoFileError(file: File): string | null {
       </div>
       <div class="logo-uploader__body">
         <strong>Logo de la empresa</strong>
-        <small>PNG, JPG o WebP de hasta 2 MB. Se muestra en el menú lateral; al cambiarlo se reemplaza el anterior.</small>
+        <small>PNG, JPG o WebP de hasta 2 MB, idealmente cuadrado. Llena el recuadro del menú lateral (si no es cuadrado se recorta al centro); al cambiarlo se reemplaza el anterior.</small>
         <div class="logo-uploader__actions">
           <button type="button" class="ghost" [disabled]="busy()" (click)="picker.click()">
             <span class="material-icons" aria-hidden="true">upload</span>{{ logoUrl() ? 'Cambiar logo' : 'Subir logo' }}
@@ -45,10 +45,11 @@ export function logoFileError(file: File): string | null {
   styles: `
     .logo-uploader { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
     .logo-uploader__preview {
-      display: grid; flex-shrink: 0; width: 88px; height: 88px; padding: 8px; place-items: center;
-      border: 1px dashed var(--color-border); border-radius: var(--radius-md); background: white;
+      display: grid; flex-shrink: 0; width: 88px; height: 88px; place-items: center; overflow: hidden;
+      border: 1px dashed var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-secondary);
     }
-    .logo-uploader__preview img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-uploader__preview:has(img) { border-style: solid; }
+    .logo-uploader__preview img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
     .logo-uploader__preview .material-icons { font-size: 32px; color: var(--color-text-muted); }
     .logo-uploader__body { display: grid; gap: 6px; min-width: 0; }
     .logo-uploader__body small { color: var(--color-text-muted); }
