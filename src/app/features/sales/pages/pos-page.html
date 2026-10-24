@@ -8,11 +8,11 @@
 <div class="pos">
   <div class="left">
     <section class="card">
-      <header><h2>Datos del cliente</h2><button type="button" class="new-customer" (click)="newCustomer()">+ Nuevo cliente</button></header>
+      <header><h2>Datos del cliente</h2><button type="button" class="new-customer" (click)="newCustomer()"><span class="material-icons" aria-hidden="true">person_add</span>Nuevo cliente</button></header>
       @if (selectedCustomer(); as customer) {
         <div class="customer"><span class="material-icons">person</span><div><strong>{{ customer.displayName }}</strong><small>{{ customer.documentType }} {{ customer.documentNumber }}</small></div><button type="button" (click)="clearCustomer()">Quitar</button></div>
       } @else {
-        <label class="search"><span class="material-icons">search</span><input #customerQuery (input)="searchCustomer(customerQuery.value)" placeholder="Buscar cliente por nombre o documento" /></label>
+        <label class="search"><span class="material-icons">search</span><input #customerQuery (input)="searchCustomer(customerQuery.value)" autocomplete="off" spellcheck="false" placeholder="Buscar cliente por nombre o documento" /></label>
         @if (customerResults().length) {
           <div class="results">
             @for (customer of customerResults(); track customer.id) {
@@ -35,8 +35,18 @@
     }
     <section class="card">
       <h2>Búsqueda de productos</h2>
-      <label class="search"><span class="material-icons">search</span><input #query (input)="search(query.value)" placeholder="Código o nombre del producto" /></label>
-      <div class="results">@for (product of products(); track product.id) {<button type="button" (click)="add(product)"><div><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></div><span>Stock: {{ product.totalStock }}</span><b>{{ product.salePrice | money }}</b></button>}</div>
+      <label class="search"><span class="material-icons">search</span><input #query (input)="search(query.value)" (keydown.enter)="addFirstResult(query)" (keydown.escape)="clearProductSearch(query)" autocomplete="off" spellcheck="false" placeholder="Código o nombre del producto" /></label>
+      @if (productQuery()) {
+        @if (products().length) {
+          <div class="results">@for (product of products(); track product.id) {<button type="button" (click)="addFromSearch(product, query)"><div><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></div><span>Stock: {{ product.totalStock }}</span><b>{{ product.salePrice | money }}</b></button>}</div>
+        } @else if (searchingProducts()) {
+          <p class="muted search-hint">Buscando…</p>
+        } @else {
+          <p class="muted search-hint">No hay productos que coincidan con “{{ productQuery() }}”.</p>
+        }
+      } @else {
+        <p class="muted search-hint">Escribe el código o el nombre del producto. Con Enter agregas el primero de la lista.</p>
+      }
     </section>
     <section class="card cart">
       <h2>Lista de venta</h2>

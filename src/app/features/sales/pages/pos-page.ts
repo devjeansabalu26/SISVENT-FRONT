@@ -58,6 +58,9 @@ export class PosPage implements OnInit {
   readonly paymentMethodsError = signal(false);
 
   readonly products = signal<readonly Product[]>([]);
+  readonly productQuery = signal('');
+  readonly searchingProducts = signal(false);
+  private productSearchId = 0;
   readonly cart = signal<readonly CartItem[]>([]);
   readonly paymentLines = signal<readonly PaymentDraftLine[]>([]);
   readonly payment = computed(() => this.paymentLines()[0]?.methodCode ?? '');
@@ -83,7 +86,7 @@ export class PosPage implements OnInit {
       this.cart.set([]);
       this.notifications.show('Se vació el carrito: cada local vende solo sus productos.', 'info');
     }
-    this.search('');
+    this.search(this.productQuery());
   }
 
   readonly closedCash = computed(() => {
@@ -100,7 +103,6 @@ export class PosPage implements OnInit {
   );
 
   ngOnInit(): void {
-    this.search('');
     this.loadPaymentMethods();
     this.posApi.settings().subscribe({ next: (settings) => this.posSettings.set(settings), error: () => undefined });
     const clientId = this.route.snapshot.queryParamMap.get('clientId');
@@ -119,7 +121,7 @@ export class PosPage implements OnInit {
         const preferred = this.storeContext.selectedStoreId();
         const initial = this.stores().find((item) => item.id === preferred) ?? this.stores()[0];
         if (initial) this.selectedStoreId.set(initial.id);
-        this.search('');
+        this.search(this.productQuery());
       });
     }
   }
@@ -141,9 +143,41 @@ export class PosPage implements OnInit {
   }
 
   search(query: string): void {
-    this.productApi.list({ pageSize: 30, search: query || undefined, isActive: true, storeId: this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null) }).subscribe((page) => {
-      this.products.set(page.items);
+    const term = query.trim();
+    const requestId = ++this.productSearchId;
+    this.productQuery.set(term);
+    if (!term) {
+      this.products.set([]);
+      this.searchingProducts.set(false);
+      return;
+    }
+    this.searchingProducts.set(true);
+    this.productApi.list({ pageSize: 8, search: term, isActive: true, storeId: this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null) }).subscribe({
+      next: (page) => {
+        if (requestId !== this.productSearchId) return;
+        this.products.set(page.items);
+        this.searchingProducts.set(false);
+      },
+      error: () => {
+        if (requestId === this.productSearchId) this.searchingProducts.set(false);
+      },
     });
+  }
+
+  addFromSearch(product: Product, input: HTMLInputElement): void {
+    this.add(product);
+    this.clearProductSearch(input);
+  }
+
+  addFirstResult(input: HTMLInputElement): void {
+    const first = this.products()[0];
+    if (first && !this.searchingProducts()) this.addFromSearch(first, input);
+  }
+
+  clearProductSearch(input: HTMLInputElement): void {
+    input.value = '';
+    this.search('');
+    input.focus();
   }
 
   searchCustomer(query: string): void {
