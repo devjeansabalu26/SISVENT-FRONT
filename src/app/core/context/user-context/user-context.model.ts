@@ -11,4 +11,5 @@ export interface UserContext {
   readonly branchName?: string;
   readonly canViewAllStores?: boolean;
   readonly visibleStores?: readonly { readonly id: string; readonly name: string }[];
+  readonly readOnly?: boolean;
 }

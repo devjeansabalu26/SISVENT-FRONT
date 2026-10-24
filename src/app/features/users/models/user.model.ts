@@ -85,6 +85,7 @@ export interface PlatformUserDetail {
   readonly storeName: string | null;
   readonly isActive: boolean;
   readonly isLocked?: boolean;
+  readonly readOnly?: boolean;
   readonly lastActivityAt: string | null;
   readonly createdAt: string;
 }

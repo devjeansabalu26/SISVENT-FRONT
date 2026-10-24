@@ -56,6 +56,10 @@ export class PlatformUserApiService {
     return this.http.post<void>(`${this.baseUrl}/${profileId}/unlock`, null);
   }
 
+  setReadOnly(profileId: string, readOnly: boolean): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${profileId}/read-only`, { readOnly });
+  }
+
   setStatus(profileId: string, active: boolean, reason: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${profileId}/status`, { active, reason });
   }

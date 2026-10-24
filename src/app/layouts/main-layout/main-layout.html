@@ -3,5 +3,14 @@
   @if (!navigationClosed()) {
     <div class="main-layout__backdrop" aria-hidden="true" (click)="closeNavigation()"></div>
   }
-  <section class="main-layout__workspace"><app-header (menuToggle)="toggleNavigation()" /><main><router-outlet /></main></section>
+  <section class="main-layout__workspace">
+    <app-header (menuToggle)="toggleNavigation()" />
+    @if (readOnly()) {
+      <div class="main-layout__demo" role="status">
+        <strong>Modo demostración</strong>
+        <span>Puedes recorrer todas las secciones, pero no guardar, editar ni eliminar información.</span>
+      </div>
+    }
+    <main><router-outlet /></main>
+  </section>
 </div>

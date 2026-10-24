@@ -48,6 +48,21 @@ export function userStatusReview(user: { readonly fullName: string; readonly rol
   };
 }
 
+export function readOnlyReview(fullName: string, enable: boolean): ReviewDialogData {
+  return {
+    title: enable ? 'Activar modo demostración' : 'Quitar modo demostración',
+    icon: enable ? 'visibility' : 'edit',
+    meta: [{ label: 'Usuario', value: fullName }],
+    transition: enable
+      ? { fromLabel: 'Acceso', from: 'Normal', toLabel: 'Nuevo acceso', to: 'Solo lectura' }
+      : { fromLabel: 'Acceso', from: 'Solo lectura', toLabel: 'Nuevo acceso', to: 'Normal' },
+    banner: enable
+      ? { tone: 'warning', text: 'Verá todas las secciones activas de su empresa, pero no podrá guardar, editar ni eliminar nada. El cambio aplica en su próximo inicio de sesión.' }
+      : { tone: 'info', text: 'Volverá a tener los permisos de su rol. El cambio aplica en su próximo inicio de sesión.' },
+    confirmLabel: enable ? 'Activar' : 'Quitar',
+  };
+}
+
 export function unlockReview(fullName: string): ReviewDialogData {
   return {
     title: 'Desbloquear cuenta',

@@ -4,6 +4,14 @@
 }
 .main-layout__workspace { min-height: 100dvh; margin-left: 240px; }
 main { padding: 28px; }
+.main-layout__demo {
+  display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
+  padding: 10px 28px; font-size: 13px;
+  color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  border-bottom: 1px solid color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+}
+@media (max-width: 900px) { .main-layout__demo { padding: 10px 16px; } }
 @media (max-width: 900px) { .main-layout__workspace { margin-left: 0; } main { padding: 20px 16px; } }
 .main-layout__backdrop { display: none; }
 @media (max-width: 900px) {

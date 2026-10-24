@@ -99,6 +99,7 @@ export class AppSessionService {
       branchName: user.storeName ?? undefined,
       canViewAllStores: user.canViewAllStores ?? false,
       visibleStores: user.visibleStores ?? [],
+      readOnly: user.readOnly ?? false,
     });
 
     if (user.companyId && user.company) {
