@@ -1,4 +1,4 @@
-import { CompanyModules, ModuleToggle } from '../models/company-modules.model';
+import { CompanyExtraFeatures, CompanyModules, ModuleToggle } from '../models/company-modules.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -74,6 +74,14 @@ export class CompanyApiService {
 
   getModules(id: string): Observable<CompanyModules> {
     return this.http.get<CompanyModules>(`${this.baseUrl}/${id}/modules`);
+  }
+
+  getExtraFeatures(id: string): Observable<CompanyExtraFeatures> {
+    return this.http.get<CompanyExtraFeatures>(`${this.baseUrl}/${id}/extra-features`);
+  }
+
+  updateExtraFeatures(id: string, codes: readonly string[], note: string | null): Observable<CompanyExtraFeatures> {
+    return this.http.put<CompanyExtraFeatures>(`${this.baseUrl}/${id}/extra-features`, { codes, note });
   }
 
   updateModules(id: string, modules: readonly ModuleToggle[]): Observable<CompanyModules> {

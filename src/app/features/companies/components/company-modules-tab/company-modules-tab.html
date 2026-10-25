@@ -7,7 +7,7 @@
         <h3>Menús habilitados</h3>
         <p>
           {{ enabledCount() }} de {{ info.modules.length }} activos · Plan {{ info.planName ?? 'sin plan vigente' }}.
-          Los menús que el plan no incluye no se pueden activar. Los de configuración son solo para el administrador.
+          Los menús que el plan no incluye se pueden habilitar abajo, en Funcionalidades extra. Los de configuración son solo para el administrador.
         </p>
       </div>
       <div class="modules__bulk">
@@ -50,4 +50,8 @@
       </button>
     </footer>
   </section>
+}
+
+@if (!loading()) {
+  <app-company-extra-features [companyId]="companyId()" (changed)="reload()" />
 }

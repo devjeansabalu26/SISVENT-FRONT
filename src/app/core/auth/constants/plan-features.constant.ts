@@ -31,6 +31,7 @@ export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   SUPPLY_ANALYTICS: 'Abastecimiento y rotación',
   ABC_ANALYSIS: 'Clasificación ABC',
   REPORTS: 'Reportes',
+  DASHBOARD_ANALYTIC: 'Dashboard analítico',
   REPORTS_CASH: 'Reporte de caja y pagos',
   REPORTS_CUSTOMERS: 'Reporte de clientes',
   REPORTS_TEAM: 'Reporte de equipo',

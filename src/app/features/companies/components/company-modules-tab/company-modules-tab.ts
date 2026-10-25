@@ -3,6 +3,7 @@ import { AppHttpError } from '../../../../core/http/models/app-http-error.model'
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { CompanyApiService } from '../../data-access/company-api.service';
 import { CompanyModule, CompanyModules } from '../../models/company-modules.model';
+import { CompanyExtraFeaturesPanel } from '../company-extra-features/company-extra-features';
 
 interface ModuleGroup {
   readonly label: string;
@@ -17,6 +18,7 @@ function groupModules(modules: readonly CompanyModule[]): readonly ModuleGroup[]
 
 @Component({
   selector: 'app-company-modules-tab',
+  imports: [CompanyExtraFeaturesPanel],
   templateUrl: './company-modules-tab.html',
   styleUrls: ['../../../../shared/forms/switch.scss', './company-modules-tab.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +42,10 @@ export class CompanyModulesTab implements OnInit {
   readonly enabledCount = computed(() => (this.data()?.modules ?? []).filter((module) => this.isOn(module)).length);
 
   ngOnInit(): void {
+    this.reload();
+  }
+
+  reload(): void {
     this.api.getModules(this.companyId()).subscribe({
       next: (result) => this.apply(result),
       error: () => {

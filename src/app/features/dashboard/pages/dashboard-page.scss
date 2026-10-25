@@ -351,3 +351,39 @@ td small {
   color: var(--color-warning);
   font-weight: 600;
 }
+
+.locked-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-smd);
+  min-height: 180px;
+  padding: 20px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.locked-panel:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.locked-panel > .material-icons {
+  color: var(--color-text-muted);
+  font-size: 28px;
+}
+.locked-panel div {
+  display: grid;
+  gap: 6px;
+}
+.locked-panel small {
+  color: var(--color-text-muted);
+}
+.locked-panel__cta {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+.grid-2.grid-single {
+  grid-template-columns: 1fr;
+}

@@ -88,7 +88,7 @@
     <section class="card">
       <div class="list-head"><h2>3. Tipos de documento de clientes y personas</h2><button type="button" class="ghost" (click)="addDocument()">Agregar</button></div>
       <div class="table-scroll">
-        <table formArrayName="documentTypes">
+        <table class="sticky-actions" formArrayName="documentTypes">
           <thead><tr><th>Código</th><th>Nombre</th><th>Ejemplo</th><th>Formato</th><th>Dígito verificador</th><th>Empresa</th><th>Por defecto</th><th>Activo</th><th></th></tr></thead>
           <tbody>
             @for (row of documents.controls; track row; let i = $index) {
@@ -113,7 +113,7 @@
     <div class="two-columns">
       <section class="card">
         <div class="list-head"><h2>4. Regímenes tributarios</h2><button type="button" class="ghost" (click)="addRegime()">Agregar</button></div>
-        <div class="table-scroll"><table formArrayName="taxRegimes">
+        <div class="table-scroll"><table class="sticky-actions" formArrayName="taxRegimes">
           <thead><tr><th>Código</th><th>Nombre</th><th>Activo</th><th></th></tr></thead>
           <tbody>
             @for (row of regimes.controls; track row; let i = $index) {
@@ -130,7 +130,7 @@
 
       <section class="card">
         <div class="list-head"><h2>5. Zonas horarias</h2><button type="button" class="ghost" (click)="addZone()">Agregar</button></div>
-        <div class="table-scroll"><table formArrayName="timezones">
+        <div class="table-scroll"><table class="sticky-actions" formArrayName="timezones">
           <thead><tr><th>Zona IANA</th><th>Nombre visible</th><th></th></tr></thead>
           <tbody>
             @for (row of zones.controls; track row; let i = $index) {
@@ -149,7 +149,7 @@
     <section class="card">
       <div class="list-head"><h2>6. Tipos de comprobante y series</h2><button type="button" class="ghost" (click)="addReceipt()">Agregar</button></div>
       <div class="table-scroll">
-        <table formArrayName="receiptTypes">
+        <table class="sticky-actions" formArrayName="receiptTypes">
           <thead><tr><th>Código</th><th>Nombre</th><th>Etiqueta</th><th>Formato de serie</th><th>Ejemplo</th><th>Serie inicial</th><th>Cliente empresa</th><th>Activo</th><th></th></tr></thead>
           <tbody>
             @for (row of receipts.controls; track row; let i = $index) {

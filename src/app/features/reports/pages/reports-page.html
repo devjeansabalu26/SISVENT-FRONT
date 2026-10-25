@@ -10,37 +10,59 @@
 <app-report-toolbar />
 
 @if (state.report(); as report) {
-  <div class="kpi-grid" [class.is-loading]="state.loading()">
-    <app-kpi-card label="Ventas totales" [value]="(report.totalSales.value | money)" icon="payments" tone="success"
-      [trend]="trend(report.totalSales)" [delta]="delta(report.totalSales)" deltaCaption="vs periodo anterior" />
-    <app-kpi-card label="Transacciones" [value]="report.transactions.value" icon="receipt_long" tone="primary"
-      [trend]="trend(report.transactions)" [delta]="delta(report.transactions)" deltaCaption="vs periodo anterior" />
-    <app-kpi-card label="Ticket promedio" [value]="(report.averageTicket.value | money)" icon="monitoring" tone="info"
-      [trend]="trend(report.averageTicket)" [delta]="delta(report.averageTicket)" deltaCaption="vs periodo anterior" />
-    <app-kpi-card label="Productos vendidos" [value]="(report.unitsSold.value | quantity)" icon="inventory_2" tone="warning"
-      [trend]="trend(report.unitsSold)" [delta]="delta(report.unitsSold)" deltaCaption="vs periodo anterior" />
-  </div>
-
-  <section class="chart-card">
+  <section class="chart-card" [class.is-loading]="state.loading()">
     <header class="card-head">
-      <div><h2>Ventas por día</h2><p>{{ periodLabel() }}</p></div>
-      <a class="link" routerLink="/app/reports/sales" queryParamsHandling="preserve">Ver detalle de ventas</a>
+      <div><h2>Comparación con el período anterior</h2><p>{{ periodLabel() }} frente a los mismos días justo antes</p></div>
     </header>
-    @if (report.dailySeries.length) {
-      <div class="chart" role="img" aria-label="Gráfico de ingresos diarios">
-        @for (point of report.dailySeries; track point.date) {
-          <div class="bar-column">
-            <span class="amount">{{ point.amount | compactMoney }}</span>
-            <div class="bar" [style.--bar-height.%]="(point.amount / maxAmount()) * 100"></div>
-            <small>{{ point.date }}</small>
-          </div>
-        }
-      </div>
-    } @else {
-      <p class="muted empty">No hay ventas en este periodo.</p>
-    }
+    <div class="table-scroll">
+      <table class="compare-table">
+        <thead><tr><th>Indicador</th><th class="num">Este período</th><th class="num">Período anterior</th><th class="num">Diferencia</th><th class="num">Variación</th></tr></thead>
+        <tbody>
+          @for (row of comparison(); track row.label) {
+            <tr>
+              <td><strong>{{ row.label }}</strong></td>
+              <td class="num">{{ row.text(row.value.current) }}</td>
+              <td class="num">{{ row.value.previous != null ? row.text(row.value.previous) : '—' }}</td>
+              <td class="num" [class.up]="(row.value.difference ?? 0) > 0" [class.down]="(row.value.difference ?? 0) < 0">
+                {{ row.value.difference != null ? (row.value.difference > 0 ? '+' : '') + row.text(row.value.difference) : '—' }}
+              </td>
+              <td class="num" [class.up]="(row.value.deltaPercent ?? 0) > 0" [class.down]="(row.value.deltaPercent ?? 0) < 0">
+                {{ row.value.deltaPercent != null ? (row.value.deltaPercent > 0 ? '▲ +' : row.value.deltaPercent < 0 ? '▼ ' : '') + row.value.deltaPercent.toFixed(1) + '%' : 'Sin datos' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 
+  @if (insights(); as insight) {
+    <h2 class="section-title">Lectura del período</h2>
+    <div class="highlights highlights--insights highlights--two">
+      <article>
+        <span class="material-icons" aria-hidden="true">{{ insight.trendPercent == null ? 'trending_flat' : insight.trendPercent >= 0 ? 'trending_up' : 'trending_down' }}</span>
+        <div>
+          <small>Tendencia dentro del período</small>
+          <strong>{{ insight.trendPercent == null ? 'Sin datos suficientes' : (insight.trendPercent >= 0 ? 'Vas mejorando' : 'Vas bajando') }}</strong>
+          @if (insight.trendPercent != null) {
+            <p>La segunda mitad vendió {{ insight.trendPercent >= 0 ? '+' : '' }}{{ insight.trendPercent.toFixed(1) }}% frente a la primera ({{ insight.secondHalf | money }} vs {{ insight.firstHalf | money }})</p>
+          }
+        </div>
+      </article>
+      <article>
+        <span class="material-icons" aria-hidden="true">south</span>
+        <div>
+          <small>Día más flojo</small>
+          <strong>{{ insight.weakestDay ? (insight.weakestDay.date | shortDate) : '—' }}</strong>
+          @if (insight.weakestDay; as day) {
+            <p>{{ day.amount | money }} en ventas</p>
+          }
+        </div>
+      </article>
+    </div>
+  }
+
+  <h2 class="section-title">Destacados</h2>
   <div class="highlights">
     <article>
       <span class="material-icons" aria-hidden="true">category</span>
@@ -77,7 +99,7 @@
   <div class="shortcuts">
     <a routerLink="/app/reports/sales" queryParamsHandling="preserve">
       <span class="material-icons" aria-hidden="true">trending_up</span>
-      <div><strong>Ventas</strong><small>Tendencia, categorías y vendedores</small></div>
+      <div><strong>Ventas</strong><small>Ventas por día, por hora, categorías y vendedores</small></div>
       <span class="material-icons" aria-hidden="true">chevron_right</span>
     </a>
     <a routerLink="/app/reports/products" queryParamsHandling="preserve">

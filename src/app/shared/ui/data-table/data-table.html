@@ -8,7 +8,7 @@
       <div class="state">{{ emptyMessage() }}</div>
     }
   } @else {
-    <table>
+    <table [class.sticky-actions]="hasActions()">
       <thead><tr>@for (column of columns(); track column.key) { <th>{{ column.label }}</th> }@if (hasActions()) {<th>Acciones</th>}</tr></thead>
       <tbody>
         @for (row of rows(); track row.id) {
@@ -22,7 +22,7 @@
                 }
               </td>
             }
-            @if (hasActions()) {<td class="actions">@if (showView()) {<button type="button" (click)="view.emit(row)" [attr.aria-label]="viewLabel()" [title]="viewLabel()"><span class="material-icons">{{ viewIcon() }}</span></button>}@if (showEdit()) {<button type="button" (click)="edit.emit(row)" [attr.aria-label]="editLabel()" [title]="editLabel()"><span class="material-icons">{{ editIcon() }}</span></button>}@if (showKey()) {<button type="button" (click)="key.emit(row)" [attr.aria-label]="keyLabel()" [title]="keyLabel()"><span class="material-icons">{{ keyIcon() }}</span></button>}@if (showRemove()) {<button type="button" class="danger" (click)="remove.emit(row)" [attr.aria-label]="removeLabel()" [title]="removeLabel()"><span class="material-icons">{{ removeIcon() }}</span></button>}@if (menuActions().length) {<button type="button" [matMenuTriggerFor]="rowMenu" [matMenuTriggerData]="{ row: row }" [attr.aria-label]="menuLabel()" [title]="menuLabel()"><span class="material-icons">{{ menuIcon() }}</span></button>}</td>}
+            @if (hasActions()) {<td class="actions-cell"><div class="actions">@if (showView()) {<button type="button" (click)="view.emit(row)" [attr.aria-label]="viewLabel()" [title]="viewLabel()"><span class="material-icons">{{ viewIcon() }}</span></button>}@if (showEdit()) {<button type="button" (click)="edit.emit(row)" [attr.aria-label]="editLabel()" [title]="editLabel()"><span class="material-icons">{{ editIcon() }}</span></button>}@if (showKey()) {<button type="button" (click)="key.emit(row)" [attr.aria-label]="keyLabel()" [title]="keyLabel()"><span class="material-icons">{{ keyIcon() }}</span></button>}@if (showRemove()) {<button type="button" class="danger" (click)="remove.emit(row)" [attr.aria-label]="removeLabel()" [title]="removeLabel()"><span class="material-icons">{{ removeIcon() }}</span></button>}@if (menuActions().length) {<button type="button" [matMenuTriggerFor]="rowMenu" [matMenuTriggerData]="{ row: row }" [attr.aria-label]="menuLabel()" [title]="menuLabel()"><span class="material-icons">{{ menuIcon() }}</span></button>}</div></td>}
           </tr>
         }
       </tbody>
