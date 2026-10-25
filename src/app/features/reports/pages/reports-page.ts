@@ -2,17 +2,18 @@ import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/ex
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
-import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { CompactMoneyPipe, MoneyPipe, QuantityPipe } from '../../../shared/pipes/date-time.pipe';
+import { MoneyPipe, QuantityPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
+import { formatMoney, formatQuantity } from '../../../core/regional/regional-format';
 import { ReportToolbar } from '../components/report-toolbar';
 import { ReportState } from '../data-access/report-state';
 import { MetricDelta } from '../models/sales-report.model';
 import { periodLabel } from '../utils/report-period';
+import { compareMetric, periodInsights } from '../utils/period-insights';
 
 @Component({
   selector: 'app-reports-page',
-  imports: [PageHeader, KpiCard, RouterLink, ReportToolbar, MoneyPipe, CompactMoneyPipe, QuantityPipe],
+  imports: [PageHeader, RouterLink, ReportToolbar, MoneyPipe, QuantityPipe, ShortDatePipe],
   providers: [ReportState],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
@@ -28,7 +29,22 @@ export class ReportsPage {
   }
 
   readonly periodLabel = computed(() => periodLabel(this.state.period()));
-  readonly maxAmount = computed(() => Math.max(...(this.state.report()?.dailySeries.map((point) => point.amount) ?? [0]), 1));
+  readonly comparison = computed(() => {
+    const report = this.state.report();
+    if (!report) return [];
+    const money = (value: number) => formatMoney(value);
+    const count = (value: number) => formatQuantity(value);
+    return [
+      { label: 'Ventas', value: compareMetric(report.totalSales), text: money },
+      { label: 'Transacciones', value: compareMetric(report.transactions), text: count },
+      { label: 'Ticket promedio', value: compareMetric(report.averageTicket), text: money },
+      { label: 'Unidades vendidas', value: compareMetric(report.unitsSold), text: count },
+    ];
+  });
+  readonly insights = computed(() => {
+    const report = this.state.report();
+    return report ? periodInsights(report.dailySeries, report.from, report.to) : null;
+  });
   readonly topCategory = computed(() => this.state.report()?.byCategory[0] ?? null);
   readonly topProduct = computed(() => this.state.report()?.topProducts[0] ?? null);
   readonly topSeller = computed(() => this.state.report()?.bySeller[0] ?? null);

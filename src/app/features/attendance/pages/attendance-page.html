@@ -85,7 +85,7 @@
       }
       @if (today().length && canManage) {
         <div class="today-table">
-          <table>
+          <table class="sticky-actions">
             <thead><tr><th>Persona</th><th>Usuario</th><th>Entrada</th><th>Salida</th><th>Tiempo</th><th></th></tr></thead>
             <tbody>
               @for (row of today(); track row.id) {
@@ -166,7 +166,7 @@
       } @else if (!history().length) {
         <p class="state">No hay asistencias en este período.</p>
       } @else {
-        <table>
+        <table class="sticky-actions">
           <thead>
             <tr>
               <th>Fecha</th><th>Local</th><th>Persona</th><th>Rol</th><th>Entrada</th><th>Salida</th><th>Tiempo</th>

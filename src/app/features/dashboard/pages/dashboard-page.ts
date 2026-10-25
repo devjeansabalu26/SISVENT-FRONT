@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { RouterLink } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { KpiCard, KpiTrend } from '../../../shared/ui/kpi-card/kpi-card';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -32,11 +33,13 @@ export class DashboardPage implements OnInit {
   private readonly sellerApi = inject(UserApiService);
   private readonly userContext = inject(UserContextService);
   private readonly companyContext = inject(CompanyContextService);
+  private readonly access = inject(AccessControlService);
 
   readonly role = computed(() => this.userContext.user()?.role ?? 'ADMIN');
   readonly displayName = computed(() => this.userContext.user()?.displayName ?? 'Usuario');
   readonly companyName = computed(() => this.companyContext.company()?.commercialName ?? 'tu empresa');
 
+  readonly hasReports = computed(() => this.access.hasFeature('REPORTS'));
   readonly loading = signal(true);
   readonly syncing = signal(false);
   readonly admin = signal<AdminDashboard | null>(null);

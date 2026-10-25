@@ -56,6 +56,7 @@ export interface AdminDashboard {
   readonly actions?: DashboardActions | null;
   readonly month?: DashboardMonthProjection | null;
   readonly todayByHour?: readonly DashboardHourPoint[] | null;
+  readonly analyticsEnabled?: boolean;
 }
 
 export interface DashboardMonthProjection {

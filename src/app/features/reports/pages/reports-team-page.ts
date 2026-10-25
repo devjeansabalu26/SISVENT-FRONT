@@ -14,11 +14,10 @@ import { SalesReportApiService } from '../data-access/sales-report-api.service';
 import { TeamMemberRow, TeamReport } from '../models/team-report.model';
 import { ReportPeriod, periodLabel, periodRange } from '../utils/report-period';
 
-type TeamView = 'productivity' | 'sales' | 'discounts';
+type TeamView = 'productivity' | 'discounts';
 
 const VIEWS: readonly ViewTab[] = [
   { id: 'productivity', label: 'Por hora trabajada', icon: 'schedule' },
-  { id: 'sales', label: 'Ventas por persona', icon: 'leaderboard' },
   { id: 'discounts', label: 'Descuentos y anulaciones', icon: 'money_off' },
 ];
 
@@ -44,7 +43,7 @@ export class ReportsTeamPage {
 
   readonly view = computed<TeamView>(() => {
     const value = this.state.viewParam();
-    return value === 'sales' || value === 'discounts' ? value : 'productivity';
+    return value === 'discounts' ? value : 'productivity';
   });
   readonly periodLabel = computed(() => periodLabel(this.state.period()));
   readonly byRate = computed(() =>
