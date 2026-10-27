@@ -1,0 +1,76 @@
+<app-page-header title="Facturas electrónicas" description="Facturas y notas de crédito y su estado de envío a SUNAT">
+  <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Historial de ventas</a>
+</app-page-header>
+
+@if (page(); as data) {
+  @if (!data.providerConfigured) {
+    <p class="notice">
+      <span class="material-icons">schedule_send</span>
+      Tu empresa aún no tiene un proveedor de facturación conectado. Las facturas quedan registradas como pendientes y se
+      enviarán a SUNAT en cuanto Savix active la conexión.
+    </p>
+  }
+
+  <section class="summary">
+    @for (item of summary(); track item.status) {
+      <button type="button" [class.active]="status === item.status" [attr.data-status]="item.status" (click)="filterBy(item.status)">
+        <strong>{{ item.count }}</strong><span>{{ item.label }}</span>
+      </button>
+    }
+  </section>
+}
+
+<section class="filters">
+  <select [(ngModel)]="kind" (change)="load()" aria-label="Tipo de comprobante">
+    <option value="">Facturas y notas de crédito</option>
+    <option value="FACTURA">Solo facturas</option>
+    <option value="NOTA_CREDITO">Solo notas de crédito</option>
+  </select>
+  <select [(ngModel)]="status" (change)="load()" aria-label="Estado">
+    <option value="">Todos los estados</option>
+    <option value="PENDIENTE">Pendiente de envío</option>
+    <option value="ENVIADO">Enviado</option>
+    <option value="ACEPTADO">Aceptado</option>
+    <option value="ERROR">Con error</option>
+    <option value="RECHAZADO">Rechazado</option>
+  </select>
+</section>
+
+<div class="surface-card table-scroll">
+  <table>
+    <thead>
+      <tr><th>Comprobante</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (item of page()?.items ?? []; track item.id) {
+        <tr>
+          <td>
+            <strong>{{ kindLabel[item.kind] }} {{ item.number }}</strong>
+            <small><a [routerLink]="['/app/sales', item.saleId]">Venta {{ item.saleNumber }}</a></small>
+          </td>
+          <td>{{ item.issuedAt | dateTime }}</td>
+          <td>{{ item.customerName }}<small>RUC {{ item.customerTaxId }}</small></td>
+          <td>{{ item.total | money }}</td>
+          <td>
+            <span class="status" [attr.data-status]="item.status">{{ statusLabel[item.status] ?? item.status }}</span>
+            @if (credentialLabel(item); as label) { <small>{{ label }}</small> }
+            @if (item.lastError) { <small class="error">{{ item.lastError }}</small> }
+            @if (item.nextAttemptAt && item.attempts > 0) { <small>Intento {{ item.attempts }} · próximo {{ item.nextAttemptAt | dateTime }}</small> }
+          </td>
+          <td class="actions">
+            @if (item.pdfUrl) { <a [href]="item.pdfUrl" target="_blank" rel="noopener">PDF</a> }
+            @if (item.xmlUrl) { <a [href]="item.xmlUrl" target="_blank" rel="noopener">XML</a> }
+            @if (item.cdrUrl) { <a [href]="item.cdrUrl" target="_blank" rel="noopener">CDR</a> }
+            @if (canRetry(item)) {
+              <button type="button" class="ghost" [disabled]="retrying() === item.id" (click)="retry(item)">
+                {{ retrying() === item.id ? 'Reintentando…' : 'Reintentar' }}
+              </button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="6" class="empty">{{ loading() ? 'Cargando…' : 'No hay comprobantes electrónicos con estos filtros.' }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

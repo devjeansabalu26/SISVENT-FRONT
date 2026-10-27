@@ -1,0 +1,224 @@
+@if (loading()) {
+  <p class="muted">Cargando configuración de facturación…</p>
+} @else if (data(); as info) {
+  <form class="surface-card regional" [formGroup]="form" (ngSubmit)="save()">
+    <header class="regional__head">
+      <div>
+        <h3>Facturación electrónica</h3>
+        <p>
+          Cómo emite esta empresa sus facturas y notas de crédito electrónicas a SUNAT. El RUC, la razón social, la dirección
+          fiscal, las series y los correlativos siempre son los de esta empresa, use la credencial general o la suya.
+        </p>
+      </div>
+      @if (info.updatedAt) {
+        <small class="muted">Último cambio: {{ info.updatedAt | dateTime }}</small>
+      }
+    </header>
+
+    @if (info.missingForSending.length) {
+      <div class="checklist">
+        <strong><span class="material-icons">checklist</span>Falta para enviar a SUNAT</strong>
+        <ul>
+          @for (item of info.missingForSending; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <p class="ready"><span class="material-icons">verified</span>Todo listo: las facturas pendientes se envían automáticamente.</p>
+    }
+
+    <h4 class="section">Credencial</h4>
+    <div class="modes" role="radiogroup" aria-label="Modo de facturación">
+      <label class="mode" [class.is-on]="isDisabled()">
+        <input type="radio" formControlName="credentialMode" value="DESACTIVADA" />
+        <span><strong>Desactivada</strong><small>No se envía nada a SUNAT. Las facturas quedan pendientes.</small></span>
+      </label>
+      <label class="mode" [class.is-on]="isShared()" [class.is-disabled]="!info.shared.allowed">
+        <input type="radio" formControlName="credentialMode" value="GENERAL" [attr.disabled]="info.shared.allowed ? null : true" />
+        <span>
+          <strong>General de Savix{{ info.shared.providerName ? ' (' + info.shared.providerName + ')' : '' }}</strong>
+          @if (!info.shared.allowed) {
+            <small>No disponible: el servidor no permite la credencial general (EInvoicing__AllowShared).</small>
+          } @else if (!info.shared.configured) {
+            <small>Permitida, pero el servidor aún no tiene el token general (EInvoicing__ApiToken).</small>
+          } @else {
+            <small>Usa la cuenta de Savix en el proveedor.</small>
+          }
+        </span>
+      </label>
+      <label class="mode" [class.is-on]="isOwn()">
+        <input type="radio" formControlName="credentialMode" value="PROPIA" />
+        <span><strong>Propia</strong><small>La empresa tiene su propia cuenta en un proveedor.</small></span>
+      </label>
+    </div>
+
+    @if (isShared() && info.shared.allowed) {
+      <p class="ready">
+        <span class="material-icons">{{ info.shared.configured ? 'verified' : 'schedule' }}</span>
+        @if (info.shared.configured) {
+          Usando la credencial general de Savix ✓
+        } @else {
+          Se usará la credencial general de Savix cuando el servidor tenga el token.
+        }
+      </p>
+    }
+
+    @if (!isDisabled()) {
+      <div class="fields">
+        @if (isOwn()) {
+          <label>
+            <span>Proveedor <span class="required">*</span></span>
+            <select formControlName="providerCode">
+              @for (provider of info.providers; track provider.code) {
+                <option [value]="provider.code">{{ provider.name }}</option>
+              }
+            </select>
+            @if (selectedProvider()?.testOnly) {
+              <small class="hint">Acepta los comprobantes sin enviarlos a SUNAT. Sirve para probar el flujo completo.</small>
+            }
+          </label>
+        }
+        <label>
+          <span>Ambiente <span class="required">*</span></span>
+          <select formControlName="environment">
+            <option value="PRUEBAS">Pruebas</option>
+            <option value="PRODUCCION" [disabled]="productionBlocked()">Producción</option>
+          </select>
+          @if (productionBlocked()) {
+            <small class="hint">{{ selectedProvider()?.testOnly ? 'Este proveedor solo funciona en pruebas.' : 'Producción se habilita al completar el checklist de alta.' }}</small>
+          }
+        </label>
+        @if (selectedProvider()?.requiresCompanyId) {
+          <label class="full">
+            <span>ID de la empresa en {{ selectedProvider()!.name }} <span class="required">*</span></span>
+            <input formControlName="providerCompanyId" maxlength="100" autocomplete="off" placeholder="Lo da el proveedor al registrar la empresa" />
+          </label>
+        }
+        @if (isOwn() && selectedProvider()?.requiresCredentials) {
+          <label class="full">
+            <span>URL de la API</span>
+            <input formControlName="apiUrl" maxlength="300" placeholder="Vacío: la URL oficial del proveedor según el ambiente" autocomplete="off" />
+            @if (form.controls.apiUrl.touched && form.controls.apiUrl.invalid) {
+              <span class="error">Debe ser una dirección https.</span>
+            }
+          </label>
+          <label class="full">
+            <span>Token de la API <span class="required">*</span></span>
+            <input type="password" formControlName="apiToken" maxlength="2000" autocomplete="new-password"
+              [placeholder]="info.hasApiToken ? 'Guardado: ••••' + (info.apiTokenHint ?? '') + '. Escribe uno nuevo solo para reemplazarlo' : 'Pega aquí el token del proveedor'" />
+            @if (info.hasApiToken) {
+              <small class="hint">Token guardado: ••••{{ info.apiTokenHint }}</small>
+            }
+            @if (!info.tokenEncryptionConfigured) {
+              <small class="hint">El servidor aún no tiene la clave para cifrar tokens (EInvoicing__EncryptionKey).</small>
+            } @else if (info.hasApiToken) {
+              <label class="check"><input type="checkbox" formControlName="clearApiToken" /> Borrar el token guardado</label>
+            }
+          </label>
+        }
+      </div>
+
+      <div class="test">
+        <button type="button" class="ghost" (click)="testConnection()" [disabled]="testing() || saving()">
+          <span class="material-icons">wifi_tethering</span>{{ testing() ? 'Probando…' : 'Probar conexión' }}
+        </button>
+        @if (testResult(); as result) {
+          <span [class.test__ok]="result.ok" [class.test__fail]="!result.ok">{{ result.message }}</span>
+        } @else {
+          <small class="muted">Valida la credencial guardada sin emitir ningún comprobante.</small>
+        }
+      </div>
+
+      <h4 class="section">Checklist de alta</h4>
+      <div class="steps">
+        <label class="check"><input type="checkbox" formControlName="checklistProviderRegistered" /> RUC de la empresa registrado en el proveedor</label>
+        <label class="check"><input type="checkbox" formControlName="checklistSolAffiliation" /> Afiliación del proveedor como PSE/OSE en SUNAT con Clave SOL</label>
+        <label class="check"><input type="checkbox" formControlName="checklistCertificate" /> Certificado digital cargado en el proveedor</label>
+        <label class="check"><input type="checkbox" formControlName="checklistSandboxTested" /> Factura de prueba aceptada en el ambiente de pruebas</label>
+        @if (info.checklistUpdatedAt) {
+          <small class="muted">Checklist actualizado: {{ info.checklistUpdatedAt | dateTime }}</small>
+        }
+      </div>
+    }
+
+    <h4 class="section">Datos del emisor</h4>
+    <div class="fields">
+      <label class="full">
+        <span>Dirección fiscal</span>
+        <input formControlName="fiscalAddress" maxlength="300" placeholder="Av. ejemplo 123, Miraflores, Lima" />
+      </label>
+      <label>
+        <span>Ubigeo</span>
+        <input formControlName="ubigeo" maxlength="6" inputmode="numeric" placeholder="150122" />
+        @if (form.controls.ubigeo.touched && form.controls.ubigeo.invalid) {
+          <span class="error">Debe tener 6 dígitos.</span>
+        }
+      </label>
+      <label>
+        <span>Código de establecimiento <span class="required">*</span></span>
+        <input formControlName="establishmentCode" maxlength="4" inputmode="numeric" />
+        <small class="hint">0000 si emite desde el domicilio fiscal.</small>
+      </label>
+    </div>
+
+    <h4 class="section">Series y numeración</h4>
+    <div class="fields">
+      <label>
+        <span>Serie de facturas</span>
+        <input [value]="info.invoiceSeries" disabled />
+        <small class="hint">Se cambia en la configuración de la empresa. Última factura: {{ info.lastInvoiceNumber }}.</small>
+      </label>
+      <label>
+        <span>Próximo número de factura</span>
+        <input type="number" formControlName="nextInvoiceNumber" [min]="info.minNextInvoiceNumber" [placeholder]="info.minNextInvoiceNumber" />
+        <small class="hint">Solo si el negocio viene de otro sistema y debe continuar su numeración. Mínimo {{ info.minNextInvoiceNumber }}.</small>
+      </label>
+      <label>
+        <span>Serie de notas de crédito <span class="required">*</span></span>
+        <input formControlName="creditNoteSeries" maxlength="4" placeholder="FC01" />
+        @if (form.controls.creditNoteSeries.touched && form.controls.creditNoteSeries.invalid) {
+          <span class="error">Empieza con F y tiene 4 caracteres (FC01).</span>
+        }
+      </label>
+    </div>
+
+    <h4 class="section">Consulta RUC bloqueada</h4>
+    @if (blockedUsers().length) {
+      <ul class="blocked">
+        @for (user of blockedUsers(); track user.identityUserId) {
+          <li>
+            <span>
+              <strong>{{ user.name }}</strong>@if (user.userCode) { <small>· usuario {{ user.userCode }}</small> }
+              <small>Bloqueada el {{ user.blockedAt | dateTime }}@if (user.blockedRuc) { por consultar repetidamente el RUC {{ user.blockedRuc }} }.</small>
+            </span>
+            <button type="button" class="ghost" (click)="unblock(user)" [disabled]="unblocking() === user.identityUserId">
+              {{ unblocking() === user.identityUserId ? 'Reactivando…' : 'Reactivar' }}
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <small class="muted">Ningún usuario tiene la consulta de RUC bloqueada.</small>
+    }
+
+    @if (countGroups().length) {
+      <h4 class="section">Comprobantes electrónicos</h4>
+      <div class="counts">
+        @for (group of countGroups(); track group.label) {
+          <div>
+            <strong>{{ group.label }}</strong>
+            @for (item of group.items; track item.status) {
+              <span>{{ statusLabel[item.status] ?? item.status }}: <b>{{ item.count }}</b></span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <footer class="regional__foot">
+      <button type="button" class="ghost" (click)="discard()" [disabled]="saving()">Descartar</button>
+      <button type="submit" class="primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar facturación' }}</button>
+    </footer>
+  </form>
+}

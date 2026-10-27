@@ -28,3 +28,27 @@ export function applyDocumentType(control: FormControl<string>, type: DocumentTy
   control.setValidators(documentNumberValidators(type));
   control.updateValueAndValidity({ emitEvent: false });
 }
+
+export interface DocumentLengthRule {
+  readonly min: number;
+  readonly max: number;
+  readonly digitsOnly: boolean;
+}
+
+export function documentLengthRule(type: DocumentTypeOption | undefined): DocumentLengthRule {
+  const match = /^\^(\\d|\[[^\]]+\])\{(\d+)(?:,(\d+))?\}\$$/.exec(type?.pattern ?? '');
+  if (!match) return { min: 1, max: 30, digitsOnly: false };
+  const min = Number(match[2]);
+  return { min, max: match[3] ? Number(match[3]) : min, digitsOnly: match[1] === String.raw`\d` };
+}
+
+export function documentLengthHint(type: DocumentTypeOption | undefined, value: string): string | null {
+  const rule = documentLengthRule(type);
+  const length = value.trim().length;
+  if (!length) return null;
+  const unit = rule.digitsOnly ? 'dígitos' : 'caracteres';
+  const expected = rule.min === rule.max ? `${rule.max} ${unit}` : `entre ${rule.min} y ${rule.max} ${unit}`;
+  if (length < rule.min) return `${length}/${rule.max}: faltan ${rule.min - length} ${unit} (debe tener ${expected}).`;
+  if (length > rule.max) return `Tiene ${length} ${unit}; debe tener ${expected}.`;
+  return null;
+}

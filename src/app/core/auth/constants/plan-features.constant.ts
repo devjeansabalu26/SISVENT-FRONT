@@ -16,6 +16,7 @@ export const PLAN_FEATURES = {
   reportsTeam: 'REPORTS_TEAM',
   audit: 'AUDIT',
   notifications: 'NOTIFICATIONS',
+  eInvoicing: 'E_INVOICING',
 } as const;
 
 export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
@@ -37,4 +38,5 @@ export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   REPORTS_TEAM: 'Reporte de equipo',
   AUDIT: 'Auditoría',
   NOTIFICATIONS: 'Notificaciones',
+  E_INVOICING: 'Facturación electrónica',
 };

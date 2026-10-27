@@ -55,7 +55,11 @@
     </section>
   </div>
   <aside class="summary">
-    <h2>Resumen de venta</h2><div><span>Subtotal</span><b>{{ subtotal() | money }}</b></div><div class="total"><strong>Total a pagar</strong><strong>{{ subtotal() | money }}</strong></div>
+    <h2>Resumen de venta</h2>
+    @if (canInvoice()) {
+      <div class="voucher"><span>Comprobante</span><b>{{ invoiceCustomer() ? 'Factura' : 'Boleta' }}</b></div>
+    }
+    <div><span>Subtotal</span><b>{{ subtotal() | money }}</b></div><div class="total"><strong>Total a pagar</strong><strong>{{ subtotal() | money }}</strong></div>
     <h3>Método de pago</h3>
     @if (paymentMethodsError()) {
       <p class="pay-error">No se pudieron cargar los métodos de pago. <button type="button" class="link" (click)="loadPaymentMethods()">Reintentar</button></p>

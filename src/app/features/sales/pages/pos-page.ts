@@ -31,6 +31,7 @@ import { PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } fr
 import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../utils/payment';
 import { PendingSale, SALE_CONFIRM_TIMEOUT_MS, isUncertainSaleFailure, pendingSaleFor } from '../utils/pending-sale';
 import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { INVOICE_FEATURE, documentNumber, isInvoice, isValidRuc } from '../utils/sale-document';
 
 @Component({
   selector: 'app-pos-page',
@@ -51,7 +52,8 @@ export class PosPage implements OnInit {
   private readonly receiptMailer = inject(ReceiptMailerService);
   private readonly userContext = inject(UserContextService);
   private readonly attendanceApi = inject(AttendanceApiService);
-  private readonly usesAttendance = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.attendanceView] });
+  private readonly access = inject(AccessControlService);
+  private readonly usesAttendance = this.access.canAccess({ permissions: [APP_PERMISSIONS.attendanceView] });
 
   readonly isAdmin = this.userContext.user()?.role === 'ADMIN';
   readonly paymentMethods = signal<readonly PaymentMethodOption[]>([]);
@@ -97,6 +99,12 @@ export class PosPage implements OnInit {
 
   readonly customerResults = signal<readonly Customer[]>([]);
   readonly selectedCustomer = signal<Customer | null>(null);
+
+  readonly canInvoice = computed(() => this.access.hasFeature(INVOICE_FEATURE));
+  readonly invoiceCustomer = computed(() => {
+    const customer = this.selectedCustomer();
+    return this.canInvoice() && customer?.documentType === 'RUC' && customer.documentNumber ? customer : null;
+  });
 
   readonly subtotal = computed(() =>
     this.cart().reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0),
@@ -243,6 +251,11 @@ export class PosPage implements OnInit {
       this.notifications.show('Tu empresa no tiene métodos de pago habilitados.', 'error');
       return;
     }
+    const invoiceCustomer = this.invoiceCustomer();
+    if (invoiceCustomer && !isValidRuc(invoiceCustomer.documentNumber ?? '')) {
+      this.notifications.show('El RUC del cliente no es válido. Corrígelo en Clientes o elige otro cliente.', 'warning');
+      return;
+    }
     const total = this.subtotal();
     const error = paymentsError(this.paymentLines(), this.kindOf, total);
     if (error) {
@@ -304,9 +317,11 @@ export class PosPage implements OnInit {
     this.dialog
       .open<SaleConfirmDialog, SaleConfirmData, SaleConfirmResult | false>(SaleConfirmDialog, {
         data: {
-          customer: customer
-            ? `${customer.displayName}${customer.documentNumber ? ` (${customer.documentType ?? 'Doc.'} ${customer.documentNumber})` : ''}`
-            : 'Cliente general',
+          customer: this.invoiceCustomer()
+            ? `Factura para ${customer!.displayName} (RUC ${customer!.documentNumber})`
+            : customer
+              ? `${customer.displayName}${customer.documentNumber ? ` (${customer.documentType ?? 'Doc.'} ${customer.documentNumber})` : ''}`
+              : 'Cliente general',
           lines: this.cart().map((item) => ({ name: item.product.name, quantity: item.quantity, unitPrice: item.product.salePrice })),
           discount: 0,
           paymentMethod: this.paymentLines().map((line) => this.methodName(line.methodCode)).join(' + '),
@@ -353,6 +368,7 @@ export class PosPage implements OnInit {
     const total = this.subtotal();
     const payments = toPaymentLines(this.paymentLines(), this.kindOf, total);
     if (!payments.length) return;
+    const invoiceCustomer = this.invoiceCustomer();
     const body: PosSaleRequest = {
       storeId: this.isAdmin ? this.selectedStoreId() : null,
       sellerProfileId,
@@ -362,6 +378,9 @@ export class PosPage implements OnInit {
       notes: null,
       lines: this.cart().map((item) => ({ productId: item.product.id, quantity: item.quantity, discountAmount: 0 })),
       payments,
+      invoice: invoiceCustomer
+        ? { ruc: invoiceCustomer.documentNumber!, legalName: invoiceCustomer.displayName, address: null }
+        : null,
     };
     const pending = pendingSaleFor(this.pendingSale, body, () => crypto.randomUUID());
     this.pendingSale = pending;
@@ -377,8 +396,8 @@ export class PosPage implements OnInit {
           this.dialog
             .open(SaleSuccessDialog, {
               data: {
-                saleNumber: sale.saleNumber,
-                customer: sale.clientName ?? 'Cliente general',
+                saleNumber: isInvoice(sale) ? `Factura ${documentNumber(sale)}` : sale.saleNumber,
+                customer: sale.customerLegalName ?? sale.clientName ?? 'Cliente general',
                 paymentMethod: sale.paymentMethod,
                 total: sale.total,
                 change: sale.changeAmount ?? breakdown(this.paymentLines(), this.kindOf, total).change,

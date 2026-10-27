@@ -51,3 +51,5 @@ tr.clickable {
 tr.clickable:hover {
   background: var(--color-surface-secondary);
 }
+
+.einvoices{display:grid;gap:10px}.einvoices h3{margin:0;font-size:15px}.einvoices ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}.einvoices li{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:13px}.einvoices a{color:var(--color-primary);font-weight:600;text-decoration:none}.einvoices small{color:var(--color-text-muted)}.einvoices__status{padding:2px 10px;border-radius:999px;background:var(--color-surface-secondary);font-size:12px;font-weight:600}.einvoices__status[data-status='ACEPTADO']{color:var(--color-success)}.einvoices__status[data-status='ERROR'],.einvoices__status[data-status='RECHAZADO']{color:var(--color-danger)}.einvoices__status[data-status='PENDIENTE']{color:var(--color-warning)}.einvoices__error{flex-basis:100%;color:var(--color-danger)!important}

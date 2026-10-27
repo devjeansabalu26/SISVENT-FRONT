@@ -36,6 +36,13 @@ interface AnnulLine {
         <span class="material-icons">warning</span>
         Se anula toda la venta y no se puede deshacer. Si el cliente se lleva otros productos, registra una venta nueva.
       </p>
+      @if (data.sale.documentType === 'FACTURA' && data.sale.documentNumber) {
+        <p class="banner">
+          <span class="material-icons">description</span>
+          Es la factura {{ data.sale.documentNumber }}: al anularla se emite una nota de crédito por el total, que se envía a SUNAT
+          después de la factura.
+        </p>
+      }
 
       <div class="table-scroll">
         <table class="lines">

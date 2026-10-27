@@ -7,6 +7,7 @@ import { SaleApiService } from '../data-access/sale-api.service';
 import { SaleDetail } from '../models/sale-detail.model';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { downloadReceiptPdf } from '../utils/receipt-pdf';
+import { EINVOICE_STATUS_LABEL, documentNumber, documentTitle, isInvoice } from '../utils/sale-document';
 import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -30,6 +31,10 @@ export class ReceiptPage implements OnInit {
   readonly sending = this.mailer.sending;
   readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly sale = signal<SaleDetail | null>(null);
+  readonly isInvoice = isInvoice;
+  readonly documentNumber = documentNumber;
+  readonly documentTitle = documentTitle;
+  readonly statusLabel = EINVOICE_STATUS_LABEL;
 
   ngOnInit(): void {
     this.api.get(this.id).subscribe({

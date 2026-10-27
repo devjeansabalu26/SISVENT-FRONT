@@ -16,6 +16,7 @@ import { CreditNoteDetailDialog } from '../components/credit-note-dialogs/credit
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { SaleAnnulmentOptions, SaleDetail } from '../models/sale-detail.model';
 import { paymentSummary } from '../utils/payment';
+import { EINVOICE_STATUS_LABEL, credentialLabel, isInvoice } from '../utils/sale-document';
 import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -26,6 +27,9 @@ import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/dat
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SaleDetailPage implements OnInit {
+  readonly isInvoice = isInvoice;
+  readonly statusLabel = EINVOICE_STATUS_LABEL;
+  readonly credentialLabel = credentialLabel;
   private readonly api = inject(SaleApiService);
   private readonly creditNotes = inject(CreditNoteApiService);
   private readonly mailer = inject(ReceiptMailerService);

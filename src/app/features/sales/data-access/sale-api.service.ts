@@ -17,6 +17,7 @@ interface ListParams {
   readonly status?: string;
   readonly mineOnly?: boolean;
   readonly scope?: 'MINE' | 'STORE';
+  readonly documentType?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,6 +38,7 @@ export class SaleApiService {
     if (params.status) httpParams = httpParams.set('status', params.status);
     if (params.mineOnly !== undefined) httpParams = httpParams.set('mineOnly', params.mineOnly);
     if (params.scope) httpParams = httpParams.set('scope', params.scope);
+    if (params.documentType) httpParams = httpParams.set('documentType', params.documentType);
     return this.http.get<SalePage>(this.baseUrl, { params: httpParams });
   }
 

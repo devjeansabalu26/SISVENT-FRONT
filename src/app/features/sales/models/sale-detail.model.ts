@@ -1,3 +1,4 @@
+import { SaleDocumentType } from '../utils/sale-document';
 import { SalePayment } from './payment.model';
 
 export interface SaleDetailLine {
@@ -37,6 +38,27 @@ export interface SaleDetail {
   readonly changeAmount?: number;
   readonly clientEmail?: string | null;
   readonly annulment?: SaleAnnulment | null;
+  readonly documentType?: SaleDocumentType;
+  readonly documentNumber?: string | null;
+  readonly customerTaxId?: string | null;
+  readonly customerLegalName?: string | null;
+  readonly customerAddress?: string | null;
+  readonly eInvoiceStatus?: string | null;
+  readonly electronicDocuments?: readonly SaleElectronicDocument[];
+}
+
+export interface SaleElectronicDocument {
+  readonly id: string;
+  readonly kind: 'FACTURA' | 'NOTA_CREDITO';
+  readonly number: string;
+  readonly status: string;
+  readonly lastError: string | null;
+  readonly pdfUrl: string | null;
+  readonly xmlUrl: string | null;
+  readonly cdrUrl: string | null;
+  readonly providerCode: string | null;
+  readonly environment: string | null;
+  readonly credentialSource: 'PROPIA' | 'GENERAL' | null;
 }
 
 export interface SaleAnnulmentItem {

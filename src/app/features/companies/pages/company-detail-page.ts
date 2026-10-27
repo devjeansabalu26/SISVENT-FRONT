@@ -18,6 +18,7 @@ import {
 import { CompanyHistoryTab } from '../components/company-history-tab/company-history-tab';
 import { CompanyPlanTab } from '../components/company-plan-tab/company-plan-tab';
 import { CompanyRegionalTab } from '../components/company-regional-tab/company-regional-tab';
+import { CompanyEInvoicingTab } from '../components/company-einvoicing-tab/company-einvoicing-tab';
 import { CompanyModulesTab } from '../components/company-modules-tab/company-modules-tab';
 import { CompanyStoresTab } from '../components/company-stores-tab/company-stores-tab';
 import { CompanySummaryTab } from '../components/company-summary-tab/company-summary-tab';
@@ -31,8 +32,8 @@ import { PlatformUserApiService } from '../../users/data-access/platform-user-ap
 import { CompanyApiService } from '../data-access/company-api.service';
 import { CompanyDetail, companyStatusHint } from '../models/company.model';
 
-type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'history';
-const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'history'];
+type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'einvoicing' | 'history';
+const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'einvoicing', 'history'];
 
 @Component({
   selector: 'app-company-detail-page',
@@ -50,6 +51,7 @@ const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users'
     CompanySummaryTab,
     CompanyHistoryTab,
     CompanyRegionalTab,
+    CompanyEInvoicingTab,
     LogoUploader,
   ],
   templateUrl: './company-detail-page.html',
