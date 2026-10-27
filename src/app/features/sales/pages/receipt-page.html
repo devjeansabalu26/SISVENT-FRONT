@@ -13,18 +13,25 @@
     <header class="receipt__head">
       <div>
         <strong>{{ companyName() }}</strong>
-        <p>Comprobante interno de venta</p>
+        <p>{{ isInvoice(sale) ? 'Factura' : 'Comprobante interno de venta' }}</p>
       </div>
       <div class="receipt__doc">
-        <strong>COMPROBANTE DE VENTA</strong>
-        <span>{{ sale.saleNumber }}</span>
+        <strong>{{ documentTitle(sale) }}</strong>
+        <span>{{ documentNumber(sale) }}</span>
       </div>
     </header>
 
     <section class="receipt__meta">
       <div><span>Fecha emisión:</span> {{ sale.saleDate | dateTime }}</div>
       <div><span>Local:</span> {{ sale.storeName }}</div>
-      <div><span>Cliente:</span> {{ sale.clientName ?? 'Cliente general' }}</div>
+      @if (isInvoice(sale)) {
+        <div><span>Razón social:</span> {{ sale.customerLegalName }}</div>
+        <div><span>RUC:</span> {{ sale.customerTaxId }}</div>
+        @if (sale.customerAddress) { <div><span>Dirección:</span> {{ sale.customerAddress }}</div> }
+        <div><span>Venta interna:</span> {{ sale.saleNumber }}</div>
+      } @else {
+        <div><span>Cliente:</span> {{ sale.clientName ?? 'Cliente general' }}</div>
+      }
       <div><span>Vendedor:</span> {{ sale.sellerName }}</div>
     </section>
 
@@ -67,13 +74,22 @@
       <div class="sep"></div>
       <div><span>Subtotal:</span> {{ sale.subtotal | money }}</div>
       <div><span>Descuento:</span> {{ sale.discountTotal | money }}</div>
-      <div><span>{{ 'taxName' | regional }} (referencial):</span> {{ sale.tax | money }}</div>
+      @if (isInvoice(sale)) {
+        <div><span>Op. gravada:</span> {{ (sale.total - sale.tax) | money }}</div>
+        <div><span>{{ 'taxName' | regional }}:</span> {{ sale.tax | money }}</div>
+      } @else {
+        <div><span>{{ 'taxName' | regional }} (referencial):</span> {{ sale.tax | money }}</div>
+      }
       <div class="grand"><span>TOTAL:</span> {{ sale.total | money }}</div>
     </section>
 
     <footer class="receipt__foot">
       <p>¡Gracias por su compra!</p>
-      <p class="muted">{{ 'receiptNote' | regional }}</p>
+      @if (isInvoice(sale)) {
+        <p class="muted">{{ statusLabel[sale.eInvoiceStatus ?? ''] ?? 'Factura' }}. La representación impresa de la factura electrónica estará disponible cuando se conecte el envío a SUNAT.</p>
+      } @else {
+        <p class="muted">{{ 'receiptNote' | regional }}</p>
+      }
     </footer>
   </article>
 } @else if (loading()) {

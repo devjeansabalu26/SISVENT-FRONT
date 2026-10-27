@@ -1,3 +1,4 @@
+import { BlockedRucLookupUser, CompanyEInvoicing, ConnectionTestResult, UpdateCompanyEInvoicing } from '../models/company-einvoicing.model';
 import { CompanyExtraFeatures, CompanyModules, ModuleToggle } from '../models/company-modules.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
@@ -82,6 +83,26 @@ export class CompanyApiService {
 
   updateExtraFeatures(id: string, codes: readonly string[], note: string | null): Observable<CompanyExtraFeatures> {
     return this.http.put<CompanyExtraFeatures>(`${this.baseUrl}/${id}/extra-features`, { codes, note });
+  }
+
+  getEInvoicing(id: string): Observable<CompanyEInvoicing> {
+    return this.http.get<CompanyEInvoicing>(`${this.baseUrl}/${id}/einvoicing`);
+  }
+
+  updateEInvoicing(id: string, body: UpdateCompanyEInvoicing): Observable<CompanyEInvoicing> {
+    return this.http.put<CompanyEInvoicing>(`${this.baseUrl}/${id}/einvoicing`, body);
+  }
+
+  testEInvoicing(id: string): Observable<ConnectionTestResult> {
+    return this.http.post<ConnectionTestResult>(`${this.baseUrl}/${id}/einvoicing/test`, {});
+  }
+
+  blockedRucLookups(id: string): Observable<readonly BlockedRucLookupUser[]> {
+    return this.http.get<readonly BlockedRucLookupUser[]>(`${this.baseUrl}/${id}/ruc-lookup/blocked`);
+  }
+
+  unblockRucLookup(id: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/ruc-lookup/blocked/${encodeURIComponent(userId)}/unblock`, {});
   }
 
   updateModules(id: string, modules: readonly ModuleToggle[]): Observable<CompanyModules> {

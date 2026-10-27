@@ -1,5 +1,6 @@
 import { SaleDetail } from '../models/sale-detail.model';
 import { currentRegional, formatDateTime, formatMoney, receiptNote } from '../../../core/regional/regional-format';
+import { EINVOICE_STATUS_LABEL, documentNumber, isInvoice } from './sale-document';
 
 const WIDTH = 80;
 const MARGIN = 5;
@@ -17,16 +18,26 @@ const quantity = (value: number): string => (Number.isInteger(value) ? String(va
 
 export function receiptRows(sale: SaleDetail, companyName: string): readonly Row[] {
   const date = formatDateTime(sale.saleDate);
+  const invoice = isInvoice(sale);
   const rows: Row[] = [
     { kind: 'text', text: companyName, align: 'center', bold: true, size: 11 },
-    { kind: 'text', text: 'Comprobante interno de venta', align: 'center' },
-    { kind: 'text', text: sale.saleNumber, align: 'center', bold: true },
+    { kind: 'text', text: invoice ? 'FACTURA' : 'Comprobante interno de venta', align: 'center' },
+    { kind: 'text', text: documentNumber(sale), align: 'center', bold: true },
     { kind: 'rule' },
     { kind: 'pair', left: 'Fecha', right: date },
     { kind: 'pair', left: 'Local', right: sale.storeName },
-    { kind: 'pair', left: 'Cliente', right: sale.clientName ?? 'Cliente general' },
-    { kind: 'pair', left: 'Vendedor', right: sale.sellerName },
   ];
+  if (invoice) {
+    rows.push(
+      { kind: 'pair', left: 'RUC', right: sale.customerTaxId ?? '' },
+      { kind: 'text', text: sale.customerLegalName ?? '' },
+    );
+    if (sale.customerAddress) rows.push({ kind: 'text', text: sale.customerAddress });
+    rows.push({ kind: 'pair', left: 'Venta interna', right: sale.saleNumber });
+  } else {
+    rows.push({ kind: 'pair', left: 'Cliente', right: sale.clientName ?? 'Cliente general' });
+  }
+  rows.push({ kind: 'pair', left: 'Vendedor', right: sale.sellerName });
   if (sale.status === 'CANCELLED') rows.push({ kind: 'text', text: '*** VENTA ANULADA ***', align: 'center', bold: true });
   rows.push({ kind: 'rule' });
 
@@ -40,7 +51,12 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
     { kind: 'rule' },
     { kind: 'pair', left: 'Subtotal', right: money(sale.subtotal) },
     { kind: 'pair', left: 'Descuento', right: `-${money(sale.discountTotal)}` },
-    { kind: 'pair', left: `${currentRegional().taxName} (referencial)`, right: money(sale.tax) },
+    ...(invoice
+      ? [
+          { kind: 'pair', left: 'Op. gravada', right: money(sale.total - sale.tax) } as const,
+          { kind: 'pair', left: currentRegional().taxName, right: money(sale.tax) } as const,
+        ]
+      : [{ kind: 'pair', left: `${currentRegional().taxName} (referencial)`, right: money(sale.tax) } as const]),
     { kind: 'pair', left: 'TOTAL', right: money(sale.total), bold: true, size: 11 },
     { kind: 'rule' },
     { kind: 'text', text: 'Pagos', bold: true },
@@ -64,13 +80,18 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
   rows.push(
     { kind: 'rule' },
     { kind: 'text', text: '¡Gracias por su compra!', align: 'center', bold: true },
-    { kind: 'text', text: receiptNote(), align: 'center', size: 7 },
+    {
+      kind: 'text',
+      text: invoice ? (EINVOICE_STATUS_LABEL[sale.eInvoiceStatus ?? ''] ?? 'Factura') : receiptNote(),
+      align: 'center',
+      size: 7,
+    },
   );
   return rows;
 }
 
 export async function downloadReceiptPdf(sale: SaleDetail, companyName: string): Promise<void> {
-  (await buildReceiptPdf(sale, companyName)).save(`comprobante-${sale.saleNumber}.pdf`);
+  (await buildReceiptPdf(sale, companyName)).save(`comprobante-${documentNumber(sale)}.pdf`);
 }
 
 export async function receiptPdfBase64(sale: SaleDetail, companyName: string): Promise<string> {

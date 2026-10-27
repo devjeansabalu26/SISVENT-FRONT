@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -12,6 +12,8 @@ import { PosApiService } from '../data-access/pos-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
 import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 import { formatDateTime, formatMoney } from '../../../core/regional/regional-format';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { INVOICE_FEATURE } from '../utils/sale-document';
 
 @Component({
   selector: 'app-sale-list-page',
@@ -29,6 +31,8 @@ export class SaleListPage implements OnInit {
   readonly isSeller = this.role === 'VENDEDOR';
   readonly scope = signal<'MINE' | 'STORE'>('MINE');
   readonly canUseCash = canUseCash();
+  private readonly access = inject(AccessControlService);
+  readonly canInvoice = computed(() => this.access.hasFeature(INVOICE_FEATURE));
 
   readonly loading = signal(false);
   readonly rows = signal<readonly Sale[]>([]);
@@ -39,10 +43,11 @@ export class SaleListPage implements OnInit {
   to = '';
   paymentMethod = '';
   status = '';
+  documentType = '';
   readonly paymentOptions = signal<readonly { value: string; label: string }[]>([]);
 
   readonly columns: readonly DataTableColumn<Sale>[] = [
-    { key: 'number', label: 'Nro venta', value: (row) => row.saleNumber },
+    { key: 'number', label: 'Nro venta', value: (row) => (row.documentNumber ? `${row.documentNumber} (${row.saleNumber})` : row.saleNumber) },
     { key: 'date', label: 'Fecha', value: (row) => formatDateTime(row.saleDate) },
     { key: 'customer', label: 'Cliente', value: (row) => row.clientName ?? 'Cliente general' },
     { key: 'seller', label: 'Vendedor', value: (row) => row.sellerName },
@@ -69,6 +74,7 @@ export class SaleListPage implements OnInit {
         to: this.to || undefined,
         paymentMethod: this.paymentMethod || undefined,
         status: this.status || undefined,
+        documentType: this.documentType || undefined,
         scope: this.isSeller ? this.scope() : undefined,
       })
       .subscribe({
@@ -82,7 +88,7 @@ export class SaleListPage implements OnInit {
   }
 
   hasFilters(): boolean {
-    return !!(this.search.trim() || this.from || this.to || this.paymentMethod || this.status);
+    return !!(this.search.trim() || this.from || this.to || this.paymentMethod || this.status || this.documentType);
   }
 
   setScope(scope: 'MINE' | 'STORE'): void {
@@ -101,6 +107,7 @@ export class SaleListPage implements OnInit {
     this.to = '';
     this.paymentMethod = '';
     this.status = '';
+    this.documentType = '';
     this.load();
   }
 

@@ -32,6 +32,7 @@
     <button type="button" [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">Locales</button>
     <button type="button" [class.active]="activeTab() === 'summary'" (click)="setTab('summary')">Resumen</button>
     <button type="button" [class.active]="activeTab() === 'regional'" (click)="setTab('regional')">Configuración regional</button>
+    <button type="button" [class.active]="activeTab() === 'einvoicing'" (click)="setTab('einvoicing')">Facturación</button>
     <button type="button" [class.active]="activeTab() === 'history'" (click)="setTab('history')">Historial</button>
   </nav>
 
@@ -169,6 +170,11 @@
   @if (activatedTabs().has('regional')) {
     <div [hidden]="activeTab() !== 'regional'">
       <app-company-regional-tab [companyId]="company.id" (changed)="onRegionalChanged()" />
+    </div>
+  }
+  @if (activatedTabs().has('einvoicing')) {
+    <div [hidden]="activeTab() !== 'einvoicing'">
+      <app-company-einvoicing-tab [companyId]="company.id" />
     </div>
   }
   @if (activatedTabs().has('history')) {

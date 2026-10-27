@@ -9,6 +9,8 @@ export interface Sale {
   readonly cashAmount?: number;
   readonly total: number;
   readonly status: 'CONFIRMED' | 'CANCELLED';
+  readonly documentType?: 'BOLETA' | 'FACTURA';
+  readonly documentNumber?: string | null;
 }
 
 export interface SalesTotals {

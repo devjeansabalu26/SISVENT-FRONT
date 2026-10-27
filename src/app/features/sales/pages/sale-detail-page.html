@@ -15,6 +15,31 @@
     <app-status-chip [value]="sale.status" [label]="sale.status" [hint]="sale.annulment ? 'Anulada por ' + sale.annulment.cancelledBy + '. Motivo: ' + sale.annulment.reason : null" />
   </div>
 
+  @if (isInvoice(sale)) {
+    <p class="notice muted-notice">
+      <span class="material-icons">description</span>
+      Factura {{ sale.documentNumber }} · {{ sale.customerLegalName }} · RUC {{ sale.customerTaxId }}@if (sale.customerAddress) { · {{ sale.customerAddress }} }
+    </p>
+    @if (sale.electronicDocuments?.length) {
+      <section class="surface-card einvoices">
+        <h3>Comprobantes electrónicos</h3>
+        <ul>
+          @for (doc of sale.electronicDocuments; track doc.id) {
+            <li>
+              <strong>{{ doc.kind === 'FACTURA' ? 'Factura' : 'Nota de crédito' }} {{ doc.number }}</strong>
+              <span class="einvoices__status" [attr.data-status]="doc.status">{{ statusLabel[doc.status] ?? doc.status }}</span>
+              @if (credentialLabel(doc); as label) { <small>{{ label }}</small> }
+              @if (doc.pdfUrl) { <a [href]="doc.pdfUrl" target="_blank" rel="noopener">PDF</a> }
+              @if (doc.xmlUrl) { <a [href]="doc.xmlUrl" target="_blank" rel="noopener">XML</a> }
+              @if (doc.cdrUrl) { <a [href]="doc.cdrUrl" target="_blank" rel="noopener">CDR</a> }
+              @if (doc.lastError) { <small class="einvoices__error">{{ doc.lastError }}</small> }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+
   @if (canCancel && sale.status === 'CONFIRMED' && annulment(); as a) {
     @if (!a.canAnnul && a.blockedReason) {
       <p class="notice muted-notice"><span class="material-icons">info</span>{{ a.blockedReason }}</p>

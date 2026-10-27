@@ -2,6 +2,7 @@
   [title]="isAdmin ? 'Historial de ventas' : scope() === 'STORE' ? 'Ventas del local' : 'Mis ventas'"
   [description]="isAdmin ? 'Registro completo de operaciones de venta' : scope() === 'STORE' ? 'Ventas registradas en tu local' : 'Ventas registradas con tu usuario'"
 >
+  @if (canInvoice() && isAdmin) {<a class="ghost" routerLink="/app/sales/einvoices"><span class="material-icons">receipt</span>Facturas electrónicas</a>}
   @if (canUseCash) {<a class="ghost" routerLink="/app/sales/cash"><span class="material-icons">point_of_sale</span>Caja</a>}
 </app-page-header>
 @if (isSeller) {
@@ -15,7 +16,7 @@
   </nav>
 }
 <section class="filters sales-filters">
-  <label><span class="material-icons">search</span><input [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nro de venta o cliente" /></label>
+  <label><span class="material-icons">search</span><input [(ngModel)]="search" (keyup.enter)="load()" [placeholder]="canInvoice() ? 'Nro de venta, factura, cliente o RUC' : 'Nro de venta o cliente'" /></label>
   <input type="date" [(ngModel)]="from" aria-label="Fecha desde" />
   <input type="date" [(ngModel)]="to" aria-label="Fecha hasta" />
   <select [(ngModel)]="paymentMethod" aria-label="Método de pago">
@@ -27,6 +28,13 @@
     <option value="CONFIRMED">Confirmada</option>
     <option value="CANCELLED">Anulada</option>
   </select>
+  @if (canInvoice()) {
+    <select [(ngModel)]="documentType" aria-label="Comprobante">
+      <option value="">Boletas y facturas</option>
+      <option value="BOLETA">Solo boletas</option>
+      <option value="FACTURA">Solo facturas</option>
+    </select>
+  }
   <div class="sales-filters__actions">
     <button type="button" class="ghost" (click)="clearFilters()">Limpiar</button>
     <button type="button" (click)="load()">Filtrar</button>
