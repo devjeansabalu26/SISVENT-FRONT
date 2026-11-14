@@ -42,7 +42,7 @@ const EXPORT_SHEETS: readonly { readonly label: string; readonly icon: string }[
   selector: 'app-company-data-tab',
   imports: [CompanyWipePanel],
   templateUrl: './company-data-tab.html',
-  styleUrls: ['../../../../shared/ui/detail-page.scss', './company-data-tab.scss'],
+  styleUrls: ['../../../../shared/ui/detail-page.scss', './company-data-tab.scss', './company-data-results.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompanyDataTab implements OnInit {
