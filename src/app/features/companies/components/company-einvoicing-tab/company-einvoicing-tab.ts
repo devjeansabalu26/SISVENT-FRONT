@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
@@ -25,6 +25,9 @@ export class CompanyEInvoicingTab implements OnInit {
   private readonly notifications = inject(NotificationService);
 
   readonly companyId = input.required<string>();
+  readonly goToModules = output<void>();
+
+  readonly featureState = signal<'active' | 'inactive' | null>(null);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -77,6 +80,13 @@ export class CompanyEInvoicingTab implements OnInit {
   });
 
   ngOnInit(): void {
+    this.api.getExtraFeatures(this.companyId()).subscribe({
+      next: (result) => {
+        const feature = result.features.find((item) => item.code === 'E_INVOICING');
+        this.featureState.set(feature && (feature.inPlan || feature.extra) ? 'active' : 'inactive');
+      },
+      error: () => this.featureState.set(null),
+    });
     const controls = this.form.controls;
     controls.credentialMode.valueChanges.subscribe((mode) => {
       this.mode.set(mode);

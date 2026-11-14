@@ -38,4 +38,22 @@ export class AuditApiService {
     if (params.to) httpParams = httpParams.set('to', params.to);
     return this.http.get<AuditPage>(url, { params: httpParams });
   }
+
+  requestPurgeCode(): Observable<AuditPurgeCode> {
+    return this.http.post<AuditPurgeCode>(`${this.apiBaseUrl}/api/v1/platform/audit/purge/code`, {});
+  }
+
+  purge(code: string, confirmText: string): Observable<AuditPurgeResult> {
+    return this.http.post<AuditPurgeResult>(`${this.apiBaseUrl}/api/v1/platform/audit/purge`, { code, confirmText });
+  }
+}
+
+export interface AuditPurgeCode {
+  readonly sentTo: string;
+  readonly expiresAt: string;
+  readonly totalRows: number;
+}
+
+export interface AuditPurgeResult {
+  readonly deletedRows: number;
 }

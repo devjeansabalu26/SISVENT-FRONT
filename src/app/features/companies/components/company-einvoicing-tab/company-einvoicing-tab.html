@@ -1,3 +1,24 @@
+@if (featureState(); as state) {
+  <div class="feature-status" [class.feature-status--on]="state === 'active'" [class.feature-status--off]="state === 'inactive'"
+    role="status">
+    <span class="material-icons" aria-hidden="true">{{ state === 'active' ? 'check_circle' : 'info' }}</span>
+    <div class="feature-status__text">
+      @if (state === 'active') {
+        <strong>Facturación electrónica: activa</strong>
+        <span>La empresa ya puede emitir facturas desde el POS. Aquí configuras cómo se envían a SUNAT.</span>
+      } @else {
+        <strong>Facturación electrónica: inactiva</strong>
+        <span>La empresa solo emite boletas. Actívala en Menús → Funcionalidades extra y luego configura aquí el envío a SUNAT.</span>
+      }
+    </div>
+    @if (state === 'inactive') {
+      <button type="button" class="feature-status__btn" (click)="goToModules.emit()">
+        <span class="material-icons" aria-hidden="true">tune</span>Ir a Menús
+      </button>
+    }
+  </div>
+}
+
 @if (loading()) {
   <p class="muted">Cargando configuración de facturación…</p>
 } @else if (data(); as info) {

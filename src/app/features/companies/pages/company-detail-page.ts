@@ -23,6 +23,7 @@ import { CompanyModulesTab } from '../components/company-modules-tab/company-mod
 import { CompanyStoresTab } from '../components/company-stores-tab/company-stores-tab';
 import { CompanySummaryTab } from '../components/company-summary-tab/company-summary-tab';
 import { CompanyUsersTab } from '../components/company-users-tab/company-users-tab';
+import { CompanyDataTab } from '../components/company-data-tab/company-data-tab';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
@@ -32,8 +33,8 @@ import { PlatformUserApiService } from '../../users/data-access/platform-user-ap
 import { CompanyApiService } from '../data-access/company-api.service';
 import { CompanyDetail, companyStatusHint } from '../models/company.model';
 
-type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'einvoicing' | 'history';
-const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'einvoicing', 'history'];
+type CompanyTab = 'general' | 'plan' | 'modules' | 'users' | 'stores' | 'summary' | 'regional' | 'einvoicing' | 'data' | 'history';
+const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users', 'stores', 'summary', 'regional', 'einvoicing', 'data', 'history'];
 
 @Component({
   selector: 'app-company-detail-page',
@@ -52,6 +53,7 @@ const VALID_TABS: readonly CompanyTab[] = ['general', 'plan', 'modules', 'users'
     CompanyHistoryTab,
     CompanyRegionalTab,
     CompanyEInvoicingTab,
+    CompanyDataTab,
     LogoUploader,
   ],
   templateUrl: './company-detail-page.html',
@@ -120,6 +122,20 @@ export class CompanyDetailPage implements OnInit {
         uploader.showError(cause instanceof AppHttpError && cause.message ? cause.message : 'No se pudo guardar el logo.');
       },
     });
+  }
+
+  openModulesFromEInvoicing(): void {
+    this.setTab('modules');
+    this.invalidateTabs(['einvoicing']);
+  }
+
+  onCompanyDeleted(): void {
+    void this.router.navigate(['/app/companies']);
+  }
+
+  onDataChanged(): void {
+    this.load();
+    this.invalidateTabs(['summary', 'history']);
   }
 
   onRegionalChanged(): void {

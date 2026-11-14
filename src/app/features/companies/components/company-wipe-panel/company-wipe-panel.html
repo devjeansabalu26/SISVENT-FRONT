@@ -1,0 +1,158 @@
+<section class="surface-card danger-panel" aria-labelledby="danger-title">
+  <header class="danger-panel__head">
+    <span class="danger-panel__icon" aria-hidden="true"><span class="material-icons">warning</span></span>
+    <div>
+      <span class="danger-panel__tag">Zona de peligro</span>
+      <h3 id="danger-title">Borrar información de la empresa</h3>
+      <p>Elige qué quieres hacer. Las dos acciones se autorizan con un código que llega a tu correo y no se pueden deshacer.</p>
+    </div>
+  </header>
+
+  <div class="options" role="radiogroup" aria-labelledby="danger-title">
+    @for (option of options; track option.mode) {
+      <label class="option" [class.is-selected]="mode() === option.mode" [class.is-disabled]="working()">
+        <input type="radio" class="sr-only" name="danger-mode" [value]="option.mode" [checked]="mode() === option.mode"
+          [disabled]="working()" (change)="choose(option.mode)" />
+        <span class="option__icon material-icons" aria-hidden="true">{{ option.copy.icon }}</span>
+        <span class="option__text">
+          <strong>{{ option.copy.title }}</strong>
+          <small>{{ option.copy.lead }}</small>
+        </span>
+        <span class="option__check material-icons" aria-hidden="true">
+          {{ mode() === option.mode ? 'radio_button_checked' : 'radio_button_unchecked' }}
+        </span>
+      </label>
+    }
+  </div>
+
+  @if (isDelete()) {
+    <div class="keep-grid">
+      <div class="keep-box keep-box--drop">
+        <h4><span class="material-icons" aria-hidden="true">delete_forever</span>Se elimina todo</h4>
+        <ul>
+          <li>La empresa, su plan y su configuración</li>
+          <li>Todos sus usuarios: el administrador y los vendedores (ya no podrán entrar)</li>
+          <li>Todos los locales, productos, stock y kardex</li>
+          <li>Ventas, pagos, comprobantes, clientes, proveedores, cajas, asistencia y auditoría</li>
+        </ul>
+      </div>
+      <div class="keep-box keep-box--keep">
+        <h4><span class="material-icons" aria-hidden="true">shield</span>No se toca</h4>
+        <ul>
+          <li>Las demás empresas y sus datos</li>
+          <li>Los planes y el catálogo de la plataforma</li>
+        </ul>
+      </div>
+    </div>
+  } @else {
+    <div class="keep-grid">
+      <div class="keep-box keep-box--keep">
+        <h4><span class="material-icons" aria-hidden="true">verified</span>Se conserva</h4>
+        <ul>
+          <li>El usuario <strong>administrador principal</strong></li>
+          <li>El <strong>local del administrador</strong></li>
+          <li>Plan, medios de pago, menús, colores y configuración</li>
+        </ul>
+      </div>
+      <div class="keep-box keep-box--drop">
+        <h4><span class="material-icons" aria-hidden="true">delete_sweep</span>Se borra</h4>
+        <ul>
+          <li>Productos, categorías, marcas, stock y kardex</li>
+          <li>Ventas, pagos, anulaciones, notas de crédito y comprobantes</li>
+          <li>Clientes, proveedores, ingresos, cajas y asistencia</li>
+          <li>Los demás usuarios y locales, notificaciones y auditoría</li>
+        </ul>
+      </div>
+    </div>
+  }
+
+  @if (result(); as done) {
+    <div class="notice notice--success" role="status">
+      <span class="material-icons" aria-hidden="true">check_circle</span>
+      <div>
+        <p><strong>Limpieza terminada.</strong> Se borraron {{ done.totalRows }} registro(s). Quedaron el administrador
+          <strong>{{ done.keptAdminName }}</strong> y el local <strong>{{ done.keptStoreName }}</strong>.</p>
+        @if (done.tables.length) {
+          <ul class="counts">
+            @for (row of done.tables; track row.table) {
+              <li><span>{{ label(row.table) }}</span><strong>{{ row.rows }}</strong></li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!open()) {
+    <footer class="danger-panel__foot">
+      <p><span class="material-icons" aria-hidden="true">lightbulb</span>Antes de continuar, exporta la información por si la necesitas después.</p>
+      <div class="actions">
+        <button type="button" class="ghost" (click)="exportRequested.emit()">
+          <span class="material-icons" aria-hidden="true">file_download</span>Exportar primero
+        </button>
+        <button type="button" class="danger-btn" (click)="start()">
+          <span class="material-icons" aria-hidden="true">{{ copy().icon }}</span>{{ copy().startLabel }}
+        </button>
+      </div>
+    </footer>
+  } @else {
+    <div class="flow">
+      <div class="flow__step" [class.is-done]="!!sent()">
+        <span class="flow__badge" aria-hidden="true">
+          @if (sent()) { <span class="material-icons">check</span> } @else { 1 }
+        </span>
+        <div class="flow__body">
+          <h4>Recibe el código en tu correo</h4>
+          @if (sent(); as info) {
+            <p>Enviamos un código de 6 dígitos a <strong>{{ info.sentTo }}</strong>. Vence a las {{ info.expiresAt | dateTime }}.</p>
+            <button type="button" class="link-btn" (click)="sendCode()" [disabled]="sending()">
+              {{ sending() ? 'Enviando…' : 'Reenviar código' }}
+            </button>
+          } @else {
+            <p>{{ copy().mailHint }}</p>
+            <button type="button" class="ghost" (click)="sendCode()" [disabled]="sending()">
+              <span class="material-icons" aria-hidden="true">mail</span>{{ sending() ? 'Enviando…' : 'Enviar código a mi correo' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="flow__step" [class.is-locked]="!sent()">
+        <span class="flow__badge" aria-hidden="true">2</span>
+        <div class="flow__body">
+          <h4>Confirma</h4>
+          <div class="fields">
+            <label class="field">
+              <span>Código del correo</span>
+              <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"
+                class="code-input" [formControl]="code" />
+            </label>
+            <label class="field">
+              <span>Escribe el nombre de la empresa: <strong>{{ companyName() }}</strong></span>
+              <input type="text" autocomplete="off" [formControl]="confirmName" [class.is-ok]="nameMatches()" />
+            </label>
+          </div>
+          <label class="check">
+            <input type="checkbox" [formControl]="acknowledged" />
+            <span>{{ copy().ack }}</span>
+          </label>
+        </div>
+      </div>
+
+      @if (error(); as message) {
+        <div class="notice notice--danger" role="alert">
+          <span class="material-icons" aria-hidden="true">error</span>
+          <p>{{ message }}</p>
+        </div>
+      }
+
+      <footer class="danger-panel__foot">
+        <button type="button" class="ghost" (click)="cancel()" [disabled]="working()">Cancelar</button>
+        <button type="button" class="danger-btn" (click)="confirm()" [disabled]="!canConfirm()">
+          <span class="material-icons" aria-hidden="true">{{ working() ? 'hourglass_top' : copy().icon }}</span>
+          {{ working() ? copy().busyLabel : copy().confirmLabel }}
+        </button>
+      </footer>
+    </div>
+  }
+</section>

@@ -2,6 +2,11 @@
   <button type="button" class="primary" (click)="exportHistory()" [disabled]="exporting()">
     <span class="material-icons">download</span>{{ exporting() ? 'Exportando…' : 'Exportar historial' }}
   </button>
+  @if (isSuperadmin) {
+    <button type="button" class="purge-btn" (click)="openPurge()">
+      <span class="material-icons" aria-hidden="true">delete_sweep</span>Eliminar auditoría
+    </button>
+  }
 </app-page-header>
 
 <section class="filters">
