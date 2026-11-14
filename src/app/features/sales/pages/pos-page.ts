@@ -32,6 +32,7 @@ import { breakdown, paymentSummary, paymentsError, toPaymentLines } from '../uti
 import { PendingSale, SALE_CONFIRM_TIMEOUT_MS, isUncertainSaleFailure, pendingSaleFor } from '../utils/pending-sale';
 import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 import { INVOICE_FEATURE, documentNumber, isInvoice, isValidRuc } from '../utils/sale-document';
+import { SoundService } from '../../../core/sound/sound.service';
 
 @Component({
   selector: 'app-pos-page',
@@ -45,6 +46,7 @@ export class PosPage implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly notifications = inject(NotificationService);
+  private readonly sound = inject(SoundService);
   private readonly productApi = inject(ProductApiService);
   private readonly customerApi = inject(CustomerApiService);
   private readonly storeApi = inject(StoreApiService);
@@ -392,6 +394,7 @@ export class PosPage implements OnInit {
         next: (sale) => {
           this.saving.set(false);
           this.pendingSale = null;
+          this.sound.play('sale');
           const autoEmailedTo = this.autoEmailReceipt(sale);
           this.dialog
             .open(SaleSuccessDialog, {

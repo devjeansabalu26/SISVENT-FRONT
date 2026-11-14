@@ -14,6 +14,7 @@
     </label>
   }
   <div class="user">
+    <app-sound-settings [full]="user()?.role === 'SUPERADMIN'" />
     <button type="button" class="mode" (click)="toggleMode()" [attr.aria-label]="modeLabel()" [title]="modeLabel()" [attr.aria-pressed]="isDark()">
       <span class="material-icons">{{ isDark() ? 'light_mode' : 'dark_mode' }}</span>
     </button>

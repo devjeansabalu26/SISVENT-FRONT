@@ -1,0 +1,50 @@
+<button type="button" class="trigger" (click)="toggle()" [attr.aria-expanded]="open()" aria-haspopup="dialog"
+  [attr.aria-label]="label()" [title]="label()">
+  <span class="material-icons">{{ icon() }}</span>
+</button>
+
+@if (open()) {
+  <section class="panel" role="dialog" aria-label="Sonidos">
+    <header>
+      <strong>Sonidos</strong>
+      <small>Se guardan en este equipo</small>
+    </header>
+
+    @if (full()) {
+      <label class="row">
+        <span>Activar sonidos</span>
+        <input type="checkbox" role="switch" [checked]="prefs().enabled" (change)="setEnabled($event)" />
+      </label>
+
+      <label class="field">
+        <span>Tono</span>
+        <select [value]="prefs().tone" (change)="setTone($event)" [disabled]="!prefs().enabled">
+          @for (tone of sound.tones; track tone.id) {
+            <option [value]="tone.id" [selected]="tone.id === prefs().tone">{{ tone.label }}: {{ tone.description }}</option>
+          }
+        </select>
+      </label>
+    } @else if (!prefs().enabled) {
+      <p class="note">Los sonidos están desactivados en este equipo.</p>
+    } @else {
+      <p class="note">Tono: <b>{{ toneLabel() }}</b></p>
+    }
+
+    <label class="field">
+      <span>Volumen <b>{{ volumePercent() }}%</b></span>
+      <input type="range" min="0" max="100" step="5" [value]="volumePercent()" (input)="setVolume($event)" (change)="previewVolume()"
+        [disabled]="!prefs().enabled" aria-label="Volumen de los sonidos" />
+    </label>
+
+    <div class="tests">
+      <span>Probar</span>
+      <div class="grid">
+        @for (item of kinds; track item.kind) {
+          <button type="button" (click)="test(item.kind)">
+            <span class="material-icons">{{ item.icon }}</span>{{ item.label }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+}

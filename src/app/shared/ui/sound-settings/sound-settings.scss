@@ -1,0 +1,20 @@
+:host { position: relative; display: inline-flex; }
+.trigger { display: inline-grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: var(--radius-md); color: var(--color-text-secondary); background: transparent; cursor: pointer; transition: color 0.2s ease, background 0.2s ease; }
+.trigger:hover, .trigger:focus-visible, .trigger[aria-expanded='true'] { color: var(--color-primary); background: var(--color-primary-soft); outline: none; }
+.panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 1000; display: grid; gap: 14px; width: min(320px, calc(100vw - 24px)); padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-lg, 0 12px 32px rgb(15 23 42 / 18%)); }
+header { display: grid; gap: 2px; }
+header strong { color: var(--color-text-primary); }
+header small, .tests > span, .field > span { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-text-primary); font-weight: 600; cursor: pointer; }
+.field { display: grid; gap: 6px; }
+.field b { color: var(--color-text-primary); }
+.field select { width: 100%; }
+.field input[type='range'] { width: 100%; accent-color: var(--color-primary); }
+.tests { display: grid; gap: 8px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.grid button { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-primary); background: var(--color-surface); font: inherit; font-size: var(--font-size-sm); text-align: left; cursor: pointer; }
+.grid button:hover, .grid button:focus-visible { border-color: var(--color-primary); color: var(--color-primary); outline: none; }
+.grid .material-icons { font-size: 18px; color: var(--color-primary); }
+@media (max-width: 600px) { .panel { position: fixed; top: 64px; right: 12px; } }
+.note { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.note b { color: var(--color-text-primary); }

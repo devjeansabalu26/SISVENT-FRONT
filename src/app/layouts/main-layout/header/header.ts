@@ -10,8 +10,9 @@ import { CompanyContextService } from '../../../core/context/company-context/com
 import { NotificationBadgeService } from '../../../features/notifications/data-access/notification-badge.service';
 import { ThemeService } from '../../../core/theme/theme.service';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
+import { SoundSettings } from '../../../shared/ui/sound-settings/sound-settings';
 
-@Component({ selector: 'app-header', imports: [RouterLink], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-header', imports: [RouterLink, SoundSettings], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
   private readonly session = inject(AppSessionService);
   private readonly router = inject(Router);

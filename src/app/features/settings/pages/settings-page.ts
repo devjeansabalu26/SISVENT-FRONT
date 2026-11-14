@@ -18,6 +18,7 @@ import { DiffRow } from '../../../shared/utils/diff-rows';
 import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { INVOICE_FEATURE } from '../../sales/utils/sale-document';
+import { SoundService } from '../../../core/sound/sound.service';
 
 const TAX_REGIMES: readonly { readonly value: TaxRegime; readonly label: string }[] = [
   { value: 'RUS', label: 'Nuevo RUS' },
@@ -109,6 +110,7 @@ export class SettingsPage implements OnInit {
   readonly weekDays = WEEK_DAYS;
   private version = 0;
   private saved: CompanySettings | null = null;
+  private readonly sound = inject(SoundService);
   private readonly lastSavedAt = signal<string | null>(null);
   readonly lastSavedLabel = computed(() => {
     const at = this.lastSavedAt();
@@ -277,8 +279,10 @@ export class SettingsPage implements OnInit {
 
   private persist(request: CompanySettings): void {
     this.saving.set(true);
+    const previousSound = this.saved?.soundEffects;
     this.api.update(request).subscribe({
       next: (settings) => {
+        if (previousSound !== settings.soundEffects) this.sound.setEnabled(settings.soundEffects);
         this.apply(settings);
         this.saving.set(false);
         this.notifications.show('Configuración guardada correctamente.', 'success');
