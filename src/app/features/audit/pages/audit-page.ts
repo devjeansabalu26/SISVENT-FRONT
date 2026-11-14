@@ -11,7 +11,8 @@ import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model'
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { Paginator } from '../../../shared/ui/paginator/paginator';
 import { AuditDetailDialog } from '../components/audit-detail-dialog/audit-detail-dialog';
-import { AuditApiService } from '../data-access/audit-api.service';
+import { AuditApiService, AuditPurgeResult } from '../data-access/audit-api.service';
+import { AuditPurgeDialog } from '../components/audit-purge-dialog/audit-purge-dialog';
 import { AuditEvent } from '../models/audit-event.model';
 import { formatDateTime } from '../../../core/regional/regional-format';
 
@@ -133,6 +134,18 @@ export class AuditPage implements OnInit {
 
   view(event: AuditEvent): void {
     this.dialog.open(AuditDetailDialog, { data: event });
+  }
+
+  openPurge(): void {
+    this.dialog
+      .open<AuditPurgeDialog, void, AuditPurgeResult | null>(AuditPurgeDialog, { maxWidth: 'calc(100vw - 32px)', autoFocus: false })
+      .afterClosed()
+      .subscribe((result) => {
+        if (!result) return;
+        this.notifications.show(`Auditoría eliminada (${result.deletedRows} registros).`, 'success');
+        this.pageNumber.set(1);
+        this.load();
+      });
   }
 
   async exportHistory(): Promise<void> {

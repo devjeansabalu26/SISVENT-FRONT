@@ -51,6 +51,12 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
                           {{ feature.description ?? 'No incluida en el plan' }}
                         }
                       </small>
+                      @if (feature.code === 'E_INVOICING') {
+                        <small class="extras__hint">
+                          <span class="material-icons" aria-hidden="true">arrow_forward</span>
+                          Después, configura el envío en la pestaña Envío a SUNAT.
+                        </small>
+                      }
                     </span>
                     <input type="checkbox" role="switch" [checked]="isOn(feature)" [disabled]="saving()"
                       (change)="toggle(feature, $any($event.target).checked)" [attr.aria-label]="'Habilitar ' + feature.name" />
@@ -86,6 +92,8 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
     .extras__list label { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
     .extras__text { display: grid; gap: 2px; }
     .extras__text small { color: var(--color-text-muted); }
+    .extras__text .extras__hint { display: inline-flex; align-items: center; gap: 4px; color: var(--color-primary); font-weight: 600; }
+    .extras__hint .material-icons { font-size: 14px; }
     .extras__note { display: grid; gap: 6px; margin-top: 12px; color: var(--color-text-secondary); font-size: var(--font-size-xs); font-weight: 600; }
     .extras__note input { height: var(--control-height); padding: 0 12px; }
     .extras__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; }

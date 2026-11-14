@@ -32,7 +32,8 @@
     <button type="button" [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">Locales</button>
     <button type="button" [class.active]="activeTab() === 'summary'" (click)="setTab('summary')">Resumen</button>
     <button type="button" [class.active]="activeTab() === 'regional'" (click)="setTab('regional')">Configuración regional</button>
-    <button type="button" [class.active]="activeTab() === 'einvoicing'" (click)="setTab('einvoicing')">Facturación</button>
+    <button type="button" [class.active]="activeTab() === 'einvoicing'" (click)="setTab('einvoicing')">Envío a SUNAT</button>
+    <button type="button" [class.active]="activeTab() === 'data'" (click)="setTab('data')">Datos</button>
     <button type="button" [class.active]="activeTab() === 'history'" (click)="setTab('history')">Historial</button>
   </nav>
 
@@ -174,7 +175,13 @@
   }
   @if (activatedTabs().has('einvoicing')) {
     <div [hidden]="activeTab() !== 'einvoicing'">
-      <app-company-einvoicing-tab [companyId]="company.id" />
+      <app-company-einvoicing-tab [companyId]="company.id" (goToModules)="openModulesFromEInvoicing()" />
+    </div>
+  }
+  @if (activatedTabs().has('data')) {
+    <div [hidden]="activeTab() !== 'data'">
+      <app-company-data-tab [companyId]="company.id" [companyName]="company.tradeName" (changed)="onDataChanged()"
+        (deleted)="onCompanyDeleted()" />
     </div>
   }
   @if (activatedTabs().has('history')) {

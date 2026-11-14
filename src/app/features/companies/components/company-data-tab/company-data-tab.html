@@ -1,0 +1,249 @@
+<section class="surface-card panel">
+  <header class="panel__head">
+    <span class="panel__icon" aria-hidden="true"><span class="material-icons">inventory_2</span></span>
+    <div>
+      <h3>Cargar productos desde Excel</h3>
+      <p>Sigue los 3 pasos. Antes de guardar verás una revisión fila por fila; nada se carga hasta que confirmes.</p>
+    </div>
+  </header>
+
+  <ol class="steps">
+    <li class="step" [class.is-done]="templateDownloaded()">
+      <div class="step__badge" aria-hidden="true">
+        @if (templateDownloaded()) { <span class="material-icons">check</span> } @else { 1 }
+      </div>
+      <div class="step__body">
+        <h4>Descarga la plantilla</h4>
+        <p>Envíasela al cliente para que llene sus productos. Si ya tienes el Excel lleno, salta este paso.</p>
+        <button type="button" class="ghost" (click)="downloadTemplate()" [disabled]="busy() === 'template'">
+          <span class="material-icons" aria-hidden="true">download</span>
+          {{ busy() === 'template' ? 'Generando…' : 'Descargar plantilla' }}
+        </button>
+      </div>
+    </li>
+
+    <li class="step" [class.is-done]="!!storeId()">
+      <div class="step__badge" aria-hidden="true">
+        @if (storeId()) { <span class="material-icons">check</span> } @else { 2 }
+      </div>
+      <div class="step__body">
+        <h4 id="store-title">Elige el local</h4>
+        <p>Ahí entrará el stock inicial de cada producto.</p>
+        @if (stores().length && stores().length <= 6) {
+          <div class="store-cards" role="radiogroup" aria-labelledby="store-title">
+            @for (store of stores(); track store.id) {
+              <label class="store-card" [class.is-selected]="storeId() === store.id"
+                [class.is-disabled]="!!result() || busy() === 'importing'">
+                <input type="radio" class="sr-only" name="import-store" [value]="store.id" [checked]="storeId() === store.id"
+                  [disabled]="!!result() || busy() === 'importing'" (change)="onStoreChange(store.id)" />
+                <span class="store-card__icon material-icons" aria-hidden="true">store</span>
+                <span class="store-card__text">
+                  <strong>{{ store.name }}</strong>
+                  <small>{{ store.code }}</small>
+                </span>
+                <span class="store-card__check material-icons" aria-hidden="true">
+                  {{ storeId() === store.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                </span>
+              </label>
+            }
+          </div>
+        } @else if (stores().length) {
+          <div class="select-wrap">
+            <span class="material-icons select-wrap__icon" aria-hidden="true">store</span>
+            <select id="import-store" aria-labelledby="store-title" [value]="storeId()" (change)="onStoreChange($any($event.target).value)"
+              [disabled]="!!result() || busy() === 'importing'">
+              @for (store of stores(); track store.id) {
+                <option [value]="store.id">{{ store.name }} ({{ store.code }})</option>
+              }
+            </select>
+          </div>
+        } @else {
+          <p class="hint hint--warn"><span class="material-icons" aria-hidden="true">warning</span>La empresa no tiene locales activos.</p>
+        }
+      </div>
+    </li>
+
+    <li class="step step--wide" [class.is-done]="!!preview() && !fileError()">
+      <div class="step__badge" aria-hidden="true">
+        @if (preview() && !fileError()) { <span class="material-icons">check</span> } @else { 3 }
+      </div>
+      <div class="step__body">
+        <h4>Sube el Excel lleno</h4>
+        @if (fileName(); as name) {
+          <div class="file-chip">
+            <span class="material-icons file-chip__icon" aria-hidden="true">description</span>
+            <div class="file-chip__text">
+              <strong>{{ name }}</strong>
+              <span>{{ rows().length }} producto(s) en el archivo</span>
+            </div>
+            @if (!result()) {
+              <label class="link-btn" [class.is-disabled]="!!busy()">
+                Cambiar
+                <input type="file" class="sr-only" accept=".xlsx" (change)="onFile($event)" [disabled]="!!busy()" />
+              </label>
+            }
+            <button type="button" class="icon-btn" (click)="clearFile()" [disabled]="busy() === 'importing'" aria-label="Quitar archivo">
+              <span class="material-icons" aria-hidden="true">close</span>
+            </button>
+          </div>
+        } @else {
+          <label class="dropzone" [class.is-over]="dragging()" [class.is-disabled]="!!busy() || !stores().length"
+            (dragover)="onDragOver($event)" (dragleave)="dragging.set(false)" (drop)="onDrop($event)">
+            <span class="material-icons dropzone__icon" aria-hidden="true">cloud_upload</span>
+            <strong>Arrastra el archivo aquí o haz clic para elegirlo</strong>
+            <span>Excel (.xlsx) · hasta {{ maxRows }} productos</span>
+            <input type="file" class="sr-only" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              (change)="onFile($event)" [disabled]="!!busy() || !stores().length" />
+          </label>
+        }
+      </div>
+    </li>
+  </ol>
+
+  @if (busy() === 'reading' || busy() === 'reviewing' || busy() === 'importing') {
+    <div class="progress" role="status">
+      <span class="progress__bar" aria-hidden="true"></span>
+      {{ busy() === 'reading' ? 'Leyendo el archivo…' : busy() === 'reviewing' ? 'Revisando cada producto…' : 'Cargando productos…' }}
+    </div>
+  }
+
+  @if (fileError(); as error) {
+    <div class="notice notice--danger" role="alert">
+      <span class="material-icons" aria-hidden="true">error</span>
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (shown(); as data) {
+    <div class="results">
+      <div class="results__head">
+        <h4>{{ data.dryRun ? 'Revisión del archivo' : 'Resultado de la carga' }}</h4>
+        <span class="muted">{{ data.total }} fila(s) leída(s)</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat stat--ok">
+          <span class="stat__icon material-icons" aria-hidden="true">add_circle</span>
+          <div><strong>{{ data.newCount }}</strong><span>{{ data.dryRun ? 'Se crearán' : 'Creados' }}</span></div>
+        </div>
+        <div class="stat stat--warn">
+          <span class="stat__icon material-icons" aria-hidden="true">skip_next</span>
+          <div><strong>{{ data.skippedCount }}</strong><span>Omitidos (ya existen)</span></div>
+        </div>
+        <div class="stat stat--bad">
+          <span class="stat__icon material-icons" aria-hidden="true">error</span>
+          <div><strong>{{ data.errorCount }}</strong><span>Con error</span></div>
+        </div>
+        <div class="stat">
+          <span class="stat__icon material-icons" aria-hidden="true">category</span>
+          <div>
+            <strong>{{ data.newCategories + data.newBrands + data.newUnits }}</strong>
+            <span>{{ data.newCategories }} categ. · {{ data.newBrands }} marcas · {{ data.newUnits }} unid. nuevas</span>
+          </div>
+        </div>
+      </div>
+
+      @if (data.exceedsPlanLimit) {
+        <div class="notice notice--danger" role="alert">
+          <span class="material-icons" aria-hidden="true">block</span>
+          <p>
+            <strong>Supera el límite del plan.</strong>
+            La empresa tiene {{ data.currentProducts }} productos y su plan {{ data.planName ?? '' }} permite {{ data.maxProducts }}.
+            Con este archivo serían {{ data.currentProducts + data.newCount }}. Cambia el plan antes de cargar.
+          </p>
+        </div>
+      } @else if (data.maxProducts !== null && data.dryRun) {
+        <p class="hint"><span class="material-icons" aria-hidden="true">info</span>
+          Plan {{ data.planName ?? '' }}: {{ data.currentProducts }} de {{ data.maxProducts }} productos usados; quedarán {{ data.currentProducts + data.newCount }}.
+        </p>
+      }
+
+      @if (result()) {
+        <div class="notice notice--success" role="status">
+          <span class="material-icons" aria-hidden="true">check_circle</span>
+          <p><strong>Carga terminada.</strong> Los productos ya aparecen en la empresa con su stock en el local elegido.</p>
+        </div>
+      }
+
+      <div class="segmented" role="group" aria-label="Filtrar filas">
+        <button type="button" [class.active]="rowFilter() === 'all'" [attr.aria-pressed]="rowFilter() === 'all'" (click)="rowFilter.set('all')">
+          Todas <span class="count">{{ data.rows.length }}</span>
+        </button>
+        <button type="button" [class.active]="rowFilter() === 'problems'" [attr.aria-pressed]="rowFilter() === 'problems'" (click)="rowFilter.set('problems')">
+          Omitidas y con error <span class="count">{{ data.skippedCount + data.errorCount }}</span>
+        </button>
+      </div>
+
+      <div class="table-box">
+        <table>
+          <thead><tr><th>Fila</th><th>Producto</th><th>Código</th><th>Estado</th><th>Detalle</th></tr></thead>
+          <tbody>
+            @for (row of visibleRows(); track row.rowNumber) {
+              <tr>
+                <td class="num">{{ row.rowNumber }}</td>
+                <td class="name">{{ row.name ?? '—' }}</td>
+                <td class="code">{{ row.sku ?? '—' }}</td>
+                <td>
+                  <span class="chip" [class.chip--new]="row.status === 'NEW'" [class.chip--skipped]="row.status === 'SKIPPED'"
+                    [class.chip--error]="row.status === 'ERROR'">
+                    <span class="material-icons" aria-hidden="true">{{ statusIcon[row.status] }}</span>{{ statusLabel[row.status] }}
+                  </span>
+                </td>
+                <td class="detail">{{ row.message ?? (data.dryRun ? 'Listo para cargar' : 'Cargado') }}</td>
+              </tr>
+            }
+            @if (!visibleRows().length) {
+              <tr><td colspan="5" class="empty">
+                <span class="material-icons" aria-hidden="true">task_alt</span>No hay filas omitidas ni con error.
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (!result()) {
+        <footer class="confirm-bar">
+          <p>Solo se cargan las filas <strong>nuevas</strong>. Las omitidas o con error puedes corregirlas en el Excel y subirlo de nuevo.</p>
+          <button type="button" class="primary big" (click)="confirm()" [disabled]="!canConfirm()">
+            <span class="material-icons" aria-hidden="true">publish</span>
+            {{ busy() === 'importing' ? 'Cargando…' : 'Cargar ' + data.newCount + ' producto(s)' }}
+          </button>
+        </footer>
+      } @else {
+        <footer class="confirm-bar">
+          <p>¿Tienes otro archivo?</p>
+          <button type="button" class="ghost" (click)="clearFile()">
+            <span class="material-icons" aria-hidden="true">refresh</span>Cargar otro archivo
+          </button>
+        </footer>
+      }
+    </div>
+  }
+</section>
+
+<section class="surface-card panel">
+  <header class="panel__head">
+    <span class="panel__icon panel__icon--teal" aria-hidden="true"><span class="material-icons">cloud_download</span></span>
+    <div>
+      <h3>Exportar toda la información</h3>
+      <p>Un Excel con todo lo registrado por la empresa, una hoja por tipo de dato. Úsalo cuando la empresa deje el sistema o pida una copia de sus datos.</p>
+    </div>
+  </header>
+
+  <ul class="sheet-list" aria-label="Hojas incluidas">
+    @for (sheet of exportSheets; track sheet.label) {
+      <li><span class="material-icons" aria-hidden="true">{{ sheet.icon }}</span>{{ sheet.label }}</li>
+    }
+  </ul>
+
+  <footer class="confirm-bar">
+    <p class="hint"><span class="material-icons" aria-hidden="true">lock</span>No incluye contraseñas ni credenciales de facturación. Queda registrado en el historial.</p>
+    <button type="button" class="primary big" (click)="exportAll()" [disabled]="exporting()">
+      <span class="material-icons" aria-hidden="true">{{ exporting() ? 'hourglass_top' : 'file_download' }}</span>
+      {{ exporting() ? 'Preparando Excel…' : 'Exportar a Excel' }}
+    </button>
+  </footer>
+</section>
+
+<app-company-wipe-panel [companyId]="companyId()" [companyName]="companyName()" (wiped)="onWiped()"
+  (deleted)="deleted.emit()" (exportRequested)="exportAll()" />

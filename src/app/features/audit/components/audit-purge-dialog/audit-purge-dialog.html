@@ -1,0 +1,72 @@
+<section class="dialog review purge">
+  <header>
+    <span class="material-icons purge__icon" aria-hidden="true">delete_sweep</span>
+    <div class="review__title">
+      <h2 mat-dialog-title>Eliminar toda la auditoría</h2>
+      <p>Todas las empresas de la plataforma</p>
+    </div>
+  </header>
+
+  <p class="review__banner" data-tone="danger">
+    <span class="material-icons" aria-hidden="true">warning</span>
+    Se borran todos los registros de auditoría de todas las empresas. La lista quedará vacía, no quedará registro de la
+    eliminación y no se puede deshacer.
+  </p>
+  <p class="purge__tip">
+    <span class="material-icons" aria-hidden="true">lightbulb</span>
+    Si necesitas una copia, cierra esta ventana y usa "Exportar historial" antes.
+  </p>
+
+  <div class="purge__step" [class.is-done]="!!sent()">
+    <span class="purge__badge" aria-hidden="true">
+      @if (sent()) { <span class="material-icons">check</span> } @else { 1 }
+    </span>
+    <div class="purge__body">
+      <h3>Recibe el código en tu correo</h3>
+      @if (sent(); as info) {
+        <p>Enviamos un código a <strong>{{ info.sentTo }}</strong>. Vence a las {{ info.expiresAt | dateTime }}.</p>
+        <p class="purge__count">Se eliminarán <strong>{{ info.totalRows | number }}</strong> registro(s).</p>
+        <button type="button" class="purge__link" (click)="sendCode()" [disabled]="sending()">
+          {{ sending() ? 'Enviando…' : 'Reenviar código' }}
+        </button>
+      } @else {
+        <p>Llega a tu correo de SUPERADMIN, con copia al correo de Nubio Tech. Sirve una sola vez y vence en 10 minutos.</p>
+        <button type="button" class="ghost" (click)="sendCode()" [disabled]="sending()">
+          <span class="material-icons" aria-hidden="true">mail</span>{{ sending() ? 'Enviando…' : 'Enviar código a mi correo' }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="purge__step" [class.is-locked]="!sent()">
+    <span class="purge__badge" aria-hidden="true">2</span>
+    <div class="purge__body">
+      <h3>Confirma</h3>
+      <div class="purge__fields">
+        <label class="purge__field">
+          <span>Código del correo</span>
+          <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"
+            class="purge__code" [formControl]="code" />
+        </label>
+        <label class="purge__field">
+          <span>Escribe <strong>{{ confirmWord }}</strong></span>
+          <input type="text" autocomplete="off" [formControl]="confirmText" [class.is-ok]="textMatches()" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <p class="review__banner" data-tone="danger" role="alert">
+      <span class="material-icons" aria-hidden="true">error</span>{{ message }}
+    </p>
+  }
+
+  <footer>
+    <button type="button" (click)="cancel()" [disabled]="purging()">Cancelar</button>
+    <button type="button" class="purge__danger" (click)="purge()" [disabled]="!canPurge()">
+      <span class="material-icons" aria-hidden="true">{{ purging() ? 'hourglass_top' : 'delete_forever' }}</span>
+      {{ purging() ? 'Eliminando…' : 'Eliminar auditoría' }}
+    </button>
+  </footer>
+</section>

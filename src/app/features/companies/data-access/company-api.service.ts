@@ -1,5 +1,13 @@
 import { BlockedRucLookupUser, CompanyEInvoicing, ConnectionTestResult, UpdateCompanyEInvoicing } from '../models/company-einvoicing.model';
 import { CompanyExtraFeatures, CompanyModules, ModuleToggle } from '../models/company-modules.model';
+import {
+  CompanyDeleteResult,
+  CompanyExport,
+  CompanyWipeCode,
+  CompanyWipeResult,
+  ProductImportRequest,
+  ProductImportResult,
+} from '../models/company-data.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -139,5 +147,29 @@ export class CompanyApiService {
 
   changePlan(id: string, body: ChangeCompanyPlanValue): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${id}/change-plan`, body);
+  }
+
+  importProducts(id: string, body: ProductImportRequest): Observable<ProductImportResult> {
+    return this.http.post<ProductImportResult>(`${this.baseUrl}/${id}/products/import`, body);
+  }
+
+  exportData(id: string): Observable<CompanyExport> {
+    return this.http.get<CompanyExport>(`${this.baseUrl}/${id}/export`);
+  }
+
+  requestWipeCode(id: string): Observable<CompanyWipeCode> {
+    return this.http.post<CompanyWipeCode>(`${this.baseUrl}/${id}/wipe/code`, {});
+  }
+
+  wipe(id: string, code: string, confirmName: string): Observable<CompanyWipeResult> {
+    return this.http.post<CompanyWipeResult>(`${this.baseUrl}/${id}/wipe`, { code, confirmName });
+  }
+
+  requestDeleteCode(id: string): Observable<CompanyWipeCode> {
+    return this.http.post<CompanyWipeCode>(`${this.baseUrl}/${id}/delete/code`, {});
+  }
+
+  deleteCompany(id: string, code: string, confirmName: string): Observable<CompanyDeleteResult> {
+    return this.http.post<CompanyDeleteResult>(`${this.baseUrl}/${id}/delete`, { code, confirmName });
   }
 }
