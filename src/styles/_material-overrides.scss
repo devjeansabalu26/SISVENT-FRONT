@@ -62,6 +62,21 @@
 }
 
 .mat-mdc-snack-bar-container {
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+  --mat-snack-bar-supporting-text-weight: 500;
+
+  .mat-mdc-snack-bar-label,
+  .mat-mdc-snack-bar-label * {
+    color: #ffffff;
+  }
+
+  .mat-mdc-snack-bar-action,
+  .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
   &.notification--success {
     --mat-snack-bar-container-color: #067647;
   }

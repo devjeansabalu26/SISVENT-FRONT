@@ -43,9 +43,9 @@
 
         <fieldset>
           <legend>Series de comprobante</legend>
-          @if (seriesTypes().length) {
+          @if (visibleSeriesTypes().length) {
             <div class="row" [formGroup]="seriesForm">
-              @for (type of seriesTypes(); track type.receiptTypeCode) {
+              @for (type of visibleSeriesTypes(); track type.receiptTypeCode) {
                 <label>
                   {{ type.seriesLabel }} de {{ type.name }}
                   <input [formControlName]="type.receiptTypeCode" maxlength="20" autocapitalize="characters" [placeholder]="type.seriesPlaceholder ?? ''" />
@@ -122,7 +122,9 @@
           </label>
           <div class="series-preview">
             <div><span>Boletas</span><strong>{{ extras.controls.receiptSeries.value || '—' }}-00000001</strong></div>
-            <div><span>Facturas</span><strong>{{ extras.controls.invoiceSeries.value || '—' }}-00000001</strong></div>
+            @if (canInvoice()) {
+              <div><span>Facturas</span><strong>{{ extras.controls.invoiceSeries.value || '—' }}-00000001</strong></div>
+            }
             <small>Las series se editan en la pestaña General → Datos fiscales.</small>
           </div>
           <label>

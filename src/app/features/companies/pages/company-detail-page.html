@@ -175,7 +175,7 @@
   }
   @if (activatedTabs().has('einvoicing')) {
     <div [hidden]="activeTab() !== 'einvoicing'">
-      <app-company-einvoicing-tab [companyId]="company.id" (goToModules)="openModulesFromEInvoicing()" />
+      <app-company-einvoicing-tab [companyId]="company.id" />
     </div>
   }
   @if (activatedTabs().has('data')) {

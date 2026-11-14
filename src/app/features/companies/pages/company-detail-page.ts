@@ -124,11 +124,6 @@ export class CompanyDetailPage implements OnInit {
     });
   }
 
-  openModulesFromEInvoicing(): void {
-    this.setTab('modules');
-    this.invalidateTabs(['einvoicing']);
-  }
-
   onCompanyDeleted(): void {
     void this.router.navigate(['/app/companies']);
   }

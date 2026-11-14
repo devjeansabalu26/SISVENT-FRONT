@@ -1,23 +1,97 @@
-@if (featureState(); as state) {
-  <div class="feature-status" [class.feature-status--on]="state === 'active'" [class.feature-status--off]="state === 'inactive'"
-    role="status">
-    <span class="material-icons" aria-hidden="true">{{ state === 'active' ? 'check_circle' : 'info' }}</span>
-    <div class="feature-status__text">
-      @if (state === 'active') {
-        <strong>Facturación electrónica: activa</strong>
-        <span>La empresa ya puede emitir facturas desde el POS. Aquí configuras cómo se envían a SUNAT.</span>
-      } @else {
-        <strong>Facturación electrónica: inactiva</strong>
-        <span>La empresa solo emite boletas. Actívala en Menús → Funcionalidades extra y luego configura aquí el envío a SUNAT.</span>
-      }
+<section class="surface-card sunat-features" aria-labelledby="ruc-title">
+  <header>
+    <h3 id="ruc-title"><span class="material-icons" aria-hidden="true">travel_explore</span>Consulta de RUC en SUNAT</h3>
+    <p>Solo <strong>busca</strong> datos: al registrar un cliente con RUC, completa su razón social y dirección. No emite ni envía comprobantes.</p>
+  </header>
+  @if (!sunatLoaded()) {
+    <p class="muted">Cargando…</p>
+  } @else if (rucFeature(); as feature) {
+    <div class="sunat-switch" [class.is-on]="sunatOn(feature)">
+      <label>
+        <span class="sunat-features__text">
+          <strong>{{ feature.title }}</strong>
+          <small>{{ feature.inPlan ? 'Incluida en el plan de la empresa.' : feature.detail }}</small>
+        </span>
+        <input type="checkbox" role="switch" [checked]="sunatOn(feature)" [disabled]="feature.inPlan || !!savingSunat()"
+          (change)="toggleSunat(feature, $any($event.target).checked)" [attr.aria-label]="'Activar ' + feature.title" />
+      </label>
     </div>
-    @if (state === 'inactive') {
-      <button type="button" class="feature-status__btn" (click)="goToModules.emit()">
-        <span class="material-icons" aria-hidden="true">tune</span>Ir a Menús
+    <footer class="sunat-features__foot">
+      <span>{{ sunatChanged(feature) ? 'Cambio sin guardar' : 'Sin cambios' }}</span>
+      <button type="button" class="ghost sunat-btn" (click)="discardSunat(feature)" [disabled]="!sunatChanged(feature) || !!savingSunat()">
+        <span class="material-icons" aria-hidden="true">undo</span>Descartar
       </button>
-    }
-  </div>
-}
+      <button type="button" class="primary sunat-btn" (click)="saveSunat(feature)" [disabled]="!sunatChanged(feature) || !!savingSunat()">
+        <span class="material-icons" aria-hidden="true">{{ savingSunat() === feature.code ? 'hourglass_top' : 'save' }}</span>
+        {{ savingSunat() === feature.code ? 'Guardando…' : 'Guardar consulta de RUC' }}
+      </button>
+    </footer>
+  } @else {
+    <p class="muted">Esta opción todavía no está disponible.</p>
+  }
+
+  <h4 class="section">Usuarios con la consulta de RUC bloqueada</h4>
+  <p class="muted small-note">Se bloquea a un usuario cuando consulta el mismo RUC 5 veces seguidas. Reactivar solo afecta a ese usuario.</p>
+  @if (blockedUsers().length && !rucLookupActive()) {
+    <p class="sunat-features__missing" role="status">
+      <span class="material-icons" aria-hidden="true">info</span>
+      La consulta de RUC está apagada para esta empresa. Actívala arriba y guarda; después podrás reactivar a estos usuarios.
+    </p>
+  }
+  @if (blockedUsers().length) {
+    <ul class="blocked">
+      @for (user of blockedUsers(); track user.identityUserId) {
+        <li>
+          <span>
+            <strong>{{ user.name }}</strong>@if (user.userCode) { <small>· usuario {{ user.userCode }}</small> }
+            <small>Bloqueada el {{ user.blockedAt | dateTime }}@if (user.blockedRuc) { por consultar repetidamente el RUC {{ user.blockedRuc }} }.</small>
+          </span>
+          <button type="button" class="ghost sunat-btn" (click)="unblock(user)"
+            [disabled]="!rucLookupActive() || unblocking() === user.identityUserId"
+            [attr.title]="rucLookupActive() ? null : 'Activa primero la consulta de RUC'">
+            <span class="material-icons" aria-hidden="true">lock_open</span>
+            {{ unblocking() === user.identityUserId ? 'Reactivando…' : 'Reactivar' }}
+          </button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <small class="muted">Ningún usuario tiene la consulta de RUC bloqueada.</small>
+  }
+</section>
+
+<section class="surface-card sunat-features" aria-labelledby="emit-title">
+  <header>
+    <h3 id="emit-title"><span class="material-icons" aria-hidden="true">send</span>Emisión de comprobantes a SUNAT</h3>
+    <p><strong>Emite y envía</strong> comprobantes electrónicos (facturas y notas de crédito) a SUNAT. Es independiente de la consulta de RUC.</p>
+  </header>
+  @if (!sunatLoaded()) {
+    <p class="muted">Cargando…</p>
+  } @else if (invoiceFeature(); as feature) {
+    <div class="sunat-switch" [class.is-on]="sunatOn(feature)">
+      <label>
+        <span class="sunat-features__text">
+          <strong>{{ feature.title }}</strong>
+          <small>{{ feature.inPlan ? 'Incluida en el plan de la empresa.' : feature.detail }}</small>
+        </span>
+        <input type="checkbox" role="switch" [checked]="sunatOn(feature)" [disabled]="feature.inPlan || !!savingSunat()"
+          (change)="toggleSunat(feature, $any($event.target).checked)" [attr.aria-label]="'Activar ' + feature.title" />
+      </label>
+    </div>
+    <footer class="sunat-features__foot">
+      <span>{{ sunatChanged(feature) ? 'Cambio sin guardar' : 'Sin cambios' }}</span>
+      <button type="button" class="ghost sunat-btn" (click)="discardSunat(feature)" [disabled]="!sunatChanged(feature) || !!savingSunat()">
+        <span class="material-icons" aria-hidden="true">undo</span>Descartar
+      </button>
+      <button type="button" class="primary sunat-btn" (click)="saveSunat(feature)" [disabled]="!sunatChanged(feature) || !!savingSunat()">
+        <span class="material-icons" aria-hidden="true">{{ savingSunat() === feature.code ? 'hourglass_top' : 'save' }}</span>
+        {{ savingSunat() === feature.code ? 'Guardando…' : 'Guardar emisión' }}
+      </button>
+    </footer>
+  } @else {
+    <p class="muted">Esta opción todavía no está disponible.</p>
+  }
+</section>
 
 @if (loading()) {
   <p class="muted">Cargando configuración de facturación…</p>
@@ -25,10 +99,10 @@
   <form class="surface-card regional" [formGroup]="form" (ngSubmit)="save()">
     <header class="regional__head">
       <div>
-        <h3>Facturación electrónica</h3>
+        <h3>Configuración del envío a SUNAT</h3>
         <p>
-          Cómo emite esta empresa sus facturas y notas de crédito electrónicas a SUNAT. El RUC, la razón social, la dirección
-          fiscal, las series y los correlativos siempre son los de esta empresa, use la credencial general o la suya.
+          Cómo se envían a SUNAT los comprobantes de esta empresa. El RUC, la razón social, la dirección fiscal, las series y los
+          correlativos siempre son los de esta empresa, use la credencial general o la suya.
         </p>
       </div>
       @if (info.updatedAt) {
@@ -60,9 +134,9 @@
         <span>
           <strong>General de Savix{{ info.shared.providerName ? ' (' + info.shared.providerName + ')' : '' }}</strong>
           @if (!info.shared.allowed) {
-            <small>No disponible: el servidor no permite la credencial general (EInvoicing__AllowShared).</small>
+            <small>No disponible por ahora.</small>
           } @else if (!info.shared.configured) {
-            <small>Permitida, pero el servidor aún no tiene el token general (EInvoicing__ApiToken).</small>
+            <small>Disponible cuando Nubio Tech active la cuenta general con el proveedor.</small>
           } @else {
             <small>Usa la cuenta de Savix en el proveedor.</small>
           }
@@ -132,7 +206,7 @@
               <small class="hint">Token guardado: ••••{{ info.apiTokenHint }}</small>
             }
             @if (!info.tokenEncryptionConfigured) {
-              <small class="hint">El servidor aún no tiene la clave para cifrar tokens (EInvoicing__EncryptionKey).</small>
+              <small class="hint">Por ahora no se pueden guardar tokens. Contacta a soporte de Nubio Tech.</small>
             } @else if (info.hasApiToken) {
               <label class="check"><input type="checkbox" formControlName="clearApiToken" /> Borrar el token guardado</label>
             }
@@ -203,25 +277,6 @@
         }
       </label>
     </div>
-
-    <h4 class="section">Consulta RUC bloqueada</h4>
-    @if (blockedUsers().length) {
-      <ul class="blocked">
-        @for (user of blockedUsers(); track user.identityUserId) {
-          <li>
-            <span>
-              <strong>{{ user.name }}</strong>@if (user.userCode) { <small>· usuario {{ user.userCode }}</small> }
-              <small>Bloqueada el {{ user.blockedAt | dateTime }}@if (user.blockedRuc) { por consultar repetidamente el RUC {{ user.blockedRuc }} }.</small>
-            </span>
-            <button type="button" class="ghost" (click)="unblock(user)" [disabled]="unblocking() === user.identityUserId">
-              {{ unblocking() === user.identityUserId ? 'Reactivando…' : 'Reactivar' }}
-            </button>
-          </li>
-        }
-      </ul>
-    } @else {
-      <small class="muted">Ningún usuario tiene la consulta de RUC bloqueada.</small>
-    }
 
     @if (countGroups().length) {
       <h4 class="section">Comprobantes electrónicos</h4>

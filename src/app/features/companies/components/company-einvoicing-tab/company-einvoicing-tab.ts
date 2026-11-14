@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { switchMap } from 'rxjs';
+import { SUNAT_FEATURE_CODES } from '../../../../core/auth/constants/plan-features.constant';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
@@ -13,11 +15,30 @@ import {
   EInvoicingEnvironment,
 } from '../../models/company-einvoicing.model';
 
+interface SunatFeature {
+  readonly code: string;
+  readonly title: string;
+  readonly detail: string;
+  readonly inPlan: boolean;
+  readonly extra: boolean;
+}
+
+const SUNAT_COPY: Readonly<Record<string, { readonly title: string; readonly detail: string }>> = {
+  E_INVOICING: {
+    title: 'Emitir comprobantes electrónicos',
+    detail: 'El POS emite facturas con RUC, serie y correlativo, y se envían a SUNAT según la configuración del envío.',
+  },
+  RUC_LOOKUP: {
+    title: 'Consultar RUC en SUNAT',
+    detail: 'Al registrar un cliente con RUC, completa su razón social y dirección. No emite comprobantes.',
+  },
+};
+
 @Component({
   selector: 'app-company-einvoicing-tab',
   imports: [ReactiveFormsModule, DateTimePipe],
   templateUrl: './company-einvoicing-tab.html',
-  styleUrls: ['../company-regional-tab/company-regional-tab.scss', './company-einvoicing-tab.scss'],
+  styleUrls: ['../../../../shared/forms/switch.scss', '../company-regional-tab/company-regional-tab.scss', './company-einvoicing-tab.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompanyEInvoicingTab implements OnInit {
@@ -25,9 +46,17 @@ export class CompanyEInvoicingTab implements OnInit {
   private readonly notifications = inject(NotificationService);
 
   readonly companyId = input.required<string>();
-  readonly goToModules = output<void>();
 
-  readonly featureState = signal<'active' | 'inactive' | null>(null);
+  readonly sunatFeatures = signal<readonly SunatFeature[]>([]);
+  readonly sunatLoaded = signal(false);
+  readonly rucFeature = computed(() => this.sunatFeatures().find((f) => f.code === 'RUC_LOOKUP') ?? null);
+  readonly invoiceFeature = computed(() => this.sunatFeatures().find((f) => f.code === 'E_INVOICING') ?? null);
+  readonly rucLookupActive = computed(() => {
+    const feature = this.rucFeature();
+    return !!feature && (feature.inPlan || feature.extra);
+  });
+  readonly sunatDraft = signal<ReadonlyMap<string, boolean>>(new Map());
+  readonly savingSunat = signal<string | null>(null);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -80,13 +109,7 @@ export class CompanyEInvoicingTab implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.getExtraFeatures(this.companyId()).subscribe({
-      next: (result) => {
-        const feature = result.features.find((item) => item.code === 'E_INVOICING');
-        this.featureState.set(feature && (feature.inPlan || feature.extra) ? 'active' : 'inactive');
-      },
-      error: () => this.featureState.set(null),
-    });
+    this.loadSunatFeatures();
     const controls = this.form.controls;
     controls.credentialMode.valueChanges.subscribe((mode) => {
       this.mode.set(mode);
@@ -108,7 +131,7 @@ export class CompanyEInvoicingTab implements OnInit {
   }
 
   unblock(user: BlockedRucLookupUser): void {
-    if (this.unblocking()) return;
+    if (this.unblocking() || !this.rucLookupActive()) return;
     this.unblocking.set(user.identityUserId);
     this.api.unblockRucLookup(this.companyId(), user.identityUserId).subscribe({
       next: () => {
@@ -236,5 +259,83 @@ export class CompanyEInvoicingTab implements OnInit {
     this.providerCode.set(ownProvider?.code ?? '');
     this.syncChecklist();
     this.loading.set(false);
+  }
+
+  sunatOn(feature: SunatFeature): boolean {
+    return feature.inPlan || (this.sunatDraft().get(feature.code) ?? feature.extra);
+  }
+
+  toggleSunat(feature: SunatFeature, enabled: boolean): void {
+    const next = new Map(this.sunatDraft());
+    next.set(feature.code, enabled);
+    this.sunatDraft.set(next);
+  }
+
+  sunatChanged(feature: SunatFeature): boolean {
+    return !feature.inPlan && this.sunatDraft().has(feature.code) && this.sunatDraft().get(feature.code) !== feature.extra;
+  }
+
+  discardSunat(feature: SunatFeature): void {
+    const next = new Map(this.sunatDraft());
+    next.delete(feature.code);
+    this.sunatDraft.set(next);
+  }
+
+  saveSunat(target: SunatFeature): void {
+    if (!this.sunatChanged(target) || this.savingSunat()) return;
+    const enabled = this.sunatOn(target);
+    this.savingSunat.set(target.code);
+    this.api
+      .getExtraFeatures(this.companyId())
+      .pipe(
+        switchMap((fresh) => {
+          const codes = fresh.features
+            .filter((f) => f.extra && f.code !== target.code)
+            .map((f) => f.code);
+          if (enabled) codes.push(target.code);
+          return this.api.updateExtraFeatures(this.companyId(), codes, 'Configurado en Envío a SUNAT');
+        }),
+      )
+      .subscribe({
+        next: (result) => {
+          this.savingSunat.set(null);
+          const kept = new Map(this.sunatDraft());
+          kept.delete(target.code);
+          this.applySunat(result.features, kept);
+          this.notifications.show(
+            `${target.title}: ${enabled ? 'activada' : 'desactivada'}. La empresa lo verá al recargar o volver a iniciar sesión.`,
+            'success',
+          );
+        },
+        error: () => {
+          this.savingSunat.set(null);
+          this.notifications.show(`No se pudo guardar «${target.title}». Inténtalo de nuevo.`, 'error');
+        },
+      });
+  }
+
+  private loadSunatFeatures(): void {
+    this.api.getExtraFeatures(this.companyId()).subscribe({
+      next: (result) => this.applySunat(result.features),
+      error: () => {
+        this.sunatLoaded.set(true);
+        this.notifications.show('No se pudieron cargar las opciones de SUNAT de la empresa.', 'error');
+      },
+    });
+  }
+
+  private applySunat(
+    features: readonly { readonly code: string; readonly inPlan: boolean; readonly extra: boolean }[],
+    draft: ReadonlyMap<string, boolean> = new Map(),
+  ): void {
+    const list: SunatFeature[] = [];
+    for (const code of SUNAT_FEATURE_CODES) {
+      const feature = features.find((f) => f.code === code);
+      const copy = SUNAT_COPY[code];
+      if (feature && copy) list.push({ code, title: copy.title, detail: copy.detail, inPlan: feature.inPlan, extra: feature.extra });
+    }
+    this.sunatFeatures.set(list);
+    this.sunatDraft.set(draft);
+    this.sunatLoaded.set(true);
   }
 }

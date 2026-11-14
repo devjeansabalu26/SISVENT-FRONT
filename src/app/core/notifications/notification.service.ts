@@ -13,7 +13,7 @@ export class NotificationService {
     if (type === 'permission-blocked') this.blockedUntil = Date.now() + 1500;
     const persistent = type === 'error' || type === 'plan-limit' || type === 'permission-blocked';
     this.snackBar.open(message, 'Cerrar', {
-      duration: persistent ? 7000 : 4000,
+      duration: persistent ? 10000 : 6500,
       horizontalPosition: 'end',
       verticalPosition: 'top',
       panelClass: [`notification--${type}`],

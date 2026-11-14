@@ -160,76 +160,165 @@
   color: var(--color-text-muted);
 }
 
-.feature-status {
+.sunat-features {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-smd);
   margin-bottom: var(--space-md);
-  padding: var(--space-smd) var(--space-md);
+}
+
+.sunat-features h3 {
+  margin: 0 0 4px;
+}
+
+.sunat-features header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.sunat-features__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sunat-features__list li {
+  padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
 }
 
-.feature-status > .material-icons {
-  font-size: 24px;
+.sunat-features__list li.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
-.feature-status__text {
+.sunat-features__list label {
   display: flex;
-  flex: 1 1 320px;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
 }
 
-.feature-status__text strong {
+.sunat-features__text {
+  display: grid;
+  gap: 2px;
+}
+
+.sunat-features__text strong {
   color: var(--color-text-primary);
 }
 
-.feature-status__text span {
+.sunat-features__text small {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
 }
 
-.feature-status--on {
-  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
-  background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
+.sunat-features__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
-.feature-status--on > .material-icons {
-  color: var(--color-success-text);
+.sunat-features__foot span {
+  margin-right: auto;
+  color: var(--color-text-muted);
+  font-size: 13px;
 }
-
-.feature-status--off {
-  border-color: color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
-  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
-}
-
-.feature-status--off > .material-icons {
+.sunat-features__missing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
+  border-radius: var(--radius-md);
   color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  font-size: 13px;
 }
 
-.feature-status__btn {
+.sunat-features__missing .material-icons {
+  font-size: 18px;
+}
+
+.sunat-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid var(--color-border-strong);
+  padding: 8px 16px;
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  background: var(--color-surface);
   font-weight: 600;
   cursor: pointer;
 }
 
-.feature-status__btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+.sunat-btn .material-icons {
+  font-size: 18px;
 }
 
-.feature-status__btn .material-icons {
-  font-size: 18px;
+.sunat-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sunat-features__foot {
+  padding-top: var(--space-smd);
+  border-top: 1px solid var(--color-border);
+}
+
+.sunat-features__foot span {
+  font-weight: 600;
+}
+
+.sunat-features + .sunat-features__missing,
+.blocked + .sunat-features__missing {
+  margin-top: var(--space-sm);
+}
+
+.sunat-features h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sunat-features h3 .material-icons {
+  color: var(--color-primary);
+  font-size: 22px;
+}
+
+.sunat-features header p strong {
+  color: var(--color-text-primary);
+}
+
+.sunat-switch {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.sunat-switch.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.sunat-switch label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.small-note {
+  margin: 0;
+  font-size: 12px;
 }

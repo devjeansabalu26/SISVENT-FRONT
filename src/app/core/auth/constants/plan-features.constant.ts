@@ -17,7 +17,10 @@ export const PLAN_FEATURES = {
   audit: 'AUDIT',
   notifications: 'NOTIFICATIONS',
   eInvoicing: 'E_INVOICING',
+  rucLookup: 'RUC_LOOKUP',
 } as const;
+
+export const SUNAT_FEATURE_CODES: readonly string[] = ['E_INVOICING', 'RUC_LOOKUP'];
 
 export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   SALES: 'Ventas y punto de venta',
@@ -39,4 +42,5 @@ export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   AUDIT: 'Auditoría',
   NOTIFICATIONS: 'Notificaciones',
   E_INVOICING: 'Facturación electrónica',
+  RUC_LOOKUP: 'Consulta de RUC en SUNAT',
 };

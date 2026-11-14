@@ -16,6 +16,8 @@ import { RegionalService } from '../../../core/regional/regional.service';
 import { CompanyRegional, RegionalReceiptSeries } from '../../../core/regional/regional.model';
 import { DiffRow } from '../../../shared/utils/diff-rows';
 import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { INVOICE_FEATURE } from '../../sales/utils/sale-document';
 
 const TAX_REGIMES: readonly { readonly value: TaxRegime; readonly label: string }[] = [
   { value: 'RUS', label: 'Nuevo RUS' },
@@ -83,10 +85,15 @@ export class SettingsPage implements OnInit {
   private readonly notifications = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly regionalService = inject(RegionalService);
+  private readonly access = inject(AccessControlService);
 
   readonly ticketFormats = TICKET_FORMATS;
   readonly regional = signal<CompanyRegional | null>(null);
   readonly seriesTypes = computed<readonly RegionalReceiptSeries[]>(() => this.regional()?.series ?? []);
+  readonly canInvoice = computed(() => this.access.hasFeature(INVOICE_FEATURE));
+  readonly visibleSeriesTypes = computed<readonly RegionalReceiptSeries[]>(() =>
+    this.canInvoice() ? this.seriesTypes() : this.seriesTypes().filter((type) => !type.receiptTypeCode.startsWith('FACTURA')),
+  );
   readonly seriesForm = new FormRecord<FormControl<string>>({});
   readonly taxRegimeLabel = computed(() => {
     const regional = this.regional();

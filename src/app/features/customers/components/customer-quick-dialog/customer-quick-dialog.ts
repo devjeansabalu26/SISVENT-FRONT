@@ -12,7 +12,7 @@ import { AccessControlService } from '../../../../core/auth/services/access-cont
 import { PosApiService, RUC_LOOKUP_BLOCKED, RucLookupResult } from '../../../sales/data-access/pos-api.service';
 import { problemCode, problemTitle } from '../../../countries/models/country.model';
 import { NotificationService } from '../../../../core/notifications/notification.service';
-import { INVOICE_FEATURE, isValidRuc } from '../../../sales/utils/sale-document';
+import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-document';
 
 @Component({
   selector: 'app-customer-quick-dialog',
@@ -103,7 +103,7 @@ export class CustomerQuickDialog {
 
   private readonly access = inject(AccessControlService);
   private readonly posApi = inject(PosApiService);
-  readonly canLookup = computed(() => this.access.hasFeature(INVOICE_FEATURE));
+  readonly canLookup = computed(() => this.access.hasFeature(RUC_LOOKUP_FEATURE));
   readonly lookingUp = signal(false);
   readonly found = signal<RucLookupResult | null>(null);
   readonly existing = signal<CustomerDetail | null>(null);

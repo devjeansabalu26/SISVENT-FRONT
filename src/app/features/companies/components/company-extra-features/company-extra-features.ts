@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { switchMap } from 'rxjs';
+import { SUNAT_FEATURE_CODES } from '../../../../core/auth/constants/plan-features.constant';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 import { CompanyApiService } from '../../data-access/company-api.service';
@@ -27,6 +29,7 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
             Habilita a esta empresa funcionalidades que su plan {{ data()?.planName ?? '' }} no incluye, por ejemplo para una prueba
             o un acuerdo especial. Se suman a las del plan mientras su plan esté vigente y se conservan si cambia de plan.
           </p>
+          <p class="extras__sunat">La facturación electrónica y la consulta de RUC se configuran en la pestaña Envío a SUNAT.</p>
         </div>
       </header>
 
@@ -51,12 +54,6 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
                           {{ feature.description ?? 'No incluida en el plan' }}
                         }
                       </small>
-                      @if (feature.code === 'E_INVOICING') {
-                        <small class="extras__hint">
-                          <span class="material-icons" aria-hidden="true">arrow_forward</span>
-                          Después, configura el envío en la pestaña Envío a SUNAT.
-                        </small>
-                      }
                     </span>
                     <input type="checkbox" role="switch" [checked]="isOn(feature)" [disabled]="saving()"
                       (change)="toggle(feature, $any($event.target).checked)" [attr.aria-label]="'Habilitar ' + feature.name" />
@@ -92,8 +89,7 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
     .extras__list label { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
     .extras__text { display: grid; gap: 2px; }
     .extras__text small { color: var(--color-text-muted); }
-    .extras__text .extras__hint { display: inline-flex; align-items: center; gap: 4px; color: var(--color-primary); font-weight: 600; }
-    .extras__hint .material-icons { font-size: 14px; }
+    .extras__sunat { margin: 4px 0 0; color: var(--color-text-muted); font-size: 13px; }
     .extras__note { display: grid; gap: 6px; margin-top: 12px; color: var(--color-text-secondary); font-size: var(--font-size-xs); font-weight: 600; }
     .extras__note input { height: var(--control-height); padding: 0 12px; }
     .extras__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; }
@@ -113,8 +109,12 @@ export class CompanyExtraFeaturesPanel implements OnInit {
   readonly data = signal<CompanyExtraFeatures | null>(null);
   readonly draft = signal<ReadonlyMap<string, boolean>>(new Map());
 
-  readonly available = computed(() => (this.data()?.features ?? []).filter((feature) => !feature.inPlan));
-  readonly included = computed(() => (this.data()?.features ?? []).filter((feature) => feature.inPlan));
+  readonly available = computed(() =>
+    (this.data()?.features ?? []).filter((feature) => !feature.inPlan && !SUNAT_FEATURE_CODES.includes(feature.code)),
+  );
+  readonly included = computed(() =>
+    (this.data()?.features ?? []).filter((feature) => feature.inPlan && !SUNAT_FEATURE_CODES.includes(feature.code)),
+  );
   readonly extrasCount = computed(() => this.available().filter((feature) => feature.extra).length);
   readonly groups = computed(() => {
     const map = new Map<string, CompanyFeature[]>();
@@ -152,9 +152,17 @@ export class CompanyExtraFeaturesPanel implements OnInit {
 
   save(note: string): void {
     if (!this.pending().length || this.saving()) return;
-    const codes = this.available().filter((feature) => this.isOn(feature)).map((feature) => feature.code);
+    const visible = this.available().filter((feature) => this.isOn(feature)).map((feature) => feature.code);
     this.saving.set(true);
-    this.api.updateExtraFeatures(this.companyId(), codes, note.trim() || null).subscribe({
+    this.api
+      .getExtraFeatures(this.companyId())
+      .pipe(
+        switchMap((fresh) => {
+          const sunat = fresh.features.filter((f) => f.extra && SUNAT_FEATURE_CODES.includes(f.code)).map((f) => f.code);
+          return this.api.updateExtraFeatures(this.companyId(), [...visible, ...sunat], note.trim() || null);
+        }),
+      )
+      .subscribe({
       next: (result) => {
         this.saving.set(false);
         this.apply(result);

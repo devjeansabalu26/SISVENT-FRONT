@@ -9,6 +9,7 @@ export interface SaleDocumentInfo {
 }
 
 export const INVOICE_FEATURE = PLAN_FEATURES.eInvoicing;
+export const RUC_LOOKUP_FEATURE = PLAN_FEATURES.rucLookup;
 
 const RUC_WEIGHTS = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
 
