@@ -16,7 +16,7 @@
         <input type="checkbox" role="switch" [checked]="prefs().enabled" (change)="setEnabled($event)" />
       </label>
 
-      <label class="field">
+      <label class="field" [attr.data-locked]="!prefs().enabled ? 'Activa los sonidos para poder elegir el tono.' : null">
         <span>Tono</span>
         <select [value]="prefs().tone" (change)="setTone($event)" [disabled]="!prefs().enabled">
           @for (tone of sound.tones; track tone.id) {

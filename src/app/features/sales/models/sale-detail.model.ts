@@ -45,6 +45,7 @@ export interface SaleDetail {
   readonly customerAddress?: string | null;
   readonly eInvoiceStatus?: string | null;
   readonly electronicDocuments?: readonly SaleElectronicDocument[];
+  readonly receipt?: SaleReceiptBranding;
 }
 
 export interface SaleElectronicDocument {
@@ -98,4 +99,10 @@ export interface CancelSaleBody {
   readonly reason: string;
   readonly refundMethod: string | null;
   readonly lines: readonly { readonly productId: string; readonly returnQuantity: number; readonly wasteQuantity: number }[];
+}
+
+export interface SaleReceiptBranding {
+  readonly showLogoOnReceipt?: boolean;
+  readonly logoUrl: string | null;
+  readonly footer: string | null;
 }

@@ -1,3 +1,4 @@
+import { ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
@@ -13,7 +14,7 @@ import { Store, StoreFormValue, StorePlanLimit } from '../models/local.model';
 
 @Component({
   selector: 'app-local-list-page',
-  imports: [PageHeader, StatusChip],
+  imports: [PageHeader, StatusChip, ShortDatePipe],
   templateUrl: './local-list-page.html',
   styleUrl: './local-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

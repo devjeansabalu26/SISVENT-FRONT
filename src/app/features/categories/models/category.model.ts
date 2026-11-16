@@ -7,6 +7,7 @@ export interface Category {
   readonly parentId?: string | null;
   readonly parentName?: string | null;
   readonly productCount?: number;
+  readonly createdAt?: string | null;
 }
 
 export interface CategoryFormData {

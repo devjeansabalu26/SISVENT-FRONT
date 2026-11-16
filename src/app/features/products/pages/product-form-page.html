@@ -89,10 +89,10 @@
                 }
               </select>
             </label>
-            <label>Stock inicial
+            <label data-locked="Elige primero el local donde se registra el stock.">Stock inicial
               <input type="number" step="0.001" formControlName="initialStock" [disabled]="!form.controls.initialStoreId.value" />
             </label>
-            <label>Stock mínimo (alerta)
+            <label data-locked="Elige primero el local donde se registra el stock.">Stock mínimo (alerta)
               <input type="number" step="0.001" formControlName="minStock" [disabled]="!form.controls.initialStoreId.value" />
             </label>
           </div>

@@ -13,6 +13,21 @@ type Row =
   | { readonly kind: 'rule' }
   | { readonly kind: 'space' };
 
+const LOGO_MAX_W = 40;
+const LOGO_MAX_H = 18;
+const DEFAULT_FOOTER = '¡Gracias por su compra!';
+
+interface ReceiptLogo {
+  readonly data: string;
+  readonly format: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+export function receiptFooter(sale: SaleDetail): string {
+  return sale.receipt?.footer?.trim() || DEFAULT_FOOTER;
+}
+
 const money = (value: number): string => formatMoney(value);
 const quantity = (value: number): string => (Number.isInteger(value) ? String(value) : value.toFixed(2));
 
@@ -79,7 +94,7 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
 
   rows.push(
     { kind: 'rule' },
-    { kind: 'text', text: '¡Gracias por su compra!', align: 'center', bold: true },
+    { kind: 'text', text: receiptFooter(sale), align: 'center', bold: true },
     {
       kind: 'text',
       text: invoice ? (EINVOICE_STATUS_LABEL[sale.eInvoiceStatus ?? ''] ?? 'Factura') : receiptNote(),
@@ -102,6 +117,8 @@ export async function receiptPdfBase64(sale: SaleDetail, companyName: string): P
 async function buildReceiptPdf(sale: SaleDetail, companyName: string) {
   const { jsPDF } = await import('jspdf');
   const rows = receiptRows(sale, companyName);
+  const logo = sale.receipt?.logoUrl ? await loadLogo(sale.receipt.logoUrl) : null;
+  const logoHeight = logo ? logo.height + 3 : 0;
 
   const measure = new jsPDF({ unit: 'mm', format: [WIDTH, 200] });
   const wrap = (text: string, size = 8, bold = false, width = CONTENT): string[] => {
@@ -121,10 +138,14 @@ async function buildReceiptPdf(sale: SaleDetail, companyName: string) {
         return wrap(row.right, row.size, row.bold, CONTENT * 0.6).length * LINE;
     }
   };
-  const height = Math.max(100, MARGIN * 2 + rows.reduce((sum, row) => sum + heightOf(row), 0));
+  const height = Math.max(100, MARGIN * 2 + logoHeight + rows.reduce((sum, row) => sum + heightOf(row), 0));
 
   const doc = new jsPDF({ unit: 'mm', format: [WIDTH, height] });
   let y = MARGIN + 3;
+  if (logo) {
+    doc.addImage(logo.data, logo.format, (WIDTH - logo.width) / 2, MARGIN, logo.width, logo.height);
+    y += logoHeight;
+  }
   for (const row of rows) {
     const size = 'size' in row && row.size ? row.size : 8;
     const bold = 'bold' in row && !!row.bold;
@@ -156,4 +177,37 @@ async function buildReceiptPdf(sale: SaleDetail, companyName: string) {
     }
   }
   return doc;
+}
+
+async function loadLogo(url: string): Promise<ReceiptLogo | null> {
+  try {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    const source = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error('logo'));
+      element.src = source;
+    });
+    if (!image.naturalWidth || !image.naturalHeight) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0);
+    const scale = Math.min(LOGO_MAX_W / image.naturalWidth, LOGO_MAX_H / image.naturalHeight);
+    return { data: canvas.toDataURL('image/png'), format: 'PNG', width: image.naturalWidth * scale, height: image.naturalHeight * scale };
+  } catch {
+    return null;
+  }
 }

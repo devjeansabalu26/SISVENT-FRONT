@@ -12,6 +12,7 @@ export interface AppUser {
   readonly isActive: boolean;
   readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
+  readonly createdAt?: string | null;
 }
 
 export interface UserRoleLimit {
@@ -105,4 +106,5 @@ export interface PlatformUserItem {
   readonly isActive: boolean;
   readonly isLocked?: boolean;
   readonly lastActivityAt: string | null;
+  readonly createdAt?: string | null;
 }

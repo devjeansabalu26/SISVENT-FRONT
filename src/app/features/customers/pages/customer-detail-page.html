@@ -4,27 +4,38 @@
     @if (canManage) {<a class="ghost" [routerLink]="['/app/customers', customer.id, 'edit']"><span class="material-icons">edit</span>Editar cliente</a>}
   </app-page-header>
 
-  <div class="summary surface-card">
-    <div><span class="code">{{ customer.documentType }} {{ customer.documentNumber }}</span><h2>{{ customer.displayName }}</h2></div>
+  <section class="profile surface-card" aria-label="Datos del cliente">
     <app-status-chip [value]="customer.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="customer.isActive ? 'ACTIVE' : 'INACTIVE'" />
-  </div>
+    <ul class="facts">
+      @if (customer.documentNumber) {
+        <li title="Documento de identidad"><span class="material-icons" aria-hidden="true">badge</span>{{ customer.documentType }} {{ customer.documentNumber }}</li>
+      }
+      @if (customer.phone) {
+        <li title="Teléfono móvil"><span class="material-icons" aria-hidden="true">call</span><a [href]="'tel:' + customer.phone">{{ customer.phone }}</a></li>
+      }
+      @if (customer.email) {
+        <li title="Correo electrónico"><span class="material-icons" aria-hidden="true">mail</span><a [href]="'mailto:' + customer.email">{{ customer.email }}</a></li>
+      }
+      @if (customer.address) {
+        <li title="Dirección"><span class="material-icons" aria-hidden="true">location_on</span>{{ customer.address }}</li>
+      }
+      @if (customer.createdAt) {
+        <li><span class="material-icons" aria-hidden="true">event</span><small>Cliente desde</small>{{ customer.createdAt | shortDate }}</li>
+      }
+      @if (!customer.documentNumber && !customer.phone && !customer.email && !customer.address) {
+        <li class="muted">Sin datos de contacto registrados.</li>
+      }
+    </ul>
+    @if (customer.notes) {
+      <p class="profile__note"><span class="material-icons" aria-hidden="true">sticky_note_2</span>{{ customer.notes }}</p>
+    }
+  </section>
 
   <div class="kpi-grid">
     <app-kpi-card label="Total compras" [value]="customer.purchaseCount + ''" icon="shopping_bag" tone="primary" />
     <app-kpi-card label="Monto total" [value]="(customer.totalAmount | money)" icon="payments" tone="success" />
     <app-kpi-card label="Última compra" [value]="(customer.lastPurchaseAt ? (customer.lastPurchaseAt | dateTime) : null) ?? 'Sin compras'" icon="event" tone="info" />
     <app-kpi-card label="Ticket promedio" [value]="(customer.averageTicket | money)" icon="receipt" tone="warning" />
-  </div>
-
-  <div class="cards">
-    <section class="surface-card">
-      <h3>Datos personales</h3>
-      <dl>
-        @for (field of personal(); track field.label) {
-          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-        }
-      </dl>
-    </section>
   </div>
 
   <section class="surface-card history">
@@ -51,9 +62,11 @@
 
     @if (historyTotals(); as totals) {
       <div class="history__totals">
-        <div><small>Compras</small><strong>{{ totals.operationCount }}</strong></div>
-        <div><small>Monto</small><strong>{{ totals.totalAmount | money }}</strong></div>
-        <div><small>Ticket promedio</small><strong>{{ historyAverage() | money }}</strong></div>
+        @if (historyPeriod() !== 'all') {
+          <div><small>Compras en el período</small><strong>{{ totals.operationCount }}</strong></div>
+          <div><small>Monto en el período</small><strong>{{ totals.totalAmount | money }}</strong></div>
+          <div><small>Ticket promedio</small><strong>{{ historyAverage() | money }}</strong></div>
+        }
         <div><small>Productos distintos</small><strong>{{ purchases()?.products?.length ?? '—' }}</strong></div>
         <div><small>Unidades</small><strong>{{ purchases() ? productUnits() : '—' }}</strong></div>
       </div>

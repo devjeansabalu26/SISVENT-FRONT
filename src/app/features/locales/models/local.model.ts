@@ -8,6 +8,7 @@ export interface Store {
   readonly isWaste?: boolean;
   readonly sellerCount: number;
   readonly version: number;
+  readonly createdAt?: string | null;
 }
 
 export interface StorePlanLimit {

@@ -35,17 +35,26 @@
     }
     <section class="card">
       <h2>Búsqueda de productos</h2>
-      <label class="search"><span class="material-icons">search</span><input #query (input)="search(query.value)" (keydown.enter)="addFirstResult(query)" (keydown.escape)="clearProductSearch(query)" autocomplete="off" spellcheck="false" placeholder="Código o nombre del producto" /></label>
-      @if (productQuery()) {
-        @if (products().length) {
-          <div class="results">@for (product of products(); track product.id) {<button type="button" (click)="addFromSearch(product, query)"><div><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></div><span>Stock: {{ product.totalStock }}</span><b>{{ product.salePrice | money }}</b></button>}</div>
-        } @else if (searchingProducts()) {
-          <p class="muted search-hint">Buscando…</p>
-        } @else {
-          <p class="muted search-hint">No hay productos que coincidan con “{{ productQuery() }}”.</p>
-        }
+      <div class="product-pick">
+        <label class="product-pick__select" data-picker-anchor
+          [attr.data-locked]="loadingCatalog() ? 'Espera un momento: se están cargando los productos del local.' : !catalog().length ? 'Este local no tiene productos con stock para vender.' : null">
+          <span>Producto</span>
+          <select #picker (change)="pickProduct(picker)" [disabled]="loadingCatalog() || !catalog().length" aria-label="Seleccionar producto">
+            <option value="" selected>{{ loadingCatalog() ? 'Cargando productos…' : catalog().length ? 'Selecciona un producto (' + catalog().length + ' con stock)' : 'Sin productos con stock' }}</option>
+            @for (product of catalog(); track product.id) {
+              <option [value]="product.id">{{ productLabel(product) }}</option>
+            }
+          </select>
+        </label>
+        <label class="search product-pick__code" title="Escanea el código de barras o escribe el SKU y presiona Enter">
+          <span class="material-icons" aria-hidden="true">qr_code_scanner</span>
+          <input #query (keydown.enter)="addByCode(query)" (keydown.escape)="query.value = ''" autocomplete="off" spellcheck="false" placeholder="Código de barras o SKU + Enter" aria-label="Agregar por código" />
+        </label>
+      </div>
+      @if (catalogError()) {
+        <p class="muted search-hint">No se pudieron cargar los productos. <button type="button" class="link" (click)="loadCatalog()">Reintentar</button></p>
       } @else {
-        <p class="muted search-hint">Escribe el código o el nombre del producto. Con Enter agregas el primero de la lista.</p>
+        <p class="muted search-hint">Abre el selector para ver y buscar los productos del local, o escanea el código y presiona Enter.</p>
       }
     </section>
     <section class="card cart">

@@ -13,5 +13,6 @@ export function toCustomer(detail: CustomerDetail): Customer {
     lastPurchaseAt: detail.lastPurchaseAt,
     isActive: detail.isActive,
     version: detail.version,
+    createdAt: detail.createdAt,
   };
 }

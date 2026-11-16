@@ -28,6 +28,8 @@ export interface TopProduct {
   readonly units: number;
   readonly revenue: number;
   readonly marginPercent: number | null;
+  readonly firstSaleAt?: string | null;
+  readonly lastSaleAt?: string | null;
 }
 
 export interface SalesReport {

@@ -18,6 +18,7 @@ export interface Company {
   readonly effectiveStatus: string;
   readonly storeCount: number;
   readonly userCount: number;
+  readonly createdAt?: string | null;
 }
 
 export interface CompanySummary {

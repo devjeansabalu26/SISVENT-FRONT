@@ -10,6 +10,7 @@ export interface Supplier {
   readonly isActive: boolean;
   readonly version: number;
   readonly leadTimeDays: number;
+  readonly createdAt?: string | null;
 }
 
 export interface SupplierPage {

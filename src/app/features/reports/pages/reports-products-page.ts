@@ -1,7 +1,7 @@
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NotificationService } from '../../../core/notifications/notification.service';
-import { formatMoney, formatQuantity } from '../../../core/regional/regional-format';
+import { formatDateTime, formatMoney, formatQuantity } from '../../../core/regional/regional-format';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
@@ -89,6 +89,7 @@ export class ReportsProductsPage {
     { key: 'units', label: 'Unidades', value: (row) => formatQuantity(row.units) },
     { key: 'revenue', label: 'Ingresos', value: (row) => formatMoney(row.revenue) },
     { key: 'margin', label: 'Margen', value: (row) => (row.marginPercent !== null ? `${row.marginPercent.toFixed(1)}%` : 'Sin costo') },
+    { key: 'lastSale', label: 'Última venta', value: (row) => formatDateTime(row.lastSaleAt) || '—' },
   ];
 
   money(value: number): string {
@@ -127,6 +128,8 @@ export class ReportsProductsPage {
           { header: 'Unidades', value: (row) => row.units, type: 'number' },
           { header: 'Ingresos', value: (row) => row.revenue, type: 'money' },
           { header: 'Margen', value: (row) => row.marginPercent, type: 'percent', total: false },
+          { header: 'Primera venta', value: (row) => row.firstSaleAt, type: 'datetime' },
+          { header: 'Última venta', value: (row) => row.lastSaleAt, type: 'datetime' },
         ] }),
         excelTable({ name: 'Matriz ventas × margen', rows: matrixRows, columns: [
           { header: 'Grupo', value: (row) => row.group },

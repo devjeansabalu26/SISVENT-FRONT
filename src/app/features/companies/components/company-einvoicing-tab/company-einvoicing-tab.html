@@ -7,7 +7,7 @@
     <p class="muted">Cargando…</p>
   } @else if (rucFeature(); as feature) {
     <div class="sunat-switch" [class.is-on]="sunatOn(feature)">
-      <label>
+      <label [attr.data-locked]="feature.inPlan ? 'Esta función viene incluida en el plan de la empresa. Para quitarla, cambia el plan.' : null">
         <span class="sunat-features__text">
           <strong>{{ feature.title }}</strong>
           <small>{{ feature.inPlan ? 'Incluida en el plan de la empresa.' : feature.detail }}</small>
@@ -69,7 +69,7 @@
     <p class="muted">Cargando…</p>
   } @else if (invoiceFeature(); as feature) {
     <div class="sunat-switch" [class.is-on]="sunatOn(feature)">
-      <label>
+      <label [attr.data-locked]="feature.inPlan ? 'Esta función viene incluida en el plan de la empresa. Para quitarla, cambia el plan.' : null">
         <span class="sunat-features__text">
           <strong>{{ feature.title }}</strong>
           <small>{{ feature.inPlan ? 'Incluida en el plan de la empresa.' : feature.detail }}</small>

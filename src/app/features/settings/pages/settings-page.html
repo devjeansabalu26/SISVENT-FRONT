@@ -137,10 +137,11 @@
         <fieldset>
           <legend>Impuestos</legend>
           <div class="toggle-list">
-            <label class="toggle">
+            <label class="toggle" [attr.data-locked]="'No se puede desactivar: Savix trabaja siempre con precios que incluyen el ' + ('taxName' | regional) + '. El punto de venta, los comprobantes y los reportes calculan el impuesto a partir del precio final.'">
               <span>
                 <strong>Precios incluyen {{ 'taxName' | regional }}</strong>
-                <small>El precio de venta del catálogo ya contiene el {{ 'taxName' | regional }} ({{ 'taxRatePercent' | regional }}). Siempre activo: el POS cobra el precio con {{ 'taxName' | regional }} incluido.</small>
+                <small>El precio de venta del catálogo ya contiene el {{ 'taxName' | regional }} ({{ 'taxRatePercent' | regional }}). El POS cobra el precio con {{ 'taxName' | regional }} incluido.</small>
+                <small class="locked-note"><span class="material-icons" aria-hidden="true">lock</span>Siempre activo: no se puede desactivar porque los cobros, comprobantes y reportes calculan el {{ 'taxName' | regional }} desde el precio final.</small>
               </span>
               <input type="checkbox" role="switch" [formControl]="extras.controls.pricesIncludeTax" />
             </label>

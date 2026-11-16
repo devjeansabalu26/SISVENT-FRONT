@@ -13,12 +13,11 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { ProductApiService } from '../data-access/product-api.service';
 import { ProductDetail, ProductPriceHistoryItem } from '../models/product.model';
-import { DateTimePipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
-import { formatMoney } from '../../../core/regional/regional-format';
+import { DateTimePipe, MoneyPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
   selector: 'app-product-detail-page',
-  imports: [PageHeader, StatusChip, KpiCard, RouterLink, MoneyPipe, DateTimePipe],
+  imports: [PageHeader, StatusChip, KpiCard, RouterLink, MoneyPipe, DateTimePipe, ShortDatePipe],
   templateUrl: './product-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './product-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,36 +33,10 @@ export class ProductDetailPage implements OnInit {
   readonly product = signal<ProductDetail | null>(null);
   readonly priceHistory = signal<readonly ProductPriceHistoryItem[]>([]);
 
-  readonly specs = computed(() => {
+  readonly margin = computed(() => {
     const product = this.product();
-    if (!product) return [];
-    return [
-      { label: 'Descripción', value: product.description ?? '—' },
-      { label: 'Categoría', value: product.categoryName ?? '—' },
-      { label: 'Marca', value: product.brandName ?? '—' },
-      { label: 'Unidad', value: product.unitName ?? '—' }];
-  });
-
-  readonly finance = computed(() => {
-    const product = this.product();
-    if (!product) return [];
-    const margin =
-      product.referenceCost && product.referenceCost > 0
-        ? `${(((product.salePrice - product.referenceCost) / product.salePrice) * 100).toFixed(1)}%`
-        : '—';
-    return [
-      { label: 'Costo de referencia', value: product.referenceCost != null ? formatMoney(product.referenceCost) : '—' },
-      { label: 'Precio de venta', value: formatMoney(product.salePrice) },
-      { label: 'Margen de utilidad', value: margin }];
-  });
-
-  readonly stock = computed(() => {
-    const product = this.product();
-    if (!product) return [];
-    return [
-      { label: 'Stock actual', value: `${product.totalStock}` },
-      { label: 'Stock mínimo', value: `${product.minStock}` },
-      { label: 'SKU', value: product.sku }];
+    if (!product?.referenceCost || product.referenceCost <= 0 || product.salePrice <= 0) return '—';
+    return `${(((product.salePrice - product.referenceCost) / product.salePrice) * 100).toFixed(1)}%`;
   });
 
   ngOnInit(): void {

@@ -10,6 +10,7 @@ export interface Customer {
   readonly lastPurchaseAt: string | null;
   readonly isActive: boolean;
   readonly version: number;
+  readonly createdAt?: string | null;
 }
 
 export interface CustomerPage {
@@ -37,6 +38,7 @@ export interface CustomerDetail {
   readonly lastPurchaseAt: string | null;
   readonly averageTicket: number;
   readonly version: number;
+  readonly createdAt?: string | null;
 }
 
 export interface CustomerSummary {

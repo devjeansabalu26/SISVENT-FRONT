@@ -12,6 +12,7 @@ export interface Product {
   readonly lowStock: boolean;
   readonly version: number;
   readonly stores?: readonly ProductStoreStock[];
+  readonly createdAt?: string | null;
 }
 
 export interface ProductStoreStock {
@@ -47,6 +48,7 @@ export interface ProductDetail {
   readonly totalStock: number;
   readonly minStock: number;
   readonly version: number;
+  readonly createdAt?: string | null;
 }
 
 export interface ProductPriceHistoryItem {

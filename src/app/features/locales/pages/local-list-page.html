@@ -27,6 +27,7 @@
       <p class="local-card__row"><span class="material-icons">location_on</span>{{ local.address || 'Sin dirección' }}</p>
       <p class="local-card__row"><span class="material-icons">call</span>{{ local.phone || 'Sin teléfono' }}</p>
       <p class="local-card__row"><span class="material-icons">group</span>{{ local.sellerCount }} vendedor(es) asignado(s)</p>
+      @if (local.createdAt) {<p class="local-card__row"><span class="material-icons">event</span>Registrado el {{ local.createdAt | shortDate }}</p>}
       <footer>
         <button type="button" (click)="edit(local)"><span class="material-icons">edit</span>Editar datos</button>
         <button type="button" (click)="toggleStatus(local)">

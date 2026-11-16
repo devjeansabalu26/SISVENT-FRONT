@@ -22,15 +22,21 @@ function normalize(text: string): string {
         <label class="search">
           <span class="material-icons" aria-hidden="true">search</span>
           <input #search type="text" [value]="query()" (input)="setQuery($any($event.target).value)"
-            placeholder="Buscar…" aria-label="Buscar opción" autocomplete="off" />
+            placeholder="Escribe para buscar…" aria-label="Buscar opción" autocomplete="off" spellcheck="false" />
+          @if (query()) {
+            <button type="button" class="clear" (mousedown)="$event.preventDefault()" (click)="setQuery(''); focusSearch()" aria-label="Limpiar búsqueda">
+              <span class="material-icons" aria-hidden="true">close</span>
+            </button>
+          }
         </label>
+        <p class="count" aria-live="polite">{{ visible().length }} de {{ options().length }}</p>
       }
       <ul #list role="listbox" [attr.aria-label]="label()" tabindex="-1">
         @for (option of visible(); track option.index; let i = $index) {
           <li role="option" [id]="'opt-' + option.index" [attr.aria-selected]="option.index === selected()"
             [attr.aria-disabled]="option.disabled" [class.active]="i === active()" [class.selected]="option.index === selected()"
             [class.disabled]="option.disabled" (mouseenter)="active.set(i)" (mousedown)="$event.preventDefault()" (click)="choose(option)">
-            <span class="text">{{ option.label || '—' }}</span>
+            <span class="text" [title]="option.label">{{ option.label || '—' }}</span>
             @if (option.index === selected()) { <span class="material-icons check" aria-hidden="true">check</span> }
           </li>
         } @empty {
@@ -56,8 +62,12 @@ export class SelectPanel implements AfterViewInit {
   readonly active = signal(0);
   readonly searchable = computed(() => this.options().length > SEARCH_THRESHOLD);
   readonly visible = computed(() => {
-    const term = normalize(this.query().trim());
-    return term ? this.options().filter((option) => normalize(option.label).includes(term)) : this.options();
+    const terms = normalize(this.query()).split(/\s+/).filter(Boolean);
+    if (!terms.length) return this.options();
+    return this.options().filter((option) => {
+      const label = normalize(option.label);
+      return terms.every((term) => label.includes(term));
+    });
   });
 
   ngAfterViewInit(): void {
@@ -65,6 +75,10 @@ export class SelectPanel implements AfterViewInit {
     this.active.set(Math.max(0, start));
     (this.searchInput()?.nativeElement ?? this.list().nativeElement).focus();
     this.scrollActive();
+  }
+
+  focusSearch(): void {
+    this.searchInput()?.nativeElement.focus();
   }
 
   setQuery(value: string): void {

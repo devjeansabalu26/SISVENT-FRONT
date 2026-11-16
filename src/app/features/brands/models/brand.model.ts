@@ -4,6 +4,7 @@ export interface Brand {
   readonly description: string | null;
   readonly isActive: boolean;
   readonly version: number;
+  readonly createdAt?: string | null;
 }
 
 export interface BrandPage {

@@ -6,6 +6,7 @@ import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog/confirm-dialog';
 import { ConfirmDialogData } from '../../../shared/ui/confirm-dialog/confirm-dialog.model';
+import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
@@ -17,7 +18,7 @@ import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/dat
 
 @Component({
   selector: 'app-goods-receipt-detail-page',
-  imports: [PageHeader, StatusChip, RouterLink, MoneyPipe, DateTimePipe, RegionalPipe],
+  imports: [PageHeader, StatusChip, KpiCard, RouterLink, MoneyPipe, DateTimePipe, RegionalPipe],
   templateUrl: './goods-receipt-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './goods-receipt-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

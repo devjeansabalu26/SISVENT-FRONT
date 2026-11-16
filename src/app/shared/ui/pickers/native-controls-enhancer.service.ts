@@ -77,7 +77,8 @@ export class NativeControlsEnhancer {
       disabled: option.disabled || (option.parentElement instanceof HTMLOptGroupElement && option.parentElement.disabled),
     }));
     const box = select.closest<HTMLElement>('[data-picker-anchor]') ?? select;
-    const ref = this.open(select, SelectPanel, box.getBoundingClientRect().width, box);
+    const width = this.selectPanelWidth(select, options, box);
+    const ref = this.open(select, SelectPanel, width, box, options.length > 8 ? 320 : undefined);
     if (!ref) return;
     ref.setInput('options', options);
     ref.setInput('selected', select.selectedIndex);
@@ -90,6 +91,17 @@ export class NativeControlsEnhancer {
       this.close(true);
     });
     ref.instance.dismiss.subscribe(() => this.close(true));
+  }
+
+  private selectPanelWidth(select: HTMLSelectElement, options: readonly SelectPanelOption[], box: HTMLElement): number {
+    const canvas = this.document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const optionStyle = this.document.defaultView?.getComputedStyle(select);
+    if (context && optionStyle) context.font = `${optionStyle.fontSize} ${optionStyle.fontFamily}`;
+    const longest = Math.max(0, ...options.map(({ label }) => context?.measureText(label).width ?? label.length * 8));
+    const viewportWidth = this.document.documentElement.clientWidth || 560;
+    const availableWidth = Math.max(180, viewportWidth - 16);
+    return Math.min(availableWidth, Math.max(box.getBoundingClientRect().width, Math.ceil(longest + 72)));
   }
 
   private openDate(input: DateInput): void {
@@ -108,7 +120,9 @@ export class NativeControlsEnhancer {
     ref.instance.dismiss.subscribe(() => this.close(true));
   }
 
-  private open<T>(anchor: HTMLElement, component: ComponentType<T>, width?: number, box: HTMLElement = anchor): ComponentRef<T> | null {
+  private open<T>(
+    anchor: HTMLElement, component: ComponentType<T>, width?: number, box: HTMLElement = anchor, minWidth?: number,
+  ): ComponentRef<T> | null {
     this.close();
     const position = this.overlay
       .position()
@@ -127,6 +141,8 @@ export class NativeControlsEnhancer {
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-transparent-backdrop',
       width,
+      minWidth,
+      maxWidth: 'calc(100vw - 16px)',
       panelClass: 'app-picker-overlay',
     });
     overlayRef.backdropClick().subscribe(() => this.close());

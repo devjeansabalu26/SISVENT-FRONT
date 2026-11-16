@@ -1,3 +1,4 @@
+import { formatDate } from '../../../core/regional/regional-format';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
@@ -46,6 +47,7 @@ export class BrandListPage implements OnInit {
   readonly columns: readonly DataTableColumn<Brand>[] = [
     { key: 'name', label: 'Nombre', value: (row) => row.name },
     { key: 'description', label: 'Descripción', value: (row) => row.description ?? '—' },
+    { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
 

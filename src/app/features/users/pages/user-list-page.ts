@@ -1,3 +1,4 @@
+import { formatDate } from '../../../core/regional/regional-format';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
@@ -18,7 +19,7 @@ import { PlatformUserApiService } from '../data-access/platform-user-api.service
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, PlatformUserItem, UserFormValue, UserRoleLimit } from '../models/user.model';
 
-interface Row { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean; readonly isLocked: boolean }
+interface Row { readonly id: string; readonly fullName: string; readonly userCode: string | null; readonly email: string | null; readonly document: string | null; readonly role: string; readonly storeName: string | null; readonly companyName?: string | null; readonly isActive: boolean; readonly isLocked: boolean; readonly createdAt?: string | null }
 
 @Component({
   selector: 'app-user-list-page',
@@ -69,6 +70,7 @@ export class UserListPage implements OnInit {
           companyName: u.companyName,
           isActive: u.isActive,
           isLocked: u.isLocked ?? false,
+          createdAt: u.createdAt,
         }
       : {
           id: u.id,
@@ -80,6 +82,7 @@ export class UserListPage implements OnInit {
           storeName: u.storeName,
           isActive: u.isActive,
           isLocked: u.isLocked ?? false,
+          createdAt: u.createdAt,
         };
   }
 
@@ -95,6 +98,7 @@ export class UserListPage implements OnInit {
         { key: 'role', label: 'Rol', value: (row) => row.role },
         { key: 'company', label: 'Empresa', value: (row) => row.companyName ?? '—' },
         { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
+        { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
         { key: 'status', label: 'Estado', value: (row) => (row.isLocked ? 'LOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       ]
     : [
@@ -104,6 +108,7 @@ export class UserListPage implements OnInit {
         { key: 'document', label: 'Documento', value: (row) => row.document ?? '—' },
         { key: 'role', label: 'Rol', value: (row) => row.role },
         { key: 'store', label: 'Local', value: (row) => row.storeName ?? '—' },
+        { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
         { key: 'status', label: 'Estado', value: (row) => (row.isLocked ? 'LOCKED' : row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
       ];
 

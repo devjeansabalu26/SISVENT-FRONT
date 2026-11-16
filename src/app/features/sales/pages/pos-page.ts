@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { formatMoney } from '../../../core/regional/regional-format';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { filter, timeout } from 'rxjs';
@@ -61,10 +62,10 @@ export class PosPage implements OnInit {
   readonly paymentMethods = signal<readonly PaymentMethodOption[]>([]);
   readonly paymentMethodsError = signal(false);
 
-  readonly products = signal<readonly Product[]>([]);
-  readonly productQuery = signal('');
-  readonly searchingProducts = signal(false);
-  private productSearchId = 0;
+  readonly catalog = signal<readonly Product[]>([]);
+  readonly loadingCatalog = signal(false);
+  readonly catalogError = signal(false);
+  private catalogRequestId = 0;
   readonly cart = signal<readonly CartItem[]>([]);
   readonly paymentLines = signal<readonly PaymentDraftLine[]>([]);
   readonly payment = computed(() => this.paymentLines()[0]?.methodCode ?? '');
@@ -90,7 +91,7 @@ export class PosPage implements OnInit {
       this.cart.set([]);
       this.notifications.show('Se vació el carrito: cada local vende solo sus productos.', 'info');
     }
-    this.search(this.productQuery());
+    this.loadCatalog();
   }
 
   readonly closedCash = computed(() => {
@@ -131,8 +132,10 @@ export class PosPage implements OnInit {
         const preferred = this.storeContext.selectedStoreId();
         const initial = this.stores().find((item) => item.id === preferred) ?? this.stores()[0];
         if (initial) this.selectedStoreId.set(initial.id);
-        this.search(this.productQuery());
+        this.loadCatalog();
       });
+    } else {
+      this.loadCatalog();
     }
   }
 
@@ -152,41 +155,70 @@ export class PosPage implements OnInit {
     this.showPaymentErrors.set(false);
   }
 
-  search(query: string): void {
-    const term = query.trim();
-    const requestId = ++this.productSearchId;
-    this.productQuery.set(term);
-    if (!term) {
-      this.products.set([]);
-      this.searchingProducts.set(false);
+  loadCatalog(): void {
+    const requestId = ++this.catalogRequestId;
+    const storeId = this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null);
+    this.catalogError.set(false);
+    if (this.isAdmin && !storeId) {
+      this.catalog.set([]);
       return;
     }
-    this.searchingProducts.set(true);
-    this.productApi.list({ pageSize: 8, search: term, isActive: true, storeId: this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null) }).subscribe({
-      next: (page) => {
-        if (requestId !== this.productSearchId) return;
-        this.products.set(page.items);
-        this.searchingProducts.set(false);
-      },
-      error: () => {
-        if (requestId === this.productSearchId) this.searchingProducts.set(false);
-      },
-    });
+    this.loadingCatalog.set(true);
+    const collected: Product[] = [];
+    const loadPage = (pageNumber: number): void => {
+      this.productApi.list({ pageNumber, pageSize: 100, isActive: true, storeId }).subscribe({
+        next: (page) => {
+          if (requestId !== this.catalogRequestId) return;
+          collected.push(...page.items);
+          if (page.items.length === 100 && collected.length < page.totalCount && pageNumber < 50) {
+            loadPage(pageNumber + 1);
+            return;
+          }
+          this.catalog.set(
+            collected.filter((product) => product.totalStock > 0).sort((x, y) => x.name.localeCompare(y.name, 'es')),
+          );
+          this.loadingCatalog.set(false);
+        },
+        error: () => {
+          if (requestId !== this.catalogRequestId) return;
+          this.loadingCatalog.set(false);
+          this.catalogError.set(true);
+          this.notifications.show('No se pudieron cargar los productos del local.', 'error');
+        },
+      });
+    };
+    loadPage(1);
   }
 
-  addFromSearch(product: Product, input: HTMLInputElement): void {
+  productLabel(product: Product): string {
+    return `${product.name} (${product.sku}) · stock ${product.totalStock} · ${formatMoney(product.salePrice)}`;
+  }
+
+  pickProduct(select: HTMLSelectElement): void {
+    const product = this.catalog().find((item) => item.id === select.value);
+    select.value = '';
+    if (product) this.add(product);
+  }
+
+  addByCode(input: HTMLInputElement): void {
+    const term = input.value.trim().toLowerCase();
+    if (!term) return;
+    const catalog = this.catalog();
+    const product =
+      catalog.find((item) => item.sku.toLowerCase() === term || item.barcode?.toLowerCase() === term) ??
+      catalog.find((item) => item.name.toLowerCase() === term);
+    if (!product) {
+      this.notifications.show(
+        this.loadingCatalog()
+          ? 'Todavía se están cargando los productos del local. Intenta en un momento.'
+          : `No hay un producto con código “${input.value.trim()}” con stock en este local. Elígelo en el selector de productos.`,
+        'warning',
+      );
+      input.select();
+      return;
+    }
     this.add(product);
-    this.clearProductSearch(input);
-  }
-
-  addFirstResult(input: HTMLInputElement): void {
-    const first = this.products()[0];
-    if (first && !this.searchingProducts()) this.addFromSearch(first, input);
-  }
-
-  clearProductSearch(input: HTMLInputElement): void {
     input.value = '';
-    this.search('');
     input.focus();
   }
 
@@ -413,6 +445,7 @@ export class PosPage implements OnInit {
             .subscribe((action) => {
               this.cart.set([]);
               this.selectedCustomer.set(null);
+              this.loadCatalog();
               this.selectPayment(this.paymentMethods()[0]?.code ?? '');
               if (action === 'print') void this.router.navigate(['/app/sales', sale.id, 'comprobante']);
               else if (action === 'detail') void this.router.navigate(['/app/sales', sale.id]);

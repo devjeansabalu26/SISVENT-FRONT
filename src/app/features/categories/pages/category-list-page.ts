@@ -1,3 +1,4 @@
+import { formatDate } from '../../../core/regional/regional-format';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
@@ -79,6 +80,7 @@ export class CategoryListPage implements OnInit {
     { key: 'parent', label: 'Categoría principal', value: (row) => row.parentName ?? '—' },
     { key: 'products', label: 'Productos', value: (row) => String(row.productCount ?? 0) },
     { key: 'description', label: 'Descripción', value: (row) => row.description ?? '—' },
+    { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
 

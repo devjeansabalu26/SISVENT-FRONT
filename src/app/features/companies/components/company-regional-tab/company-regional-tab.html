@@ -23,7 +23,7 @@
     }
 
     <div class="fields">
-      <label>
+      <label [attr.data-locked]="countryLocked() ? 'El país no se puede cambiar porque la empresa ya tiene ventas o movimientos de caja.' : null">
         <span>País <span class="required">*</span></span>
         <select formControlName="countryCode">
           @for (item of selectableCountries(); track item.code) {
@@ -32,7 +32,7 @@
         </select>
         @if (countryLocked()) { <small class="hint">Bloqueado: la empresa ya tiene ventas.</small> }
       </label>
-      <label>
+      <label [attr.data-locked]="currencyLocked() ? 'La moneda no se puede cambiar porque la empresa ya tiene ventas o movimientos de caja.' : null">
         <span>Moneda <span class="required">*</span></span>
         <select formControlName="currencyCode">
           @for (item of selectableCurrencies(); track item.code) {

@@ -3,7 +3,7 @@
   <div class="fields">
     <label>Nombres<input formControlName="firstName" placeholder="Nombres" /></label>
     <label>Apellidos<input formControlName="lastName" placeholder="Apellidos" /></label>
-    <label class="wide">Correo electrónico<input type="email" formControlName="email" placeholder="usuario@empresa.com" />
+    <label class="wide" data-locked="El correo de un usuario ya creado no se puede cambiar desde aquí.">Correo electrónico<input type="email" formControlName="email" placeholder="usuario@empresa.com" />
       @if (user) { <small class="muted">El correo no se puede cambiar una vez creado el usuario.</small> }
     </label>
     <label>Documento<input inputmode="numeric" formControlName="document" placeholder="Documento de identidad" /></label>

@@ -70,4 +70,19 @@ describe('SelectPanel', () => {
     panel.choose(options[3]);
     expect(picked).toEqual([3]);
   });
+
+  it('busca por varias palabras en cualquier orden', () => {
+    const fixture = TestBed.createComponent(SelectPanel);
+    fixture.componentRef.setInput('options', [
+      { index: 0, label: 'Coca Cola 500 ml (CC500) · stock 12', disabled: false },
+      { index: 1, label: 'Inca Kola 500 ml (IK500) · stock 3', disabled: false },
+      { index: 2, label: 'Coca Cola 1.5 L (CC15) · stock 8', disabled: false },
+    ]);
+    fixture.detectChanges();
+    const panel = fixture.componentInstance;
+    panel.setQuery('500 coca');
+    expect(panel.visible().map((o) => o.index)).toEqual([0]);
+    panel.setQuery('  ');
+    expect(panel.visible().length).toBe(3);
+  });
 });

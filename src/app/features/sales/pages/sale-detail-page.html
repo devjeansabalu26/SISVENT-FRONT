@@ -10,10 +10,15 @@
     }
   </app-page-header>
 
-  <div class="summary surface-card">
-    <div><span class="code">{{ sale.saleDate | dateTime }}</span><h2>{{ sale.saleNumber }}</h2></div>
+  <section class="profile surface-card" aria-label="Datos de la venta">
     <app-status-chip [value]="sale.status" [label]="sale.status" [hint]="sale.annulment ? 'Anulada por ' + sale.annulment.cancelledBy + '. Motivo: ' + sale.annulment.reason : null" />
-  </div>
+    <ul class="facts">
+      <li title="Fecha"><span class="material-icons" aria-hidden="true">event</span>{{ sale.saleDate | dateTime }}</li>
+      <li title="Cliente"><span class="material-icons" aria-hidden="true">person</span>{{ sale.clientName ?? 'Cliente general' }}</li>
+      <li title="Vendedor"><span class="material-icons" aria-hidden="true">badge</span>{{ sale.sellerName }}</li>
+      <li title="Local"><span class="material-icons" aria-hidden="true">store</span>{{ sale.storeName }}</li>
+    </ul>
+  </section>
 
   @if (isInvoice(sale)) {
     <p class="notice muted-notice">
@@ -135,19 +140,6 @@
         @for (detail of paymentDetails(); track $index) {
           <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>
         }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Información de venta</h3>
-      <dl>
-        <div><dt>Vendedor</dt><dd>{{ sale.sellerName }}</dd></div>
-        <div><dt>Local</dt><dd>{{ sale.storeName }}</dd></div>
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Información de cliente</h3>
-      <dl>
-        <div><dt>Nombre</dt><dd>{{ sale.clientName ?? 'Cliente general' }}</dd></div>
       </dl>
     </section>
     <section class="surface-card">

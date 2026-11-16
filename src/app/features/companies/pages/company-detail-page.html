@@ -12,7 +12,7 @@
   <div class="summary surface-card">
     <div>
       <span class="code">{{ company.taxIdName ?? 'RUC' }}: {{ company.taxDocument }} · {{ company.countryName ?? 'Perú' }} · Plan {{ company.planName ?? 'Sin plan' }}</span>
-      <h2>{{ company.legalName ?? company.tradeName }}</h2>
+      @if (company.legalName && company.legalName !== company.tradeName) {<h2>{{ company.legalName }}</h2>}
     </div>
     <app-status-chip [value]="company.effectiveStatus" [label]="company.effectiveStatus" [hint]="statusHint(company)" />
   </div>

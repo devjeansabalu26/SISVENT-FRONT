@@ -13,7 +13,7 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { SupplierApiService } from '../data-access/supplier-api.service';
 import { Supplier } from '../models/supplier.model';
-import { currentRegional } from '../../../core/regional/regional-format';
+import { currentRegional, formatDate } from '../../../core/regional/regional-format';
 import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -57,6 +57,7 @@ export class SupplierListPage implements OnInit {
     { key: 'contactName', label: 'Contacto', value: (row) => row.contactName ?? '—' },
     { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
     { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
+    { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
   ];
 

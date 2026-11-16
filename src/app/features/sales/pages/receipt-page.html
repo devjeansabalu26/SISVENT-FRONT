@@ -11,7 +11,10 @@
 
   <article class="receipt">
     <header class="receipt__head">
-      <div>
+      <div class="receipt__brand">
+        @if (receiptLogoUrl(); as logo) {
+          <img class="receipt__logo" [src]="logo" [alt]="'Logo de ' + companyName()" (error)="hideLogo($event)" />
+        }
         <strong>{{ companyName() }}</strong>
         <p>{{ isInvoice(sale) ? 'Factura' : 'Comprobante interno de venta' }}</p>
       </div>
@@ -84,7 +87,7 @@
     </section>
 
     <footer class="receipt__foot">
-      <p>¡Gracias por su compra!</p>
+      <p>{{ footerText(sale) }}</p>
       @if (isInvoice(sale)) {
         <p class="muted">{{ statusLabel[sale.eInvoiceStatus ?? ''] ?? 'Factura' }}. La representación impresa de la factura electrónica estará disponible cuando se conecte el envío a SUNAT.</p>
       } @else {

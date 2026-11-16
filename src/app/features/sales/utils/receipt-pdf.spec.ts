@@ -1,5 +1,5 @@
 import { SaleDetail } from '../models/sale-detail.model';
-import { receiptRows } from './receipt-pdf';
+import { receiptFooter, receiptRows } from './receipt-pdf';
 
 const sale: SaleDetail = {
   id: 's1',
@@ -50,5 +50,14 @@ describe('receipt PDF rows', () => {
   it('marks cancelled sales', () => {
     const rows = receiptRows({ ...sale, status: 'CANCELLED' }, 'JEAN SAC');
     expect(rows.some((row) => row.kind === 'text' && row.text.includes('ANULADA'))).toBeTrue();
+  });
+
+  it('usa el mensaje al pie configurado o el de siempre', () => {
+    expect(receiptFooter(sale)).toBe('¡Gracias por su compra!');
+    expect(receiptFooter({ ...sale, receipt: { logoUrl: null, footer: 'Vuelve pronto' } })).toBe('Vuelve pronto');
+    expect(receiptFooter({ ...sale, receipt: { logoUrl: null, footer: '   ' } })).toBe('¡Gracias por su compra!');
+    const footerRow = receiptRows({ ...sale, receipt: { logoUrl: null, footer: 'Vuelve pronto' } }, 'JEAN SAC')
+      .find((row) => row.kind === 'text' && row.text === 'Vuelve pronto');
+    expect(footerRow).toBeDefined();
   });
 });

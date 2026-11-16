@@ -10,7 +10,7 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { CustomerApiService } from '../data-access/customer-api.service';
 import { Customer, CustomerSummary } from '../models/customer.model';
 import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
-import { formatMoney } from '../../../core/regional/regional-format';
+import { formatDate, formatMoney } from '../../../core/regional/regional-format';
 
 @Component({
   selector: 'app-customer-list-page',
@@ -45,6 +45,7 @@ export class CustomerListPage implements OnInit {
     { key: 'email', label: 'Correo', value: (row) => row.email ?? '—' },
     { key: 'phone', label: 'Teléfono', value: (row) => row.phone ?? '—' },
     { key: 'purchases', label: 'Compras total', value: (row) => formatMoney(row.totalPurchases) },
+    { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' }];
 
   ngOnInit(): void {

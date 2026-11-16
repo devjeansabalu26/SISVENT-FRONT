@@ -1,3 +1,4 @@
+import { formatDate } from '../../../core/regional/regional-format';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
@@ -40,6 +41,7 @@ export class CompanyListPage implements OnInit {
     { key: 'status', label: 'Estado', value: (row) => row.effectiveStatus, type: 'status', hint: companyStatusHint },
     { key: 'stores', label: 'Locales', value: (row) => row.storeCount },
     { key: 'users', label: 'Usuarios', value: (row) => row.userCount },
+    { key: 'createdAt', label: 'Registrado', value: (row) => formatDate(row.createdAt) || '—' },
   ];
 
   ngOnInit(): void {

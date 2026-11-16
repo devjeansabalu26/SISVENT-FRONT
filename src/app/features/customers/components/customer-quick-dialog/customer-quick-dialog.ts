@@ -49,22 +49,22 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
           </span>
           <small class="help" [attr.data-kind]="documentHelp().kind" [title]="documentHelp().text">{{ documentHelp().text }}</small>
         </label>
-        <label class="wide"
+        <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null" class="wide"
           >Nombre o razón social *
           <input formControlName="displayName" />
           <small class="help" data-kind="error">{{ form.controls.displayName.touched && form.controls.displayName.invalid ? 'El nombre es obligatorio.' : '' }}</small>
         </label>
-        <label
+        <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null"
           >Teléfono *
           <input formControlName="phone" inputmode="tel" />
           <small class="help" data-kind="error">{{ form.controls.phone.touched && form.controls.phone.invalid ? 'El teléfono es obligatorio.' : '' }}</small>
         </label>
-        <label
+        <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null"
           >Correo
           <input formControlName="email" type="email" />
           <small class="help" data-kind="error">{{ form.controls.email.touched && form.controls.email.invalid ? 'Correo no válido.' : '' }}</small>
         </label>
-        <label class="wide"
+        <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null" class="wide"
           >Dirección
           <input formControlName="address" maxlength="350" />
           <small class="help"></small>

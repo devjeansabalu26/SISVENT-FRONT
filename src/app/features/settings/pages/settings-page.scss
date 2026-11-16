@@ -306,3 +306,13 @@ label.toggle small,
   color: var(--color-text-primary);
   font-weight: 600;
 }
+
+label.toggle[data-locked] {
+  cursor: not-allowed;
+}
+label.toggle small.locked-note {
+  display: flex;
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}

@@ -9,7 +9,6 @@
   <div class="summary surface-card">
     <div>
       <span class="code">{{ plan.code }}</span>
-      <h2>Plan {{ plan.name }}</h2>
     </div>
     <app-status-chip [value]="plan.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="plan.isActive ? 'ACTIVE' : 'INACTIVE'" />
   </div>

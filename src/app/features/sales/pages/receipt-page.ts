@@ -6,7 +6,7 @@ import { NotificationService } from '../../../core/notifications/notification.se
 import { SaleApiService } from '../data-access/sale-api.service';
 import { SaleDetail } from '../models/sale-detail.model';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
-import { downloadReceiptPdf } from '../utils/receipt-pdf';
+import { downloadReceiptPdf, receiptFooter } from '../utils/receipt-pdf';
 import { EINVOICE_STATUS_LABEL, documentNumber, documentTitle, isInvoice } from '../utils/sale-document';
 import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
@@ -31,6 +31,11 @@ export class ReceiptPage implements OnInit {
   readonly sending = this.mailer.sending;
   readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly sale = signal<SaleDetail | null>(null);
+  readonly receiptLogoUrl = computed(() => {
+    const sale = this.sale();
+    if (sale?.receipt?.showLogoOnReceipt !== true) return null;
+    return sale.receipt?.logoUrl || this.company()?.logoUrl || null;
+  });
   readonly isInvoice = isInvoice;
   readonly documentNumber = documentNumber;
   readonly documentTitle = documentTitle;
@@ -44,6 +49,12 @@ export class ReceiptPage implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  readonly footerText = receiptFooter;
+
+  hideLogo(event: Event): void {
+    (event.target as HTMLElement).hidden = true;
   }
 
   back(): void {
@@ -64,7 +75,15 @@ export class ReceiptPage implements OnInit {
     if (!sale || this.downloading()) return;
     this.downloading.set(true);
     try {
-      await downloadReceiptPdf(sale, this.company()?.commercialName ?? 'SAVIX');
+      const printableSale = {
+        ...sale,
+        receipt: {
+          showLogoOnReceipt: sale.receipt?.showLogoOnReceipt === true,
+          logoUrl: this.receiptLogoUrl(),
+          footer: sale.receipt?.footer ?? null,
+        },
+      };
+      await downloadReceiptPdf(printableSale, this.company()?.commercialName ?? 'SAVIX');
     } catch {
       this.notifications.show('No se pudo generar el PDF del comprobante.', 'error');
     } finally {

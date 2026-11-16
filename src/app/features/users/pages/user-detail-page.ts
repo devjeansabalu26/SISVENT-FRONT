@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
@@ -14,7 +14,7 @@ import { SellerModulesCard } from '../components/seller-modules-card/seller-modu
 import { PlatformUserApiService } from '../data-access/platform-user-api.service';
 import { UserApiService } from '../data-access/user-api.service';
 import { AppUser, UserFormValue } from '../models/user.model';
-import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
+import { DateTimePipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 
 interface UserDetailView {
   readonly id: string;
@@ -35,7 +35,7 @@ interface UserDetailView {
 
 @Component({
   selector: 'app-user-detail-page',
-  imports: [PageHeader, StatusChip, RouterLink, SellerModulesCard, DateTimePipe],
+  imports: [PageHeader, StatusChip, RouterLink, SellerModulesCard, DateTimePipe, ShortDatePipe],
   templateUrl: './user-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,18 +50,6 @@ export class UserDetailPage implements OnInit {
 
   readonly loading = signal(true);
   readonly user = signal<UserDetailView | null>(null);
-
-  readonly fields = computed(() => {
-    const user = this.user();
-    if (!user) return [];
-    return [
-      { label: 'Correo electrónico', value: user.email ?? '—' },
-      { label: 'Teléfono', value: user.phone ?? '—' },
-      { label: 'Documento', value: user.document ?? '—' },
-      { label: 'Rol', value: user.role },
-      ...(this.isSuperadmin ? [{ label: 'Empresa', value: user.companyName ?? '—' }] : []),
-      { label: 'Local asignado', value: user.storeName ?? '—' }];
-  });
 
   ngOnInit(): void {
     this.load();

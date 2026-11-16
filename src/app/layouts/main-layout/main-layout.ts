@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { DemoLockService } from '../../core/demo/demo-lock.service';
+import { LockedControlService } from '../../core/locked/locked-control.service';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from './sidebar/sidebar';
 import { Header } from './header/header';
@@ -20,11 +21,16 @@ export class MainLayout {
   private readonly users = inject(UserContextService);
   readonly readOnly = computed(() => !!this.users.user()?.readOnly);
   private readonly demoLock = inject(DemoLockService);
+  private readonly lockedControls = inject(LockedControlService);
 
   constructor() {
     afterNextRender(() => this.attendancePrompt.checkOnEntry());
     effect(() => (this.readOnly() ? this.demoLock.start() : this.demoLock.stop()));
-    inject(DestroyRef).onDestroy(() => this.demoLock.stop());
+    this.lockedControls.start();
+    inject(DestroyRef).onDestroy(() => {
+      this.demoLock.stop();
+      this.lockedControls.stop();
+    });
   }
 
   toggleNavigation(): void { this.navigationClosed.update((value) => !value); }

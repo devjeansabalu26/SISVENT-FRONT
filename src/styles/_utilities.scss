@@ -107,3 +107,28 @@ table.sticky-actions > thead > tr > th:last-child {
   z-index: 2;
   background: var(--sticky-actions-head-bg, var(--color-surface));
 }
+
+:where(main > router-outlet + :not(app-einvoice-list-page)) > :where(.surface-card, .cards, section) + :where(.surface-card, .cards, section) {
+  margin-top: var(--space-md);
+}
+
+[data-locked],
+[data-locked] :disabled,
+main :is(input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+
+.locked-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+.locked-note .material-icons {
+  flex: none;
+  color: var(--color-warning);
+  font-size: 15px;
+}

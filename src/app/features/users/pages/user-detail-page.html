@@ -21,35 +21,30 @@
     </p>
   }
 
-  <div class="summary surface-card">
-    <div>
-      <span class="code">{{ user.email ?? 'Sin correo' }}</span>
-      <h2>{{ user.fullName }}</h2>
-    </div>
+  <section class="profile surface-card" aria-label="Datos del usuario">
     <app-status-chip [value]="user.isLocked ? 'LOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="user.isLocked ? 'LOCKED' : user.isActive ? 'ACTIVE' : 'INACTIVE'" />
-  </div>
-
-  <div class="cards">
-    <section class="surface-card">
-      <h3>Datos del usuario</h3>
-      <dl>
-        @for (field of fields(); track field.label) {
-          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-        }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Actividad</h3>
-      <dl>
-        <div><dt>Estado</dt><dd>{{ user.isLocked ? 'Bloqueado' : user.isActive ? 'Activo' : 'Inactivo' }}</dd></div>
-        @if (isSuperadmin) {
-          <div><dt>Acceso</dt><dd>{{ user.readOnly ? 'Solo lectura (demostración)' : 'Normal' }}</dd></div>
-        }
-        <div><dt>Última actividad</dt><dd>{{ user.lastActivityAt ? (user.lastActivityAt | dateTime) : 'Sin registro' }}</dd></div>
-        <div><dt>Registrado</dt><dd>{{ user.createdAt ? (user.createdAt | dateTime) : '—' }}</dd></div>
-      </dl>
-    </section>
-  </div>
+    <ul class="facts">
+      <li title="Rol"><span class="material-icons" aria-hidden="true">shield_person</span>{{ user.role }}</li>
+      @if (isSuperadmin) {
+        <li title="Empresa"><span class="material-icons" aria-hidden="true">business</span>{{ user.companyName ?? 'Sin empresa' }}</li>
+      }
+      <li title="Local asignado"><span class="material-icons" aria-hidden="true">store</span>{{ user.storeName ?? 'Sin local asignado' }}</li>
+      @if (user.email) {
+        <li title="Correo electrónico"><span class="material-icons" aria-hidden="true">mail</span><a [href]="'mailto:' + user.email">{{ user.email }}</a></li>
+      }
+      @if (user.phone) {
+        <li title="Teléfono"><span class="material-icons" aria-hidden="true">call</span>{{ user.phone }}</li>
+      }
+      @if (user.document) {
+        <li title="Documento"><span class="material-icons" aria-hidden="true">badge</span>{{ user.document }}</li>
+      }
+      @if (isSuperadmin && user.readOnly) {
+        <li><span class="material-icons" aria-hidden="true">visibility</span>Solo lectura (demostración)</li>
+      }
+      <li><span class="material-icons" aria-hidden="true">schedule</span><small>Última actividad</small>{{ user.lastActivityAt ? (user.lastActivityAt | dateTime) : 'Sin registro' }}</li>
+      <li><span class="material-icons" aria-hidden="true">event</span><small>Registrado</small>{{ user.createdAt | shortDate }}</li>
+    </ul>
+  </section>
 
   <!-- ADMIN: menús del vendedor (dentro de lo que el SUPERADMIN habilitó para la empresa). -->
   @if (user.editable && user.role === 'VENDEDOR') {

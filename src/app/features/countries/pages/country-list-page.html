@@ -29,7 +29,7 @@
 
   @if (editingCurrency() !== null) {
     <form class="currency-form" [formGroup]="currencyForm" (ngSubmit)="saveCurrency()">
-      <label>Código (ISO 4217)<input formControlName="code" maxlength="3" placeholder="COP" /></label>
+      <label data-locked="El código de una moneda ya creada no se puede cambiar.">Código (ISO 4217)<input formControlName="code" maxlength="3" placeholder="COP" /></label>
       <label>Nombre<input formControlName="name" placeholder="Peso colombiano" /></label>
       <label>Símbolo<input formControlName="symbol" maxlength="8" placeholder="$" /></label>
       <label>Decimales<input type="number" min="0" max="4" formControlName="decimals" /></label>

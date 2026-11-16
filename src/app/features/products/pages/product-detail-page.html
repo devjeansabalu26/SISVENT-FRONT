@@ -10,65 +10,58 @@
     }
   </app-page-header>
 
-  <div class="summary surface-card">
-    <div><span class="code">{{ product.sku }}</span><h2>{{ product.name }}</h2></div>
+  <section class="profile surface-card" aria-label="Datos del producto">
     <app-status-chip [value]="product.isActive ? 'ACTIVE' : 'INACTIVE'" [label]="product.isActive ? 'ACTIVE' : 'INACTIVE'" />
-  </div>
+    <ul class="facts">
+      <li title="SKU"><span class="material-icons" aria-hidden="true">tag</span>{{ product.sku }}</li>
+      @if (product.barcode) {
+        <li title="Código de barras"><span class="material-icons" aria-hidden="true">qr_code_scanner</span>{{ product.barcode }}</li>
+      }
+      <li title="Categoría"><span class="material-icons" aria-hidden="true">category</span>{{ product.categoryName ?? 'Sin categoría' }}</li>
+      @if (product.brandName) {
+        <li title="Marca"><span class="material-icons" aria-hidden="true">sell</span>{{ product.brandName }}</li>
+      }
+      @if (product.unitName) {
+        <li title="Unidad"><span class="material-icons" aria-hidden="true">straighten</span>{{ product.unitName }}</li>
+      }
+      @if (product.createdAt) {
+        <li><span class="material-icons" aria-hidden="true">event</span><small>Registrado</small>{{ product.createdAt | shortDate }}</li>
+      }
+    </ul>
+    @if (product.description) {
+      <p class="profile__note"><span class="material-icons" aria-hidden="true">notes</span>{{ product.description }}</p>
+    }
+  </section>
 
   <div class="kpi-grid">
-    <app-kpi-card label="Stock actual" [value]="product.totalStock + ' u.'" icon="inventory_2" tone="primary" />
     <app-kpi-card label="Precio de venta" [value]="(product.salePrice | money)" icon="sell" tone="success" />
-    <app-kpi-card label="Stock mínimo" [value]="product.minStock + ' u.'" icon="warning" tone="warning" />
+    <app-kpi-card label="Costo de referencia" [value]="product.referenceCost != null ? (product.referenceCost | money) : 'Sin costo'" icon="request_quote" tone="info" />
+    <app-kpi-card label="Margen de utilidad" [value]="margin()" icon="percent" tone="primary" />
+    <app-kpi-card label="Stock actual" [value]="product.totalStock + ' u.'" icon="inventory_2" tone="warning" [caption]="'Mínimo ' + product.minStock + ' u.'" />
   </div>
 
-  <div class="cards">
-    <section class="surface-card">
-      <h3>Especificaciones generales</h3>
-      <dl>
-        @for (field of specs(); track field.label) {
-          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-        }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Finanzas y precios</h3>
-      <dl>
-        @for (field of finance(); track field.label) {
-          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-        }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Almacén y stock</h3>
-      <dl>
-        @for (field of stock(); track field.label) {
-          <div><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd></div>
-        }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Historial de precios</h3>
-      @if (priceHistory().length) {
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
-            <tbody>
-              @for (item of priceHistory(); track item.changedAt) {
-                <tr>
-                  <td>{{ item.changedAt | dateTime }}</td>
-                  <td>{{ item.oldPrice | money }}</td>
-                  <td>{{ item.newPrice | money }}</td>
-                  <td>{{ item.reason || '—' }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      } @else {
-        <p class="muted">Sin cambios de precio registrados.</p>
-      }
-    </section>
-  </div>
+  <section class="surface-card">
+    <h3>Historial de precios</h3>
+    @if (priceHistory().length) {
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Motivo</th></tr></thead>
+          <tbody>
+            @for (item of priceHistory(); track item.changedAt) {
+              <tr>
+                <td>{{ item.changedAt | dateTime }}</td>
+                <td>{{ item.oldPrice | money }}</td>
+                <td>{{ item.newPrice | money }}</td>
+                <td>{{ item.reason || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="muted">Sin cambios de precio registrados.</p>
+    }
+  </section>
 } @else if (loading()) {
   <p class="muted">Cargando producto…</p>
 } @else {

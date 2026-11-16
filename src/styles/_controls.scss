@@ -137,6 +137,12 @@ button.link.link.link:disabled {
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
+:where(input:not([type='checkbox'], [type='radio'], [type='color'], [type='range'], [type='file'], [type='hidden']), select) {
+  min-height: var(--control-height);
+  padding-left: 12px;
+  box-sizing: border-box;
+}
+
 :where(input, select, textarea)::placeholder {
   color: var(--color-text-disabled);
 }

@@ -14,7 +14,7 @@ import { SaleApiService } from '../../sales/data-access/sale-api.service';
 import { Sale, SalesTotals } from '../../sales/models/sale.model';
 import { CustomerApiService } from '../data-access/customer-api.service';
 import { CustomerDetail, CustomerPurchasedItem, CustomerPurchases } from '../models/customer.model';
-import { DateTimePipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
+import { DateTimePipe, MoneyPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 
 type HistoryPeriod = 'all' | '30d' | '90d' | 'year';
 type HistoryView = 'sales' | 'products';
@@ -36,7 +36,7 @@ const EXPORT_LIMIT = 2000;
 
 @Component({
   selector: 'app-customer-detail-page',
-  imports: [PageHeader, StatusChip, KpiCard, Paginator, ViewTabs, RouterLink, MoneyPipe, DateTimePipe],
+  imports: [PageHeader, StatusChip, KpiCard, Paginator, ViewTabs, RouterLink, MoneyPipe, DateTimePipe, ShortDatePipe],
   templateUrl: './customer-detail-page.html',
   styleUrls: ['../../../shared/ui/detail-page.scss', './customer-detail-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,17 +84,6 @@ export class CustomerDetailPage implements OnInit {
   readonly historyAverage = computed(() => {
     const totals = this.historyTotals();
     return totals && totals.operationCount > 0 ? totals.totalAmount / totals.operationCount : 0;
-  });
-
-  readonly personal = computed(() => {
-    const customer = this.customer();
-    if (!customer) return [];
-    return [
-      { label: 'Documento de identidad', value: `${customer.documentType ?? ''} ${customer.documentNumber ?? ''}`.trim() || '—' },
-      { label: 'Teléfono móvil', value: customer.phone ?? '—' },
-      { label: 'Correo electrónico', value: customer.email ?? '—' },
-      { label: 'Dirección', value: customer.address ?? '—' },
-      { label: 'Observaciones', value: customer.notes ?? '—' }];
   });
 
   ngOnInit(): void {

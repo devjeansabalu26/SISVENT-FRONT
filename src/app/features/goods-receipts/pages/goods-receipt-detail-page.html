@@ -15,31 +15,26 @@
     </p>
   }
 
-  <div class="summary surface-card">
-    <div><span class="code">{{ receipt.documentType }} · Nº {{ receipt.documentNumber }}</span><h2>{{ receipt.supplierName ?? 'Sin proveedor' }}</h2></div>
+  <section class="profile surface-card" aria-label="Datos del ingreso">
     <app-status-chip [value]="statusLabel(receipt.status)" [label]="statusLabel(receipt.status)" [hint]="statusHint(receipt.status)" />
-  </div>
+    <ul class="facts">
+      <li title="Fecha"><span class="material-icons" aria-hidden="true">event</span>{{ receipt.receiptDate | dateTime }}</li>
+      <li title="Proveedor"><span class="material-icons" aria-hidden="true">local_shipping</span>{{ receipt.supplierName ?? 'Sin proveedor' }}@if (receipt.supplierTaxDocument) {&nbsp;<small>{{ 'taxIdName' | regional }} {{ receipt.supplierTaxDocument }}</small>}</li>
+      @if (receipt.documentNumber) {
+        <li title="Documento de referencia"><span class="material-icons" aria-hidden="true">description</span>{{ receipt.documentType }} Nº {{ receipt.documentNumber }}</li>
+      }
+      <li title="Local destino"><span class="material-icons" aria-hidden="true">store</span>{{ receipt.storeName }}</li>
+      <li title="Usuario receptor"><span class="material-icons" aria-hidden="true">person</span>{{ receipt.receivedBy }}</li>
+    </ul>
+    @if (receipt.notes) {
+      <p class="profile__note"><span class="material-icons" aria-hidden="true">sticky_note_2</span>{{ receipt.notes }}</p>
+    }
+  </section>
 
-  <div class="cards">
-    <section class="surface-card">
-      <h3>Cabecera</h3>
-      <dl>
-        <div><dt>Fecha</dt><dd>{{ receipt.receiptDate | dateTime }}</dd></div>
-        <div><dt>Proveedor</dt><dd>{{ receipt.supplierName ?? '—' }} @if (receipt.supplierTaxDocument) { ({{ 'taxIdName' | regional }} {{ receipt.supplierTaxDocument }}) }</dd></div>
-        <div><dt>Documento referencia</dt><dd>{{ receipt.documentType ?? '—' }} Nº {{ receipt.documentNumber ?? '—' }}</dd></div>
-        <div><dt>Local destino</dt><dd>{{ receipt.storeName }}</dd></div>
-        <div><dt>Usuario receptor</dt><dd>{{ receipt.receivedBy }}</dd></div>
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Resumen</h3>
-      <dl>
-        <div><dt>Items totales</dt><dd>{{ receipt.itemCount }}</dd></div>
-        <div><dt>Unidades registradas</dt><dd>{{ receipt.totalUnits }}</dd></div>
-        <div><dt>Costo de operación</dt><dd>{{ receipt.totalCost | money }}</dd></div>
-      </dl>
-      <p class="muted">{{ receipt.notes }}</p>
-    </section>
+  <div class="kpi-grid">
+    <app-kpi-card label="Items" [value]="receipt.itemCount" icon="list_alt" tone="primary" />
+    <app-kpi-card label="Unidades" [value]="receipt.totalUnits" icon="inventory_2" tone="info" />
+    <app-kpi-card label="Costo de la operación" [value]="(receipt.totalCost | money)" icon="payments" tone="success" />
   </div>
 
   <section class="surface-card">

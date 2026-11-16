@@ -21,7 +21,7 @@
       <ul class="modules__list">
         @for (module of group.modules; track module.code) {
           <li [class.is-locked]="!module.includedInPlan">
-            <label>
+            <label [attr.data-locked]="!module.includedInPlan ? 'Este menú no está incluido en el plan de la empresa. Cambia el plan para poder activarlo.' : null">
               <span class="modules__text">
                 <strong>{{ module.label }}</strong>
                 <small>
