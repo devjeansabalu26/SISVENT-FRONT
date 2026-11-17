@@ -1,4 +1,5 @@
-<app-page-header title="Movimientos de inventario" description="Trazabilidad completa de entradas y salidas" />
+<app-page-header title="Movimientos de inventario"
+  [description]="storeContext.selectedStore()?.name ? 'Entradas y salidas de ' + storeContext.selectedStore()!.name : 'Entradas y salidas de todos los locales'" />
 
 <div class="kpi-grid">
   <app-kpi-card label="Movimientos" [value]="rows().length" icon="swap_vert" tone="primary" />
@@ -12,6 +13,14 @@
     <span class="material-icons">search</span>
     <input #box (input)="search.set(box.value)" placeholder="Buscar producto o SKU…" />
   </label>
+  @if (storeContext.canPick() && storeContext.stores().length > 1) {
+    <select #store aria-label="Local" [value]="storeContext.selectedStoreId() ?? ''" (change)="selectStore(store.value)">
+      <option value="">Local: todos</option>
+      @for (option of storeContext.stores(); track option.id) {
+        <option [value]="option.id">{{ option.name }}</option>
+      }
+    </select>
+  }
   <select #type aria-label="Tipo" (change)="typeFilter.set(type.value)">
     <option value="">Tipo: todos</option>
     @for (option of types(); track option) {

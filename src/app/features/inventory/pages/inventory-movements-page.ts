@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
@@ -14,8 +15,10 @@ import { formatDateTime } from '../../../core/regional/regional-format';
   styleUrl: '../../../shared/ui/list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InventoryMovementsPage implements OnInit {
+export class InventoryMovementsPage {
   private readonly api = inject(InventoryApiService);
+  readonly storeContext = inject(StoreContextService);
+  private requestId = 0;
 
   readonly loading = signal(false);
   readonly search = signal('');
@@ -50,18 +53,31 @@ export class InventoryMovementsPage implements OnInit {
     { key: 'reason', label: 'Motivo', value: (row) => row.reason ?? '—' },
   ];
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    this.storeContext.load();
+    effect(() => {
+      const storeId = this.storeContext.selectedStoreId();
+      untracked(() => this.load(storeId));
+    });
   }
 
-  load(): void {
+  selectStore(storeId: string): void {
+    this.storeContext.select(storeId || null);
+  }
+
+  load(storeId: string | null = this.storeContext.selectedStoreId()): void {
+    const requestId = ++this.requestId;
     this.loading.set(true);
-    this.api.movements({ pageSize: 100 }).subscribe({
+    this.api.movements({ pageSize: 100, storeId: storeId ?? undefined }).subscribe({
       next: (page) => {
+        if (requestId !== this.requestId) return;
         this.movements.set(page.items);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        if (requestId !== this.requestId) return;
+        this.loading.set(false);
+      },
     });
   }
 }
