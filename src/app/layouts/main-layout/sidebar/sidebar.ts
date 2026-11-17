@@ -49,9 +49,9 @@ export class Sidebar {
   });
 
   private readonly items = computed<readonly SidebarItem[]>(() =>
-    MAIN_NAVIGATION.filter((item) => this.access.canAccess({ roles: item.roles, permissions: item.permissions, plans: item.plans })).map(
-      (item) => ({ ...item, locked: this.access.isLockedByPlan({ ...item, feature: item.requiredFeature }) }),
-    ),
+    MAIN_NAVIGATION.filter((item) => this.access.canAccess({ roles: item.roles, permissions: item.permissions, plans: item.plans }))
+      .filter((item) => !this.access.isLockedByPlan({ ...item, feature: item.requiredFeature }))
+      .map((item) => ({ ...item, locked: false })),
   );
 
   readonly groups = computed<readonly NavigationGroup[]>(() => {

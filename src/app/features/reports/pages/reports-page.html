@@ -97,21 +97,27 @@
   </div>
 
   <div class="shortcuts">
-    <a routerLink="/app/reports/sales" queryParamsHandling="preserve">
-      <span class="material-icons" aria-hidden="true">trending_up</span>
-      <div><strong>Ventas</strong><small>Ventas por día, por hora, categorías y vendedores</small></div>
-      <span class="material-icons" aria-hidden="true">chevron_right</span>
-    </a>
-    <a routerLink="/app/reports/products" queryParamsHandling="preserve">
-      <span class="material-icons" aria-hidden="true">inventory_2</span>
-      <div><strong>Productos</strong><small>Más vendidos, más ingresos y mejor margen</small></div>
-      <span class="material-icons" aria-hidden="true">chevron_right</span>
-    </a>
-    <a routerLink="/app/purchase-plan">
-      <span class="material-icons" aria-hidden="true">event_available</span>
-      <div><strong>Qué pedir y cuándo</strong><small>Fecha límite y cantidad para no quedarte sin stock</small></div>
-      <span class="material-icons" aria-hidden="true">chevron_right</span>
-    </a>
+    @if (hasSalesReport()) {
+      <a routerLink="/app/reports/sales" queryParamsHandling="preserve">
+        <span class="material-icons" aria-hidden="true">trending_up</span>
+        <div><strong>Ventas</strong><small>Ventas por día, por hora, categorías y vendedores</small></div>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
+      </a>
+    }
+    @if (hasProductsReport()) {
+      <a routerLink="/app/reports/products" queryParamsHandling="preserve">
+        <span class="material-icons" aria-hidden="true">inventory_2</span>
+        <div><strong>Productos</strong><small>Más vendidos, más ingresos y mejor margen</small></div>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
+      </a>
+    }
+    @if (hasPurchasePlan()) {
+      <a routerLink="/app/purchase-plan">
+        <span class="material-icons" aria-hidden="true">event_available</span>
+        <div><strong>Qué pedir y cuándo</strong><small>Fecha límite y cantidad para no quedarte sin stock</small></div>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
+      </a>
+    }
   </div>
 } @else if (state.failed()) {
   <p class="muted empty">No se pudo cargar el reporte. <button type="button" class="link" (click)="state.reload()">Reintentar</button></p>

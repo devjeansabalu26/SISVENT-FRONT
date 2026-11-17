@@ -32,8 +32,8 @@ export const MAIN_NAVIGATION: readonly NavigationItem[] = [
   { label: 'Usuarios', icon: 'people', route: '/app/users', group: 'Empresa', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.usersView] },
 
   { label: 'Resumen', icon: 'dashboard_customize', route: '/app/reports', exact: true, group: 'Reportes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS' },
-  { label: 'Ventas', icon: 'trending_up', route: '/app/reports/sales', group: 'Reportes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS' },
-  { label: 'Productos', icon: 'leaderboard', route: '/app/reports/products', group: 'Reportes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS' },
+  { label: 'Ventas', icon: 'trending_up', route: '/app/reports/sales', group: 'Reportes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS_SALES' },
+  { label: 'Productos', icon: 'leaderboard', route: '/app/reports/products', group: 'Reportes', roles: ['ADMIN', 'VENDEDOR'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS_PRODUCTS' },
   { label: 'Caja y pagos', icon: 'point_of_sale', route: '/app/reports/cash', group: 'Reportes', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS_CASH' },
   { label: 'Clientes', icon: 'groups', route: '/app/reports/customers', group: 'Reportes', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS_CUSTOMERS' },
   { label: 'Equipo', icon: 'badge', route: '/app/reports/team', group: 'Reportes', roles: ['ADMIN'], permissions: [APP_PERMISSIONS.reportsView], requiredFeature: 'REPORTS_TEAM' },

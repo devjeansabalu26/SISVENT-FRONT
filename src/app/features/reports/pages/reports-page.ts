@@ -1,3 +1,4 @@
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -23,6 +24,10 @@ export class ReportsPage {
   private readonly notifications = inject(NotificationService);
   private readonly excel = inject(ExcelExportService);
   readonly state = inject(ReportState);
+  private readonly access = inject(AccessControlService);
+  readonly hasSalesReport = computed(() => this.access.hasFeature('REPORTS_SALES'));
+  readonly hasProductsReport = computed(() => this.access.hasFeature('REPORTS_PRODUCTS'));
+  readonly hasPurchasePlan = computed(() => this.access.hasFeature('SUPPLY_ANALYTICS'));
 
   constructor() {
     this.state.topCount = 5;
