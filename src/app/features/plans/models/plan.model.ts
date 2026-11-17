@@ -69,9 +69,15 @@ export interface FeatureMatrixRow {
   readonly plans: readonly FeatureMatrixCell[];
 }
 
+export interface FeatureDependency {
+  readonly featureCode: string;
+  readonly requires: readonly string[];
+}
+
 export interface FeatureMatrix {
   readonly planCodes: readonly string[];
   readonly rows: readonly FeatureMatrixRow[];
+  readonly dependencies?: readonly FeatureDependency[];
 }
 
 export interface PlanFormValue {

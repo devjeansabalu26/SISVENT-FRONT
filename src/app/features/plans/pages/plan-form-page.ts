@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -10,7 +11,12 @@ import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
 import { DiffRow, formatSoles } from '../../../shared/utils/diff-rows';
 import { PlanApiService } from '../data-access/plan-api.service';
-import { PlanDetail, PlanFormValue } from '../models/plan.model';
+import { FeatureDependency, PlanDetail, PlanFormValue } from '../models/plan.model';
+
+interface MissingDependency {
+  readonly feature: string;
+  readonly requires: readonly string[];
+}
 
 const BASIC_PLAN_CODE = 'ESSENTIAL';
 
@@ -48,6 +54,21 @@ export class PlanFormPage implements OnInit {
   readonly loading = signal(this.isEdit);
   readonly saving = signal(false);
   readonly featureOptions = signal<readonly FeatureOption[]>([]);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dependencies = signal<readonly FeatureDependency[]>([]);
+  private readonly selectedCodes = signal<ReadonlySet<string>>(new Set());
+
+  readonly missingDependencies = computed<readonly MissingDependency[]>(() => {
+    const selected = this.selectedCodes();
+    const names = new Map(this.featureOptions().map((option) => [option.code, option.name]));
+    return this.dependencies()
+      .filter((dependency) => selected.has(dependency.featureCode))
+      .map((dependency) => ({
+        feature: names.get(dependency.featureCode) ?? dependency.featureCode,
+        requires: dependency.requires.filter((code) => !selected.has(code) && names.has(code)).map((code) => names.get(code)!),
+      }))
+      .filter((item) => item.requires.length > 0);
+  });
   private original: PlanDetail | null = null;
 
   readonly form = new FormGroup({
@@ -87,6 +108,11 @@ export class PlanFormPage implements OnInit {
       options.forEach((option) =>
         this.features.push(new FormControl(!this.id && basic.has(option.code), { nonNullable: true })),
       );
+      this.dependencies.set(matrix.dependencies ?? []);
+      this.features.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.refreshSelection());
+      this.refreshSelection();
       if (this.id) this.loadExisting(this.id);
     });
   }
@@ -118,9 +144,52 @@ export class PlanFormPage implements OnInit {
     });
   }
 
+  private refreshSelection(): void {
+    const values = this.features.getRawValue();
+    this.selectedCodes.set(new Set(this.featureOptions().filter((_, index) => values[index]).map((option) => option.code)));
+  }
+
+  addMissingDependencies(): void {
+    for (let round = 0; round < 5; round++) {
+      const selected = this.selectedCodes();
+      const missing = new Set(
+        this.dependencies()
+          .filter((dependency) => selected.has(dependency.featureCode))
+          .flatMap((dependency) => dependency.requires)
+          .filter((code) => !selected.has(code)),
+      );
+      if (!missing.size) return;
+      this.featureOptions().forEach((option, index) => {
+        if (missing.has(option.code)) this.features.at(index).setValue(true);
+      });
+      this.refreshSelection();
+    }
+  }
+
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+    const missing = this.missingDependencies();
+    if (missing.length) {
+      this.dialog
+        .open<ReviewDialog, ReviewDialogData, boolean>(ReviewDialog, {
+          data: {
+            title: 'Faltan opciones en el plan',
+            icon: 'warning_amber',
+            intro: 'Algunas opciones marcadas necesitan otras para funcionar. Sin ellas, el administrador de la empresa tendrá errores de permisos:',
+            meta: missing.map((item) => ({ label: item.feature, value: `Necesita: ${item.requires.join(', ')}` })),
+            banner: { tone: 'warning', text: 'Al confirmar se marcarán las opciones que faltan y se guardará el plan.' },
+            confirmLabel: 'Marcar y guardar',
+          },
+        })
+        .afterClosed()
+        .pipe(filter(Boolean))
+        .subscribe(() => {
+          this.addMissingDependencies();
+          this.save();
+        });
       return;
     }
     const value = this.form.getRawValue();

@@ -84,6 +84,20 @@
     <section class="card features-card">
       <h2>4. Funcionalidades incluidas</h2>
       <p class="hint">Módulos que quedan habilitados para las empresas con este plan.@if (!isEdit) { Vienen marcados los del plan Esencial; solo agrega o quita lo que cambie.}</p>
+      @if (missingDependencies().length) {
+        <div class="dependency-alert" role="alert">
+          <span class="material-icons" aria-hidden="true">warning_amber</span>
+          <div>
+            <strong>Faltan opciones para que funcione lo que marcaste</strong>
+            <ul>
+              @for (item of missingDependencies(); track item.feature) {
+                <li><b>{{ item.feature }}</b> necesita: {{ item.requires.join(', ') }}</li>
+              }
+            </ul>
+            <button type="button" class="link" (click)="addMissingDependencies()">Marcar las que faltan</button>
+          </div>
+        </div>
+      }
       <div class="modules" formArrayName="features">
         @for (group of featureGroups(); track group.domain) {
           <div class="feature-group">

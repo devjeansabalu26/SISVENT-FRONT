@@ -33,11 +33,13 @@ export class InventoryPage {
   readonly storeContext = inject(StoreContextService);
   private readonly ownStoreId = inject(UserContextService).user()?.branchId ?? null;
   readonly general = computed(() => this.storeContext.canPick() && !this.storeContext.selectedStoreId());
+  private readonly accessControl = inject(AccessControlService);
   readonly canAdjustHere = computed(() =>
-    this.canAdjust && (this.storeContext.isAdmin() || this.storeContext.selectedStoreId() === this.ownStoreId));
+    this.canAdjust && this.accessControl.hasFeature('STOCK_ADJUSTMENT') &&
+    (this.storeContext.isAdmin() || this.storeContext.selectedStoreId() === this.ownStoreId));
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
-  readonly canAdjust = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.inventoryAdjust] });
+  readonly canAdjust = this.accessControl.canAccess({ permissions: [APP_PERMISSIONS.inventoryAdjust] });
 
   readonly loading = signal(false);
   private readonly generalData = signal<readonly Product[]>([]);
