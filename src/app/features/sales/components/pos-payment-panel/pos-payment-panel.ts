@@ -92,12 +92,16 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
       <button type="button" class="add" (click)="add()"><span class="material-icons">add</span>Agregar otro método</button>
     }
 
-    <div class="status" [class.status--pending]="summary().pending > 0">
-      @if (summary().pending > 0) {
-        <span>Por cubrir</span><strong>{{ summary().pending | money }}</strong>
-      } @else {
-        <span>Vuelto</span><strong>{{ summary().change | money }}</strong>
-      }
+    <div class="totals" aria-live="polite">
+      <div class="totals__row"><span>Total a cobrar</span><span>{{ total() | money }}</span></div>
+      <div class="totals__row"><span>Recibido</span><span>{{ received() | money }}</span></div>
+      <div class="status" [class.status--pending]="summary().pending > 0">
+        @if (summary().pending > 0) {
+          <span>Falta cobrar</span><strong>{{ summary().pending | money }}</strong>
+        } @else {
+          <span>Vuelto</span><strong>{{ summary().change | money }}</strong>
+        }
+      </div>
     </div>
 
     @if (showErrors() && error(); as message) {
@@ -125,6 +129,9 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
     .quick button.active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); }
     .add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); background: transparent; color: var(--color-primary); font-weight: 600; cursor: pointer; }
     .add .material-icons { font-size: 18px; }
+    .totals { display: grid; gap: 4px; }
+    .totals__row { display: flex; justify-content: space-between; padding: 0 12px; color: var(--color-text-secondary); font-size: 13px; }
+    .totals__row span:last-child { font-weight: 600; color: var(--color-text-primary); }
     .status { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-md); color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); }
     .status strong { font-size: 18px; }
     .status--pending { color: var(--color-warning-text); background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); }
@@ -148,6 +155,10 @@ export class PosPaymentPanel {
   readonly summary = computed(() => breakdown(this.lines(), this.kindOf, this.total()));
   readonly error = computed(() => paymentsError(this.lines(), this.kindOf, this.total()));
   readonly quickAmounts = computed(() => quickCashAmounts(this.summary().due));
+  readonly received = computed(() => {
+    const summary = this.summary();
+    return summary.nonCash + (summary.cashReceived !== null && Number.isFinite(summary.cashReceived) ? summary.cashReceived : 0);
+  });
 
   patch(index: number, changes: Partial<PaymentDraftLine>): void {
     this.lines.update((lines) => lines.map((line, i) => (i === index ? { ...line, ...changes } : line)));
