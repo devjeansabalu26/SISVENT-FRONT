@@ -83,7 +83,7 @@
     <!-- Columna derecha: funcionalidades como checkboxes, agrupadas por dominio. -->
     <section class="card features-card">
       <h2>4. Funcionalidades incluidas</h2>
-      <p class="hint">Módulos que quedan habilitados para las empresas con este plan.</p>
+      <p class="hint">Módulos que quedan habilitados para las empresas con este plan.@if (!isEdit) { Vienen marcados los del plan Esencial; solo agrega o quita lo que cambie.}</p>
       <div class="modules" formArrayName="features">
         @for (group of featureGroups(); track group.domain) {
           <div class="feature-group">

@@ -8,7 +8,7 @@ import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
 import { formatSoles } from '../../../shared/utils/diff-rows';
 import { CompanyPlanApiService } from '../data-access/company-plan-api.service';
-import { AvailablePlan, MyPlan, MyPlanUsage } from '../models/company-plan.model';
+import { AvailablePlan, MyPlan, MyPlanUsage, PlanMenuItem } from '../models/company-plan.model';
 
 const STATUS_LABELS: Readonly<Record<string, string>> = {
   ACTIVE: 'Activo',
@@ -99,6 +99,10 @@ export class CompanyPlanPage implements OnInit {
       limit(plan.maxStores, 'local', 'locales'),
       plan.maxProducts === null ? 'Productos ilimitados' : `Hasta ${plan.maxProducts} productos`,
     ];
+  }
+
+  activeMenus(plan: AvailablePlan): readonly PlanMenuItem[] {
+    return (plan.items ?? []).filter((menu) => menu.included || menu.extra);
   }
 
   ctaLabel(plan: AvailablePlan): string {

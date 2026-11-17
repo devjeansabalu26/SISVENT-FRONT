@@ -12,6 +12,8 @@ import { DiffRow, formatSoles } from '../../../shared/utils/diff-rows';
 import { PlanApiService } from '../data-access/plan-api.service';
 import { PlanDetail, PlanFormValue } from '../models/plan.model';
 
+const BASIC_PLAN_CODE = 'ESSENTIAL';
+
 interface FeatureOption {
   readonly code: string;
   readonly name: string;
@@ -79,7 +81,12 @@ export class PlanFormPage implements OnInit {
     this.api.featureMatrix().subscribe((matrix) => {
       const options = matrix.rows.map((row) => ({ code: row.featureCode, name: row.featureName, domain: row.domain }));
       this.featureOptions.set(options);
-      options.forEach(() => this.features.push(new FormControl(false, { nonNullable: true })));
+      const basic = new Set(
+        matrix.rows.filter((row) => row.plans.some((cell) => cell.planCode === BASIC_PLAN_CODE && cell.enabled)).map((row) => row.featureCode),
+      );
+      options.forEach((option) =>
+        this.features.push(new FormControl(!this.id && basic.has(option.code), { nonNullable: true })),
+      );
       if (this.id) this.loadExisting(this.id);
     });
   }
