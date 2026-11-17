@@ -11,6 +11,7 @@ export interface Plan {
   readonly maxStores: number | null;
   readonly featureCount: number;
   readonly companyCount: number;
+  readonly isPublic: boolean;
 }
 
 export interface PlanFeatureRow {

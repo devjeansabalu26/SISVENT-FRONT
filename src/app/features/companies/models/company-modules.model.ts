@@ -6,6 +6,7 @@ export interface CompanyModule {
   readonly includedInPlan: boolean;
   readonly enabled: boolean;
   readonly sellerAssignable: boolean;
+  readonly extra: boolean;
 }
 
 export interface CompanyModules {

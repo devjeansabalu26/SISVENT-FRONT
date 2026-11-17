@@ -137,3 +137,8 @@ button:disabled {
 .muted {
   color: var(--color-text-muted);
 }
+
+.modules__list .is-extra label {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}

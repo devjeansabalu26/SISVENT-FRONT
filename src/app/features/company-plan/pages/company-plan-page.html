@@ -68,8 +68,23 @@
         @if (item.description) { <p class="muted">{{ item.description }}</p> }
         <ul>
           @for (limit of planLimits(item); track limit) { <li>{{ limit }}</li> }
-          @for (feature of item.features; track feature) { <li>{{ feature }}</li> }
         </ul>
+        @if (item.items?.length) {
+          <ul class="plan-card__menus" [attr.aria-label]="'Menús del plan ' + item.name">
+            @for (menu of item.items; track menu.label) {
+              <li [class.is-off]="!menu.included && !menu.extra" [class.is-extra]="menu.extra">
+                <span class="material-icons" aria-hidden="true">{{ menu.included ? 'check_circle' : menu.extra ? 'add_circle' : 'remove_circle_outline' }}</span>
+                <span>{{ menu.label }}</span>
+                @if (menu.extra) { <small>Adicional</small> }
+                @if (!menu.included && !menu.extra) { <span class="sr-only">(no incluido)</span> }
+              </li>
+            }
+          </ul>
+        } @else {
+          <ul>
+            @for (feature of item.features; track feature) { <li>{{ feature }}</li> }
+          </ul>
+        }
         <button type="button" [disabled]="item.isCurrent || pending()?.planId === item.id || sending()" (click)="requestChange(item)">
           {{ ctaLabel(item) }}
         </button>

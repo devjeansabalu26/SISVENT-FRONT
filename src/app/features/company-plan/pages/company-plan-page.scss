@@ -156,3 +156,45 @@
 .table-scroll {
   overflow-x: auto;
 }
+.plan-card .plan-card__menus {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan-card__menus li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plan-card__menus .material-icons {
+  font-size: 16px;
+  color: var(--color-success);
+}
+.plan-card__menus li.is-off {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.plan-card__menus li.is-off .material-icons {
+  color: var(--color-text-muted);
+}
+.plan-card__menus li.is-extra .material-icons {
+  color: var(--color-primary);
+}
+.plan-card__menus small {
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

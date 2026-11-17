@@ -7,7 +7,7 @@
         <h3>Menús habilitados</h3>
         <p>
           {{ enabledCount() }} de {{ info.modules.length }} activos · Plan {{ info.planName ?? 'sin plan vigente' }}.
-          Los menús que el plan no incluye se pueden habilitar abajo, en Funcionalidades extra. Los de configuración son solo para el administrador.
+          Puedes activar cualquier menú: si el plan no lo incluye, se agrega como adicional para esta empresa (sin cambiar el plan). Los de configuración son solo para el administrador.
         </p>
       </div>
       <div class="modules__bulk">
@@ -20,13 +20,15 @@
       <h4 class="modules__group">{{ group.label }}</h4>
       <ul class="modules__list">
         @for (module of group.modules; track module.code) {
-          <li [class.is-locked]="!module.includedInPlan">
-            <label [attr.data-locked]="!module.includedInPlan ? 'Este menú no está incluido en el plan de la empresa. Cambia el plan para poder activarlo.' : null">
+          <li [class.is-extra]="module.extra || (!module.includedInPlan && isOn(module))">
+            <label>
               <span class="modules__text">
                 <strong>{{ module.label }}</strong>
                 <small>
-                  @if (!module.includedInPlan) {
-                    <span class="material-icons">lock</span>No incluido en el plan
+                  @if (module.extra) {
+                    <span class="material-icons">add_circle</span>Adicional · fuera del plan
+                  } @else if (!module.includedInPlan) {
+                    <span class="material-icons">add_circle_outline</span>Fuera del plan · al activarlo queda como adicional
                   } @else if (!module.sellerAssignable) {
                     Configuración · solo administrador
                   } @else {
@@ -34,7 +36,7 @@
                   }
                 </small>
               </span>
-              <input type="checkbox" role="switch" [checked]="isOn(module)" [disabled]="!module.includedInPlan || saving()"
+              <input type="checkbox" role="switch" [checked]="isOn(module)" [disabled]="saving()"
                 (change)="toggle(module, $any($event.target).checked)" [attr.aria-label]="'Activar ' + module.label" />
             </label>
           </li>

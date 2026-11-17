@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal, viewChild } from '@angular/core';
 import { AppHttpError } from '../../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { CompanyApiService } from '../../data-access/company-api.service';
@@ -33,6 +33,7 @@ export class CompanyModulesTab implements OnInit {
   readonly saving = signal(false);
   readonly data = signal<CompanyModules | null>(null);
   readonly draft = signal<ReadonlyMap<string, boolean>>(new Map());
+  private readonly extras = viewChild(CompanyExtraFeaturesPanel);
 
   readonly groups = computed<readonly ModuleGroup[]>(() => groupModules(this.data()?.modules ?? []));
 
@@ -67,7 +68,7 @@ export class CompanyModulesTab implements OnInit {
 
   setAll(enabled: boolean): void {
     const next = new Map<string, boolean>();
-    for (const module of this.data()?.modules ?? []) if (module.includedInPlan) next.set(module.code, enabled);
+    for (const module of this.data()?.modules ?? []) next.set(module.code, enabled);
     this.draft.set(next);
   }
 
@@ -84,6 +85,7 @@ export class CompanyModulesTab implements OnInit {
         this.saving.set(false);
         this.apply(result);
         this.notifications.show('Menús de la empresa actualizados. Los usuarios los verán al volver a iniciar sesión o recargar.', 'success');
+        this.extras()?.reload();
       },
       error: (cause: unknown) => {
         this.saving.set(false);

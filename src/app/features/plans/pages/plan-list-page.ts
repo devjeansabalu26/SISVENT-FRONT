@@ -24,6 +24,7 @@ export class PlanListPage implements OnInit {
   readonly columns: readonly DataTableColumn<Plan>[] = [
     { key: 'code', label: 'Código', value: (row) => row.code },
     { key: 'name', label: 'Nombre', value: (row) => row.name },
+    { key: 'visibility', label: 'Visible en Mi plan', value: (row) => (row.isPublic ? 'Sí, para las empresas' : 'Solo SUPERADMIN') },
     { key: 'price', label: 'Precio', value: (row) => (row.currentPrice != null ? `S/ ${row.currentPrice.toFixed(2)}` : '—') },
     { key: 'status', label: 'Estado', value: (row) => (row.isActive ? 'ACTIVE' : 'INACTIVE'), type: 'status' },
     { key: 'sellerLimit', label: 'Vendedores', value: (row) => row.maxSellers ?? '∞' },

@@ -127,6 +127,10 @@ export class CompanyExtraFeaturesPanel implements OnInit {
   readonly pending = computed(() => this.available().filter((feature) => this.draft().has(feature.code) && this.draft().get(feature.code) !== feature.extra));
 
   ngOnInit(): void {
+    this.reload();
+  }
+
+  reload(): void {
     this.api.getExtraFeatures(this.companyId()).subscribe({
       next: (result) => this.apply(result),
       error: () => {

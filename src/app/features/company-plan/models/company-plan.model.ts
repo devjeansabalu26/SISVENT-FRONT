@@ -29,7 +29,15 @@ export interface AvailablePlan {
   readonly maxProducts: number | null;
   readonly features: readonly string[];
   readonly featureCodes?: readonly string[];
+  readonly items?: readonly PlanMenuItem[];
   readonly isCurrent: boolean;
+}
+
+export interface PlanMenuItem {
+  readonly label: string;
+  readonly group: string;
+  readonly included: boolean;
+  readonly extra: boolean;
 }
 
 export interface MyPlanPeriod {
