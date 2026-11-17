@@ -1,0 +1,90 @@
+@if (health(); as h) {
+  <section class="health" [class.is-loading]="loading()">
+    <div class="health__kpis">
+      <app-kpi-card label="Ganancia del periodo" icon="savings" tone="success"
+        [value]="h.profit.profit !== null ? (h.profit.profit | money) : '—'"
+        [delta]="deltaText(h.profit.profitDeltaPercent)" [trend]="trendOf(h.profit.profitDeltaPercent)" deltaCaption="vs periodo anterior"
+        [caption]="h.profit.missingCost ? 'Algunos productos no tienen costo' : 'Ventas menos costo'" />
+      <app-kpi-card label="Margen" icon="percent" tone="primary"
+        [value]="marginText(h.profit.marginPercent)"
+        [caption]="h.profit.previousMarginPercent !== null ? 'Antes: ' + marginText(h.profit.previousMarginPercent) : 'De cada venta, lo que te queda'" />
+      <app-kpi-card label="Fugas de dinero" icon="water_drop" tone="warning"
+        [value]="(h.leaks.total | money)"
+        [caption]="'Descuentos, ' + h.leaks.cancelledSales + ' anulaciones y faltantes de caja'" />
+      <app-kpi-card label="Plata dormida" icon="inventory" tone="info"
+        [value]="(h.dormant.value | money)"
+        [caption]="h.dormant.products + ' productos sin venta hace ' + h.dormant.days + '+ días'" />
+    </div>
+
+    <div class="health__grid">
+      <section class="health__card">
+        <header><h2>Qué hacer ahora</h2><p>Conclusiones del periodo con una acción concreta</p></header>
+        <ul class="health__insights">
+          @for (item of insights(); track item.title) {
+            <li [attr.data-tone]="item.tone">
+              <span class="material-icons" aria-hidden="true">{{ item.icon }}</span>
+              <div>
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.action }}</p>
+                @if (item.link) {
+                  <a [routerLink]="item.link" queryParamsHandling="preserve">Ver detalle</a>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="health__card">
+        <header><h2>Cierre estimado del mes</h2><p>Día {{ h.month.daysElapsed }} de {{ h.month.daysInMonth }}</p></header>
+        <strong class="health__projection">{{ h.month.projected | money }}</strong>
+        <p class="health__muted">
+          Llevas {{ h.month.monthToDate | money }}. El mes pasado cerraste en {{ h.month.previousMonth | money }}.
+          @if (h.month.projectedDeltaPercent !== null) {
+            <span [class.up]="h.month.projectedDeltaPercent >= 0" [class.down]="h.month.projectedDeltaPercent < 0">
+              ({{ deltaText(h.month.projectedDeltaPercent) }})
+            </span>
+          }
+        </p>
+        @if (monthProgress() !== null) {
+          <div class="health__bar" role="progressbar" aria-label="Avance frente al mes pasado"
+            [attr.aria-valuenow]="monthProgress()" aria-valuemin="0" aria-valuemax="100">
+            <span [style.width.%]="monthProgress()"></span>
+          </div>
+          <small class="health__muted">{{ monthProgress() }}% de lo que vendiste el mes pasado</small>
+        }
+      </section>
+    </div>
+
+    @if (h.dormant.top.length) {
+      <section class="health__card">
+        <header>
+          <h2>Plata dormida en el almacén</h2>
+          <p>Productos con stock que no se venden hace más de {{ h.dormant.days }} días, por dinero inmovilizado</p>
+        </header>
+        <div class="table-scroll">
+          <table class="health__table">
+            <thead><tr><th>Producto</th><th class="num">Stock</th><th class="num">Dinero inmovilizado</th><th class="num">Última venta</th></tr></thead>
+            <tbody>
+              @for (product of h.dormant.top; track product.sku) {
+                <tr>
+                  <td><strong>{{ product.name }}</strong><small>{{ product.sku }}</small></td>
+                  <td class="num">{{ product.stock | quantity }}</td>
+                  <td class="num">{{ product.value | money }}</td>
+                  <td class="num">{{ product.daysWithoutSale !== null ? 'Hace ' + product.daysWithoutSale + ' días' : 'Nunca' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (h.dormant.productsWithoutCost) {
+          <p class="health__muted">{{ h.dormant.productsWithoutCost }} de estos productos no tienen costo registrado y no suman al total.</p>
+        }
+      </section>
+    }
+  </section>
+} @else if (failed()) {
+  <p class="health__muted health__state">No se pudo calcular la salud del negocio. <button type="button" class="health__link" (click)="reload()">Reintentar</button></p>
+} @else if (loading()) {
+  <p class="health__muted health__state">Calculando la salud del negocio…</p>
+}

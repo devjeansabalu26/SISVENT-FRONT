@@ -19,6 +19,8 @@
     <app-kpi-card label="Cajas abiertas" [value]="report.summary.openNow" icon="point_of_sale" [tone]="report.summary.longOpen > 0 ? 'warning' : 'primary'" [caption]="report.summary.longOpen ? report.summary.longOpen + ' abiertas hace más de ' + report.longOpenHours + ' h' : 'Del período elegido'" />
   </div>
 
+  <app-action-tips [tips]="tips()" />
+
   @switch (view()) {
     @case ('differences') {
       <section class="chart-card">

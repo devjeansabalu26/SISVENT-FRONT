@@ -13,6 +13,9 @@ import { ReportState } from '../data-access/report-state';
 import { SalesReportApiService } from '../data-access/sales-report-api.service';
 import { CustomerRankRow, CustomerReport, LapsedCustomerRow } from '../models/customer-report.model';
 import { ReportPeriod, periodLabel, periodRange } from '../utils/report-period';
+import { comebackMessage, whatsappLink } from '../utils/whatsapp-link';
+import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
+import { currentRegional } from '../../../core/regional/regional-format';
 
 type CustomerView = 'frequent' | 'lapsed' | 'business';
 
@@ -27,7 +30,7 @@ const VIEWS: readonly ViewTab[] = [
   imports: [PageHeader, KpiCard, ViewTabs, ReportToolbar, StatusChip, RouterLink, MoneyPipe, DateTimePipe],
   providers: [ReportState],
   templateUrl: './reports-customers-page.html',
-  styleUrls: ['./reports-page.scss', './reports-cash-page.scss'],
+  styleUrls: ['./reports-page.scss', './reports-cash-page.scss', './reports-contact.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsCustomersPage {
@@ -35,11 +38,18 @@ export class ReportsCustomersPage {
   private readonly notifications = inject(NotificationService);
   private readonly excel = inject(ExcelExportService);
   private readonly api = inject(SalesReportApiService);
+  private readonly companyContext = inject(CompanyContextService);
   readonly state = inject(ReportState);
   readonly views = VIEWS;
 
   private requestId = 0;
   readonly loading = signal(true);
+  readonly contactable = computed(() => (this.report()?.lapsed ?? []).filter((row) => this.whatsapp(row)).length);
+
+  whatsapp(row: LapsedCustomerRow): string | null {
+    const company = this.companyContext.company()?.commercialName ?? 'la tienda';
+    return whatsappLink(row.phone, currentRegional().countryCode, comebackMessage(row.name, company));
+  }
   readonly failed = signal(false);
   readonly report = signal<CustomerReport | null>(null);
 

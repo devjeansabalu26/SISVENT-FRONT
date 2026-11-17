@@ -13,6 +13,8 @@ import { ReportToolbar } from '../components/report-toolbar';
 import { ReportState } from '../data-access/report-state';
 import { DailyPoint } from '../models/sales-report.model';
 import { periodLabel } from '../utils/report-period';
+import { periodInsights } from '../utils/period-insights';
+import { ActionTip, ActionTips } from '../components/action-tips';
 
 type SalesView = 'trend' | 'hours' | 'categories' | 'sellers';
 
@@ -25,7 +27,7 @@ const VIEWS: readonly ViewTab[] = [
 
 @Component({
   selector: 'app-reports-sales-page',
-  imports: [PageHeader, KpiCard, ViewTabs, ReportToolbar, MoneyPipe, CompactMoneyPipe],
+  imports: [PageHeader, KpiCard, ViewTabs, ReportToolbar, ActionTips, MoneyPipe, CompactMoneyPipe],
   providers: [ReportState],
   templateUrl: './reports-sales-page.html',
   styleUrl: './reports-page.scss',
@@ -87,6 +89,43 @@ export class ReportsSalesPage {
     return days.length ? days.reduce((sum, point) => sum + point.amount, 0) / days.length : 0;
   });
   readonly daysWithSales = computed(() => this.series().filter((point) => point.amount > 0).length);
+
+  readonly trendTips = computed<readonly ActionTip[]>(() => {
+    const report = this.state.report();
+    if (!report || !report.dailySeries.length) return [];
+    const insight = periodInsights(report.dailySeries, report.from, report.to);
+    const tips: ActionTip[] = [];
+    if (insight.trendPercent !== null && insight.trendPercent <= -10) {
+      tips.push({ icon: 'trending_down', text: `Las ventas bajaron ${Math.abs(insight.trendPercent).toFixed(1)}% en la segunda mitad del periodo. Revisa si te faltó stock de lo que más se vende o lanza una promoción.` });
+    } else if (insight.trendPercent !== null && insight.trendPercent >= 10) {
+      tips.push({ icon: 'trending_up', text: `Las ventas subieron ${insight.trendPercent.toFixed(1)}% en la segunda mitad del periodo. Asegura stock para no cortar la racha.` });
+    }
+    if (insight.bestWeekday) {
+      tips.push({ icon: 'event', text: `Los ${insight.bestWeekday.label} concentran el ${insight.bestWeekday.share.toFixed(1)}% de tu venta. Ese día ten la tienda completa y más personal en caja.` });
+    }
+    if (insight.daysWithoutSales > 0) {
+      tips.push({ icon: 'event_busy', text: `Hubo ${insight.daysWithoutSales} días sin ventas. Si abriste esos días, revisa el horario o avisa a tus clientes cuándo atiendes.` });
+    }
+    return tips;
+  });
+
+  readonly hourTips = computed<readonly ActionTip[]>(() => {
+    const map = this.heatmap();
+    if (!map || !map.rows.length) return [];
+    const tips: ActionTip[] = [];
+    if (map.peak) {
+      tips.push({ icon: 'schedule', text: `Tu hora pico es los ${map.peak.weekday} a las ${hourLabel(map.peak.hour)}. Refuerza la caja y repón góndolas antes de esa hora.` });
+    }
+    const totals = map.hours.map((hour) => ({
+      hour,
+      amount: map.rows.reduce((sum, row) => sum + (row.cells.find((cell) => cell.hour === hour)?.amount ?? 0), 0),
+    })).filter((item) => item.amount > 0);
+    if (totals.length > 2) {
+      const weakest = [...totals].sort((a, b) => a.amount - b.amount)[0];
+      tips.push({ icon: 'hourglass_empty', text: `A las ${hourLabel(weakest.hour)} casi no vendes. Aprovecha esa hora para reponer, hacer pedidos o lanzar una oferta solo en ese horario.` });
+    }
+    return tips;
+  });
 
 
   money(value: number): string {

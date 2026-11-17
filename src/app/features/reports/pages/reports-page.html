@@ -1,4 +1,4 @@
-<app-page-header title="Resumen" description="Cómo va tu negocio en el periodo, comparado con el periodo anterior">
+<app-page-header title="Resumen" description="¿Tu negocio está ganando plata? Ganancia, fugas de dinero, stock sin movimiento y qué hacer">
   <button type="button" class="ghost" (click)="exportExcel('pdf')" [disabled]="!state.report()">
     <span class="material-icons">picture_as_pdf</span>PDF
   </button>
@@ -8,6 +8,10 @@
 </app-page-header>
 
 <app-report-toolbar />
+
+@if (isAdmin()) {
+  <app-health-panel />
+}
 
 @if (state.report(); as report) {
   <section class="chart-card" [class.is-loading]="state.loading()">
@@ -61,40 +65,6 @@
       </article>
     </div>
   }
-
-  <h2 class="section-title">Destacados</h2>
-  <div class="highlights">
-    <article>
-      <span class="material-icons" aria-hidden="true">category</span>
-      <div>
-        <small>Categoría que más vende</small>
-        <strong>{{ topCategory()?.name ?? '—' }}</strong>
-        @if (topCategory(); as category) {
-          <p>{{ category.amount | money }} · {{ category.percent.toFixed(1) }}% de las ventas</p>
-        }
-      </div>
-    </article>
-    <article>
-      <span class="material-icons" aria-hidden="true">star</span>
-      <div>
-        <small>Producto estrella</small>
-        <strong>{{ topProduct()?.name ?? '—' }}</strong>
-        @if (topProduct(); as product) {
-          <p>{{ product.units | quantity }} uds · {{ product.revenue | money }}</p>
-        }
-      </div>
-    </article>
-    <article>
-      <span class="material-icons" aria-hidden="true">emoji_events</span>
-      <div>
-        <small>Vendedor del periodo</small>
-        <strong>{{ topSeller()?.name ?? '—' }}</strong>
-        @if (topSeller(); as seller) {
-          <p>{{ seller.amount | money }} · {{ seller.percent.toFixed(1) }}%</p>
-        }
-      </div>
-    </article>
-  </div>
 
   <div class="shortcuts">
     @if (hasSalesReport()) {

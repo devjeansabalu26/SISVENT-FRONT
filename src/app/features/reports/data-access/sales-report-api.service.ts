@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { CashReport } from '../models/cash-report.model';
 import { CustomerReport } from '../models/customer-report.model';
+import { HealthReport } from '../models/health-report.model';
 import { TeamReport } from '../models/team-report.model';
 import { SalesHeatmap, SalesReport } from '../models/sales-report.model';
 
@@ -50,6 +51,14 @@ export class SalesReportApiService {
     if (params.to) httpParams = httpParams.set('to', params.to);
     if (params.storeId) httpParams = httpParams.set('storeId', params.storeId);
     return this.http.get<CustomerReport>(this.baseUrl.replace(/\/sales$/, '/customers'), { params: httpParams });
+  }
+
+  health(params: ReportParams = {}): Observable<HealthReport> {
+    let httpParams = new HttpParams();
+    if (params.from) httpParams = httpParams.set('from', params.from);
+    if (params.to) httpParams = httpParams.set('to', params.to);
+    if (params.storeId) httpParams = httpParams.set('storeId', params.storeId);
+    return this.http.get<HealthReport>(this.baseUrl.replace(/\/sales$/, '/health'), { params: httpParams });
   }
 
   team(params: ReportParams = {}): Observable<TeamReport> {

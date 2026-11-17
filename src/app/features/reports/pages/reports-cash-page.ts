@@ -7,6 +7,7 @@ import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { ViewTab, ViewTabs } from '../../../shared/ui/view-tabs/view-tabs';
+import { ActionTip, ActionTips } from '../components/action-tips';
 import { ReportToolbar } from '../components/report-toolbar';
 import { ReportState } from '../data-access/report-state';
 import { SalesReportApiService } from '../data-access/sales-report-api.service';
@@ -24,7 +25,7 @@ const VIEWS: readonly ViewTab[] = [
 
 @Component({
   selector: 'app-reports-cash-page',
-  imports: [PageHeader, KpiCard, ViewTabs, ReportToolbar, StatusChip, MoneyPipe, DateTimePipe, ShortDatePipe],
+  imports: [PageHeader, KpiCard, ViewTabs, ReportToolbar, StatusChip, ActionTips, MoneyPipe, DateTimePipe, ShortDatePipe],
   providers: [ReportState],
   templateUrl: './reports-cash-page.html',
   styleUrls: ['./reports-page.scss', './reports-cash-page.scss'],
@@ -42,6 +43,30 @@ export class ReportsCashPage {
   readonly loading = signal(true);
   readonly failed = signal(false);
   readonly report = signal<CashReport | null>(null);
+  readonly tips = computed<readonly ActionTip[]>(() => {
+    const report = this.report();
+    if (!report) return [];
+    const tips: ActionTip[] = [];
+    const { summary } = report;
+    if (summary.shortage > 0) {
+      const worst = [...report.byCashier].sort((a, b) => b.shortage - a.shortage)[0];
+      tips.push({
+        icon: 'trending_down',
+        text: `Faltaron ${formatMoney(summary.shortage)} en caja` + (worst && worst.shortage > 0 ? `, la mayor parte en la caja de ${worst.name}` : '')
+          + '. Cuenten el dinero juntos al cambiar de turno y revisen las ventas sin pago registrado.',
+      });
+    }
+    if (summary.forcedCloses > 0) {
+      tips.push({ icon: 'lock_reset', text: `${summary.forcedCloses} cajas las cerró otra persona. Pide que cada cajero cierre su propia caja al terminar su turno.` });
+    }
+    if (summary.longOpen > 0) {
+      tips.push({ icon: 'schedule', text: `${summary.longOpen} cajas siguen abiertas hace más de ${report.longOpenHours} horas. Ciérralas para que el cuadre del día sea correcto.` });
+    }
+    if (!tips.length && summary.closedSessions > 0) {
+      tips.push({ icon: 'verified', text: 'Las cajas cuadraron bien en este periodo. Mantén el conteo al cierre de cada turno.' });
+    }
+    return tips;
+  });
 
   readonly view = computed<CashView>(() => {
     const value = this.state.viewParam();

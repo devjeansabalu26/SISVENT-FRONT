@@ -147,7 +147,7 @@
   }
 
   @default {
-    <app-page-header title="Dashboard" [description]="'Vista general de ' + companyName()">
+    <app-page-header title="Dashboard" [description]="'Lo que pasa hoy en ' + companyName() + (hasReports() ? '. Ganancia, fugas y cierre del mes están en Reportes → Resumen.' : '')">
       <button type="button" class="ghost" (click)="sync()" [disabled]="syncing()">
         <span class="material-icons">{{ syncing() ? 'hourglass_top' : 'sync' }}</span>{{ syncing() ? 'Sincronizando…' : 'Sincronizar' }}
       </button>
@@ -247,7 +247,7 @@
         <app-kpi-card label="Locales activos" [value]="admin.activeStores" icon="store" tone="primary" />
       </div>
 
-      <div class="grid-2">
+      <div class="grid-2" [class.grid-single]="hasReports() && admin.analyticsEnabled !== false">
         <section class="surface-card">
           <div class="card-head">
             <h2>Ventas recientes</h2>
@@ -284,9 +284,9 @@
               <span class="locked-panel__cta">Disponible en un plan superior · Ver planes</span>
             </div>
           </a>
-        } @else {
+        } @else if (!hasReports()) {
         <section class="chart-card">
-          <header><h2>{{ hasReports() ? 'Proyección del mes' : 'Evolución de ventas' }}</h2></header>
+          <header><h2>Evolución de ventas</h2></header>
           @if (admin.month; as month) {
             <p class="projection">
               <span class="material-icons" aria-hidden="true">insights</span>
@@ -301,9 +301,7 @@
               </span>
             </p>
           }
-          @if (hasReports()) {
-            <a class="link" routerLink="/app/reports/sales">Ver ventas por día, por categoría y por vendedor en Reportes →</a>
-          } @else if (admin.salesEvolution.length) {
+          @if (admin.salesEvolution.length) {
             <div class="chart" role="img" aria-label="Evolución de ventas del período">
               @for (point of admin.salesEvolution; track point.date) {
                 <div class="bar-column">

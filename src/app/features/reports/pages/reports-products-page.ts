@@ -17,17 +17,17 @@ type ProductsView = 'units' | 'revenue' | 'margin' | 'matrix';
 type ProductRow = TopProduct & { readonly id: string; readonly position: number };
 
 const VIEWS: readonly ViewTab[] = [
+  { id: 'matrix', label: 'Qué hacer con cada producto', icon: 'grid_view' },
   { id: 'units', label: 'Más vendidos', icon: 'shopping_basket' },
   { id: 'revenue', label: 'Más ingresos', icon: 'payments' },
   { id: 'margin', label: 'Mejor margen', icon: 'percent' },
-  { id: 'matrix', label: 'Matriz ventas × margen', icon: 'grid_view' },
 ];
 
 const DESCRIPTION: Readonly<Record<ProductsView, string>> = {
   units: 'Productos ordenados por unidades vendidas: los que más rotan.',
   revenue: 'Productos ordenados por ingresos: los que más dinero traen.',
   margin: 'Productos ordenados por margen sobre el costo: los que más ganancia dejan por cada venta.',
-  matrix: 'Cada producto según cuánto se vende y cuánto margen deja, comparado con la mediana de tus productos.',
+  matrix: 'Cada producto en un grupo según cuánto se vende y cuánto margen deja, con lo que conviene hacer.',
 };
 
 @Component({
@@ -50,7 +50,7 @@ export class ReportsProductsPage {
 
   readonly view = computed<ProductsView>(() => {
     const value = this.state.viewParam();
-    return value === 'revenue' || value === 'margin' || value === 'matrix' ? value : 'units';
+    return value === 'revenue' || value === 'margin' || value === 'units' ? value : 'matrix';
   });
   readonly matrix = computed(() => productMatrix(this.products()));
   readonly description = computed(() => DESCRIPTION[this.view()]);

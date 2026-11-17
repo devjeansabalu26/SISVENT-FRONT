@@ -70,13 +70,13 @@
         <header class="card-head">
           <div>
             <h2>Clientes que dejaron de comprar</h2>
-            <p>Compraron {{ report.minPurchasesForLapsed }} veces o más en los últimos {{ report.lookbackDays }} días y no vuelven hace más de {{ report.lapsedAfterDays }} días. Llámalos o envíales una promoción.</p>
+            <p>Compraron {{ report.minPurchasesForLapsed }} veces o más en los últimos {{ report.lookbackDays }} días y no vuelven hace más de {{ report.lapsedAfterDays }} días. Escríbeles por WhatsApp con un mensaje listo para invitarlos a volver.</p>
           </div>
         </header>
         @if (report.lapsed.length) {
           <div class="table-scroll">
             <table class="cash-table">
-              <thead><tr><th>Cliente</th><th>Teléfono</th><th>Compras</th><th>Monto</th><th>Solía comprar</th><th>Última compra</th><th>Sin volver</th></tr></thead>
+              <thead><tr><th>Cliente</th><th>Teléfono</th><th>Compras</th><th>Monto</th><th>Solía comprar</th><th>Última compra</th><th>Sin volver</th><th>Contactar</th></tr></thead>
               <tbody>
                 @for (row of report.lapsed; track row.id) {
                   <tr>
@@ -90,6 +90,15 @@
                     <td>{{ frequencyText(row.averageDaysBetween) }}</td>
                     <td>{{ row.lastPurchaseAt | dateTime }}</td>
                     <td><app-status-chip value="SIN VOLVER" [label]="row.daysSinceLastPurchase + ' días'" [hint]="lapsedHint(row)" /></td>
+                    <td>
+                      @if (whatsapp(row); as link) {
+                        <a class="whatsapp-link" [href]="link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Escribir por WhatsApp a ' + row.name">
+                          <span class="material-icons" aria-hidden="true">chat</span>WhatsApp
+                        </a>
+                      } @else {
+                        <span class="muted" title="Registra su teléfono en la ficha del cliente para poder escribirle.">Sin teléfono</span>
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -97,6 +106,12 @@
           </div>
         } @else {
           <p class="muted empty">Ningún cliente habitual dejó de venir. ¡Bien!</p>
+        }
+        @if (report.lapsed.length && contactable() < report.lapsed.length) {
+          <p class="customer-tip">
+            <span class="material-icons" aria-hidden="true">lightbulb</span>
+            {{ report.lapsed.length - contactable() }} de estos clientes no tienen teléfono registrado. Pídelo en caja para poder invitarlos a volver.
+          </p>
         }
       </section>
     }

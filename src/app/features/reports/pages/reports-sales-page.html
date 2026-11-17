@@ -19,6 +19,7 @@
         <app-kpi-card label="Mejor día" [value]="bestDay() ? (bestDay()!.amount | money) : '—'" icon="emoji_events" tone="warning" [caption]="bestDay()?.date ?? ''" />
         <app-kpi-card label="Días con ventas" [value]="daysWithSales()" icon="event_available" tone="info" [caption]="'de ' + series().length + ' días'" />
       </div>
+      <app-action-tips [tips]="trendTips()" />
       <section class="chart-card">
         <header class="card-head"><div><h2>Ventas por día</h2><p>{{ periodLabel() }}</p></div></header>
         @if (series().length) {
@@ -45,6 +46,7 @@
             <app-kpi-card label="Día más fuerte" [value]="map.strongestDay?.label ?? '—'" icon="event" tone="success"
               [caption]="map.strongestDay ? money(map.strongestDay.amount) + ' en el periodo' : ''" />
           </div>
+          <app-action-tips [tips]="hourTips()" />
           <section class="chart-card" [class.is-loading]="heatmapLoading()">
             <header class="card-head"><div><h2>Ventas por día y hora</h2><p>Más oscuro = más ventas. Úsalo para planear turnos, horarios y reposición en góndola.</p></div></header>
             <div class="heatmap" role="table" aria-label="Ventas por día de la semana y hora">

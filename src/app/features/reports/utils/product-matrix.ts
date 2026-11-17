@@ -18,10 +18,10 @@ export interface ProductMatrix {
 }
 
 const META: Readonly<Record<MatrixQuadrant, Omit<MatrixGroup, 'quadrant' | 'products'>>> = {
-  star: { title: 'Estrellas', hint: 'Venden mucho y dejan buen margen. Que nunca falten.', icon: 'star' },
-  hook: { title: 'Gancho', hint: 'Venden mucho con poco margen. Atraen clientes; revisa su precio.', icon: 'campaign' },
-  opportunity: { title: 'Oportunidad', hint: 'Buen margen pero se venden poco. Exhíbelos y promociónalos.', icon: 'lightbulb' },
-  review: { title: 'Revisar', hint: 'Poca venta y poco margen. Liquida o deja de comprarlos.', icon: 'report' },
+  star: { title: 'Estrellas', hint: 'Venden mucho y dejan buen margen. Que nunca falten: pídelos antes de que se acaben.', icon: 'star' },
+  hook: { title: 'Revisar precio', hint: 'Venden mucho pero dejan poco. Sube un poco el precio o negocia mejor costo con tu proveedor.', icon: 'price_change' },
+  opportunity: { title: 'Impulsar', hint: 'Dejan buen margen pero se venden poco. Exhíbelos mejor, recomiéndalos o arma combos.', icon: 'campaign' },
+  review: { title: 'Liquidar', hint: 'Poca venta y poco margen. Ponlos en oferta para recuperar el dinero y deja de comprarlos.', icon: 'sell' },
 };
 
 export function median(values: readonly number[]): number {

@@ -4,9 +4,11 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { MoneyPipe, QuantityPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
+import { MoneyPipe, ShortDatePipe } from '../../../shared/pipes/date-time.pipe';
 import { formatMoney, formatQuantity } from '../../../core/regional/regional-format';
 import { ReportToolbar } from '../components/report-toolbar';
+import { HealthPanel } from '../components/health-panel/health-panel';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { ReportState } from '../data-access/report-state';
 import { MetricDelta } from '../models/sales-report.model';
 import { periodLabel } from '../utils/report-period';
@@ -14,7 +16,7 @@ import { compareMetric, periodInsights } from '../utils/period-insights';
 
 @Component({
   selector: 'app-reports-page',
-  imports: [PageHeader, RouterLink, ReportToolbar, MoneyPipe, QuantityPipe, ShortDatePipe],
+  imports: [PageHeader, RouterLink, ReportToolbar, HealthPanel, MoneyPipe, ShortDatePipe],
   providers: [ReportState],
   templateUrl: './reports-page.html',
   styleUrl: './reports-page.scss',
@@ -28,6 +30,7 @@ export class ReportsPage {
   readonly hasSalesReport = computed(() => this.access.hasFeature('REPORTS_SALES'));
   readonly hasProductsReport = computed(() => this.access.hasFeature('REPORTS_PRODUCTS'));
   readonly hasPurchasePlan = computed(() => this.access.hasFeature('SUPPLY_ANALYTICS'));
+  readonly isAdmin = inject(StoreContextService).isAdmin;
 
   constructor() {
     this.state.topCount = 5;
@@ -50,9 +53,6 @@ export class ReportsPage {
     const report = this.state.report();
     return report ? periodInsights(report.dailySeries, report.from, report.to) : null;
   });
-  readonly topCategory = computed(() => this.state.report()?.byCategory[0] ?? null);
-  readonly topProduct = computed(() => this.state.report()?.topProducts[0] ?? null);
-  readonly topSeller = computed(() => this.state.report()?.bySeller[0] ?? null);
 
   trend(metric: MetricDelta): 'up' | 'down' | 'flat' {
     if (metric.deltaPercent === null) return 'flat';
