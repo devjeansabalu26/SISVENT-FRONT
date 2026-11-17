@@ -10,3 +10,14 @@
   height: 100%;
   object-fit: cover;
 }
+.stock-save {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.stock-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

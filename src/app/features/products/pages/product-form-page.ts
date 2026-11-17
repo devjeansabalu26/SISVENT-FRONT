@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -51,6 +51,9 @@ export class ProductFormPage implements OnInit {
   readonly showStockEditor = this.isEdit && !inject(AccessControlService).hasFeature('GOODS_RECEIPTS');
   readonly savingStock = signal(false);
   readonly totalStock = signal<number | null>(null);
+  readonly mainStore = computed<Store | null>(() =>
+    [...this.stores()].filter((store) => store.isActive).sort((a, b) => a.code.localeCompare(b.code))[0] ?? null,
+  );
 
   readonly stockForm = new FormGroup({
     storeId: new FormControl<string | null>(null, { nonNullable: false, validators: [Validators.required] }),
@@ -97,10 +100,8 @@ export class ProductFormPage implements OnInit {
       this.storeApi.list().subscribe((result) => {
         const items = result.items.filter((item) => !item.isWaste);
         this.stores.set(items);
-        if (items.length === 1) {
-          this.form.controls.initialStoreId.setValue(items[0].id);
-          this.stockForm.controls.storeId.setValue(items[0].id);
-        }
+        if (items.length === 1) this.form.controls.initialStoreId.setValue(items[0].id);
+        this.stockForm.controls.storeId.setValue(this.mainStore()?.id ?? null);
       });
     }
 

@@ -102,15 +102,11 @@
         @if (showStockEditor) {
           <section class="card" [formGroup]="stockForm">
             <h2>Control de almacén</h2>
-            <p class="muted">Stock total actual: <strong>{{ totalStock() ?? 0 }}</strong>. Elige el local y escribe cuánto stock hay; se guarda aparte de los datos del producto.</p>
+            <p class="muted">Stock total actual: <strong>{{ totalStock() ?? 0 }}</strong>. Escribe cuánto stock hay en el local principal; se guarda aparte de los datos del producto.</p>
             <div class="fields">
-              <label>Local
-                <select formControlName="storeId">
-                  <option [ngValue]="null" disabled>Elige un local</option>
-                  @for (store of stores(); track store.id) {
-                    <option [ngValue]="store.id">{{ store.name }}</option>
-                  }
-                </select>
+              <label class="full" data-locked="Desde el producto solo se coloca el stock del local principal. Para los demás locales usa Transferir stock en Inventario.">Local principal
+                <input type="text" [value]="mainStore()?.name ?? 'Sin local activo'" readonly />
+                <span class="locked-note"><span class="material-icons" aria-hidden="true">info</span>Para los demás locales usa Transferir stock en Inventario.</span>
               </label>
               <label>Stock actual
                 <input type="number" step="0.001" min="0" formControlName="stock" placeholder="Ej. 24" />
@@ -119,7 +115,7 @@
                 <input type="number" step="0.001" min="0" formControlName="minStock" placeholder="Opcional" />
               </label>
             </div>
-            <button type="button" class="primary" (click)="saveStock()" [disabled]="savingStock() || stockForm.invalid">
+            <button type="button" class="primary stock-save" (click)="saveStock()" [disabled]="savingStock() || stockForm.invalid">
               {{ savingStock() ? 'Guardando…' : 'Guardar stock' }}
             </button>
           </section>
