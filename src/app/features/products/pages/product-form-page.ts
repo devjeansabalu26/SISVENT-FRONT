@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable, filter, of, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
@@ -47,6 +48,15 @@ export class ProductFormPage implements OnInit {
   readonly brands = signal<readonly { id: string; name: string }[]>([]);
   readonly units = signal<readonly UnitOption[]>([]);
   readonly stores = signal<readonly Store[]>([]);
+  readonly showStockEditor = this.isEdit && !inject(AccessControlService).hasFeature('GOODS_RECEIPTS');
+  readonly savingStock = signal(false);
+  readonly totalStock = signal<number | null>(null);
+
+  readonly stockForm = new FormGroup({
+    storeId: new FormControl<string | null>(null, { nonNullable: false, validators: [Validators.required] }),
+    stock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.required, Validators.min(0)] }),
+    minStock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.min(0)] }),
+  });
 
   private existing: ProductDetail | null = null;
   private initialValue: ProductFormValue | null = null;
@@ -83,11 +93,14 @@ export class ProductFormPage implements OnInit {
     this.categoryApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.categories.set(withParentLabel(page.items)));
     this.brandApi.list({ pageSize: 100, isActive: true }).subscribe((page) => this.brands.set(page.items));
     this.unitApi.list().subscribe((page) => this.units.set(page.items));
-    if (!this.isEdit) {
+    if (!this.isEdit || this.showStockEditor) {
       this.storeApi.list().subscribe((result) => {
         const items = result.items.filter((item) => !item.isWaste);
         this.stores.set(items);
-        if (items.length === 1) this.form.controls.initialStoreId.setValue(items[0].id);
+        if (items.length === 1) {
+          this.form.controls.initialStoreId.setValue(items[0].id);
+          this.stockForm.controls.storeId.setValue(items[0].id);
+        }
       });
     }
 
@@ -95,6 +108,7 @@ export class ProductFormPage implements OnInit {
       this.api.get(this.id).subscribe({
         next: (product) => {
           this.existing = product;
+          this.totalStock.set(product.totalStock);
           this.form.patchValue({
             name: product.name,
             description: product.description ?? '',
@@ -117,6 +131,39 @@ export class ProductFormPage implements OnInit {
         },
       });
     }
+  }
+
+  saveStock(): void {
+    if (!this.existing || this.savingStock()) return;
+    if (this.stockForm.invalid) {
+      this.stockForm.markAllAsTouched();
+      return;
+    }
+    const value = this.stockForm.getRawValue();
+    this.savingStock.set(true);
+    this.api
+      .setStock(this.existing.id, { storeId: value.storeId!, stock: value.stock ?? 0, minStock: value.minStock })
+      .subscribe({
+        next: (result) => {
+          this.savingStock.set(false);
+          this.totalStock.update((total) => (total ?? 0) + result.stockAfter - result.stockBefore);
+          this.stockForm.controls.stock.reset(null);
+          this.notifications.show(`Stock guardado: ${result.stockBefore} → ${result.stockAfter} en el local.`, 'success');
+        },
+        error: (cause: unknown) => {
+          this.savingStock.set(false);
+          this.notifications.show(this.stockMessage(cause), 'error');
+        },
+      });
+  }
+
+  private stockMessage(cause: unknown): string {
+    if (cause instanceof AppHttpError && (cause.status === 400 || cause.status === 409)) {
+      const body = (cause.originalError as { error?: { title?: unknown } } | undefined)?.error;
+      if (typeof body?.title === 'string') return body.title;
+    }
+    if (cause instanceof AppHttpError && cause.status === 403) return 'No tienes permiso para gestionar productos.';
+    return 'No se pudo guardar el stock.';
   }
 
   save(): void {

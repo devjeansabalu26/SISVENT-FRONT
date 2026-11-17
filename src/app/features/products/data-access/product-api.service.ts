@@ -2,13 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
-import {
-  ProductCreateValue,
-  ProductDetail,
-  ProductPage,
-  ProductPriceHistoryItem,
-  ProductUpdateValue,
-} from '../models/product.model';
+import { ProductCreateValue, ProductDetail, ProductPage, ProductPriceHistoryItem, ProductStockResult, ProductStockValue, ProductUpdateValue } from '../models/product.model';
 
 interface ListParams {
   readonly pageNumber?: number;
@@ -49,6 +43,10 @@ export class ProductApiService {
 
   create(body: ProductCreateValue): Observable<ProductDetail> {
     return this.http.post<ProductDetail>(this.baseUrl, body);
+  }
+
+  setStock(id: string, body: ProductStockValue): Observable<ProductStockResult> {
+    return this.http.put<ProductStockResult>(`${this.baseUrl}/${id}/stock`, body);
   }
 
   update(id: string, body: ProductUpdateValue): Observable<ProductDetail> {

@@ -90,3 +90,16 @@ export interface ProductUpdateValue {
   readonly priceChangeReason?: string;
   readonly version: number;
 }
+
+export interface ProductStockValue {
+  readonly storeId: string;
+  readonly stock: number;
+  readonly minStock: number | null;
+}
+
+export interface ProductStockResult {
+  readonly productId: string;
+  readonly storeId: string;
+  readonly stockBefore: number;
+  readonly stockAfter: number;
+}
