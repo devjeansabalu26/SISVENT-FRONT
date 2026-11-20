@@ -39,7 +39,7 @@
         <span>SAVIX</span>
       </div>
 
-      <form class="login-card" [class.pristine]="!interacted()" [formGroup]="form" (ngSubmit)="submit()" novalidate
+      <form class="login-card" [formGroup]="form" (ngSubmit)="submit()" novalidate
         (pointermove)="glow($event)" (pointerleave)="resetGlow()"
         [style.--gx.px]="glowX()" [style.--gy.px]="glowY()">
         <header>

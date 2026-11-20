@@ -14,7 +14,6 @@ import { LoginPreview } from '../../components/login-preview/login-preview';
   selector: 'app-login-page',
   imports: [ReactiveFormsModule, NgOptimizedImage, AlertBanner, LoginPreview],
   templateUrl: './login-page.html',
-  host: { '(document:pointerdown)': 'markInteracted($event)', '(document:keydown)': 'markInteracted($event)' },
   styleUrls: ['./login-page.scss', './login-page.mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -26,11 +25,6 @@ export class LoginPage {
 
   readonly hidePassword = signal(true);
   readonly capsLock = signal(false);
-  readonly interacted = signal(false);
-
-  markInteracted(event: Event): void {
-    if (event.isTrusted && !this.interacted()) this.interacted.set(true);
-  }
 
   trackCaps(event: Event): void {
     if (event instanceof KeyboardEvent && typeof event.getModifierState === 'function') {
