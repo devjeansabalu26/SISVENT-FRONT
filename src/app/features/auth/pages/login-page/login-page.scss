@@ -22,7 +22,6 @@ $display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 100dvh;
-  color: $text;
   background: $page;
   color-scheme: dark;
 }
@@ -97,8 +96,6 @@ $display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-
   gap: 16px;
 
   img {
@@ -283,10 +280,6 @@ $display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   gap: 8px;
 }
 
-.today {
-  font-variant-numeric: tabular-nums;
-}
-
 .help {
   padding: 8px 14px;
   border: 1px solid $line;
@@ -321,7 +314,6 @@ $display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   background: linear-gradient(180deg, rgba(26, 24, 84, 0.74), rgba(34, 22, 88, 0.72));
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 70px -24px rgba(107, 84, 247, 0.45);
   backdrop-filter: blur(10px);
-  animation: card-breathe 6s ease-in-out infinite alternate;
   --gx: -999px;
   --gy: -999px;
 
@@ -439,10 +431,6 @@ header {
   > .material-icons {
     color: #7884a8;
     font-size: 20px;
-  }
-
-  &:hover {
-    border-color: rgba(167, 155, 255, 0.38);
   }
 
   &:focus-within {
@@ -712,16 +700,6 @@ header {
   }
 }
 
-@keyframes card-breathe {
-  from {
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 60px -28px rgba(107, 84, 247, 0.35);
-  }
-
-  to {
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 90px -18px rgba(107, 84, 247, 0.6);
-  }
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -842,7 +820,6 @@ app-alert-banner ::ng-deep .banner {
     display: none;
   }
 
-  .login-card,
   .submit:hover:not(:disabled)::after,
   .welcome,
   .welcome-check {
