@@ -706,6 +706,8 @@ header {
   }
 }
 
+.pristine input:-webkit-autofill { zoom: 1.2; }
+
 footer .by { flex-basis: 100%; text-align: center; }
 
 footer {
