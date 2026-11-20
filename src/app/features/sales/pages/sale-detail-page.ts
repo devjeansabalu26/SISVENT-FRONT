@@ -1,3 +1,4 @@
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, computed, OnInit, inject, signal } from '@angular/core';
@@ -53,6 +54,12 @@ export class SaleDetailPage implements OnInit {
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);
+  private readonly storeContext = inject(StoreContextService);
+  readonly otherStore = computed(() => {
+    const selected = this.storeContext.canPick() ? this.storeContext.selectedStore() : null;
+    const sale = this.sale();
+    return selected && sale && sale.storeName !== selected.name ? selected.name : null;
+  });
   readonly credit = signal<SaleCreditSummary | null>(null);
   readonly units = computed(() => (this.sale()?.lines ?? []).reduce((sum, line) => sum + line.quantity, 0));
   readonly brandLabel = (brand: string): string => CARD_BRANDS.find((item) => item.value === brand)?.label ?? brand;

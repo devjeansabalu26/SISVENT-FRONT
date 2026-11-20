@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AppRole } from '../../../core/auth/constants/app-role.constant';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -48,8 +49,16 @@ export class Sidebar {
     return role ? ROLE_LABEL[role] : '';
   });
 
+  private readonly cashAllowed = computed(() => {
+    const role = this.users.user()?.role;
+    if (role === 'ADMIN') return this.access.canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
+    if (role === 'VENDEDOR') return this.access.canAccess({ permissions: [APP_PERMISSIONS.salesCreate] });
+    return false;
+  });
+
   private readonly items = computed<readonly SidebarItem[]>(() =>
     MAIN_NAVIGATION.filter((item) => this.access.canAccess({ roles: item.roles, permissions: item.permissions, plans: item.plans }))
+      .filter((item) => !item.cashOnly || this.cashAllowed())
       .filter((item) => !this.access.isLockedByPlan({ ...item, feature: item.requiredFeature }))
       .map((item) => ({ ...item, locked: false })),
   );

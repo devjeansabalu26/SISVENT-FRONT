@@ -3,8 +3,8 @@
     <div>
       <h3>Menús del vendedor</h3>
       <p>
-        <strong>Ver</strong>: solo consulta. <strong>Gestionar</strong>: crear, editar, ajustar stock o anular.
-        Solo aparecen los menús habilitados para tu empresa; las opciones de configuración son del administrador.
+        <strong>Ver</strong>: solo consulta · <strong>Gestionar</strong>: crear, editar, ajustar stock o anular.
+        Solo aparecen los menús habilitados para tu empresa; la configuración es del administrador.
       </p>
     </div>
     @if (data(); as info) {
@@ -17,31 +17,33 @@
   @if (loading()) {
     <p class="muted">Cargando menús…</p>
   } @else if (data()) {
-    @for (group of groups(); track group.label) {
-      <h4 class="seller-modules__group">{{ group.label }}</h4>
-      <ul class="seller-modules__list">
-        @for (module of group.modules; track module.code) {
-          <li [class.is-off]="!module.availableInCompany">
-            <span class="seller-modules__name">
-              <strong>{{ module.label }}</strong>
-              @if (!module.availableInCompany) {
-                <small><span class="material-icons">lock</span>No habilitado para tu empresa</small>
-              }
-            </span>
-            <div class="segmented" role="radiogroup" [attr.aria-label]="'Acceso a ' + module.label">
-              <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'NONE'" [class.on]="choiceOf(module) === 'NONE'"
-                [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'NONE')">Sin acceso</button>
-              <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'VIEW'" [class.on]="choiceOf(module) === 'VIEW'"
-                [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'VIEW')">Ver</button>
-              @if (module.supportsManage) {
-                <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'MANAGE'" [class.on]="choiceOf(module) === 'MANAGE'"
-                  [disabled]="!module.availableInCompany || saving()" (click)="choose(module, 'MANAGE')">Gestionar</button>
-              }
-            </div>
-          </li>
-        }
-      </ul>
-    }
+    <div class="seller-modules__grid">
+      @for (group of groups(); track group.label) {
+        <section class="seller-modules__box" [attr.aria-label]="group.label">
+          <h4 class="seller-modules__group">
+            {{ group.label }}
+            <small>{{ assignedIn(group.modules) }}/{{ group.modules.length }}</small>
+          </h4>
+          <ul class="seller-modules__list">
+            @for (module of group.modules; track module.code) {
+              <li>
+                <span class="seller-modules__name">{{ module.label }}</span>
+                <div class="segmented" role="radiogroup" [attr.aria-label]="'Acceso a ' + module.label">
+                  <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'NONE'" [class.on]="choiceOf(module) === 'NONE'"
+                    [disabled]="saving()" (click)="choose(module, 'NONE')">Sin acceso</button>
+                  <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'VIEW'" [class.on]="choiceOf(module) === 'VIEW'"
+                    [disabled]="saving()" (click)="choose(module, 'VIEW')">Ver</button>
+                  @if (module.supportsManage) {
+                    <button type="button" role="radio" [attr.aria-checked]="choiceOf(module) === 'MANAGE'" [class.on]="choiceOf(module) === 'MANAGE'"
+                      [disabled]="saving()" (click)="choose(module, 'MANAGE')">Gestionar</button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
 
     <footer class="seller-modules__foot">
       <button type="button" class="link" (click)="restoreDefaults()" [disabled]="saving()">Restablecer menús por defecto</button>

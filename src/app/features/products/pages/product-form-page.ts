@@ -49,6 +49,7 @@ export class ProductFormPage implements OnInit {
   readonly brands = signal<readonly { id: string; name: string }[]>([]);
   readonly units = signal<readonly UnitOption[]>([]);
   readonly stores = signal<readonly Store[]>([]);
+  private readonly initialStoreTick = signal(0);
   readonly showStockEditor = this.isEdit && !inject(AccessControlService).hasFeature('GOODS_RECEIPTS');
   readonly savingStock = signal(false);
   readonly totalStock = signal<number | null>(null);
@@ -93,11 +94,13 @@ export class ProductFormPage implements OnInit {
             initial.disable({ emitEvent: false });
           } else {
             initial.enable({ emitEvent: false });
+            if (!initial.value || !this.stores().some((store) => store.id === initial.value)) initial.setValue(fallback);
           }
         }
       });
     });
     this.stockForm.controls.storeId.valueChanges.subscribe((storeId) => this.fillStock(storeId));
+    this.form.controls.initialStoreId.valueChanges.subscribe(() => this.initialStoreTick.update((n) => n + 1));
   }
 
   private fillStock(storeId: string | null): void {
@@ -121,8 +124,19 @@ export class ProductFormPage implements OnInit {
     active: new FormControl(true, { nonNullable: true }),
     imageUrl: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(2000)] }),
     initialStoreId: new FormControl<string | null>(null, { nonNullable: false }),
-    initialStock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.min(0)] }),
-    minStock: new FormControl<number | null>(null, { nonNullable: false, validators: [Validators.min(0)] }),
+    initialStock: new FormControl<number | null>(0, { nonNullable: false, validators: [Validators.min(0)] }),
+    minStock: new FormControl<number | null>(0, { nonNullable: false, validators: [Validators.min(0)] }),
+  });
+
+  readonly initialStoreName = computed(() => {
+    this.initialStoreTick();
+    const id = this.form.controls.initialStoreId.getRawValue();
+    return this.stores().find((store) => store.id === id)?.name ?? null;
+  });
+  readonly otherStoresCount = computed(() => {
+    this.initialStoreTick();
+    const id = this.form.controls.initialStoreId.getRawValue();
+    return this.activeStores().filter((store) => store.id !== id).length;
   });
 
   get marginPercent(): number {
@@ -143,7 +157,6 @@ export class ProductFormPage implements OnInit {
       this.storeApi.list().subscribe((result) => {
         const items = result.items.filter((item) => !item.isWaste);
         this.stores.set(items);
-        if (items.length === 1) this.form.controls.initialStoreId.setValue(items[0].id);
       });
     }
 
@@ -285,6 +298,13 @@ export class ProductFormPage implements OnInit {
     };
   }
 
+  private initialStock(value: ProductFormValue): InitialStock {
+    const stock = value.initialStock ?? 0;
+    const min = value.minStock ?? 0;
+    if (!value.initialStoreId || (stock <= 0 && min <= 0)) return { initialStoreId: null, initialStock: null, minStock: null };
+    return { initialStoreId: value.initialStoreId, initialStock: stock, minStock: min };
+  }
+
   private persist(value: ProductFormValue): void {
     this.saving.set(true);
 
@@ -316,9 +336,7 @@ export class ProductFormPage implements OnInit {
           referenceCost: value.referenceCost,
           imageUrl: value.imageUrl.trim() || null,
           isActive: value.active,
-          initialStoreId: value.initialStoreId,
-          initialStock: value.initialStoreId ? (value.initialStock ?? 0) : null,
-          minStock: value.initialStoreId ? (value.minStock ?? 0) : null,
+          ...this.initialStock(value),
         });
 
     request.subscribe({
@@ -343,5 +361,7 @@ export class ProductFormPage implements OnInit {
     return `No se pudo ${this.isEdit ? 'actualizar' : 'crear'} el producto.`;
   }
 }
+
+type InitialStock = { initialStoreId: string | null; initialStock: number | null; minStock: number | null };
 
 type ProductFormValue = ReturnType<ProductFormPage['form']['getRawValue']>;

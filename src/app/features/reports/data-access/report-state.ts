@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { SalesReport } from '../models/sales-report.model';
 import { formatDate } from '../../../core/regional/regional-format';
@@ -40,7 +41,11 @@ export class ReportState {
   readonly period = computed<ReportPeriod>(
     () => normalizePeriod(this.params().get('period')) ?? normalizePeriod(remembered(PERIOD_KEY)) ?? DEFAULT_PERIOD,
   );
-  readonly storeId = computed(() => this.params().get('store') ?? remembered(STORE_KEY) ?? '');
+  private readonly storeContext = inject(StoreContextService);
+  readonly storeId = computed(() =>
+    this.storeContext.canPick()
+      ? (this.storeContext.selectedStoreId() ?? '')
+      : (this.params().get('store') ?? remembered(STORE_KEY) ?? ''));
   readonly viewParam = computed(() => this.params().get('view'));
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly report = signal<SalesReport | null>(null);
@@ -62,6 +67,8 @@ export class ReportState {
 
   readonly storeName = computed(() => this.stores().find((store) => store.id === this.storeId())?.name ?? 'Todos los locales');
 
+  readonly inStore = computed(() => (this.storeId() ? ` en ${this.storeName()}` : ''));
+
   exportContext(): string {
     const period = this.period();
     const range = periodRange(period);
@@ -78,6 +85,10 @@ export class ReportState {
   }
 
   setStore(storeId: string): void {
+    if (this.storeContext.canPick()) {
+      this.storeContext.select(storeId || null);
+      return;
+    }
     remember(STORE_KEY, storeId);
     this.update({ store: storeId || null });
   }

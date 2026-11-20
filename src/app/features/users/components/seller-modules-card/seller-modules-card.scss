@@ -39,18 +39,44 @@
   background: var(--color-primary-soft);
 }
 
+.seller-modules__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
+  align-items: start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.seller-modules__box {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
 .seller-modules__group {
-  margin: 14px 0 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-text-muted);
-  font-size: 14px;
+  background: var(--color-surface-secondary);
+  font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.seller-modules__group small {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .seller-modules__list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -58,51 +84,39 @@
 
 .seller-modules__list li {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  border-top: 1px solid var(--color-border);
 }
 
-.seller-modules__list li.is-off {
-  background: var(--color-surface-secondary);
+.seller-modules__list li:first-child {
+  border-top: 0;
 }
 
 .seller-modules__name {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.seller-modules__name small {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-}
-
-.seller-modules__name .material-icons {
-  font-size: 16px;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .segmented {
   display: inline-flex;
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
 .segmented button {
-  padding: 6px 12px;
+  padding: 4px 10px;
   border: 0;
   border-left: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 14px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -122,8 +136,8 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 16px;
-  padding-top: 14px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -168,6 +182,10 @@ button:disabled {
 }
 
 @media (max-width: 560px) {
+  .seller-modules__list li {
+    flex-wrap: wrap;
+  }
+
   .segmented {
     width: 100%;
   }

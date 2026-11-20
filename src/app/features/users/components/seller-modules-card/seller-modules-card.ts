@@ -37,12 +37,13 @@ export class SellerModulesCard implements OnInit {
   readonly data = signal<SellerModules | null>(null);
   readonly draft = signal<ReadonlyMap<string, Choice>>(new Map());
 
-  readonly groups = computed(() => groupModules(this.data()?.modules ?? []));
+  private readonly enabled = computed(() => (this.data()?.modules ?? []).filter((module) => module.availableInCompany));
+  readonly groups = computed(() => groupModules(this.enabled()));
   readonly dirty = computed(() =>
-    (this.data()?.modules ?? []).some((module) => this.choiceOf(module) !== (module.level ?? 'NONE')),
+    this.enabled().some((module) => this.choiceOf(module) !== (module.level ?? 'NONE')),
   );
   readonly assignedCount = computed(() =>
-    (this.data()?.modules ?? []).filter((module) => this.choiceOf(module) !== 'NONE').length,
+    this.enabled().filter((module) => this.choiceOf(module) !== 'NONE').length,
   );
 
   ngOnInit(): void {
@@ -53,6 +54,10 @@ export class SellerModulesCard implements OnInit {
         this.notifications.show('No se pudieron cargar los menús del vendedor.', 'error');
       },
     });
+  }
+
+  assignedIn(modules: readonly SellerModule[]): number {
+    return modules.filter((module) => this.choiceOf(module) !== 'NONE').length;
   }
 
   choiceOf(module: SellerModule): Choice {

@@ -9,7 +9,7 @@ const LIMIT_LABELS: Record<string, string> = {
   MAX_ADMINS: 'Administradores máximos',
   MAX_SELLERS: 'Vendedores máximos',
   MAX_STORES: 'Locales máximos',
-  MAX_PRODUCTS: 'Productos máximos',
+  MAX_PRODUCTS: 'Productos activos máximos',
 };
 
 @Component({

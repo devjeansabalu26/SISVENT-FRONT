@@ -1,5 +1,6 @@
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,6 +29,7 @@ export class ProductDetailPage implements OnInit {
   private readonly notifications = inject(NotificationService);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
   readonly canManage = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.productsManage] });
+  readonly storeContext = inject(StoreContextService);
 
   readonly loading = signal(true);
   readonly product = signal<ProductDetail | null>(null);
@@ -39,7 +41,30 @@ export class ProductDetailPage implements OnInit {
     return `${(((product.salePrice - product.referenceCost) / product.salePrice) * 100).toFixed(1)}%`;
   });
 
+  readonly storeStock = computed(() => {
+    const product = this.product();
+    if (!product) return null;
+    const storeId = this.storeContext.selectedStoreId();
+    if (!storeId) return { label: 'Stock en todos los locales', current: product.totalStock, min: product.minStock };
+    const row = product.stores?.find((s) => s.storeId === storeId);
+    const name = this.storeContext.selectedStore()?.name ?? row?.storeName ?? 'este local';
+    return { label: `Stock en ${name}`, current: row?.currentStock ?? 0, min: row?.minStock ?? 0 };
+  });
+
+  readonly missingIn = computed(() => {
+    const product = this.product();
+    const storeId = this.storeContext.selectedStoreId();
+    if (!product || !storeId) return null;
+    const row = product.stores?.find((s) => s.storeId === storeId);
+    if (row && row.currentStock > 0) return null;
+    const name = this.storeContext.selectedStore()?.name ?? 'este local';
+    return row ? `Este producto está agotado en ${name}.` : `Este producto no está registrado en ${name}.`;
+  });
+
+  readonly storeRows = computed(() => (this.storeContext.selectedStoreId() ? [] : (this.product()?.stores ?? [])));
+
   ngOnInit(): void {
+    this.storeContext.load();
     this.load();
   }
 

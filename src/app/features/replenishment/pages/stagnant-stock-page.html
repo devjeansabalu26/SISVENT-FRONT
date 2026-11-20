@@ -1,6 +1,6 @@
 <app-page-header
   title="Sin movimiento y exceso"
-  description="Identificación de capital inmovilizado y acciones correctivas"
+  [description]="'Identificación de capital inmovilizado y acciones correctivas' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '')"
 />
 
 @if (state() !== 'ready') {
@@ -41,6 +41,6 @@
     [rows]="rows()"
     [showEdit]="false"
     [showRemove]="false"
-    emptyMessage="No hay inventario inmovilizado con este umbral."
+    [emptyMessage]="'No hay inventario inmovilizado' + storeContext.inStore() + ' con este umbral.'"
   />
 }

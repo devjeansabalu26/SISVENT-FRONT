@@ -19,6 +19,13 @@
     </ul>
   </section>
 
+  @if (otherStore(); as selected) {
+    <p class="notice">
+      <span class="material-icons">info</span>
+      Esta venta no es de {{ selected }}: se hizo en {{ sale.storeName }}.
+    </p>
+  }
+
   @if (isInvoice(sale)) {
     <p class="notice muted-notice">
       <span class="material-icons">description</span>

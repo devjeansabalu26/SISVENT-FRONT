@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { companyToday, formatCalendarDate } from '../../../core/regional/regional-format';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
@@ -89,8 +90,14 @@ export class OrderPlanPage implements OnInit {
     { key: 'status', label: 'Estado', value: (row) => ORDER_STATUS_LABELS[orderStatusOf(row)], type: 'status', hint: orderStatusHint },
   ];
 
+  readonly storeContext = inject(StoreContextService);
+  private readonly followStore = effect(() => {
+    this.storeContext.selectedStoreId();
+    untracked(() => this.load());
+  });
+
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {

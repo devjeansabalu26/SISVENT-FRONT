@@ -35,6 +35,11 @@ export class StoreContextService {
   });
 
   readonly selectedStore = computed(() => this.stores().find((s) => s.id === this.selectedStoreId()) ?? null);
+  readonly inStore = computed(() => {
+    const name = this.selectedStore()?.name;
+    return name ? ` en ${name}` : '';
+  });
+  readonly scopeLabel = computed(() => this.selectedStore()?.name ?? (this.canPick() ? 'Todos los locales' : ''));
 
   load(): void {
     if (this.loaded || !this.isAdmin()) return;

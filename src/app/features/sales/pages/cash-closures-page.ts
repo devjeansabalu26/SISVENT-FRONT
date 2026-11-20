@@ -1,5 +1,6 @@
 import { localIsoDate } from '../../../shared/utils/date-format';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -13,7 +14,7 @@ import { formatMoney } from '../../../core/regional/regional-format';
   selector: 'app-cash-closures-page',
   imports: [PageHeader, RouterLink, MoneyPipe, DayMonthTimePipe, CalendarDatePipe],
   template: `
-    <app-page-header title="Cierres de caja" description="Historial de cierres por local y día">
+    <app-page-header title="Cierres de caja" [description]="'Historial de cierres por local y día' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '')">
       <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Ventas</a>
       <button type="button" class="primary" (click)="closeCash()"><span class="material-icons">point_of_sale</span>Cerrar caja</button>
     </app-page-header>
@@ -34,7 +35,7 @@ import { formatMoney } from '../../../core/regional/regional-format';
       @if (loading()) {
         <p class="state">Cargando cierres…</p>
       } @else if (!rows().length) {
-        <p class="state">No hay cierres de caja en este período.</p>
+        <p class="state">No hay cierres de caja{{ storeContext.inStore() }} en este período.</p>
       } @else {
         <table>
           <thead>
@@ -88,6 +89,12 @@ export class CashClosuresPage implements OnInit {
 
   readonly loading = signal(true);
   readonly rows = signal<readonly CashClosure[]>([]);
+  readonly storeContext = inject(StoreContextService);
+  private readonly storeFilter = computed(() => (this.storeContext.canPick() ? this.storeContext.selectedStoreId() : null));
+  private readonly followStore = effect(() => {
+    this.storeFilter();
+    untracked(() => this.load());
+  });
   readonly from = signal(localIsoDate(new Date(Date.now() - 30 * 86400000)));
   readonly to = signal(localIsoDate());
 
@@ -97,12 +104,12 @@ export class CashClosuresPage implements OnInit {
   }));
 
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.api.list({ from: this.from(), to: this.to() }).subscribe({
+    this.api.list({ storeId: this.storeFilter() ?? undefined, from: this.from(), to: this.to() }).subscribe({
       next: (rows) => {
         this.rows.set(rows);
         this.loading.set(false);

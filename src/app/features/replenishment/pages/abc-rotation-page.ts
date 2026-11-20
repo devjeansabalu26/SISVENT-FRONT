@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -57,8 +58,14 @@ export class AbcRotationPage implements OnInit {
     { key: 'share', label: '% acumulado', value: (row) => `${row.cumulativeShare}%` },
   ];
 
+  readonly storeContext = inject(StoreContextService);
+  private readonly followStore = effect(() => {
+    this.storeContext.selectedStoreId();
+    untracked(() => this.load());
+  });
+
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {

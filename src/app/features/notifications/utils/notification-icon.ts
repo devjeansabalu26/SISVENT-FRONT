@@ -49,7 +49,7 @@ export function notificationRoute(item: Pick<ApiNotification, 'type' | 'referenc
     case 'sales':
       return id ? ['/app/sales', id] : ['/app/sales'];
     case 'cash_sessions':
-      return ['/app/sales/cash'];
+      return ['/app/cash'];
     case 'purchase_plan':
       return ['/app/purchase-plan'];
     case 'stores':

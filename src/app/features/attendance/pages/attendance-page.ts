@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -60,7 +60,22 @@ export class AttendancePage implements OnInit {
   readonly history = signal<readonly AttendanceRecord[]>([]);
   readonly historyLoading = signal(false);
   readonly workers = signal<readonly AttendanceWorker[]>([]);
-  readonly storeFilter = signal('');
+  readonly storeFilter = signal(this.storeContext.canPick() ? (this.storeContext.selectedStoreId() ?? '') : '');
+  readonly storeFilterName = computed(() => {
+    const name = this.stores().find((s) => s.id === this.storeFilter())?.name;
+    return name ? ` en ${name}` : '';
+  });
+  private readonly followStore = effect(() => {
+    if (!this.storeContext.canPick()) return;
+    const top = this.storeContext.selectedStoreId() ?? '';
+    untracked(() => {
+      if (top && top !== this.storeId() && this.stores().some((s) => s.id === top)) this.changeStore(top);
+      if (top !== this.storeFilter()) {
+        this.storeFilter.set(top);
+        this.loadHistory();
+      }
+    });
+  });
   readonly personFilter = signal('');
   readonly from = signal(addDays(companyToday(), -6));
   readonly to = signal(companyToday());

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, fromEvent, interval, merge } from 'rxjs';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { AppSessionService } from '../../../core/auth/services/app-session.service';
@@ -12,6 +12,8 @@ import { ThemeService } from '../../../core/theme/theme.service';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { SoundSettings } from '../../../shared/ui/sound-settings/sound-settings';
 import { NotificationMenu } from '../../../features/notifications/components/notification-menu/notification-menu';
+
+const BADGE_POLL_MS = 30_000;
 
 @Component({ selector: 'app-header', imports: [SoundSettings, NotificationMenu], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
@@ -36,6 +38,12 @@ export class Header implements OnInit {
     this.badge.refresh();
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.badge.refresh());
+    merge(
+      interval(BADGE_POLL_MS),
+      fromEvent(document, 'visibilitychange').pipe(filter(() => document.visibilityState === 'visible')),
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.badge.refresh());
   }
 

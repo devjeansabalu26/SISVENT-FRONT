@@ -122,6 +122,18 @@
   }
 }
 
+@media (max-width: 600px) {
+  .menu {
+    position: fixed;
+    top: 72px;
+    right: 0;
+    left: 0;
+    width: min(420px, calc(100vw - 24px));
+    max-height: calc(100dvh - 88px);
+    margin-inline: auto;
+  }
+}
+
 @keyframes menu-in {
   from { opacity: 0; transform: translateY(-6px); }
 }

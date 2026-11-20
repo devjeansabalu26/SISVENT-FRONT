@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
@@ -41,8 +42,14 @@ export class StagnantStockPage implements OnInit {
     { key: 'suggestedAction', label: 'Acción sugerida', value: (row) => row.suggestedAction, type: 'status', hint: stagnantHint },
   ];
 
+  readonly storeContext = inject(StoreContextService);
+  private readonly followStore = effect(() => {
+    this.storeContext.selectedStoreId();
+    untracked(() => this.load());
+  });
+
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {

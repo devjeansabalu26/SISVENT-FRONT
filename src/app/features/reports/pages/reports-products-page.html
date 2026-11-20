@@ -56,7 +56,7 @@
   } @else {
     <section class="detail">
       <header class="card-head"><div><h2>{{ title() }}</h2><p class="muted">{{ description() }}</p></div></header>
-      <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" emptyMessage="No hay ventas en este periodo." />
+      <app-data-table [columns]="columns" [rows]="rows()" [showEdit]="false" [showRemove]="false" [emptyMessage]="'No hay ventas' + state.inStore() + ' en este periodo.'" />
     </section>
   }
   @if (view() === 'margin' && totals().withoutCost) {

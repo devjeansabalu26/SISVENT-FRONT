@@ -33,7 +33,7 @@
             }
           </div>
         } @else {
-          <p class="muted empty">No hay ventas en este periodo.</p>
+          <p class="muted empty">No hay ventas{{ state.inStore() }} en este periodo.</p>
         }
       </section>
     }
@@ -74,7 +74,7 @@
             </div>
           </section>
         } @else {
-          <p class="muted empty">No hay ventas en este periodo.</p>
+          <p class="muted empty">No hay ventas{{ state.inStore() }} en este periodo.</p>
         }
       } @else if (heatmapLoading()) {
         <p class="muted empty">Cargando mapa de calor…</p>
@@ -99,7 +99,7 @@
             }
           </ol>
         } @else {
-          <p class="muted empty">No hay ventas en este periodo.</p>
+          <p class="muted empty">No hay ventas{{ state.inStore() }} en este periodo.</p>
         }
       </section>
     }
@@ -120,7 +120,7 @@
             }
           </ol>
         } @else {
-          <p class="muted empty">No hay ventas en este periodo.</p>
+          <p class="muted empty">No hay ventas{{ state.inStore() }} en este periodo.</p>
         }
       </section>
     }

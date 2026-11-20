@@ -165,7 +165,7 @@
       @if (historyLoading()) {
         <p class="state">Cargando asistencias…</p>
       } @else if (!history().length) {
-        <p class="state">No hay asistencias en este período.</p>
+        <p class="state">No hay asistencias{{ storeFilterName() }} en este período.</p>
       } @else {
         <table class="sticky-actions">
           <thead>

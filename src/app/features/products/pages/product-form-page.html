@@ -81,10 +81,9 @@
         <section class="card">
           <h2>Control de almacén</h2>
           <div class="fields">
-            <label [attr.data-locked]="topStore() ? 'Estás trabajando en ' + topStore()!.name + '. Para otro local, cámbialo en el selector de arriba.' : null">Local
+            <label [attr.data-locked]="topStore() ? 'Estás trabajando en ' + topStore()!.name + '. Para otro local, cámbialo en el selector de arriba.' : null">Local con stock
               <select formControlName="initialStoreId">
-                <option [ngValue]="null">Sin stock inicial</option>
-                @for (store of stores(); track store.id) {
+                @for (store of activeStores(); track store.id) {
                   <option [ngValue]="store.id">{{ store.name }}</option>
                 }
               </select>
@@ -92,14 +91,20 @@
                 <span class="locked-note"><span class="material-icons" aria-hidden="true">info</span>Estás trabajando en {{ top.name }}.</span>
               }
             </label>
-            <label data-locked="Elige primero el local donde se registra el stock.">Stock inicial
-              <input type="number" step="0.001" formControlName="initialStock" [disabled]="!form.controls.initialStoreId.value" />
+            <label>Stock inicial
+              <input type="number" step="0.001" min="0" formControlName="initialStock" placeholder="0" />
             </label>
-            <label data-locked="Elige primero el local donde se registra el stock.">Stock mínimo (alerta)
-              <input type="number" step="0.001" formControlName="minStock" [disabled]="!form.controls.initialStoreId.value" />
+            <label>Stock mínimo (alerta)
+              <input type="number" step="0.001" min="0" formControlName="minStock" placeholder="0" />
             </label>
           </div>
-          <p class="muted">Se registra en el local seleccionado al crear el producto. Los ajustes posteriores se hacen desde Inventario.</p>
+          <p class="muted stock-summary">
+            <span class="material-icons" aria-hidden="true">info</span>
+            <span>
+              Quedará con <strong>{{ form.controls.initialStock.value || 0 }} u.</strong> en {{ initialStoreName() ?? 'el local elegido' }}@if (otherStoresCount()) { y con <strong>0 u.</strong> en {{ otherStoresCount() === 1 ? 'el otro local' : 'los otros ' + otherStoresCount() + ' locales' }}}.
+              Después ajustas el stock desde Inventario.
+            </span>
+          </p>
         </section>
       } @else {
         @if (showStockEditor) {

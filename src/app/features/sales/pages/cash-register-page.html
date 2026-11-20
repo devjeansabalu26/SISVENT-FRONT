@@ -1,6 +1,6 @@
 <app-page-header
   title="Caja"
-  [description]="isAdmin ? 'Estado de las cajas de cada local y turnos de caja' : 'Apertura y cierre de caja de tu local'"
+  [description]="isAdmin ? 'Estado de las cajas de cada local y turnos de caja' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '') : 'Apertura y cierre de caja de tu local'"
 >
   <a class="ghost" routerLink="/app/sales"><span class="material-icons">arrow_back</span>Ventas</a>
   <button type="button" class="ghost" (click)="loadStatus()"><span class="material-icons">refresh</span>Actualizar</button>
@@ -9,8 +9,8 @@
 <section class="status">
   <header class="section-title">
     <h2>{{ isAdmin ? 'Estado de cajas' : 'Mi caja' }}</h2>
-    @if (isAdmin && statuses().length) {
-      <span class="muted">{{ openCount() }} de {{ statuses().length }} abiertas · se actualiza cada 30 s</span>
+    @if (isAdmin && visibleStatuses().length) {
+      <span class="muted">{{ openCount() }} de {{ visibleStatuses().length }} abiertas · se actualiza cada 30 s</span>
     }
   </header>
 
@@ -20,7 +20,7 @@
     <p class="state error">{{ statusError() }}</p>
   } @else {
     <div class="cards">
-      @for (status of statuses(); track status.storeId) {
+      @for (status of visibleStatuses(); track status.storeId) {
         <article class="card" [class.card--open]="status.current">
           <header>
             <div>
@@ -70,7 +70,7 @@
           }
         </article>
       } @empty {
-        <p class="state">No hay locales activos.</p>
+        <p class="state">{{ storeFilter() ? 'No hay caja para ' + (storeContext.selectedStore()?.name ?? 'este local') + '.' : 'No hay locales activos.' }}</p>
       }
     </div>
   }
@@ -81,9 +81,9 @@
   <div class="filters">
     @if (isAdmin && statuses().length > 1) {
       <label>Local
-        <select [value]="storeFilter()" (change)="storeFilter.set($any($event.target).value)">
+        <select [value]="storeFilter()" (change)="storeContext.select($any($event.target).value || null)">
           <option value="">Todos los locales</option>
-          @for (status of statuses(); track status.storeId) { <option [value]="status.storeId">{{ status.storeName }}</option> }
+          @for (status of statuses(); track status.storeId) { <option [value]="status.storeId" [selected]="status.storeId === storeFilter()">{{ status.storeName }}</option> }
         </select>
       </label>
     }
@@ -97,7 +97,7 @@
     @if (historyLoading()) {
       <p class="state">Cargando turnos…</p>
     } @else if (!history().length) {
-      <p class="state">No hay turnos de caja en este período.</p>
+      <p class="state">No hay turnos de caja{{ storeContext.inStore() }} en este período.</p>
     } @else {
       <table>
         <thead>

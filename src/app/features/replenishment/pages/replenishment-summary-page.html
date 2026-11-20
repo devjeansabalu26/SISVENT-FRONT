@@ -1,6 +1,6 @@
 <app-page-header
   title="Abastecimiento inteligente"
-  description="Optimización automatizada basada en tiempos de entrega y ritmo de ventas"
+  [description]="'Optimización automatizada basada en tiempos de entrega y ritmo de ventas' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '')"
 >
   <a class="ghost" routerLink="/app/purchase-plan"><span class="material-icons">event_available</span>Qué pedir y cuándo</a>
   <a class="primary" routerLink="/app/goods-receipts/new"><span class="material-icons">add</span>Nueva orden</a>
@@ -74,6 +74,6 @@
     [rows]="criticalRows()"
     [showEdit]="false"
     [showRemove]="false"
-    emptyMessage="No hay productos en riesgo crítico."
+    [emptyMessage]="'No hay productos en riesgo crítico' + storeContext.inStore() + '.'"
   />
 }

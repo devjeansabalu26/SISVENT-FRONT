@@ -33,12 +33,47 @@
     }
   </section>
 
+  @if (missingIn(); as message) {
+    <p class="notice"><span class="material-icons">info</span>{{ message }}</p>
+  }
+
   <div class="kpi-grid">
     <app-kpi-card label="Precio de venta" [value]="(product.salePrice | money)" icon="sell" tone="success" />
     <app-kpi-card label="Costo de referencia" [value]="product.referenceCost != null ? (product.referenceCost | money) : 'Sin costo'" icon="request_quote" tone="info" />
     <app-kpi-card label="Margen de utilidad" [value]="margin()" icon="percent" tone="primary" />
-    <app-kpi-card label="Stock actual" [value]="product.totalStock + ' u.'" icon="inventory_2" tone="warning" [caption]="'Mínimo ' + product.minStock + ' u.'" />
+    @if (storeStock(); as stock) {
+      <app-kpi-card [label]="stock.label" [value]="stock.current + ' u.'" icon="inventory_2" tone="warning" [caption]="'Mínimo ' + stock.min + ' u.'" />
+    }
   </div>
+
+  @if (storeRows().length) {
+    <section class="surface-card">
+      <h3>Stock por local</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Local</th><th>Stock actual</th><th>Mínimo</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (row of storeRows(); track row.storeId) {
+              <tr>
+                <td>{{ row.storeName }}</td>
+                <td>{{ row.currentStock }} u.</td>
+                <td>{{ row.minStock }} u.</td>
+                <td>
+                  @if (row.currentStock <= 0) {
+                    <app-status-chip value="OUT_OF_STOCK" label="Sin stock" />
+                  } @else if (row.currentStock <= row.minStock) {
+                    <app-status-chip value="LOW_STOCK" label="Stock bajo" />
+                  } @else {
+                    <app-status-chip value="AVAILABLE" label="Disponible" />
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
 
   <section class="surface-card">
     <h3>Historial de precios</h3>

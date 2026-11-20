@@ -1,9 +1,8 @@
 <app-page-header
   [title]="isAdmin ? 'Historial de ventas' : scope() === 'STORE' ? 'Ventas del local' : 'Mis ventas'"
-  [description]="isAdmin ? 'Registro completo de operaciones de venta' : scope() === 'STORE' ? 'Ventas registradas en tu local' : 'Ventas registradas con tu usuario'"
+  [description]="isAdmin ? 'Registro completo de operaciones de venta' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '') : scope() === 'STORE' ? 'Ventas registradas en tu local' : 'Ventas registradas con tu usuario'"
 >
   @if (canInvoice() && isAdmin) {<a class="ghost" routerLink="/app/sales/einvoices"><span class="material-icons">receipt</span>Facturas electrónicas</a>}
-  @if (canUseCash) {<a class="ghost" routerLink="/app/sales/cash"><span class="material-icons">point_of_sale</span>Caja</a>}
 </app-page-header>
 @if (isSeller) {
   <nav class="scope-tabs" aria-label="Alcance de ventas">
@@ -46,8 +45,8 @@
       description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."
       actionLabel="Limpiar filtros" (action)="clearFilters()" />
   } @else {
-    <app-empty-state tableEmpty flush icon="point_of_sale" title="Sin ventas registradas"
-      description="Las ventas de esta empresa aparecerán aquí una vez que realices tu primera venta."
+    <app-empty-state tableEmpty flush icon="point_of_sale" [title]="'Sin ventas registradas' + (storeContext.canPick() ? storeContext.inStore() : '')"
+      [description]="storeContext.canPick() && storeContext.inStore() ? 'Todavía no hay ventas' + storeContext.inStore() + '. Elige otro local arriba o «Todos los locales» para ver las demás.' : 'Las ventas de esta empresa aparecerán aquí una vez que realices tu primera venta.'"
       actionLabel="Nueva venta" (action)="newSale()" />
   }
 </app-data-table>

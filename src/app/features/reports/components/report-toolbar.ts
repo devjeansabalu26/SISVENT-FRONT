@@ -18,7 +18,7 @@ import { REPORT_PERIODS, ReportPeriod } from '../utils/report-period';
           <select #storeSelect aria-label="Local" [value]="state.storeId()" (change)="state.setStore(storeSelect.value)">
             <option value="">Todos los locales</option>
             @for (store of state.stores(); track store.id) {
-              <option [value]="store.id">{{ store.name }}</option>
+              <option [value]="store.id" [selected]="store.id === state.storeId()">{{ store.name }}</option>
             }
           </select>
         </label>

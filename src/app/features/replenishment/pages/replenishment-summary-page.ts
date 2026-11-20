@@ -1,5 +1,6 @@
 import { ExcelExportService, excelTable } from '../../../shared/export/excel-export.service';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -61,8 +62,14 @@ export class ReplenishmentSummaryPage implements OnInit {
 
   readonly criticalRows = computed(() => (this.data()?.critical ?? []).map((item) => ({ ...item, id: item.productId })));
 
+  readonly storeContext = inject(StoreContextService);
+  private readonly followStore = effect(() => {
+    this.storeContext.selectedStoreId();
+    untracked(() => this.load());
+  });
+
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {

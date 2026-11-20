@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { interval } from 'rxjs';
 import { DashboardApiService } from '../../data-access/dashboard-api.service';
 import { StoresTodayResponse } from '../../models/dashboard.model';
 import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 import { formatTime } from '../../../../core/regional/regional-format';
+import { StoreContextService } from '../../../../core/context/store-context/store-context.service';
+import { canUseCash } from '../../../sales/cash-access';
 
 @Component({
   selector: 'app-stores-today',
@@ -17,7 +19,7 @@ import { formatTime } from '../../../../core/regional/regional-format';
           <h2>Hoy por local</h2>
           <span class="muted">Se actualiza cada minuto</span>
           <a routerLink="/app/attendance" class="link">Asistencia</a>
-          <a routerLink="/app/sales/cash" class="link">Caja</a>
+          @if (canUseCash) {<a routerLink="/app/cash" class="link">Caja</a>}
         </div>
         <div class="today__grid">
           @for (store of d.stores; track store.storeId) {
@@ -50,6 +52,11 @@ import { formatTime } from '../../../../core/regional/regional-format';
                   <span class="material-icons">{{ alert.code === 'CASH_CLOSED_WITH_STAFF' ? 'info' : 'warning' }}</span>{{ alert.message }}
                 </p>
               }
+              @if (canUseCash) {
+                <button type="button" class="go-cash" [class.go-cash--closed]="!store.cash" (click)="goToCash(store.storeId)">
+                  <span class="material-icons">point_of_sale</span>{{ store.cash ? 'Ver caja' : 'Ir a caja' }}
+                </button>
+              }
             </article>
           } @empty {
             <p class="muted">No hay locales activos.</p>
@@ -81,6 +88,12 @@ import { formatTime } from '../../../../core/regional/regional-format';
     .alert { display: flex; align-items: center; gap: 6px; margin: 0; padding: 6px 8px; border-radius: var(--radius-sm, 6px); font-size: 14px;
       color: var(--color-text-secondary); background: var(--color-surface-secondary); }
     .alert .material-icons { font-size: 16px; }
+    .go-cash { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2px; padding: 7px 12px; border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm, 6px); font: inherit; font-size: 14px; font-weight: 600; color: var(--color-primary); background: var(--color-surface); cursor: pointer; }
+    .go-cash:hover { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)); }
+    .go-cash--closed { color: var(--color-on-primary, #fff); background: var(--color-primary); border-color: var(--color-primary); }
+    .go-cash--closed:hover { background: color-mix(in srgb, var(--color-primary) 88%, #000); }
+    .go-cash .material-icons { font-size: 18px; }
     .alert--high { color: var(--color-error-text, var(--color-error)); background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface)); }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,12 +101,20 @@ import { formatTime } from '../../../../core/regional/regional-format';
 export class StoresTodayPanel implements OnInit {
   private readonly api = inject(DashboardApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly storeContext = inject(StoreContextService);
+  readonly canUseCash = canUseCash();
   readonly data = signal<StoresTodayResponse | null>(null);
   readonly loaded = output<StoresTodayResponse>();
 
   ngOnInit(): void {
     this.load();
     interval(60_000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.load());
+  }
+
+  goToCash(storeId: string): void {
+    if (this.storeContext.canPick()) this.storeContext.select(storeId);
+    this.router.navigate(['/app/cash']);
   }
 
   hour(value: string): string {

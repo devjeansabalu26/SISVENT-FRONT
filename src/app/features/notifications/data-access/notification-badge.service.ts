@@ -22,6 +22,9 @@ export class NotificationBadgeService {
   }
 
   set(value: number): void {
-    this.count.set(Math.max(0, value));
+    const next = Math.max(0, value);
+    if (this.loaded && next > this.count()) this.sound.play('notification');
+    this.loaded = true;
+    this.count.set(next);
   }
 }

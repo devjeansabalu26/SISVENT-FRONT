@@ -7,7 +7,7 @@
 <p class="plan-note">
   <span class="material-icons">info</span>
   @if (planLimit().total != null) {
-    Límites de tu plan {{ planLimit().planName }}: <strong>{{ locals().length }} de {{ planLimit().total }}</strong> locales
+    Límites de tu plan {{ planLimit().planName }}: <strong>{{ planLimit().used }} de {{ planLimit().total }}</strong> locales
     utilizados @if (remaining() && remaining()! > 0) { · tienes {{ remaining() }} disponible(s) }
   } @else {
     Tu plan {{ planLimit().planName }} no tiene límite de locales.

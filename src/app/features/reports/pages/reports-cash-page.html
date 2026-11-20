@@ -100,7 +100,7 @@
             }
           </ol>
         } @else {
-          <p class="muted empty">No hay ventas en este período.</p>
+          <p class="muted empty">No hay ventas{{ state.inStore() }} en este periodo.</p>
         }
       </section>
     }

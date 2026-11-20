@@ -14,7 +14,7 @@ import { LoginPreview } from '../../components/login-preview/login-preview';
   selector: 'app-login-page',
   imports: [ReactiveFormsModule, NgOptimizedImage, AlertBanner, LoginPreview],
   templateUrl: './login-page.html',
-  styleUrl: './login-page.scss',
+  styleUrls: ['./login-page.scss', './login-page.mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {

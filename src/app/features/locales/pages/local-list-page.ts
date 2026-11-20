@@ -30,7 +30,7 @@ export class LocalListPage implements OnInit {
 
   readonly remaining = computed(() => {
     const limit = this.planLimit();
-    return limit.total == null ? null : Math.max(0, limit.total - this.locals().length);
+    return limit.total == null ? null : Math.max(0, limit.total - limit.used);
   });
   readonly canAdd = computed(() => this.remaining() === null || (this.remaining() as number) > 0);
 

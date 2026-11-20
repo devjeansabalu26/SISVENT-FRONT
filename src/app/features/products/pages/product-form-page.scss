@@ -21,3 +21,16 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+.stock-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+}
+.stock-summary .material-icons {
+  font-size: 20px;
+  color: var(--color-primary);
+}

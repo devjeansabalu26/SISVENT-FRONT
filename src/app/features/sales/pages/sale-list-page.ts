@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
@@ -6,7 +7,6 @@ import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
-import { canUseCash } from '../cash-access';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { PosApiService } from '../data-access/pos-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
@@ -30,9 +30,14 @@ export class SaleListPage implements OnInit {
   readonly isAdmin = this.role === 'ADMIN';
   readonly isSeller = this.role === 'VENDEDOR';
   readonly scope = signal<'MINE' | 'STORE'>('MINE');
-  readonly canUseCash = canUseCash();
   private readonly access = inject(AccessControlService);
   readonly canInvoice = computed(() => this.access.hasFeature(INVOICE_FEATURE));
+  readonly storeContext = inject(StoreContextService);
+  private readonly storeFilter = computed(() => (this.storeContext.canPick() ? this.storeContext.selectedStoreId() : null));
+  private readonly followStore = effect(() => {
+    this.storeFilter();
+    untracked(() => this.load());
+  });
 
   readonly loading = signal(false);
   readonly rows = signal<readonly Sale[]>([]);
@@ -61,7 +66,7 @@ export class SaleListPage implements OnInit {
       next: (methods) => this.paymentOptions.set(methods.map((m) => ({ value: m.code, label: m.name }))),
       error: () => this.paymentOptions.set([]),
     });
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {
@@ -75,6 +80,7 @@ export class SaleListPage implements OnInit {
         paymentMethod: this.paymentMethod || undefined,
         status: this.status || undefined,
         documentType: this.documentType || undefined,
+        storeId: this.storeFilter() ?? undefined,
         scope: this.isSeller ? this.scope() : undefined,
       })
       .subscribe({

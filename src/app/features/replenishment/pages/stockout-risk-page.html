@@ -1,6 +1,6 @@
 <app-page-header
   title="Riesgo de agotamiento"
-  description="Predicción de quiebre de stock según el ritmo de ventas de los últimos 30 días"
+  [description]="'Predicción de quiebre de stock según el ritmo de ventas de los últimos 30 días' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '')"
 />
 
 @if (state() !== 'ready') {
@@ -31,6 +31,6 @@
     [rows]="rows()"
     [showEdit]="false"
     [showRemove]="false"
-    emptyMessage="No hay productos que coincidan con el filtro."
+    [emptyMessage]="'No hay productos' + storeContext.inStore() + ' que coincidan con el filtro.'"
   />
 }

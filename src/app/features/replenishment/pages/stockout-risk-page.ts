@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { KpiCard } from '../../../shared/ui/kpi-card/kpi-card';
@@ -51,8 +52,14 @@ export class StockoutRiskPage implements OnInit {
     { key: 'risk', label: 'Riesgo', value: (row) => RISK_LABELS[row.risk], type: 'status', hint: riskHint },
   ];
 
+  readonly storeContext = inject(StoreContextService);
+  private readonly followStore = effect(() => {
+    this.storeContext.selectedStoreId();
+    untracked(() => this.load());
+  });
+
   ngOnInit(): void {
-    this.load();
+    this.storeContext.load();
   }
 
   load(): void {

@@ -24,6 +24,20 @@ export class SoundService {
   readonly enabled = computed(() => this.prefs().enabled);
   readonly tones = SOUND_TONES;
 
+  constructor() {
+    const doc = this.view?.document;
+    if (!doc) return;
+    const events = ['pointerdown', 'keydown', 'touchstart'] as const;
+    const unlock = (): void => {
+      const ctx = this.audio();
+      if (!ctx) return;
+      const done = (): void => events.forEach((name) => doc.removeEventListener(name, unlock, true));
+      if (ctx.state === 'running') return done();
+      void ctx.resume().then(done).catch(() => undefined);
+    };
+    events.forEach((name) => doc.addEventListener(name, unlock, true));
+  }
+
   play(kind: SoundKind): void {
     const prefs = this.prefs();
     if (!prefs.enabled || prefs.volume <= 0) return;

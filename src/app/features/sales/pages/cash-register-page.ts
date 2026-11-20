@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
@@ -41,7 +42,16 @@ export class CashRegisterPage implements OnInit {
   readonly historyLoading = signal(true);
   readonly from = signal('');
   readonly to = signal('');
-  readonly storeFilter = signal('');
+  readonly storeContext = inject(StoreContextService);
+  readonly storeFilter = computed(() => (this.storeContext.canPick() ? (this.storeContext.selectedStoreId() ?? '') : ''));
+  readonly visibleStatuses = computed(() => {
+    const storeId = this.storeFilter();
+    return storeId ? this.statuses().filter((s) => s.storeId === storeId) : this.statuses();
+  });
+  private readonly followStore = effect(() => {
+    this.storeFilter();
+    untracked(() => this.loadHistory());
+  });
 
   cashStatusHint(row: CashSession): string {
     if (row.status === 'OPEN') return 'El turno sigue abierto: todavía no se cuenta el efectivo.';
@@ -51,11 +61,11 @@ export class CashRegisterPage implements OnInit {
     return 'Quien abrió el turno lo cerró y contó el efectivo.';
   }
 
-  readonly openCount = computed(() => this.statuses().filter((s) => s.current).length);
+  readonly openCount = computed(() => this.visibleStatuses().filter((s) => s.current).length);
 
   ngOnInit(): void {
+    this.storeContext.load();
     this.loadStatus();
-    this.loadHistory();
     interval(REFRESH_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.loadStatus(true));
@@ -134,7 +144,6 @@ export class CashRegisterPage implements OnInit {
   clearFilters(): void {
     this.from.set('');
     this.to.set('');
-    this.storeFilter.set('');
     this.loadHistory();
   }
 

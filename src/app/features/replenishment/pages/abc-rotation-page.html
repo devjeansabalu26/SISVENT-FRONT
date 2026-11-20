@@ -1,6 +1,6 @@
 <app-page-header
   title="Rotación y clasificación ABC"
-  description="Análisis de ingresos, rotación y margen bruto por producto"
+  [description]="'Análisis de ingresos, rotación y margen bruto por producto' + (storeContext.scopeLabel() ? ' · ' + storeContext.scopeLabel() : '')"
 />
 
 @if (state() !== 'ready') {
@@ -44,6 +44,6 @@
     [rows]="rows()"
     [showEdit]="false"
     [showRemove]="false"
-    emptyMessage="No hay productos activos para clasificar."
+    [emptyMessage]="'No hay productos activos para clasificar' + storeContext.inStore() + '.'"
   />
 }
