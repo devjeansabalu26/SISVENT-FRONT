@@ -65,6 +65,10 @@
               <div class="row__name">
                 <strong>{{ item.product.name }}</strong>
                 <small>{{ item.product.sku }} · {{ item.product.salePrice | money }} c/u</small>
+                <small class="stk" [class.stk--max]="item.quantity >= item.product.totalStock">
+                  <span class="material-icons" aria-hidden="true">inventory_2</span>Stock: {{ item.product.totalStock }} u.
+                  · {{ item.quantity >= item.product.totalStock ? 'llevas todo el stock' : 'quedan ' + (item.product.totalStock - item.quantity) }}
+                </small>
               </div>
               <div class="quantity">
                 <button type="button" (click)="change(item.product.id, -1)" [disabled]="item.quantity <= 1" aria-label="Quitar una unidad">−</button>
