@@ -49,6 +49,7 @@ export interface ProductDetail {
   readonly minStock: number;
   readonly version: number;
   readonly createdAt?: string | null;
+  readonly stores?: readonly ProductStoreStock[];
 }
 
 export interface ProductPriceHistoryItem {

@@ -1,5 +1,6 @@
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { moneyComparison } from '../../../core/regional/delta-format';
 import { SalesReportApiService } from '../data-access/sales-report-api.service';
 import { Heatmap, HeatmapCell, HeatmapRow, buildHeatmap, hourLabel } from '../utils/sales-heatmap';
 import { ReportPeriod, periodRange } from '../utils/report-period';
@@ -11,7 +12,7 @@ import { ViewTab, ViewTabs } from '../../../shared/ui/view-tabs/view-tabs';
 import { CompactMoneyPipe, MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 import { ReportToolbar } from '../components/report-toolbar';
 import { ReportState } from '../data-access/report-state';
-import { DailyPoint } from '../models/sales-report.model';
+import { DailyPoint, MetricDelta } from '../models/sales-report.model';
 import { periodLabel } from '../utils/report-period';
 import { periodInsights } from '../utils/period-insights';
 import { ActionTip, ActionTips } from '../components/action-tips';
@@ -137,8 +138,13 @@ export class ReportsSalesPage {
     if (!report) return;
     const heatmap = this.heatmap();
     const heatCells = heatmap ? heatmap.rows.flatMap((row) => row.cells.filter((cell) => cell.transactions > 0).map((cell) => ({ day: row.label, cell }))) : [];
-    const delta = (metric: { readonly deltaPercent: number | null }) =>
-      metric.deltaPercent == null ? 'Sin datos del período anterior' : `${metric.deltaPercent > 0 ? '+' : ''}${metric.deltaPercent.toFixed(1)}% vs el período anterior`;
+    const delta = (metric: MetricDelta, unit?: readonly [string, string]) => {
+      if (metric.deltaAmount == null) return 'Sin datos del período anterior';
+      if (!unit) return moneyComparison(metric.deltaAmount, 'que el período anterior');
+      const size = Math.abs(metric.deltaAmount);
+      if (size === 0) return 'Igual que el período anterior';
+      return `${size.toLocaleString('es-PE')} ${size === 1 ? unit[0] : unit[1]} ${metric.deltaAmount > 0 ? 'más' : 'menos'} que el período anterior`;
+    };
     await this.excel.export({
       fileName: 'reporte-ventas',
       title: 'Reporte de ventas',
@@ -146,7 +152,7 @@ export class ReportsSalesPage {
       sheets: [
         { name: 'Resumen', items: [
           { label: 'Ventas del período', value: report.totalSales.value, type: 'money', detail: delta(report.totalSales) },
-          { label: 'Transacciones', value: report.transactions.value, type: 'integer', detail: delta(report.transactions) },
+          { label: 'Transacciones', value: report.transactions.value, type: 'integer', detail: delta(report.transactions, ['transacción', 'transacciones']) },
           { label: 'Ticket promedio', value: report.averageTicket.value, type: 'money', detail: delta(report.averageTicket) },
           { label: 'Promedio por día', value: this.averageDay(), type: 'money' },
           { label: 'Mejor día', value: this.bestDay()?.amount ?? null, type: 'money', detail: this.bestDay()?.date ?? '' },

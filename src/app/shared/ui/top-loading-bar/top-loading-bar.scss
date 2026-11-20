@@ -1,0 +1,55 @@
+:host {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10000;
+  height: 3px;
+  pointer-events: none;
+}
+
+.bar {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-primary, #2563eb) 18%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bar--on {
+  opacity: 1;
+  transition-duration: 0.15s;
+}
+
+.bar__run {
+  position: absolute;
+  inset: 0 auto 0 -40%;
+  width: 40%;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, var(--color-primary, #2563eb), var(--color-accent, var(--color-primary, #2563eb)));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary, #2563eb) 70%, transparent);
+  animation: run 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes run {
+  0% {
+    left: -40%;
+    width: 40%;
+  }
+
+  50% {
+    width: 55%;
+  }
+
+  100% {
+    left: 100%;
+    width: 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar__run {
+    left: 0;
+    width: 100%;
+    animation: none;
+  }
+}

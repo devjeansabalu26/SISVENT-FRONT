@@ -7,12 +7,98 @@
 }
 <div class="pos">
   <div class="left">
-    <section class="card">
-      <header><h2>Datos del cliente</h2><button type="button" class="new-customer" (click)="newCustomer()"><span class="material-icons" aria-hidden="true">person_add</span>Nuevo cliente</button></header>
-      @if (selectedCustomer(); as customer) {
-        <div class="customer"><span class="material-icons">person</span><div><strong>{{ customer.displayName }}</strong><small>{{ customer.documentType }} {{ customer.documentNumber }}</small></div><button type="button" (click)="clearCustomer()">Quitar</button></div>
+    <section class="card scan-card">
+      <div class="scan-head">
+        <h2>Agregar productos</h2>
+        @if (isAdmin && stores().length > 1) {
+          <label class="store-pick" [attr.data-locked]="storeLocked() ? 'Estás vendiendo en ' + currentStoreName() + '. Para vender en otro local, cámbialo en el selector de arriba.' : null">
+            <span class="material-icons" aria-hidden="true">storefront</span>
+            <select #store (change)="changeStore(store.value)" [disabled]="storeLocked()" aria-label="Local de venta">
+              @for (item of stores(); track item.id) {
+                <option [value]="item.id" [selected]="item.id === selectedStoreId()">{{ item.name }}</option>
+              }
+            </select>
+          </label>
+        }
+      </div>
+
+      <div class="pick-row">
+      <label class="product-pick__select" data-picker-anchor
+        [attr.data-locked]="loadingCatalog() ? 'Espera un momento: se están cargando los productos del local.' : !catalog().length ? 'Este local no tiene productos con stock para vender.' : null">
+        <select #picker (change)="pickProduct(picker)" [disabled]="loadingCatalog() || !catalog().length" aria-label="Seleccionar producto">
+          <option value="" selected>{{ loadingCatalog() ? 'Cargando productos…' : catalog().length ? 'Selecciona un producto (' + catalog().length + ' con stock)' : 'Sin productos con stock' }}</option>
+          @for (product of catalog(); track product.id) {
+            <option [value]="product.id">{{ productLabel(product) }}</option>
+          }
+        </select>
+      </label>
+      <label class="scan" [class.scan--ready]="!loadingCatalog() && catalog().length">
+        <span class="material-icons" aria-hidden="true">qr_code_scanner</span>
+        <input #query (keydown)="onScanKey($event, query)" (input)="onScanInput(query)" (keydown.escape)="query.value = ''"
+          autocomplete="off" spellcheck="false" inputmode="search"
+          [placeholder]="loadingCatalog() ? 'Cargando…' : 'Código de barras'" aria-label="Agregar por código de barras o SKU" />
+      </label>
+      </div>
+      @if (catalogError()) {
+        <p class="muted search-hint">No se pudieron cargar los productos. <button type="button" class="link" (click)="loadCatalog()">Reintentar</button></p>
       } @else {
-        <label class="search"><span class="material-icons">search</span><input #customerQuery (input)="searchCustomer(customerQuery.value)" autocomplete="off" spellcheck="false" placeholder="Buscar cliente por nombre o documento" /></label>
+        <p class="muted search-hint">Con la pistola lectora no hace falta hacer clic: escanea y el producto se agrega solo.</p>
+      }
+    </section>
+
+    <section class="card cart">
+      <header>
+        <h2>Lista de venta</h2>
+        @if (cart().length) {
+          <span class="cart-count">{{ cartUnits() }} {{ cartUnits() === 1 ? 'unidad' : 'unidades' }}</span>
+        }
+      </header>
+      @if (!cart().length) {
+        <div class="empty">
+          <span class="material-icons" aria-hidden="true">shopping_cart</span>
+          <p>Escanea un producto o elígelo de la lista para empezar.</p>
+        </div>
+      } @else {
+        <div class="rows">
+          @for (item of cart(); track item.product.id) {
+            <div class="row" [class.row--new]="lastAdded() === item.product.id">
+              <div class="row__name">
+                <strong>{{ item.product.name }}</strong>
+                <small>{{ item.product.sku }} · {{ item.product.salePrice | money }} c/u</small>
+              </div>
+              <div class="quantity">
+                <button type="button" (click)="change(item.product.id, -1)" [disabled]="item.quantity <= 1" aria-label="Quitar una unidad">−</button>
+                <b>{{ item.quantity }}</b>
+                <button type="button" (click)="change(item.product.id, 1)" [disabled]="item.quantity >= item.product.totalStock" aria-label="Agregar una unidad">+</button>
+              </div>
+              <b class="row__total">{{ (item.product.salePrice * item.quantity) | money }}</b>
+              <button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <aside class="summary">
+    <section class="customer-box">
+      <header>
+        <h2>Cliente</h2>
+        <button type="button" class="new-customer" (click)="newCustomer()"><span class="material-icons" aria-hidden="true">person_add</span>Nuevo</button>
+      </header>
+      @if (selectedCustomer(); as customer) {
+        <div class="customer">
+          <span class="material-icons">person</span>
+          <div><strong>{{ customer.displayName }}</strong><small>{{ customer.documentType }} {{ customer.documentNumber }}{{ customer.email ? ' · ' + customer.email : '' }}</small></div>
+          <div class="customer__actions">
+            @if (canEditCustomer) {
+              <button type="button" (click)="editCustomer(customer)" aria-label="Editar cliente" title="Editar cliente"><span class="material-icons">edit</span></button>
+            }
+            <button type="button" (click)="clearCustomer()" aria-label="Quitar cliente" title="Quitar cliente"><span class="material-icons">close</span></button>
+          </div>
+        </div>
+      } @else {
+        <label class="search"><span class="material-icons">search</span><input #customerQuery (input)="searchCustomer(customerQuery.value)" autocomplete="off" spellcheck="false" placeholder="Nombre o documento" /></label>
         @if (customerResults().length) {
           <div class="results">
             @for (customer of customerResults(); track customer.id) {
@@ -20,55 +106,13 @@
             }
           </div>
         }
-        <p class="muted">Sin cliente seleccionado, la venta queda como cliente general.</p>
+        <p class="muted">Sin cliente, la venta queda como cliente general.</p>
       }
     </section>
-    @if (isAdmin && stores().length > 1) {
-      <section class="card">
-        <h2>Local de venta</h2>
-        <select #store (change)="changeStore(store.value)">
-          @for (item of stores(); track item.id) {
-            <option [value]="item.id" [selected]="item.id === selectedStoreId()">{{ item.name }}</option>
-          }
-        </select>
-      </section>
-    }
-    <section class="card">
-      <h2>Búsqueda de productos</h2>
-      <div class="product-pick">
-        <label class="product-pick__select" data-picker-anchor
-          [attr.data-locked]="loadingCatalog() ? 'Espera un momento: se están cargando los productos del local.' : !catalog().length ? 'Este local no tiene productos con stock para vender.' : null">
-          <span>Producto</span>
-          <select #picker (change)="pickProduct(picker)" [disabled]="loadingCatalog() || !catalog().length" aria-label="Seleccionar producto">
-            <option value="" selected>{{ loadingCatalog() ? 'Cargando productos…' : catalog().length ? 'Selecciona un producto (' + catalog().length + ' con stock)' : 'Sin productos con stock' }}</option>
-            @for (product of catalog(); track product.id) {
-              <option [value]="product.id">{{ productLabel(product) }}</option>
-            }
-          </select>
-        </label>
-        <label class="search product-pick__code" title="Escanea el código de barras o escribe el SKU y presiona Enter">
-          <span class="material-icons" aria-hidden="true">qr_code_scanner</span>
-          <input #query (keydown.enter)="addByCode(query)" (keydown.escape)="query.value = ''" autocomplete="off" spellcheck="false" placeholder="Código de barras o SKU + Enter" aria-label="Agregar por código" />
-        </label>
-      </div>
-      @if (catalogError()) {
-        <p class="muted search-hint">No se pudieron cargar los productos. <button type="button" class="link" (click)="loadCatalog()">Reintentar</button></p>
-      } @else {
-        <p class="muted search-hint">Abre el selector para ver y buscar los productos del local, o escanea el código y presiona Enter.</p>
-      }
-    </section>
-    <section class="card cart">
-      <h2>Lista de venta</h2>
-      @if (!cart().length) {<p class="empty">Agrega productos para iniciar la venta.</p>}
-      @for (item of cart(); track item.product.id) {<div class="row"><strong>{{ item.product.name }}</strong><span>{{ item.product.salePrice | money }}</span><div class="quantity"><button type="button" (click)="change(item.product.id, -1)">−</button><b>{{ item.quantity }}</b><button type="button" (click)="change(item.product.id, 1)">+</button></div><b>{{ (item.product.salePrice * item.quantity) | money }}</b><button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button></div>}
-    </section>
-  </div>
-  <aside class="summary">
-    <h2>Resumen de venta</h2>
+
     @if (canInvoice()) {
       <div class="voucher"><span>Comprobante</span><b>{{ invoiceCustomer() ? 'Factura' : 'Boleta' }}</b></div>
     }
-    <div><span>Subtotal</span><b>{{ subtotal() | money }}</b></div><div class="total"><strong>Total a pagar</strong><strong>{{ subtotal() | money }}</strong></div>
     <h3>Método de pago</h3>
     @if (paymentMethodsError()) {
       <p class="pay-error">No se pudieron cargar los métodos de pago. <button type="button" class="link" (click)="loadPaymentMethods()">Reintentar</button></p>
@@ -77,15 +121,18 @@
     } @else {
       @if (paymentLines().length <= 1) {
         <div class="payments">
-          @for (method of paymentMethods(); track method.code) {
+          @for (method of quickMethods(); track method.code) {
             <button type="button" [class.active]="payment() === method.code" (click)="selectPayment(method.code)">{{ method.name }}</button>
           }
         </div>
       } @else {
         <p class="muted">Pago mixto: {{ paymentLines().length }} métodos.</p>
       }
-      <app-pos-payment-panel [methods]="paymentMethods()" [total]="subtotal()" [showErrors]="showPaymentErrors()" [(lines)]="paymentLines" />
+      <app-pos-payment-panel [methods]="quickMethods()" [total]="subtotal()" [showErrors]="showPaymentErrors()" [(lines)]="paymentLines" />
     }
-    <button class="confirm" type="button" [disabled]="saving()" (click)="confirm()">CONFIRMAR VENTA</button>
+    <button class="confirm" type="button" [disabled]="saving()" (click)="confirm()">
+      {{ saving() ? 'Registrando venta…' : 'Confirmar venta' }}
+      @if (cart().length && !saving()) { <span>{{ subtotal() | money }}</span> }
+    </button>
   </aside>
 </div>

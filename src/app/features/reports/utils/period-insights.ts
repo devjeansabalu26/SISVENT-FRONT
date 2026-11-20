@@ -70,6 +70,10 @@ export function periodInsights(
 }
 
 export function compareMetric(metric: MetricDelta): MetricComparison {
+  if (metric.deltaAmount != null) {
+    const difference = Math.round(metric.deltaAmount * 100) / 100;
+    return { current: metric.value, previous: Math.round((metric.value - difference) * 100) / 100, difference, deltaPercent: metric.deltaPercent };
+  }
   if (metric.deltaPercent === null) return { current: metric.value, previous: null, difference: null, deltaPercent: null };
   if (metric.deltaPercent <= -100) return { current: metric.value, previous: null, difference: null, deltaPercent: metric.deltaPercent };
   const previous = metric.value / (1 + metric.deltaPercent / 100);

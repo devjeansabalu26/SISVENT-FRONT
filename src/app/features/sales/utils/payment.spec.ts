@@ -7,11 +7,21 @@ const line = (code: string, changes: Partial<PaymentDraftLine> = {}): PaymentDra
 
 describe('POS payments', () => {
   describe('single method', () => {
-    it('cash: empty amount is exact payment, change computed', () => {
-      expect(breakdown([line('CASH')], kindOf, 72.5)).toEqual(jasmine.objectContaining({ change: 0, pending: 0 }));
+    it('cash: the received amount must be written by hand, change computed', () => {
+      expect(breakdown([line('CASH')], kindOf, 72.5)).toEqual(jasmine.objectContaining({ cashReceived: null, change: 0, pending: 72.5 }));
+      expect(paymentsError([line('CASH')], kindOf, 72.5)).toBe('Escribe cuánto efectivo te entregó el cliente.');
+      expect(paymentsError([line('CASH', { amountReceived: '72.5' })], kindOf, 72.5)).toBeNull();
       expect(breakdown([line('CASH', { amountReceived: '100' })], kindOf, 72.5).change).toBe(27.5);
       expect(breakdown([line('CASH', { amountReceived: '80,50' })], kindOf, 80).change).toBe(0.5);
       expect(toPaymentLines([line('CASH')], kindOf, 72.5)).toEqual([{ method: 'CASH', amountReceived: 72.5 }]);
+    });
+
+    it('cash: received less than total shows what is missing, more shows change', () => {
+      expect(breakdown([line('CASH', { amountReceived: '50' })], kindOf, 86.4)).toEqual(jasmine.objectContaining({ change: 0, pending: 36.4 }));
+      expect(breakdown([line('CASH', { amountReceived: '100' })], kindOf, 86.4)).toEqual(jasmine.objectContaining({ change: 13.6, pending: 0 }));
+      expect(breakdown([line('CASH', { amountReceived: '86.40' })], kindOf, 86.4)).toEqual(jasmine.objectContaining({ change: 0, pending: 0 }));
+      expect(breakdown([line('YAPE', { amount: '50' }), line('CASH', { amountReceived: '40' })], kindOf, 86.4))
+        .toEqual(jasmine.objectContaining({ due: 36.4, change: 3.6, pending: 0 }));
     });
 
     it('card without amount covers the total', () => {

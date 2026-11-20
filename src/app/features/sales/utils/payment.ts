@@ -35,8 +35,7 @@ export function breakdown(lines: readonly PaymentDraftLine[], kindOf: (code: str
   const due = round2(Math.max(0, total - nonCash));
   if (hasCash) {
     const cash = lines.find((line) => kindOf(line.methodCode) === 'CASH')!;
-    const received = parseAmount(cash.amountReceived);
-    cashReceived = received === null ? due : received;
+    cashReceived = parseAmount(cash.amountReceived);
   }
   const covered = nonCash + (cashReceived !== null && Number.isFinite(cashReceived) ? Math.min(cashReceived, due) : 0);
   return {
@@ -74,9 +73,8 @@ export function paymentsError(lines: readonly PaymentDraftLine[], kindOf: (code:
   const hasCash = lines.some((line) => kindOf(line.methodCode) === 'CASH');
   if (hasCash) {
     if (result.due <= 0) return 'El total ya está cubierto: quita el pago en efectivo.';
-    if (result.cashReceived === null || !Number.isFinite(result.cashReceived) || result.cashReceived < 0) {
-      return 'Ingresa un monto recibido válido.';
-    }
+    if (result.cashReceived === null) return 'Escribe cuánto efectivo te entregó el cliente.';
+    if (!Number.isFinite(result.cashReceived) || result.cashReceived < 0) return 'Ingresa un monto recibido válido.';
     if (round2(result.cashReceived) < result.due) return `El efectivo no cubre lo que falta (${formatMoney(result.due)}).`;
   } else if (result.due > 0) {
     return `Falta cubrir ${formatMoney(result.due)} del total.`;

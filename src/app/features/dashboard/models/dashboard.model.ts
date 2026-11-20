@@ -57,6 +57,30 @@ export interface AdminDashboard {
   readonly month?: DashboardMonthProjection | null;
   readonly todayByHour?: readonly DashboardHourPoint[] | null;
   readonly analyticsEnabled?: boolean;
+  readonly salesTodayDeltaAmount?: number | null;
+  readonly salesPeriodDeltaAmount?: number | null;
+  readonly operationsDelta?: number | null;
+  readonly averageTicketDeltaAmount?: number | null;
+  readonly grossProfitDeltaAmount?: number | null;
+  readonly unitsSoldPeriod?: number;
+  readonly unitsSoldDelta?: number | null;
+  readonly newClientsPeriod?: number;
+  readonly newClientsDelta?: number | null;
+  readonly paymentsByMethod?: readonly { readonly code: string; readonly name: string; readonly amount: number }[] | null;
+  readonly cancelledCount?: number;
+  readonly cancelledAmount?: number;
+  readonly discountsTotal?: number;
+  readonly team?: readonly DashboardSellerActivity[] | null;
+}
+
+export interface DashboardSellerActivity {
+  readonly name: string;
+  readonly sales: number;
+  readonly amount: number;
+  readonly cancelled: number;
+  readonly cancelledAmount: number;
+  readonly discounts: number;
+  readonly lastSaleAt: string | null;
 }
 
 export interface DashboardMonthProjection {
@@ -153,6 +177,7 @@ export interface StoreTodayCash {
   readonly expectedCash: number;
   readonly salesCount: number;
   readonly totalSales: number;
+  readonly byMethod?: readonly { readonly code: string; readonly name: string; readonly amount: number }[] | null;
 }
 
 export interface StoreTodayAlert {

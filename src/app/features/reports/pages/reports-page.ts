@@ -1,6 +1,7 @@
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { moneyComparison } from '../../../core/regional/delta-format';
 import { RouterLink } from '@angular/router';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -54,21 +55,18 @@ export class ReportsPage {
     return report ? periodInsights(report.dailySeries, report.from, report.to) : null;
   });
 
-  trend(metric: MetricDelta): 'up' | 'down' | 'flat' {
-    if (metric.deltaPercent === null) return 'flat';
-    return metric.deltaPercent >= 0 ? 'up' : 'down';
-  }
-
-  delta(metric: MetricDelta): string | undefined {
-    return metric.deltaPercent === null ? undefined : `${metric.deltaPercent.toFixed(1)}%`;
-  }
 
 
   async exportExcel(format: ExportFormat = 'xlsx'): Promise<void> {
     const report = this.state.report();
     if (!report) return;
-    const delta = (metric: { readonly deltaPercent: number | null }) =>
-      metric.deltaPercent == null ? 'Sin datos del período anterior' : `${metric.deltaPercent > 0 ? '+' : ''}${metric.deltaPercent.toFixed(1)}% vs el período anterior`;
+    const delta = (metric: MetricDelta, unit?: readonly [string, string]) => {
+      if (metric.deltaAmount == null) return 'Sin datos del período anterior';
+      if (!unit) return moneyComparison(metric.deltaAmount, 'que el período anterior');
+      const size = Math.abs(metric.deltaAmount);
+      if (size === 0) return 'Igual que el período anterior';
+      return `${size.toLocaleString('es-PE')} ${size === 1 ? unit[0] : unit[1]} ${metric.deltaAmount > 0 ? 'más' : 'menos'} que el período anterior`;
+    };
     await this.excel.export({
       fileName: 'reporte-resumen',
       title: 'Reporte de resumen',
@@ -76,9 +74,9 @@ export class ReportsPage {
       sheets: [
         { name: 'Resumen', items: [
           { label: 'Ventas totales', value: report.totalSales.value, type: 'money', detail: delta(report.totalSales) },
-          { label: 'Transacciones', value: report.transactions.value, type: 'integer', detail: delta(report.transactions) },
+          { label: 'Transacciones', value: report.transactions.value, type: 'integer', detail: delta(report.transactions, ['transacción', 'transacciones']) },
           { label: 'Ticket promedio', value: report.averageTicket.value, type: 'money', detail: delta(report.averageTicket) },
-          { label: 'Productos vendidos', value: report.unitsSold.value, type: 'number', detail: delta(report.unitsSold) },
+          { label: 'Productos vendidos', value: report.unitsSold.value, type: 'number', detail: delta(report.unitsSold, ['unidad', 'unidades']) },
         ] },
         excelTable({ name: 'Ventas por día', rows: report.dailySeries, totals: true, columns: [
           { header: 'Fecha', value: (row) => row.date, type: 'date' },

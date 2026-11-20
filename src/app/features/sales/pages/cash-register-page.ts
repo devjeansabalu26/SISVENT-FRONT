@@ -63,7 +63,7 @@ export class CashRegisterPage implements OnInit {
 
   loadStatus(silent = false): void {
     if (!silent) this.statusLoading.set(true);
-    this.api.status().subscribe({
+    this.api.status(silent).subscribe({
       next: (rows) => {
         this.statuses.set(rows);
         this.statusError.set(null);

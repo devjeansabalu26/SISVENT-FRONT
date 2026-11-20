@@ -11,10 +11,6 @@ export interface HealthInsight {
   readonly link?: string;
 }
 
-function percent(value: number): string {
-  return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
-}
-
 export function healthInsights(report: HealthReport, money: (value: number) => string = formatMoney): readonly HealthInsight[] {
   const list: HealthInsight[] = [];
   const { profit, sales, leaks, dormant, month } = report;
@@ -40,14 +36,14 @@ export function healthInsights(report: HealthReport, money: (value: number) => s
   if (sales.deltaPercent !== null && sales.deltaPercent <= -10) {
     list.push({
       tone: 'warning', icon: 'south',
-      title: `Vendiste ${Math.abs(sales.deltaPercent).toFixed(1)}% menos que en el periodo anterior.`,
+      title: sales.deltaAmount != null ? `Vendiste ${money(Math.abs(sales.deltaAmount))} menos que en el periodo anterior.` : 'Vendiste menos que en el periodo anterior.',
       action: 'Mira en Ventas qué días y horas bajaron y lanza una promoción justo en ese horario.',
       link: '/app/reports/sales',
     });
   } else if (sales.deltaPercent !== null && sales.deltaPercent >= 10) {
     list.push({
       tone: 'success', icon: 'north',
-      title: `Vendiste ${sales.deltaPercent.toFixed(1)}% más que en el periodo anterior.`,
+      title: sales.deltaAmount != null ? `Vendiste ${money(sales.deltaAmount)} más que en el periodo anterior.` : 'Vendiste más que en el periodo anterior.',
       action: 'Asegura stock de tus productos estrella para mantener el ritmo.',
     });
   }
@@ -73,7 +69,7 @@ export function healthInsights(report: HealthReport, money: (value: number) => s
     const good = month.projectedDeltaPercent >= 0;
     list.push({
       tone: good ? 'success' : 'warning', icon: good ? 'event_available' : 'event_busy',
-      title: `Si sigues así, cerrarías el mes en ${money(month.projected)} (${percent(month.projectedDeltaPercent)} frente al mes pasado).`,
+      title: `Si sigues así, cerrarías el mes en ${money(month.projected)} (${money(Math.abs(month.projected - month.previousMonth))} ${good ? 'más' : 'menos'} que el mes pasado).`,
       action: good
         ? 'Buen ritmo: aprovecha los días fuertes para empujar los productos con mejor margen.'
         : 'Te faltan ventas para igualar el mes pasado: refuerza los días flojos con promociones.',

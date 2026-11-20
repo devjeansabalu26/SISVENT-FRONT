@@ -6,6 +6,7 @@ export interface HealthProfit {
   readonly marginPercent: number | null;
   readonly previousMarginPercent: number | null;
   readonly missingCost: boolean;
+  readonly profitDeltaAmount?: number | null;
 }
 
 export interface HealthLeaks {

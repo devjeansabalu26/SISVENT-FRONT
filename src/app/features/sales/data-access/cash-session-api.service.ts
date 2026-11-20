@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
-import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
+import { backgroundRequest, handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import { CashMethodTotal } from './cash-closure-api.service';
 
 export type CashSessionStatus = 'OPEN' | 'CLOSED';
@@ -80,8 +80,9 @@ export class CashSessionApiService {
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/cash-sessions`;
   private readonly context = handleForbiddenInline();
 
-  status(): Observable<readonly StoreCashStatus[]> {
-    return this.http.get<readonly StoreCashStatus[]>(`${this.baseUrl}/status`, { context: this.context });
+  status(silent = false): Observable<readonly StoreCashStatus[]> {
+    const context = silent ? backgroundRequest(handleForbiddenInline()) : this.context;
+    return this.http.get<readonly StoreCashStatus[]>(`${this.baseUrl}/status`, { context });
   }
 
   list(filters: { storeId?: string; from?: string; to?: string } = {}): Observable<readonly CashSession[]> {

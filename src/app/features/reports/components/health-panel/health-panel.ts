@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { deltaTrend, moneyComparison, signedMoney } from '../../../../core/regional/delta-format';
+import { formatMoney } from '../../../../core/regional/regional-format';
 import { RouterLink } from '@angular/router';
 import { AccessControlService } from '../../../../core/auth/services/access-control.service';
 import { MoneyPipe, QuantityPipe } from '../../../../shared/pipes/date-time.pipe';
@@ -63,13 +65,23 @@ export class HealthPanel {
     return value === null ? '—' : `${value.toFixed(1)}%`;
   }
 
-  deltaText(value: number | null): string | undefined {
-    return value === null ? undefined : `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+  moneyDelta(value: number | null | undefined): string | undefined {
+    return signedMoney(value);
   }
 
-  trendOf(value: number | null): 'up' | 'down' | 'flat' {
-    if (value === null || value === 0) return 'flat';
-    return value > 0 ? 'up' : 'down';
+  moneyComparisonText(value: number, against: string): string {
+    return moneyComparison(Math.round(value * 100) / 100, against);
+  }
+
+  monthGapText(monthToDate: number, previousMonth: number): string {
+    const gap = Math.round((previousMonth - monthToDate) * 100) / 100;
+    return gap > 0
+      ? `Te faltan ${formatMoney(gap)} para igualar el mes pasado`
+      : `Ya superaste el mes pasado por ${formatMoney(-gap)}`;
+  }
+
+  trendOf(value: number | null | undefined): 'up' | 'down' | 'flat' {
+    return deltaTrend(value);
   }
 
   private load(period: ReportPeriod, storeId: string): void {

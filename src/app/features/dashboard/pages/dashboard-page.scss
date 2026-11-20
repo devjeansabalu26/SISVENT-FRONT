@@ -387,3 +387,90 @@ td small {
 .grid-2.grid-single {
   grid-template-columns: 1fr;
 }
+
+.kpi-link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 2px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  .material-icons {
+    font-size: 18px;
+    transition: transform 0.15s ease;
+  }
+
+  &:hover .material-icons {
+    transform: translateX(2px);
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.kpi-grid--simple {
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+
+  > app-kpi-card {
+    display: block;
+    height: 100%;
+  }
+
+  > app-kpi-card ::ng-deep .kpi {
+    height: 100%;
+    align-content: start;
+  }
+}
+
+.kpi-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: inline-flex;
+    gap: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  span {
+    color: var(--color-text-muted);
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.top-products {
+  padding-left: 0;
+  counter-reset: top;
+
+  li {
+    counter-increment: top;
+  }
+
+  li > div {
+    display: grid;
+    gap: 2px;
+
+    strong::before {
+      content: counter(top) '. ';
+      color: var(--color-text-muted);
+      font-weight: 600;
+    }
+  }
+}

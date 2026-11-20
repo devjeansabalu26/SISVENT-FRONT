@@ -20,7 +20,7 @@
     </header>
     <div class="table-scroll">
       <table class="compare-table">
-        <thead><tr><th>Indicador</th><th class="num">Este período</th><th class="num">Período anterior</th><th class="num">Diferencia</th><th class="num">Variación</th></tr></thead>
+        <thead><tr><th>Indicador</th><th class="num">Este período</th><th class="num">Período anterior</th><th class="num">Diferencia</th></tr></thead>
         <tbody>
           @for (row of comparison(); track row.label) {
             <tr>
@@ -29,9 +29,6 @@
               <td class="num">{{ row.value.previous != null ? row.text(row.value.previous) : '—' }}</td>
               <td class="num" [class.up]="(row.value.difference ?? 0) > 0" [class.down]="(row.value.difference ?? 0) < 0">
                 {{ row.value.difference != null ? (row.value.difference > 0 ? '+' : '') + row.text(row.value.difference) : '—' }}
-              </td>
-              <td class="num" [class.up]="(row.value.deltaPercent ?? 0) > 0" [class.down]="(row.value.deltaPercent ?? 0) < 0">
-                {{ row.value.deltaPercent != null ? (row.value.deltaPercent > 0 ? '▲ +' : row.value.deltaPercent < 0 ? '▼ ' : '') + row.value.deltaPercent.toFixed(1) + '%' : 'Sin datos' }}
               </td>
             </tr>
           }
@@ -44,12 +41,12 @@
     <h2 class="section-title">Lectura del período</h2>
     <div class="highlights highlights--insights highlights--two">
       <article>
-        <span class="material-icons" aria-hidden="true">{{ insight.trendPercent == null ? 'trending_flat' : insight.trendPercent >= 0 ? 'trending_up' : 'trending_down' }}</span>
+        <span class="material-icons" aria-hidden="true">{{ insight.trendPercent == null ? 'trending_flat' : insight.secondHalf >= insight.firstHalf ? 'trending_up' : 'trending_down' }}</span>
         <div>
           <small>Tendencia dentro del período</small>
-          <strong>{{ insight.trendPercent == null ? 'Sin datos suficientes' : (insight.trendPercent >= 0 ? 'Vas mejorando' : 'Vas bajando') }}</strong>
+          <strong>{{ insight.trendPercent == null ? 'Sin datos suficientes' : (insight.secondHalf >= insight.firstHalf ? 'Vas mejorando' : 'Vas bajando') }}</strong>
           @if (insight.trendPercent != null) {
-            <p>La segunda mitad vendió {{ insight.trendPercent >= 0 ? '+' : '' }}{{ insight.trendPercent.toFixed(1) }}% frente a la primera ({{ insight.secondHalf | money }} vs {{ insight.firstHalf | money }})</p>
+            <p>La segunda mitad vendió {{ insight.secondHalf >= insight.firstHalf ? ((insight.secondHalf - insight.firstHalf) | money) + ' más' : ((insight.firstHalf - insight.secondHalf) | money) + ' menos' }} que la primera ({{ insight.secondHalf | money }} vs {{ insight.firstHalf | money }})</p>
           }
         </div>
       </article>

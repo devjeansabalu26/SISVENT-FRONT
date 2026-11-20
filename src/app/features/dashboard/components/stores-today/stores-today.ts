@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { interval } from 'rxjs';
@@ -89,6 +89,7 @@ export class StoresTodayPanel implements OnInit {
   private readonly api = inject(DashboardApiService);
   private readonly destroyRef = inject(DestroyRef);
   readonly data = signal<StoresTodayResponse | null>(null);
+  readonly loaded = output<StoresTodayResponse>();
 
   ngOnInit(): void {
     this.load();
@@ -100,6 +101,12 @@ export class StoresTodayPanel implements OnInit {
   }
 
   private load(): void {
-    this.api.storesToday().subscribe({ next: (data) => this.data.set(data), error: () => undefined });
+    this.api.storesToday().subscribe({
+      next: (data) => {
+        this.data.set(data);
+        this.loaded.emit(data);
+      },
+      error: () => undefined,
+    });
   }
 }

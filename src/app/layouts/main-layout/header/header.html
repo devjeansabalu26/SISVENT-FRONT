@@ -19,10 +19,7 @@
       <span class="material-icons">{{ isDark() ? 'light_mode' : 'dark_mode' }}</span>
     </button>
     @if (canSeeNotifications) {
-      <a class="bell" routerLink="/app/notifications" [attr.aria-label]="bellLabel()" [title]="bellLabel()">
-        <span class="material-icons">{{ unread() ? 'notifications' : 'notifications_none' }}</span>
-        @if (unread()) { <span class="bell__count">{{ unread() > 99 ? '99+' : unread() }}</span> }
-      </a>
+      <app-notification-menu />
     } @else {
       <button type="button" aria-label="Notificaciones"><span class="material-icons">notifications_none</span></button>
     }

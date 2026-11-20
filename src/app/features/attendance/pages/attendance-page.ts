@@ -128,7 +128,7 @@ export class AttendancePage implements OnInit {
   loadStatus(silent = false): void {
     if (!silent) this.statusLoading.set(true);
     this.statusError.set(null);
-    this.api.status(this.storeId()).subscribe({
+    this.api.status(this.storeId(), silent).subscribe({
       next: (status) => {
         this.status.set(status);
         this.statusLoading.set(false);

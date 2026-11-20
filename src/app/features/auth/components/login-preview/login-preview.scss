@@ -1,0 +1,244 @@
+$cyan: #15b9f8;
+$blue: #3c5bfd;
+$violet: #6b54f7;
+$text: #eef2ff;
+$muted: #a7a4d0;
+$display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+:host {
+  display: block;
+  margin: auto 0 8px;
+}
+
+.preview {
+  position: relative;
+  height: 300px;
+  color: $text;
+
+  > * {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .material-icons {
+    font-size: 16px;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.sales-card,
+.stock-card,
+.sale-toast {
+  border: 1px solid rgba(167, 155, 255, 0.22);
+  background: linear-gradient(180deg, rgba(34, 30, 100, 0.92), rgba(16, 15, 60, 0.94));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 48px -16px rgba(0, 4, 20, 0.85), 0 0 0 1px rgba(60, 91, 253, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.sales-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 74%;
+  padding: 20px 20px 14px;
+  border-radius: 16px;
+}
+
+.sales-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: $muted;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.store {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  color: #c7d0fe;
+  background: rgba(60, 91, 253, 0.2);
+  font-size: 12.5px;
+  font-weight: 600;
+
+  .material-icons {
+    font-size: 14px;
+  }
+}
+
+.amount {
+  margin-top: 6px;
+  color: $text;
+  font-family: $display;
+  font-size: 34px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+
+  small {
+    color: #7884a8;
+    font-size: 20px;
+  }
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #34d399;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.spark {
+  width: 100%;
+  height: 72px;
+  margin-top: 10px;
+  overflow: visible;
+}
+
+.spark-area {
+  fill: url(#login-spark-fill);
+}
+
+.spark-line {
+  fill: none;
+  stroke: url(#login-spark-line);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  vector-effect: non-scaling-stroke;
+  animation: draw 1.4s 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+.hours {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: #7884a8;
+  font-size: 11.5px;
+}
+
+.stock-card {
+  position: absolute;
+  top: 136px;
+  right: 0;
+  width: 48%;
+  padding: 14px;
+  border-radius: 14px;
+  animation-delay: 0.15s;
+
+  ul {
+    display: grid;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13.5px;
+
+    span {
+      overflow: hidden;
+      color: $text;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    b {
+      flex: none;
+      color: #fbbf24;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.stock-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $text;
+  font-size: 13.5px;
+  font-weight: 600;
+
+  .material-icons {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.14);
+  }
+}
+
+.sale-toast {
+  position: absolute;
+  top: -46px;
+  right: 6%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 12px;
+  border-radius: 12px;
+  animation-delay: 0.3s;
+
+  > .material-icons {
+    color: #34d399;
+    font-size: 22px;
+  }
+
+  div {
+    display: grid;
+  }
+
+  strong {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  small {
+    color: $muted;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (max-width: 1100px) {
+  .sales-card {
+    width: 84%;
+  }
+
+  .stock-card {
+    width: 58%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview > *,
+  .spark-line {
+    animation: none;
+  }
+}

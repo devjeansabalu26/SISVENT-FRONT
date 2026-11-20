@@ -3,7 +3,7 @@ import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.con
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
@@ -44,7 +44,7 @@ export class InventoryPage {
   readonly loading = signal(false);
   private readonly generalData = signal<readonly Product[]>([]);
   private readonly search = signal('');
-  private readonly statusFilter = signal('');
+  readonly statusFilter = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('stock') === 'low' ? 'LOW_STOCK' : '');
   private readonly rowsData = signal<readonly StockRow[]>([]);
 
   readonly rows = computed(() => {

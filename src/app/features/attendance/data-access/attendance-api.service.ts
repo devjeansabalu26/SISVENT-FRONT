@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
-import { handleForbiddenInline } from '../../../core/http/http-context.tokens';
+import { backgroundRequest, handleForbiddenInline } from '../../../core/http/http-context.tokens';
 import {
   AttendanceAutoResult,
   AttendanceReport,
@@ -28,9 +28,10 @@ export class AttendanceApiService {
   private readonly baseUrl = `${inject(APP_CONFIG).apiBaseUrl}/api/v1/attendance`;
   private readonly context = handleForbiddenInline();
 
-  status(storeId: string | null): Observable<AttendanceStatus> {
+  status(storeId: string | null, silent = false): Observable<AttendanceStatus> {
     const params = storeId ? new HttpParams().set('storeId', storeId) : undefined;
-    return this.http.get<AttendanceStatus>(`${this.baseUrl}/status`, { params, context: this.context });
+    const context = silent ? backgroundRequest(handleForbiddenInline()) : this.context;
+    return this.http.get<AttendanceStatus>(`${this.baseUrl}/status`, { params, context });
   }
 
   autoCheckIn(storeId: string | null): Observable<AttendanceAutoResult> {

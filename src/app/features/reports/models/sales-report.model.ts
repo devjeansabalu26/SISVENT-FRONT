@@ -1,6 +1,7 @@
 export interface MetricDelta {
   readonly value: number;
   readonly deltaPercent: number | null;
+  readonly deltaAmount?: number | null;
 }
 
 export interface DailyPoint {

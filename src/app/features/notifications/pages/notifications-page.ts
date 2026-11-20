@@ -14,21 +14,11 @@ import {
   NotificationItem,
   NotificationTab,
 } from '../models/notification-item.model';
-import { formatDate, formatTime } from '../../../core/regional/regional-format';
 
 const EMPTY_COUNTS: NotificationCounts = { all: 0, unread: 0, alerts: 0, critical: 0, updates: 0, system: 0 };
 
-export function timeAgo(iso: string, now = new Date()): string {
-  const date = new Date(iso);
-  const minutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-  if (minutes < 1) return 'Hace un momento';
-  if (minutes < 60) return `Hace ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-  const time = formatTime(date);
-  if (hours < 48) return `Ayer, ${time}`;
-  return formatDate(date);
-}
+export { timeAgo } from '../utils/time-ago';
+import { timeAgo } from '../utils/time-ago';
 
 @Component({
   selector: 'app-notifications-page',

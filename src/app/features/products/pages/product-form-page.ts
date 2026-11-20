@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { Observable, filter, of, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { ReviewDialog } from '../../../shared/ui/review-dialog/review-dialog';
 import { ReviewDialogData } from '../../../shared/ui/review-dialog/review-dialog.model';
@@ -19,7 +20,7 @@ import { Store } from '../../locales/models/local.model';
 import { PriceChangeData, PriceChangeDialog } from '../components/price-change-dialog/price-change-dialog';
 import { ProductApiService } from '../data-access/product-api.service';
 import { UnitApiService, UnitOption } from '../data-access/unit-api.service';
-import { ProductDetail } from '../models/product.model';
+import { ProductDetail, ProductStoreStock } from '../models/product.model';
 import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -54,6 +55,14 @@ export class ProductFormPage implements OnInit {
   readonly mainStore = computed<Store | null>(() =>
     [...this.stores()].filter((store) => store.isActive).sort((a, b) => a.code.localeCompare(b.code))[0] ?? null,
   );
+  private readonly storeContext = inject(StoreContextService);
+  readonly topStore = computed(() => this.storeContext.selectedStore());
+  readonly activeStores = computed(() => this.stores().filter((store) => store.isActive));
+  private readonly storeStocks = signal<readonly ProductStoreStock[]>([]);
+  readonly stockStoreId = signal<string | null>(null);
+  readonly stockStoreName = computed(() => this.stores().find((store) => store.id === this.stockStoreId())?.name ?? null);
+  readonly stockStoreCurrent = computed(() =>
+    this.storeStocks().find((row) => row.storeId === this.stockStoreId())?.currentStock ?? 0);
 
   readonly stockForm = new FormGroup({
     storeId: new FormControl<string | null>(null, { nonNullable: false, validators: [Validators.required] }),
@@ -62,6 +71,40 @@ export class ProductFormPage implements OnInit {
   });
 
   private existing: ProductDetail | null = null;
+
+  constructor() {
+    effect(() => {
+      const top = this.storeContext.selectedStoreId();
+      const fallback = this.mainStore()?.id ?? null;
+      this.storeStocks();
+      untracked(() => {
+        const control = this.stockForm.controls.storeId;
+        if (top) {
+          control.setValue(top);
+          control.disable({ emitEvent: false });
+        } else {
+          control.enable({ emitEvent: false });
+          if (!control.value || !this.stores().some((store) => store.id === control.value)) control.setValue(fallback);
+        }
+        if (!this.isEdit) {
+          const initial = this.form.controls.initialStoreId;
+          if (top) {
+            initial.setValue(top);
+            initial.disable({ emitEvent: false });
+          } else {
+            initial.enable({ emitEvent: false });
+          }
+        }
+      });
+    });
+    this.stockForm.controls.storeId.valueChanges.subscribe((storeId) => this.fillStock(storeId));
+  }
+
+  private fillStock(storeId: string | null): void {
+    this.stockStoreId.set(storeId);
+    const row = this.storeStocks().find((item) => item.storeId === storeId);
+    this.stockForm.patchValue({ stock: row?.currentStock ?? 0, minStock: row?.minStock ?? 0 }, { emitEvent: false });
+  }
   private initialValue: ProductFormValue | null = null;
 
   readonly form = new FormGroup({
@@ -101,7 +144,6 @@ export class ProductFormPage implements OnInit {
         const items = result.items.filter((item) => !item.isWaste);
         this.stores.set(items);
         if (items.length === 1) this.form.controls.initialStoreId.setValue(items[0].id);
-        this.stockForm.controls.storeId.setValue(this.mainStore()?.id ?? null);
       });
     }
 
@@ -110,6 +152,8 @@ export class ProductFormPage implements OnInit {
         next: (product) => {
           this.existing = product;
           this.totalStock.set(product.totalStock);
+          this.storeStocks.set(product.stores ?? []);
+          this.fillStock(this.stockForm.getRawValue().storeId);
           this.form.patchValue({
             name: product.name,
             description: product.description ?? '',
@@ -148,7 +192,10 @@ export class ProductFormPage implements OnInit {
         next: (result) => {
           this.savingStock.set(false);
           this.totalStock.update((total) => (total ?? 0) + result.stockAfter - result.stockBefore);
-          this.stockForm.controls.stock.reset(null);
+          this.storeStocks.update((rows) => {
+            const others = rows.filter((row) => row.storeId !== value.storeId);
+            return [...others, { storeId: value.storeId!, storeName: this.stockStoreName() ?? '', currentStock: result.stockAfter, minStock: value.minStock ?? 0 }];
+          });
           this.notifications.show(`Stock guardado: ${result.stockBefore} → ${result.stockAfter} en el local.`, 'success');
         },
         error: (cause: unknown) => {

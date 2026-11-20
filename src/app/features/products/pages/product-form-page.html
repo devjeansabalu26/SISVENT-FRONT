@@ -81,13 +81,16 @@
         <section class="card">
           <h2>Control de almacén</h2>
           <div class="fields">
-            <label>Local
+            <label [attr.data-locked]="topStore() ? 'Estás trabajando en ' + topStore()!.name + '. Para otro local, cámbialo en el selector de arriba.' : null">Local
               <select formControlName="initialStoreId">
                 <option [ngValue]="null">Sin stock inicial</option>
                 @for (store of stores(); track store.id) {
                   <option [ngValue]="store.id">{{ store.name }}</option>
                 }
               </select>
+              @if (topStore(); as top) {
+                <span class="locked-note"><span class="material-icons" aria-hidden="true">info</span>Estás trabajando en {{ top.name }}.</span>
+              }
             </label>
             <label data-locked="Elige primero el local donde se registra el stock.">Stock inicial
               <input type="number" step="0.001" formControlName="initialStock" [disabled]="!form.controls.initialStoreId.value" />
@@ -102,12 +105,29 @@
         @if (showStockEditor) {
           <section class="card" [formGroup]="stockForm">
             <h2>Control de almacén</h2>
-            <p class="muted">Stock total actual: <strong>{{ totalStock() ?? 0 }}</strong>. Escribe cuánto stock hay en el local principal; se guarda aparte de los datos del producto.</p>
+            <p class="muted">
+              Stock en {{ stockStoreName() ?? 'el local' }}: <strong>{{ stockStoreCurrent() }}</strong>.
+              Total en todos los locales: <strong>{{ totalStock() ?? 0 }}</strong>. Se guarda aparte de los datos del producto.
+            </p>
             <div class="fields">
-              <label class="full" data-locked="Desde el producto solo se coloca el stock del local principal. Para los demás locales usa Transferir stock en Inventario.">Local principal
-                <input type="text" [value]="mainStore()?.name ?? 'Sin local activo'" readonly />
-                <span class="locked-note"><span class="material-icons" aria-hidden="true">info</span>Para los demás locales usa Transferir stock en Inventario.</span>
-              </label>
+              @if (topStore(); as top) {
+                <label class="full" [attr.data-locked]="'Estás trabajando en ' + top.name + '. Para otro local, cámbialo en el selector de arriba.'">Local
+                  <select formControlName="storeId">
+                    @for (store of activeStores(); track store.id) {
+                      <option [value]="store.id">{{ store.name }}</option>
+                    }
+                  </select>
+                  <span class="locked-note"><span class="material-icons" aria-hidden="true">info</span>Estás trabajando en {{ top.name }}. Para otro local, cámbialo en el selector de arriba.</span>
+                </label>
+              } @else {
+                <label class="full">Local
+                  <select formControlName="storeId">
+                    @for (store of activeStores(); track store.id) {
+                      <option [value]="store.id">{{ store.name }}</option>
+                    }
+                  </select>
+                </label>
+              }
               <label>Stock actual
                 <input type="number" step="0.001" min="0" formControlName="stock" placeholder="Ej. 24" />
               </label>

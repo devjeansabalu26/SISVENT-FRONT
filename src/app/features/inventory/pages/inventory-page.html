@@ -12,7 +12,7 @@
 </section>
 <section class="filters">
   <label><span class="material-icons">search</span><input #query (input)="filter(query.value, status.value)" placeholder="Buscar por SKU o producto" /></label>
-  <select #status (change)="filter(query.value, status.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="AVAILABLE">Disponible</option><option value="LOW_STOCK">Stock bajo</option><option value="OUT_OF_STOCK">Sin stock</option></select>
+  <select #status [value]="statusFilter()" (change)="filter(query.value, status.value)" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="AVAILABLE">Disponible</option><option value="LOW_STOCK">Stock bajo</option><option value="OUT_OF_STOCK">Sin stock</option></select>
 </section>
 @if (general()) {
   <app-data-table [columns]="generalColumns()" [rows]="generalRows()" [loading]="loading()" [showRemove]="false" [showEdit]="false" emptyMessage="No hay productos que coincidan con los filtros." />

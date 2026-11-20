@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { formatMoney } from '../../../core/regional/regional-format';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { UserContextService } from '../../../core/context/user-context/user-cont
 import { AppHttpError } from '../../../core/http/models/app-http-error.model';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { CustomerQuickDialog } from '../../customers/components/customer-quick-dialog/customer-quick-dialog';
+import { CustomerEditDialog, CustomerEditDialogData } from '../../customers/components/customer-edit-dialog/customer-edit-dialog';
 import { Customer } from '../../customers/models/customer.model';
 import { toCustomer } from '../../customers/utils/to-customer';
 import { CustomerApiService } from '../../customers/data-access/customer-api.service';
@@ -35,8 +36,19 @@ import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 import { INVOICE_FEATURE, documentNumber, isInvoice, isValidRuc } from '../utils/sale-document';
 import { SoundService } from '../../../core/sound/sound.service';
 
+const QUICK_METHODS: readonly string[] = ['CASH', 'YAPE', 'CARD'];
+const SCAN_KEY_GAP_MS = 45;
+const SCAN_MIN_LENGTH = 4;
+const SCAN_IDLE_MS = 120;
+
+function isEditable(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+}
+
 @Component({
   selector: 'app-pos-page',
+  host: { '(document:keydown)': 'onGlobalKey($event)' },
   imports: [PosPaymentPanel, RouterLink, MoneyPipe],
   templateUrl: './pos-page.html',
   styleUrl: './pos-page.scss',
@@ -70,6 +82,11 @@ export class PosPage implements OnInit {
   readonly paymentLines = signal<readonly PaymentDraftLine[]>([]);
   readonly payment = computed(() => this.paymentLines()[0]?.methodCode ?? '');
   readonly showPaymentErrors = signal(false);
+  readonly quickMethods = computed(() => {
+    const methods = this.paymentMethods();
+    const picked = QUICK_METHODS.map((code) => methods.find((method) => method.code === code)).filter((method) => !!method);
+    return picked.length ? picked : methods;
+  });
   readonly selectedMethod = computed(() => this.paymentMethods().find((method) => method.code === this.payment()) ?? null);
   readonly kindOf = (code: string): PaymentKind => this.paymentMethods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
   private readonly methodName = (code: string): string => this.paymentMethods().find((method) => method.code === code)?.name ?? code;
@@ -80,6 +97,29 @@ export class PosPage implements OnInit {
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly selectedStoreId = signal<string | null>(null);
   private readonly storeContext = inject(StoreContextService);
+  readonly storeLocked = computed(() => !!this.storeContext.selectedStoreId());
+  readonly currentStoreName = computed(() => this.stores().find((item) => item.id === this.selectedStoreId())?.name ?? '');
+  private readonly followTopStore = effect(() => {
+    const top = this.storeContext.selectedStoreId();
+    const loaded = this.stores().length > 0;
+    untracked(() => {
+      if (this.isAdmin && loaded && top && top !== this.selectedStoreId()) this.changeStore(top);
+    });
+  });
+
+  private readonly scanInput = viewChild<ElementRef<HTMLInputElement>>('query');
+  readonly lastAdded = signal<string | null>(null);
+  readonly cartUnits = computed(() => this.cart().reduce((sum, item) => sum + item.quantity, 0));
+  readonly canEditCustomer = this.access.canAccess({ permissions: [APP_PERMISSIONS.customersManage] });
+  private scanBuffer = '';
+  private scanLastKey = 0;
+  private scanFastKeys = 0;
+  private scanTimer: ReturnType<typeof setTimeout> | undefined;
+  private lastAddedTimer: ReturnType<typeof setTimeout> | undefined;
+  private readonly cleanup = inject(DestroyRef).onDestroy(() => {
+    clearTimeout(this.scanTimer);
+    clearTimeout(this.lastAddedTimer);
+  });
 
   private readonly cashApi = inject(CashSessionApiService);
   readonly canUseCash = canUseCash();
@@ -137,6 +177,7 @@ export class PosPage implements OnInit {
     } else {
       this.loadCatalog();
     }
+    this.focusScan();
   }
 
   loadPaymentMethods(): void {
@@ -144,7 +185,7 @@ export class PosPage implements OnInit {
     this.posApi.paymentMethods().subscribe({
       next: (methods) => {
         this.paymentMethods.set(methods);
-        if (!methods.some((method) => method.code === this.payment())) this.selectPayment(methods[0]?.code ?? '');
+        if (!this.quickMethods().some((method) => method.code === this.payment())) this.selectPayment(this.quickMethods()[0]?.code ?? '');
       },
       error: () => this.paymentMethodsError.set(true),
     });
@@ -198,28 +239,98 @@ export class PosPage implements OnInit {
     const product = this.catalog().find((item) => item.id === select.value);
     select.value = '';
     if (product) this.add(product);
+    this.focusScan();
   }
 
   addByCode(input: HTMLInputElement): void {
-    const term = input.value.trim().toLowerCase();
-    if (!term) return;
-    const catalog = this.catalog();
-    const product =
-      catalog.find((item) => item.sku.toLowerCase() === term || item.barcode?.toLowerCase() === term) ??
-      catalog.find((item) => item.name.toLowerCase() === term);
+    clearTimeout(this.scanTimer);
+    const raw = input.value.trim();
+    if (!raw) return;
+    if (!this.addByTerm(raw)) {
+      input.select();
+      return;
+    }
+    input.value = '';
+    input.focus();
+  }
+
+  onScanKey(event: KeyboardEvent, input: HTMLInputElement): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addByCode(input);
+      this.scanFastKeys = 0;
+      return;
+    }
+    if (event.key.length !== 1) return;
+    const now = performance.now();
+    this.scanFastKeys = now - this.scanLastKey < SCAN_KEY_GAP_MS ? this.scanFastKeys + 1 : 0;
+    this.scanLastKey = now;
+  }
+
+  onScanInput(input: HTMLInputElement): void {
+    clearTimeout(this.scanTimer);
+    if (this.scanFastKeys < SCAN_MIN_LENGTH - 1) return;
+    this.scanTimer = setTimeout(() => {
+      const raw = input.value.trim();
+      if (raw.length >= SCAN_MIN_LENGTH && this.findByCode(raw) && this.addByTerm(raw)) {
+        input.value = '';
+        this.scanFastKeys = 0;
+      }
+    }, SCAN_IDLE_MS);
+  }
+
+  onGlobalKey(event: KeyboardEvent): void {
+    if (this.dialog.openDialogs.length || isEditable(event.target)) return;
+    const now = performance.now();
+    if (event.key === 'Enter') {
+      const code = this.scanBuffer;
+      this.scanBuffer = '';
+      if (code.length >= SCAN_MIN_LENGTH) {
+        event.preventDefault();
+        this.addByTerm(code);
+        this.focusScan();
+      }
+      return;
+    }
+    if (event.key.length !== 1 || event.ctrlKey || event.altKey || event.metaKey) return;
+    this.scanBuffer = now - this.scanLastKey < SCAN_KEY_GAP_MS ? this.scanBuffer + event.key : event.key;
+    this.scanLastKey = now;
+  }
+
+  private findByCode(raw: string): Product | undefined {
+    const term = raw.toLowerCase();
+    return this.catalog().find((item) => item.barcode?.toLowerCase() === term || item.sku.toLowerCase() === term);
+  }
+
+  private addByTerm(raw: string): boolean {
+    const term = raw.toLowerCase();
+    const product = this.findByCode(raw) ?? this.catalog().find((item) => item.name.toLowerCase() === term);
     if (!product) {
       this.notifications.show(
         this.loadingCatalog()
           ? 'Todavía se están cargando los productos del local. Intenta en un momento.'
-          : `No hay un producto con código “${input.value.trim()}” con stock en este local. Elígelo en el selector de productos.`,
+          : `No hay un producto con código “${raw}” con stock en este local. Elígelo de la lista de productos.`,
         'warning',
       );
-      input.select();
-      return;
+      return false;
     }
     this.add(product);
-    input.value = '';
-    input.focus();
+    return true;
+  }
+
+  focusScan(): void {
+    setTimeout(() => this.scanInput()?.nativeElement.focus());
+  }
+
+  editCustomer(customer: Customer): void {
+    this.dialog
+      .open<CustomerEditDialog, CustomerEditDialogData, Customer>(CustomerEditDialog, { data: { customerId: customer.id } })
+      .afterClosed()
+      .pipe(filter((updated): updated is Customer => !!updated))
+      .subscribe((updated) => {
+        this.selectedCustomer.set(updated);
+        this.notifications.show('Cliente actualizado.', 'success');
+      });
   }
 
   searchCustomer(query: string): void {
@@ -260,6 +371,9 @@ export class PosPage implements OnInit {
           )
         : [...items, { product, quantity: 1 }];
     });
+    this.lastAdded.set(product.id);
+    clearTimeout(this.lastAddedTimer);
+    this.lastAddedTimer = setTimeout(() => this.lastAdded.set(null), 900);
   }
 
   change(id: string, step: number): void {
@@ -446,7 +560,8 @@ export class PosPage implements OnInit {
               this.cart.set([]);
               this.selectedCustomer.set(null);
               this.loadCatalog();
-              this.selectPayment(this.paymentMethods()[0]?.code ?? '');
+              this.selectPayment(this.quickMethods()[0]?.code ?? '');
+              this.focusScan();
               if (action === 'print') void this.router.navigate(['/app/sales', sale.id, 'comprobante']);
               else if (action === 'detail') void this.router.navigate(['/app/sales', sale.id]);
               else if (action === 'email') this.receiptMailer.send(sale);

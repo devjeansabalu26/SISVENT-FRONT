@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { RouterLink } from '@angular/router';
 import { UserContextService } from '../../../core/context/user-context/user-context.service';
 import { CompanyContextService } from '../../../core/context/company-context/company-context.service';
@@ -10,6 +11,8 @@ import { DateRangePreset, DATE_RANGE_PRESET_LABEL, resolveDateRange } from '../.
 import { StoreApiService } from '../../locales/data-access/store-api.service';
 import { UserApiService } from '../../users/data-access/user-api.service';
 import { DashboardApiService } from '../data-access/dashboard-api.service';
+import { deltaTrend, signedCount, signedMoney } from '../../../core/regional/delta-format';
+import { formatQuantity } from '../../../core/regional/regional-format';
 import {
   AdminDashboard,
   DashboardHourPoint,
@@ -22,7 +25,7 @@ import { CompactMoneyPipe, DateTimePipe, LocalTimePipe, MoneyPipe, ShortDatePipe
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [PageHeader, KpiCard, StatusChip, RouterLink, StoresTodayPanel, MoneyPipe, CompactMoneyPipe, DateTimePipe, ShortDatePipe, LocalTimePipe],
+  imports: [PageHeader, KpiCard, StatusChip, RouterLink, StoresTodayPanel, MoneyPipe, DateTimePipe, ShortDatePipe, LocalTimePipe],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,12 +52,26 @@ export class DashboardPage implements OnInit {
   readonly datePreset = signal<DateRangePreset>('today');
   readonly dateRangeLabel = DATE_RANGE_PRESET_LABEL;
   readonly dateRangePresets: readonly DateRangePreset[] = ['today', 'yesterday', 'last7', 'thisMonth', 'lastMonth'];
-  readonly storeId = signal('');
+  private readonly storeContext = inject(StoreContextService);
+  readonly storeId = signal(this.storeContext.selectedStoreId() ?? '');
+  private readonly followTopStore = effect(() => {
+    const top = this.storeContext.selectedStoreId() ?? '';
+    untracked(() => {
+      if (this.role() !== 'ADMIN' || top === this.storeId()) return;
+      this.onStoreChange(top);
+    });
+  });
   readonly sellerId = signal('');
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly sellers = signal<readonly { id: string; fullName: string }[]>([]);
 
   readonly comparisonCaption = computed(() => COMPARISON_CAPTION[this.datePreset()]);
+  readonly periodLabel = computed(() => DATE_RANGE_PRESET_LABEL[this.datePreset()]);
+  readonly payments = computed(() => {
+    const rows = this.admin()?.paymentsByMethod ?? [];
+    const methods = rows.filter((row) => row.amount !== 0);
+    return { total: methods.reduce((sum, row) => sum + row.amount, 0), methods };
+  });
 
   readonly hourSeries = computed(() => fillHours(this.admin()?.todayByHour ?? []));
   readonly maxHourAmount = computed(() => Math.max(...this.hourSeries().map((point) => point.amount), 1));
@@ -108,7 +125,7 @@ export class DashboardPage implements OnInit {
     if (this.role() === 'ADMIN') {
       const range = resolveDateRange(this.datePreset());
       this.api
-        .get({ dateFrom: range.from, dateTo: range.to, storeId: this.storeId() || undefined, sellerId: this.sellerId() || undefined })
+        .get({ dateFrom: range.from, dateTo: range.to, storeId: this.storeId() || undefined, sellerId: this.sellerId() || undefined, summary: true })
         .subscribe({
           next: (response) => {
             this.admin.set(response.admin);
@@ -158,13 +175,23 @@ export class DashboardPage implements OnInit {
   }
 
   deltaTrend(value: number | null | undefined): KpiTrend {
-    if (value == null || value === 0) return 'flat';
-    return value > 0 ? 'up' : 'down';
+    return deltaTrend(value);
   }
 
-  deltaText(value: number | null | undefined): string | undefined {
-    if (value == null) return undefined;
-    return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+  moneyDelta(value: number | null | undefined): string | undefined {
+    return signedMoney(value);
+  }
+
+  countDelta(value: number | null | undefined, singular: string, plural: string): string | undefined {
+    return signedCount(value, singular, plural);
+  }
+
+  quantityText(value: number | null | undefined): string {
+    return formatQuantity(value ?? 0);
+  }
+
+  sellerDelta(seller: SellerDashboard): number | null {
+    return seller.amountSameTimeLastWeek == null ? null : Math.round((seller.amountToday - seller.amountSameTimeLastWeek) * 100) / 100;
   }
 
   plural(count: number, singular: string, pluralForm: string): string {
@@ -177,7 +204,7 @@ export class DashboardPage implements OnInit {
 
   stockDaysText(days: number | null | undefined): string | null {
     if (days == null) return null;
-    return days < 1 ? 'menos de 1 día de stock' : `${Math.floor(days)} ${Math.floor(days) === 1 ? 'día' : 'días'} de stock`;
+    return days < 1 ? 'menos de 1 día' : `${Math.floor(days)} ${Math.floor(days) === 1 ? 'día' : 'días'}`;
   }
 
   categoryPercent(amount: number): number {

@@ -87,7 +87,7 @@
     @if (seller(); as seller) {
       <div class="kpi-grid">
         <app-kpi-card label="Ventas hoy" [value]="seller.salesToday + ' operaciones'" icon="receipt_long" tone="primary" />
-        <app-kpi-card label="Importe hoy" [value]="(seller.amountToday | money)" icon="payments" tone="success" [trend]="deltaTrend(seller.amountDeltaPercent)" [delta]="deltaText(seller.amountDeltaPercent)" deltaCaption="vs la semana pasada a esta hora" />
+        <app-kpi-card label="Importe hoy" [value]="(seller.amountToday | money)" icon="payments" tone="success" [trend]="deltaTrend(sellerDelta(seller))" [delta]="moneyDelta(sellerDelta(seller))" deltaCaption="vs la semana pasada a esta hora" />
         <app-kpi-card label="Última venta" [value]="(seller.lastSaleAt ? (seller.lastSaleAt | dateTime) : null) ?? 'Sin ventas'" icon="schedule" tone="info" />
         <app-kpi-card label="Clientes atendidos" [value]="seller.clientsToday + ' clientes'" icon="groups" tone="warning" />
       </div>
@@ -230,24 +230,30 @@
     <app-stores-today />
 
     @if (admin(); as admin) {
-      <div class="kpi-grid">
-        <app-kpi-card label="Ventas del día" [value]="(admin.salesTodayAmount | money)" icon="point_of_sale" [trend]="deltaTrend(admin.salesTodayDeltaPercent)" [delta]="deltaText(admin.salesTodayDeltaPercent)" deltaCaption="vs ayer" tone="success" />
-        <app-kpi-card label="Ventas del período" [value]="(admin.salesPeriodAmount | money)" icon="calendar_month" tone="primary" [trend]="deltaTrend(admin.salesPeriodDeltaPercent)" [delta]="deltaText(admin.salesPeriodDeltaPercent)" [deltaCaption]="comparisonCaption()" />
-        <app-kpi-card label="Operaciones" [value]="admin.operationsPeriod" icon="receipt_long" tone="info" [trend]="deltaTrend(admin.operationsDeltaPercent)" [delta]="deltaText(admin.operationsDeltaPercent)" [deltaCaption]="comparisonCaption()" />
-        <app-kpi-card label="Ticket promedio" [value]="((admin.averageTicket ?? 0) | money)" icon="shopping_bag" tone="primary" [trend]="deltaTrend(admin.averageTicketDeltaPercent)" [delta]="deltaText(admin.averageTicketDeltaPercent)" [deltaCaption]="comparisonCaption()" />
-        @if (admin.analyticsEnabled !== false) {
-        <app-kpi-card label="Ganancia estimada" [value]="admin.grossProfit != null ? (admin.grossProfit | money) : 'Sin costos'" icon="savings" tone="success" [trend]="deltaTrend(admin.grossProfitDeltaPercent)" [delta]="deltaText(admin.grossProfitDeltaPercent)" [deltaCaption]="comparisonCaption()" [caption]="admin.grossProfit == null ? 'Registra el costo de tus productos' : admin.grossProfitMissingCost ? 'Hay productos vendidos sin costo' : 'Con el costo de referencia'" />
-        }
+      <div class="kpi-grid kpi-grid--simple">
+        <app-kpi-card label="Venta total" [value]="(admin.salesPeriodAmount | money)" icon="point_of_sale" [trend]="deltaTrend(admin.salesPeriodDeltaAmount)" [delta]="moneyDelta(admin.salesPeriodDeltaAmount)" [deltaCaption]="comparisonCaption()" tone="success" />
+        <app-kpi-card label="Productos vendidos" [value]="quantityText(admin.unitsSoldPeriod)" icon="shopping_basket" tone="primary" [trend]="deltaTrend(admin.unitsSoldDelta)" [delta]="countDelta(admin.unitsSoldDelta, 'unidad', 'unidades')" [deltaCaption]="comparisonCaption()" />
+        <app-kpi-card label="Clientes nuevos" [value]="admin.newClientsPeriod ?? 0" icon="person_add" tone="info" [trend]="deltaTrend(admin.newClientsDelta)" [delta]="countDelta(admin.newClientsDelta, 'cliente', 'clientes')" [deltaCaption]="comparisonCaption()" />
+        <app-kpi-card label="Anuladas" [value]="plural(admin.cancelledCount ?? 0, 'venta', 'ventas')" icon="block"
+          [tone]="(admin.cancelledCount ?? 0) > 0 ? 'warning' : 'default'"
+          [caption]="((admin.cancelledAmount ?? 0) | money) + ' anulado. Descuentos: ' + ((admin.discountsTotal ?? 0) | money)">
+          @if ((admin.cancelledCount ?? 0) > 0) {
+            <a class="kpi-link" routerLink="/app/sales">Ver ventas<span class="material-icons" aria-hidden="true">chevron_right</span></a>
+          }
+        </app-kpi-card>
+        <app-kpi-card label="Medios de pago" [value]="(payments().total | money)" icon="account_balance_wallet" tone="success"
+          [caption]="payments().methods.length ? '' : 'Sin cobros en este período'">
+          @if (payments().methods.length) {
+            <ul class="kpi-methods">
+              @for (method of payments().methods; track method.code) {
+                <li><span>{{ method.name }}</span><strong>{{ method.amount | money }}</strong></li>
+              }
+            </ul>
+          }
+        </app-kpi-card>
       </div>
 
-      <div class="kpi-grid kpi-grid--secondary">
-        <app-kpi-card label="Productos" [value]="admin.activeProducts" icon="inventory_2" tone="primary" />
-        <app-kpi-card label="Clientes" [value]="admin.activeClients" icon="groups" tone="info" />
-        <app-kpi-card label="Stock bajo" [value]="admin.lowStockCount" icon="warning" [tone]="admin.lowStockCount > 0 ? 'warning' : 'default'" />
-        <app-kpi-card label="Locales activos" [value]="admin.activeStores" icon="store" tone="primary" />
-      </div>
-
-      <div class="grid-2" [class.grid-single]="hasReports() && admin.analyticsEnabled !== false">
+      <div class="grid-2">
         <section class="surface-card">
           <div class="card-head">
             <h2>Ventas recientes</h2>
@@ -275,165 +281,36 @@
           }
         </section>
 
-        @if (admin.analyticsEnabled === false) {
-          <a class="locked-panel" routerLink="/app/upgrade" [queryParams]="{ feature: 'DASHBOARD_ANALYTIC', module: 'Dashboard analítico' }">
-            <span class="material-icons" aria-hidden="true">lock</span>
-            <div>
-              <strong>Evolución de ventas y proyección del mes</strong>
-              <small>Cómo vienen tus ventas día a día, en cuánto cerrarás el mes y la ganancia estimada.</small>
-              <span class="locked-panel__cta">Disponible en un plan superior · Ver planes</span>
-            </div>
-          </a>
-        } @else if (!hasReports()) {
-        <section class="chart-card">
-          <header><h2>Evolución de ventas</h2></header>
-          @if (admin.month; as month) {
-            <p class="projection">
-              <span class="material-icons" aria-hidden="true">insights</span>
-              <span>
-                A este ritmo cerrarás {{ monthName() }} en <strong>{{ month.projectedAmount | money }}</strong>
-                <small>
-                  Llevas {{ month.amountToDate | money }} en {{ month.daysElapsed }} de {{ month.daysInMonth }} días
-                  @if (monthVsPrevious() != null) {
-                    · <span [class.up]="monthVsPrevious()! >= 0" [class.down]="monthVsPrevious()! < 0">{{ deltaText(monthVsPrevious()) }}</span> vs el mes pasado ({{ month.previousMonthAmount | money }})
-                  }
-                </small>
-              </span>
-            </p>
-          }
-          @if (admin.salesEvolution.length) {
-            <div class="chart" role="img" aria-label="Evolución de ventas del período">
-              @for (point of admin.salesEvolution; track point.date) {
-                <div class="bar-column">
-                  <span class="amount">{{ point.amount | compactMoney }}</span>
-                  <div class="bar" [style.--bar-height.%]="(point.amount / maxSalesEvolution()) * 100"></div>
-                  <small>{{ point.date | shortDate }}</small>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="muted">No hay información de ventas disponible.</p>
-          }
-        </section>
-        }
-      </div>
-
-      @if (datePreset() === 'today' || hourSeries().length) {
-        <section class="surface-card hours-card">
+        <section class="surface-card">
           <div class="card-head">
-            <h2>Ventas de hoy por hora</h2>
-            @if (peakHour(); as peak) {
-              <small class="muted">Hora pico: <strong>{{ hourLabel(peak.hour) }}</strong> · {{ peak.amount | money }} en {{ peak.transactions }} {{ peak.transactions === 1 ? 'venta' : 'ventas' }}</small>
+            <h2>Productos más vendidos <small class="muted">{{ periodLabel() }}</small></h2>
+            @if (hasReports()) {
+              <a routerLink="/app/reports/products" class="link">Ver reporte</a>
             }
           </div>
-          @if (hourSeries().length) {
-            <div class="chart chart--hours" role="img" aria-label="Ventas de hoy por hora">
-              @for (point of hourSeries(); track point.hour) {
-                <div class="bar-column" [title]="hourLabel(point.hour) + ' · ' + point.transactions + ' ventas'">
-                  <span class="amount">{{ point.amount ? (point.amount | compactMoney) : '' }}</span>
-                  <div class="bar" [class.bar--peak]="point.hour === peakHour()?.hour" [style.--bar-height.%]="(point.amount / maxHourAmount()) * 100"></div>
-                  <small>{{ point.hour }}h</small>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="muted">Todavía no hay ventas hoy.</p>
-          }
-        </section>
-      }
-
-      <div class="grid-2" [class.grid-single]="hasReports() && admin.analyticsEnabled !== false">
-        @if (admin.analyticsEnabled === false) {
-          <a class="locked-panel" routerLink="/app/upgrade" [queryParams]="{ feature: 'DASHBOARD_ANALYTIC', module: 'Dashboard analítico' }">
-            <span class="material-icons" aria-hidden="true">lock</span>
-            <div>
-              <strong>Ventas por categoría y productos estrella</strong>
-              <small>Qué categorías venden más y qué productos rotan, con su margen y los días de stock que les quedan.</small>
-              <span class="locked-panel__cta">Disponible en un plan superior · Ver planes</span>
-            </div>
-          </a>
-        } @else {
-        @if (!hasReports()) {
-        <section class="surface-card">
-          <h2>Ventas por categoría</h2>
-          @if (admin.salesByCategory.length) {
-            <ul class="shares">
-              @for (item of admin.salesByCategory; track item.categoryName) {
-                <li>
-                  <div class="shares__label"><span>{{ item.categoryName }}</span><strong>{{ item.amount | money }}</strong></div>
-                  <div class="shares__track"><span class="shares__fill" [style.width.%]="categoryPercent(item.amount)"></span></div>
-                </li>
-              }
-            </ul>
-          } @else {
-            <p class="muted">No hay información de ventas disponible.</p>
-          }
-        </section>
-
-        }
-        <section class="surface-card">
-          <h2>Top productos</h2>
           @if (admin.topProducts.length) {
-            <ul class="list">
+            <ol class="list top-products">
               @for (row of admin.topProducts; track row.sku) {
                 <li>
                   <div>
                     <strong>{{ row.name }}</strong>
                     <small>
-                      {{ row.units }} u. vendidos
-                      @if (row.marginPercent != null) { · margen {{ row.marginPercent }}% }
-                      @if (stockDaysText(row.stockDays); as stock) { · <span [class.warn]="row.stockDays! < 7">{{ stock }}</span> }
+                      {{ quantityText(row.units) }} {{ row.units === 1 ? 'unidad vendida' : 'unidades vendidas' }}
+                      @if (stockDaysText(row.stockDays); as stock) { . <span [class.warn]="row.stockDays! < 7">Te alcanza para {{ stock }}</span> }
                     </small>
                   </div>
                   <span>{{ row.revenue | money }}</span>
                 </li>
               }
-            </ul>
+            </ol>
           } @else {
             <p class="muted">No hay productos vendidos en este período.</p>
           }
-          <h2 class="mt">Alertas de stock bajo</h2>
-          @if (admin.lowStockAlerts.length) {
-            <ul class="list">
-              @for (row of admin.lowStockAlerts; track row.productName + row.storeName) {
-                <li>
-                  <div><strong>{{ row.productName }}</strong><small>{{ row.storeName }}</small></div>
-                  <span class="warn">{{ row.currentStock }} unidades</span>
-                </li>
-              }
-            </ul>
-            @if (admin.lowStockCount > admin.lowStockAlerts.length) {
-              <a routerLink="/app/inventory" class="link">Ver inventario</a>
-            }
-          } @else {
-            <p class="muted">No existen alertas de stock bajo.</p>
-          }
         </section>
-        }
-        @if (admin.analyticsEnabled === false) {
-          <section class="surface-card">
-            <h2>Alertas de stock bajo</h2>
-            @if (admin.lowStockAlerts.length) {
-              <ul class="list">
-                @for (row of admin.lowStockAlerts; track row.productName + row.storeName) {
-                  <li>
-                    <div><strong>{{ row.productName }}</strong><small>{{ row.storeName }}</small></div>
-                    <span class="warn">{{ row.currentStock }} unidades</span>
-                  </li>
-                }
-              </ul>
-              @if (admin.lowStockCount > admin.lowStockAlerts.length) {
-                <a routerLink="/app/inventory" class="link">Ver inventario</a>
-              }
-            } @else {
-              <p class="muted">No existen alertas de stock bajo.</p>
-            }
-          </section>
-        }
       </div>
     } @else if (loading()) {
       <div class="kpi-grid">
-        @for (i of [1, 2, 3, 4, 5, 6, 7]; track i) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
           <div class="skeleton skeleton--kpi"></div>
         }
       </div>

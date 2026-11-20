@@ -1,0 +1,59 @@
+<button type="button" class="bell" [class.bell--ring]="unread() > 0" (click)="toggle()" [attr.aria-label]="label()" [title]="label()"
+  [attr.aria-expanded]="open()" aria-haspopup="true" aria-controls="notification-menu">
+  <span class="material-icons">{{ unread() ? 'notifications' : 'notifications_none' }}</span>
+  @if (unread()) { <span class="bell__count">{{ unread() > 99 ? '99+' : unread() }}</span> }
+</button>
+
+@if (open()) {
+  <section id="notification-menu" class="menu" role="dialog" aria-label="Notificaciones">
+    <header>
+      <div>
+        <h2>Notificaciones</h2>
+        <small>{{ unread() ? unread() + ' sin leer' : 'Todo al día' }}</small>
+      </div>
+      <div class="menu__actions">
+        @if (unread()) {
+          <button type="button" class="icon-btn" (click)="markAll()" aria-label="Marcar todas como leídas" title="Marcar todas como leídas">
+            <span class="material-icons">done_all</span>
+          </button>
+        }
+        <a class="icon-btn" routerLink="/app/notifications" (click)="close()" aria-label="Ver todas las notificaciones" title="Ver todas las notificaciones">
+          <span class="material-icons">open_in_new</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="menu__body">
+      @if (loading() && !items().length) {
+        <p class="menu__state">Cargando notificaciones…</p>
+      } @else if (failed()) {
+        <p class="menu__state">No se pudieron cargar las notificaciones.</p>
+      } @else if (!items().length) {
+        <div class="menu__state menu__state--empty">
+          <span class="material-icons" aria-hidden="true">notifications_off</span>
+          <p>No tienes notificaciones.</p>
+        </div>
+      } @else {
+        <ul>
+          @for (item of items(); track item.id) {
+            <li>
+              <button type="button" class="item" [class.item--unread]="!item.isRead" (click)="openItem(item)">
+                <span class="item__icon material-icons" [attr.data-tone]="tone(item)" aria-hidden="true">{{ icon(item) }}</span>
+                <span class="item__text">
+                  <strong>{{ item.title }}</strong>
+                  <span>{{ item.message }}</span>
+                  <small>{{ ago(item) }}</small>
+                </span>
+                @if (!item.isRead) { <span class="item__dot" aria-label="Sin leer"></span> }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <a class="menu__all" routerLink="/app/notifications" (click)="close()">
+      Ver todas las notificaciones<span class="material-icons" aria-hidden="true">chevron_right</span>
+    </a>
+  </section>
+}

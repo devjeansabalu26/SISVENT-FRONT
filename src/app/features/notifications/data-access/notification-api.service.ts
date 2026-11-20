@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
+import { backgroundRequest } from '../../../core/http/http-context.tokens';
 import { NotificationList } from '../models/notification-item.model';
 
 @Injectable({ providedIn: 'root' })
@@ -14,7 +15,7 @@ export class NotificationApiService {
   }
 
   unreadCount(): Observable<number> {
-    return this.http.get<number>(`${this.baseUrl}/unread-count`);
+    return this.http.get<number>(`${this.baseUrl}/unread-count`, { context: backgroundRequest() });
   }
 
   markRead(id: string): Observable<void> {

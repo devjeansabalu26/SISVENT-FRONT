@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
@@ -11,8 +11,9 @@ import { NotificationBadgeService } from '../../../features/notifications/data-a
 import { ThemeService } from '../../../core/theme/theme.service';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { SoundSettings } from '../../../shared/ui/sound-settings/sound-settings';
+import { NotificationMenu } from '../../../features/notifications/components/notification-menu/notification-menu';
 
-@Component({ selector: 'app-header', imports: [RouterLink, SoundSettings], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-header', imports: [SoundSettings, NotificationMenu], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
   private readonly session = inject(AppSessionService);
   private readonly router = inject(Router);

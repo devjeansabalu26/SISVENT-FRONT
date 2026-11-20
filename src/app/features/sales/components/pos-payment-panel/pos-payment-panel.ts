@@ -10,52 +10,61 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
   selector: 'app-pos-payment-panel',
   template: `
     @for (line of lines(); track line.key; let index = $index) {
-      <fieldset class="line">
+      <fieldset class="line" [class.line--mixed]="lines().length > 1">
         @if (lines().length > 1) {
-          <div class="line__head">
+          <div class="mixed-row">
             <select aria-label="Método de pago" [value]="line.methodCode" (change)="changeMethod(index, $any($event.target).value)">
               @for (method of methods(); track method.code) {
                 <option [value]="method.code">{{ method.name }}</option>
               }
             </select>
+            <span class="money money--compact">
+              <em>{{ regional().currencySymbol }}</em>
+              @if (kindOf(line.methodCode) === 'CASH') {
+                <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Escribe el monto"
+                  aria-label="Monto recibido en efectivo" [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
+              } @else {
+                <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Monto" aria-label="Monto del pago"
+                  [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
+              }
+            </span>
             <button type="button" class="remove" (click)="remove(index)" aria-label="Quitar pago">
               <span class="material-icons">close</span>
             </button>
           </div>
-        }
-
-        @switch (kindOf(line.methodCode)) {
-          @case ('CASH') {
-            <label class="field">
-              Monto recibido
-              <span class="money">
-                <em>{{ regional().currencySymbol }}</em>
-                <input type="number" inputmode="decimal" min="0" [step]="step()" [placeholder]="asInput(summary().due)"
-                  [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
-              </span>
-            </label>
-            @if (lines().length > 1) {
-              <small class="hint">Cubre lo que falta: {{ summary().due | money }}</small>
-            }
-            <div class="quick" role="group" aria-label="Montos rápidos">
-              @for (amount of quickAmounts(); track amount; let first = $first) {
-                <button type="button" [class.active]="isReceived(line, amount)" (click)="patch(index, { amountReceived: asInput(amount) })">
-                  {{ first ? 'Exacto' : (amount | money) }}
-                </button>
-              }
-            </div>
+          @if (kindOf(line.methodCode) !== 'CASH') {
+            <input class="reference" maxlength="80" [placeholder]="kindOf(line.methodCode) === 'CARD' ? 'N.º de operación del POS *' : 'N.º de operación *'"
+              aria-label="Número de operación" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
           }
-          @case ('CARD') {
-            @if (lines().length > 1) {
-              <label class="field">Monto con tarjeta *
-                <span class="money"><em>{{ regional().currencySymbol }}</em>
-                  <input type="number" inputmode="decimal" min="0" [step]="step()" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
+        } @else {
+          @switch (kindOf(line.methodCode)) {
+            @case ('CASH') {
+              <label class="field">
+                Monto recibido
+                <span class="money">
+                  <em>{{ regional().currencySymbol }}</em>
+                  <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Escribe el monto"
+                    [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
                 </span>
               </label>
+              <div class="quick" role="group" aria-label="Montos rápidos">
+                @for (amount of quickAmounts(); track amount; let first = $first) {
+                  <button type="button" [class.active]="isReceived(line, amount)" (click)="patch(index, { amountReceived: asInput(amount) })">
+                    {{ first ? 'Exacto' : (amount | money) }}
+                  </button>
+                }
+              </div>
             }
-            <label class="field">N.º de operación del POS *
-              <input maxlength="80" placeholder="Ej. 004512" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
-            </label>
+            @default {
+              <label class="field">{{ kindOf(line.methodCode) === 'CARD' ? 'N.º de operación del POS *' : 'N.º de operación *' }}
+                <input maxlength="80" [placeholder]="kindOf(line.methodCode) === 'CARD' ? 'Ej. 004512' : 'Ej. 98765432'" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
+              </label>
+            }
+          }
+        }
+        @if (kindOf(line.methodCode) === 'CARD') {
+          <details class="more">
+            <summary>Más datos de la tarjeta (opcional)</summary>
             <div class="grid">
               <label class="field">Marca
                 <select [value]="line.cardBrand" (change)="patch(index, { cardBrand: $any($event.target).value })">
@@ -71,19 +80,7 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
             <label class="field">Código de autorización
               <input maxlength="30" placeholder="Opcional" [value]="line.authorizationCode" (input)="patch(index, { authorizationCode: $any($event.target).value })" />
             </label>
-          }
-          @case ('DIGITAL') {
-            @if (lines().length > 1) {
-              <label class="field">Monto *
-                <span class="money"><em>{{ regional().currencySymbol }}</em>
-                  <input type="number" inputmode="decimal" min="0" [step]="step()" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
-                </span>
-              </label>
-            }
-            <label class="field">N.º de operación *
-              <input maxlength="80" placeholder="Ej. 98765432" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
-            </label>
-          }
+          </details>
         }
       </fieldset>
     }
@@ -110,22 +107,30 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
   `,
   styles: `
     :host { display: grid; gap: 10px; }
-    .line { display: grid; gap: 8px; margin: 0; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-    .line__head { display: flex; gap: 6px; }
+    .line { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+    .line--mixed { gap: 6px; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+    .mixed-row { display: grid; grid-template-columns: 104px minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
+    .mixed-row select { padding: 8px; font-weight: 600; }
+    .mixed-row .remove { height: 38px; }
+    .money.money--compact input { height: 38px; font-size: 15px; font-weight: 600; }
+    .money.money--compact em { font-size: 14px; }
+    .reference { padding: 7px 10px; font-size: 13px; }
+    .more summary { color: var(--color-primary); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .more[open] { display: grid; gap: 8px; }
     .field { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
     input, select {
       width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--color-border);
       border-radius: var(--radius-md); font: inherit; background: var(--color-surface);
     }
     input:focus, select:focus { border-color: var(--color-primary); outline: 2px solid var(--color-primary-soft); }
-    .line__head select { font-weight: 600; }
     .remove { display: grid; place-items: center; padding: 0 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-danger); cursor: pointer; }
     .remove .material-icons { font-size: 18px; }
-    .money { display: flex; align-items: center; gap: 6px; }
-    .money em { font-style: normal; color: var(--color-text-muted); }
+    .money { display: flex; align-items: center; gap: 8px; }
+    .money em { font-style: normal; color: var(--color-text-muted); font-size: 18px; font-weight: 600; }
+    .money input { height: 52px; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .quick { display: flex; flex-wrap: wrap; gap: 6px; }
-    .quick button { padding: 5px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-full); background: var(--color-surface); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .quick button { padding: 7px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-full); background: var(--color-surface); font-size: 12px; font-weight: 600; cursor: pointer; }
     .quick button.active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); }
     .add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); background: transparent; color: var(--color-primary); font-weight: 600; cursor: pointer; }
     .add .material-icons { font-size: 18px; }
@@ -190,7 +195,7 @@ export class PosPaymentPanel {
   }
 
   isReceived(line: PaymentDraftLine, amount: number): boolean {
-    const received = line.amountReceived.trim() ? Number(line.amountReceived.replace(',', '.')) : this.summary().due;
-    return Math.abs(received - amount) < 0.005;
+    if (!line.amountReceived.trim()) return false;
+    return Math.abs(Number(line.amountReceived.replace(',', '.')) - amount) < 0.005;
   }
 }

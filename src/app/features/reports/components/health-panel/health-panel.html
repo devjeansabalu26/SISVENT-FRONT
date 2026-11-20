@@ -3,7 +3,7 @@
     <div class="health__kpis">
       <app-kpi-card label="Ganancia del periodo" icon="savings" tone="success"
         [value]="h.profit.profit !== null ? (h.profit.profit | money) : '—'"
-        [delta]="deltaText(h.profit.profitDeltaPercent)" [trend]="trendOf(h.profit.profitDeltaPercent)" deltaCaption="vs periodo anterior"
+        [delta]="moneyDelta(h.profit.profitDeltaAmount)" [trend]="trendOf(h.profit.profitDeltaAmount)" deltaCaption="vs periodo anterior"
         [caption]="h.profit.missingCost ? 'Algunos productos no tienen costo' : 'Ventas menos costo'" />
       <app-kpi-card label="Margen" icon="percent" tone="primary"
         [value]="marginText(h.profit.marginPercent)"
@@ -40,9 +40,9 @@
         <strong class="health__projection">{{ h.month.projected | money }}</strong>
         <p class="health__muted">
           Llevas {{ h.month.monthToDate | money }}. El mes pasado cerraste en {{ h.month.previousMonth | money }}.
-          @if (h.month.projectedDeltaPercent !== null) {
-            <span [class.up]="h.month.projectedDeltaPercent >= 0" [class.down]="h.month.projectedDeltaPercent < 0">
-              ({{ deltaText(h.month.projectedDeltaPercent) }})
+          @if (h.month.previousMonth > 0) {
+            <span [class.up]="h.month.projected >= h.month.previousMonth" [class.down]="h.month.projected < h.month.previousMonth">
+              ({{ moneyComparisonText(h.month.projected - h.month.previousMonth, 'que el mes pasado') }})
             </span>
           }
         </p>
@@ -51,7 +51,7 @@
             [attr.aria-valuenow]="monthProgress()" aria-valuemin="0" aria-valuemax="100">
             <span [style.width.%]="monthProgress()"></span>
           </div>
-          <small class="health__muted">{{ monthProgress() }}% de lo que vendiste el mes pasado</small>
+          <small class="health__muted">{{ monthGapText(h.month.monthToDate, h.month.previousMonth) }}</small>
         }
       </section>
     </div>
