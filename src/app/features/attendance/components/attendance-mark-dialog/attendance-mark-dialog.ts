@@ -62,12 +62,12 @@ export interface AttendanceMarkDialogData {
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   styles: `
     .present { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius-md); background: var(--color-surface-secondary); }
-    .present__title { color: var(--color-text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .present__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; }
+    .present__title { color: var(--color-text-muted); font-size: 14px; font-weight: 600; text-transform: uppercase; }
+    .present__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 16px; }
     .present__row .material-icons { font-size: 18px; color: var(--color-success); }
     .present__row small { color: var(--color-text-muted); }
     .alert { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: var(--radius-md);
-      color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); font-size: 14px; }
+      color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); font-size: 16px; }
     .alert .material-icons { font-size: 20px; }
     input { font-size: 22px; letter-spacing: 0.3em; text-align: center; }
   `,

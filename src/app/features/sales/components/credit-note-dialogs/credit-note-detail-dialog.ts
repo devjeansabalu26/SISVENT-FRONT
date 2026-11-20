@@ -50,12 +50,12 @@ import { DateTimePipe, MoneyPipe } from '../../../../shared/pipes/date-time.pipe
     .detail { width: min(720px, calc(100vw - 40px)); }
     .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; margin: 0; }
     .summary div { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-secondary); }
-    .summary dt { color: var(--color-text-muted); font-size: 12px; }
+    .summary dt { color: var(--color-text-muted); font-size: 14px; }
     .summary dd { margin: 0; font-weight: 700; }
     .summary a { color: var(--color-primary); text-decoration: none; }
     .table-scroll { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { padding: 9px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th { padding: 9px 10px; text-align: left; font-size: 13px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); }
     td { padding: 9px 10px; border-top: 1px solid var(--color-border); white-space: nowrap; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

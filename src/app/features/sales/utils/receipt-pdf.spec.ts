@@ -38,13 +38,13 @@ describe('receipt PDF rows', () => {
   });
 
   it('lists every payment of a mixed sale with its data', () => {
-    expect(texts).toContain('Tarjeta=S/ 6,000.00');
-    expect(texts).toContain('  Tarjeta=VISA **** 4242');
-    expect(texts).toContain('  N.º operación=004512');
-    expect(texts).toContain('Efectivo=S/ 800.00');
-    expect(texts).toContain('  Recibido=S/ 1,000.00');
-    expect(texts).toContain('  Vuelto=S/ 200.00');
-    expect(texts).toContain('TOTAL=S/ 6,800.00');
+    expect(texts).toContain('Pagó con Tarjeta=S/ 6,000.00');
+    expect(texts).toContain('Tarjeta=VISA **** 4242');
+    expect(texts).toContain('N.º de operación=004512');
+    expect(texts).toContain('Pagó con Efectivo=S/ 800.00');
+    expect(texts).toContain('El cliente entregó=S/ 1,000.00');
+    expect(texts).toContain('Su vuelto=S/ 200.00');
+    expect(texts).toContain('TOTAL A PAGAR=S/ 6,800.00');
   });
 
   it('marks cancelled sales', () => {

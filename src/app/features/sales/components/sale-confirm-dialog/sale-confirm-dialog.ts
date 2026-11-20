@@ -122,7 +122,7 @@ export interface SaleConfirmResult {
     .seller__avatar { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%;
       color: var(--color-on-primary, white); background: var(--color-primary); font-weight: 700; text-transform: uppercase; }
     .seller__data { display: grid; flex: 1; gap: 2px; min-width: 0; }
-    .seller__data small { color: var(--color-text-muted); font-size: 12px; }
+    .seller__data small { color: var(--color-text-muted); font-size: 14px; }
     .seller__change { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--color-primary);
       border-radius: var(--radius-md); color: var(--color-primary); background: var(--color-surface); font: inherit; font-weight: 600; cursor: pointer; }
     .seller__change .material-icons { font-size: 18px; }

@@ -81,7 +81,7 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
   styles: `
     .extras { margin-top: var(--space-md); display: flex; flex-direction: column; gap: 4px; }
     .extras__head h3 { margin: 0 0 4px; }
-    .extras__head p { margin: 0 0 8px; max-width: 680px; color: var(--color-text-muted); font-size: 13px; }
+    .extras__head p { margin: 0 0 8px; max-width: 680px; color: var(--color-text-muted); font-size: 15px; }
     .extras__group { margin: 12px 0 4px; color: var(--color-text-secondary); font-size: var(--font-size-xs); text-transform: uppercase; }
     .extras__list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
     .extras__list li { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
@@ -89,11 +89,11 @@ const DOMAIN_LABEL: Readonly<Record<string, string>> = {
     .extras__list label { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
     .extras__text { display: grid; gap: 2px; }
     .extras__text small { color: var(--color-text-muted); }
-    .extras__sunat { margin: 4px 0 0; color: var(--color-text-muted); font-size: 13px; }
+    .extras__sunat { margin: 4px 0 0; color: var(--color-text-muted); font-size: 15px; }
     .extras__note { display: grid; gap: 6px; margin-top: 12px; color: var(--color-text-secondary); font-size: var(--font-size-xs); font-weight: 600; }
     .extras__note input { height: var(--control-height); padding: 0 12px; }
     .extras__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; }
-    .extras__foot span { margin-right: auto; color: var(--color-text-muted); font-size: 13px; }
+    .extras__foot span { margin-right: auto; color: var(--color-text-muted); font-size: 15px; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

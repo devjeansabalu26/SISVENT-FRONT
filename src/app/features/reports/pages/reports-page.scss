@@ -62,7 +62,7 @@
 .heatmap__day { text-align: left; }
 .heatmap__cell {
   display: grid; place-items: center; min-width: 26px; height: 28px; border-radius: 6px;
-  color: var(--color-text-secondary); font-size: 10px; font-weight: 700;
+  color: var(--color-text-secondary); font-size: 12px; font-weight: 700;
   background: var(--color-surface-secondary);
 }
 .heatmap__cell[data-level='1'] { background: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface)); }

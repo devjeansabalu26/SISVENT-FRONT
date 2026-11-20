@@ -54,7 +54,7 @@ export interface CustomerEditDialogData {
   `,
   styleUrl: '../../../../shared/forms/dialog-form.scss',
   styles: `
-    .help { display: block; min-height: 18px; line-height: 18px; color: var(--color-text-muted); font-size: 12px; font-weight: 500; }
+    .help { display: block; min-height: 18px; line-height: 18px; color: var(--color-text-muted); font-size: 14px; font-weight: 500; }
     .help[data-kind='error'] { color: var(--color-danger); }
     label { align-content: start; }
   `,

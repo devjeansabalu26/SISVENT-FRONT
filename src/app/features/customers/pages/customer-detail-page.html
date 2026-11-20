@@ -85,7 +85,7 @@
         } @else {
           <div class="table-scroll" [class.is-loading]="historyLoading()">
             <table class="history-table">
-              <thead><tr><th></th><th>Comprobante</th><th>Fecha</th><th>Local</th><th>Vendedor</th><th>Pago</th><th class="num">Total</th><th>Estado</th></tr></thead>
+              <thead><tr><th>Acciones</th><th>Comprobante</th><th>Fecha</th><th>Local</th><th>Vendedor</th><th>Pago</th><th class="num">Total</th><th>Estado</th></tr></thead>
               <tbody>
                 @for (sale of history(); track sale.id) {
                   <tr class="history-row" [class.is-open]="isOpen(sale.id)" [class.is-cancelled]="sale.status !== 'CONFIRMED'">

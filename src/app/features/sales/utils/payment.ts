@@ -141,3 +141,25 @@ export function paymentSummary(source: PaymentSummarySource): string {
   if (source.authorizationCode) parts.push(`Aut. ${source.authorizationCode}`);
   return parts.join(' · ');
 }
+
+export function invalidPaymentFields(lines: readonly PaymentDraftLine[], kindOf: (code: string) => PaymentKind, total: number): ReadonlySet<string> {
+  const bad = new Set<string>();
+  const single = lines.length === 1;
+  const result = breakdown(lines, kindOf, total);
+  const overpaid = result.nonCash > round2(total);
+  const hasCash = lines.some((line) => kindOf(line.methodCode) === 'CASH');
+  for (const line of lines) {
+    if (kindOf(line.methodCode) === 'CASH') {
+      const received = result.cashReceived;
+      if (received === null || !Number.isFinite(received) || received < 0 || round2(received) < result.due) bad.add(`${line.key}:amountReceived`);
+      continue;
+    }
+    const amount = parseAmount(line.amount);
+    if ((amount === null && !single) || (amount !== null && (!Number.isFinite(amount) || amount <= 0)) || overpaid || (!hasCash && result.due > 0 && !single)) {
+      bad.add(`${line.key}:amount`);
+    }
+    if (!line.reference.trim()) bad.add(`${line.key}:reference`);
+    if (kindOf(line.methodCode) === 'CARD' && line.cardLast4.trim() && !/^\d{4}$/.test(line.cardLast4.trim())) bad.add(`${line.key}:cardLast4`);
+  }
+  return bad;
+}

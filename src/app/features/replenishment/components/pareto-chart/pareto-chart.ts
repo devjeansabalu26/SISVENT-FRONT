@@ -70,15 +70,15 @@ const CLASS_THRESHOLDS = [
     .pareto__scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
     svg { display: block; width: 100%; min-width: 480px; max-width: none; height: auto; overflow: visible; }
     .grid { stroke: var(--color-border); stroke-width: 1; }
-    .axis { fill: var(--color-text-muted); font-size: 11px; }
+    .axis { fill: var(--color-text-muted); font-size: 13px; }
     .threshold { stroke: var(--color-text-muted); stroke-width: 1; stroke-dasharray: 4 4; }
-    .threshold-label { fill: var(--color-text-secondary); font-size: 11px; font-weight: 600; }
+    .threshold-label { fill: var(--color-text-secondary); font-size: 13px; font-weight: 600; }
     .curve { fill: none; stroke: var(--color-primary); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
     .dot { fill: var(--color-primary); stroke: var(--color-surface); stroke-width: 2; pointer-events: none; }
     .dot--active { r: 6; }
     .hit { fill: transparent; cursor: pointer; outline: none; }
     .tip rect { fill: var(--color-surface); stroke: var(--color-border); filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.08)); }
-    .tip text { fill: var(--color-text-secondary); font-size: 11px; }
+    .tip text { fill: var(--color-text-secondary); font-size: 13px; }
     .tip .tip-strong { fill: var(--color-text-primary); font-weight: 700; }
     figcaption { margin-top: 6px; color: var(--color-text-muted); font-size: var(--font-size-xs); }
   `,

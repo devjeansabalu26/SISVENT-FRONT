@@ -45,15 +45,16 @@ import { addDays, companyToday } from '../../../../core/regional/regional-format
           <table>
             <thead>
               <tr>
-                <th>Persona</th><th>Rol</th><th>Días</th><th>Horas trabajadas</th><th>Tardanzas</th><th>Min. tarde</th>
+                <th>Persona</th><th>Rol</th><th>Usuario</th><th>Días</th><th>Horas trabajadas</th><th>Tardanzas</th><th>Min. tarde</th>
                 <th>Faltas</th><th>Sin salida</th>
               </tr>
             </thead>
             <tbody>
               @for (row of report()!.rows; track row.profileId) {
                 <tr>
-                  <td><strong>{{ row.fullName }}</strong> <small class="muted">{{ row.userCode }}</small></td>
+                  <td><strong>{{ row.fullName }}</strong></td>
                   <td>{{ roleLabel(row.role) }}</td>
+                  <td>{{ row.userCode ?? '—' }}</td>
                   <td>{{ row.daysWorked }}</td>
                   <td>{{ minutes(row.workedMinutes) }}</td>
                   <td [class.bad]="row.lateDays > 0">{{ row.lateDays }}</td>
@@ -65,7 +66,7 @@ import { addDays, companyToday } from '../../../../core/regional/regional-format
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="2">Total</td>
+                <td colspan="3">Total</td>
                 <td>{{ totals().days }}</td>
                 <td>{{ minutes(totals().minutes) }}</td>
                 <td>{{ totals().late }}</td>
@@ -86,7 +87,7 @@ import { addDays, companyToday } from '../../../../core/regional/regional-format
     tfoot td { font-weight: 700; border-top: 2px solid var(--color-border); }
     .bad { color: var(--color-danger); font-weight: 700; }
     .warn { color: var(--color-warning); font-weight: 700; }
-    .small { font-size: 12px; margin-top: 8px; }
+    .small { font-size: 14px; margin-top: 8px; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

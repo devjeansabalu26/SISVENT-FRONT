@@ -86,7 +86,7 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
     .ruc-search { display: flex; gap: 6px; }
     .ruc-search input { flex: 1; min-width: 0; }
     .ruc-search button { display: inline-flex; align-items: center; justify-content: center; width: var(--control-height); padding: 0; }
-    .help { display: block; min-height: 18px; line-height: 18px; overflow: hidden; color: var(--color-text-muted); font-size: 12px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+    .help { display: block; min-height: 18px; line-height: 18px; overflow: hidden; color: var(--color-text-muted); font-size: 14px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
     .help[data-kind='ok'] { color: var(--color-success); }
     .help[data-kind='warn'] { color: var(--color-warning); }
     .help[data-kind='error'] { color: var(--color-danger); }

@@ -58,38 +58,37 @@ export function receiptRows(sale: SaleDetail, companyName: string): readonly Row
 
   for (const line of sale.lines) {
     rows.push({ kind: 'text', text: line.productName, bold: true });
-    rows.push({ kind: 'pair', left: `${quantity(line.quantity)} x ${money(line.unitPrice)}`, right: money(line.subtotal) });
+    rows.push({ kind: 'pair', left: `Cant. ${quantity(line.quantity)}`, right: money(line.subtotal) });
     if (line.discountAmount > 0) rows.push({ kind: 'pair', left: '  Descuento', right: `-${money(line.discountAmount)}` });
   }
 
   rows.push(
     { kind: 'rule' },
     { kind: 'pair', left: 'Subtotal', right: money(sale.subtotal) },
-    { kind: 'pair', left: 'Descuento', right: `-${money(sale.discountTotal)}` },
+    ...(sale.discountTotal > 0 ? [{ kind: 'pair', left: 'Descuento', right: `-${money(sale.discountTotal)}` } as const] : []),
     ...(invoice
       ? [
           { kind: 'pair', left: 'Op. gravada', right: money(sale.total - sale.tax) } as const,
           { kind: 'pair', left: currentRegional().taxName, right: money(sale.tax) } as const,
         ]
       : [{ kind: 'pair', left: `${currentRegional().taxName} (referencial)`, right: money(sale.tax) } as const]),
-    { kind: 'pair', left: 'TOTAL', right: money(sale.total), bold: true, size: 11 },
+    { kind: 'pair', left: 'TOTAL A PAGAR', right: money(sale.total), bold: true, size: 11 },
     { kind: 'rule' },
-    { kind: 'text', text: 'Pagos', bold: true },
+    { kind: 'pair', left: 'Forma de pago', right: sale.paymentMethod },
   );
 
   const payments = sale.payments ?? [];
-  if (!payments.length) rows.push({ kind: 'pair', left: sale.paymentMethod, right: money(sale.total) });
   for (const payment of payments) {
-    rows.push({ kind: 'pair', left: payment.methodName, right: money(payment.amount) });
+    if (payments.length > 1) rows.push({ kind: 'pair', left: `Pagó con ${payment.methodName}`, right: money(payment.amount) });
     if (payment.amountReceived != null) {
-      rows.push({ kind: 'pair', left: '  Recibido', right: money(payment.amountReceived) });
-      rows.push({ kind: 'pair', left: '  Vuelto', right: money(payment.changeAmount ?? 0) });
+      rows.push({ kind: 'pair', left: 'El cliente entregó', right: money(payment.amountReceived) });
+      rows.push({ kind: 'pair', left: 'Su vuelto', right: money(payment.changeAmount ?? 0), bold: true });
     }
     if (payment.cardBrand) {
-      rows.push({ kind: 'pair', left: '  Tarjeta', right: payment.cardLast4 ? `${payment.cardBrand} **** ${payment.cardLast4}` : payment.cardBrand });
+      rows.push({ kind: 'pair', left: 'Tarjeta', right: payment.cardLast4 ? `${payment.cardBrand} **** ${payment.cardLast4}` : payment.cardBrand });
     }
-    if (payment.reference) rows.push({ kind: 'pair', left: '  N.º operación', right: payment.reference });
-    if (payment.authorizationCode) rows.push({ kind: 'pair', left: '  Autorización', right: payment.authorizationCode });
+    if (payment.reference) rows.push({ kind: 'pair', left: 'N.º de operación', right: payment.reference });
+    if (payment.authorizationCode) rows.push({ kind: 'pair', left: 'Código de autorización', right: payment.authorizationCode });
   }
 
   rows.push(

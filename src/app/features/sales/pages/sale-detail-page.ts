@@ -3,6 +3,8 @@ import { AccessControlService } from '../../../core/auth/services/access-control
 import { ChangeDetectionStrategy, Component, computed, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { CustomerApiService } from '../../customers/data-access/customer-api.service';
+import { CustomerDetail } from '../../customers/models/customer.model';
 import { filter } from 'rxjs';
 import { NotificationService } from '../../../core/notifications/notification.service';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -15,7 +17,7 @@ import { UserContextService } from '../../../core/context/user-context/user-cont
 import { CreditNoteDetailDialog } from '../components/credit-note-dialogs/credit-note-detail-dialog';
 import { ReceiptMailerService } from '../data-access/receipt-mailer.service';
 import { SaleAnnulmentOptions, SaleDetail } from '../models/sale-detail.model';
-import { paymentSummary } from '../utils/payment';
+import { CARD_BRANDS } from '../models/payment.model';
 import { EINVOICE_STATUS_LABEL, credentialLabel, isInvoice } from '../utils/sale-document';
 import { DateTimePipe, MoneyPipe, RegionalPipe } from '../../../shared/pipes/date-time.pipe';
 
@@ -41,11 +43,19 @@ export class SaleDetailPage implements OnInit {
   readonly canCancel = inject(UserContextService).user()?.role === 'ADMIN'
     && inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.salesManage] });
   readonly annulment = signal<SaleAnnulmentOptions | null>(null);
+  private readonly customers = inject(CustomerApiService);
+  readonly canViewCustomer = inject(AccessControlService).canAccess({ permissions: [APP_PERMISSIONS.customersView], features: ['CLIENTS'] });
+  readonly customer = signal<CustomerDetail | null>(null);
+  readonly initials = computed(() => {
+    const name = this.customer()?.displayName ?? this.sale()?.clientName ?? '';
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase() || '?';
+  });
 
   readonly loading = signal(true);
   readonly sale = signal<SaleDetail | null>(null);
   readonly credit = signal<SaleCreditSummary | null>(null);
-  readonly paymentDetails = computed(() => (this.sale()?.payments ?? []).map((payment) => paymentSummary(payment)));
+  readonly units = computed(() => (this.sale()?.lines ?? []).reduce((sum, line) => sum + line.quantity, 0));
+  readonly brandLabel = (brand: string): string => CARD_BRANDS.find((item) => item.value === brand)?.label ?? brand;
 
   sendReceipt(): void {
     const sale = this.sale();
@@ -61,6 +71,9 @@ export class SaleDetailPage implements OnInit {
       next: (sale) => {
         this.sale.set(sale);
         this.loading.set(false);
+        if (sale.clientId && this.canViewCustomer) {
+          this.customers.get(sale.clientId).subscribe({ next: (customer) => this.customer.set(customer), error: () => undefined });
+        }
       },
       error: () => this.loading.set(false),
     });

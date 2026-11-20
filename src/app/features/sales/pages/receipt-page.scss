@@ -117,6 +117,19 @@
   padding: 6px 4px;
   border-bottom: 1px dotted var(--color-border);
 }
+.receipt__lines :is(th, td):nth-child(3) {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.receipt__lines :is(th, td):first-child {
+  width: 1%;
+  text-align: center;
+}
+.receipt__lines td:nth-child(2) {
+  overflow-wrap: anywhere;
+}
 .receipt__totals {
   display: grid;
   gap: 4px;
@@ -130,6 +143,9 @@
 }
 .receipt__totals .grand {
   font-size: var(--font-size-md);
+  font-weight: 700;
+}
+.receipt__totals .change {
   font-weight: 700;
 }
 .receipt__foot {

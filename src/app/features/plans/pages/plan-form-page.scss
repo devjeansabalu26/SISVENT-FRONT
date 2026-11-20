@@ -47,14 +47,14 @@
 
 .section-head h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .section-head .hint {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -73,7 +73,7 @@ label {
   display: grid;
   gap: 7px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -114,20 +114,20 @@ textarea {
 
 .error {
   color: var(--color-danger);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .muted {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .switch-field {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -190,14 +190,14 @@ textarea {
 
 .features-card > h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .features-card > .hint {
   margin: -6px 0 0;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -217,7 +217,7 @@ textarea {
 
 .feature-group__title {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -228,7 +228,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -309,7 +309,7 @@ textarea {
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
   color: var(--color-text-primary);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .dependency-alert > .material-icons {

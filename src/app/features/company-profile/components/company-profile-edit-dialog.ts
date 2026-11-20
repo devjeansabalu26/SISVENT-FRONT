@@ -94,11 +94,11 @@ type ColorKey = 'primaryColor' | 'secondaryColor' | 'accentColor' | 'backgroundC
     .preview { display: grid; grid-template-columns: 120px 1fr; min-height: 110px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
     .preview aside { display: grid; align-content: start; gap: 6px; padding: 10px; }
     .mark { width: 22px; height: 22px; border-radius: 6px; }
-    .item { padding: 5px 8px; border-radius: 6px; font-size: 12px; background: rgba(255, 255, 255, 0.08); }
+    .item { padding: 5px 8px; border-radius: 6px; font-size: 14px; background: rgba(255, 255, 255, 0.08); }
     .muted-item { color: #94a3b8; box-shadow: none; background: transparent; }
     .content { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px; }
-    .btn { padding: 7px 12px; border-radius: 6px; color: white; font-size: 12px; font-weight: 600; }
-    .chip { padding: 4px 10px; border: 1px solid; border-radius: 999px; font-size: 12px; font-weight: 600; background: white; }
+    .btn { padding: 7px 12px; border-radius: 6px; color: white; font-size: 14px; font-weight: 600; }
+    .chip { padding: 4px 10px; border: 1px solid; border-radius: 999px; font-size: 14px; font-weight: 600; background: white; }
     footer { display: flex; justify-content: flex-end; gap: 10px; }
     button { padding: 10px 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); font-weight: 600; cursor: pointer; }
     .primary { border-color: var(--color-primary); color: white; background: var(--color-primary); }

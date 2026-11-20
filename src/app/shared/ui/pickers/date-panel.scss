@@ -50,7 +50,7 @@ button:focus-visible {
   border-radius: 8px;
   color: var(--color-text-primary);
   background: transparent;
-  font-size: 14px;
+  font-size: 16px;
   text-transform: capitalize;
 }
 
@@ -69,7 +69,7 @@ button:focus-visible {
 .weekdays span {
   padding: 4px 0;
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
@@ -83,7 +83,7 @@ button:focus-visible {
   border-radius: 9px;
   color: var(--color-text-primary);
   background: transparent;
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-variant-numeric: tabular-nums;
   transition: background 0.12s ease, color 0.12s ease;
 }
@@ -159,7 +159,7 @@ footer {
   border-radius: 8px;
   color: var(--color-text-muted);
   background: transparent;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -173,7 +173,7 @@ footer {
   border-radius: 999px;
   color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
 }
 

@@ -58,7 +58,7 @@ legend {
 label {
   display: grid;
   gap: 6px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -149,7 +149,7 @@ label.toggle small,
 .note,
 .counter {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
 }
 
@@ -177,13 +177,13 @@ label.toggle small,
 
 .series-preview span {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .series-preview small {
   grid-column: 1 / -1;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .policy {
@@ -198,7 +198,7 @@ label.toggle small,
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--color-border);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .policy div:last-child {
@@ -219,7 +219,7 @@ label.toggle small,
   border-radius: var(--radius-full);
   color: var(--color-text-muted);
   background: var(--color-surface-secondary);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 @media (max-width: 640px) {
@@ -282,7 +282,7 @@ label.toggle small,
   gap: 6px;
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .readonly-note .material-icons {
@@ -298,7 +298,7 @@ label.toggle small,
 
 .regional-grid dt {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .regional-grid dd {

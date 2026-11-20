@@ -11,19 +11,18 @@
   </app-page-header>
 
   <section class="profile surface-card" aria-label="Datos de la venta">
-    <app-status-chip [value]="sale.status" [label]="sale.status" [hint]="sale.annulment ? 'Anulada por ' + sale.annulment.cancelledBy + '. Motivo: ' + sale.annulment.reason : null" />
+    <app-status-chip [value]="sale.status === 'CONFIRMED' ? 'COMPLETADA' : 'ANULADA'" [label]="sale.status === 'CONFIRMED' ? 'Confirmada' : 'Anulada'" [hint]="sale.annulment ? 'Anulada por ' + sale.annulment.cancelledBy + '. Motivo: ' + sale.annulment.reason : null" />
     <ul class="facts">
-      <li title="Fecha"><span class="material-icons" aria-hidden="true">event</span>{{ sale.saleDate | dateTime }}</li>
-      <li title="Cliente"><span class="material-icons" aria-hidden="true">person</span>{{ sale.clientName ?? 'Cliente general' }}</li>
-      <li title="Vendedor"><span class="material-icons" aria-hidden="true">badge</span>{{ sale.sellerName }}</li>
-      <li title="Local"><span class="material-icons" aria-hidden="true">store</span>{{ sale.storeName }}</li>
+      <li><span class="material-icons" aria-hidden="true">event</span><span class="fact"><small>Fecha</small>{{ sale.saleDate | dateTime }}</span></li>
+      <li><span class="material-icons" aria-hidden="true">badge</span><span class="fact"><small>Vendedor</small>{{ sale.sellerName }}</span></li>
+      <li><span class="material-icons" aria-hidden="true">store</span><span class="fact"><small>Local</small>{{ sale.storeName }}</span></li>
     </ul>
   </section>
 
   @if (isInvoice(sale)) {
     <p class="notice muted-notice">
       <span class="material-icons">description</span>
-      Factura {{ sale.documentNumber }} · {{ sale.customerLegalName }} · RUC {{ sale.customerTaxId }}@if (sale.customerAddress) { · {{ sale.customerAddress }} }
+      Factura {{ sale.documentNumber }}
     </p>
     @if (sale.electronicDocuments?.length) {
       <section class="surface-card einvoices">
@@ -82,28 +81,112 @@
     </section>
   }
 
-  <section class="surface-card">
-    <h3>Detalle de items</h3>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th>Producto</th><th>SKU</th><th>Cantidad</th><th>P. unitario</th><th>Descuento</th><th>Subtotal</th></tr>
-        </thead>
-        <tbody>
-          @for (line of sale.lines; track line.productId) {
-            <tr>
-              <td>{{ line.productName }}</td>
-              <td>{{ line.sku }}</td>
-              <td>{{ line.quantity }}</td>
-              <td>{{ line.unitPrice | money }}</td>
-              <td>{{ line.discountAmount | money }}</td>
-              <td>{{ line.subtotal | money }}</td>
-            </tr>
+  <div class="cards sold">
+    <section class="surface-card client" aria-labelledby="client-title">
+      <h3 id="client-title">Cliente</h3>
+      @if (sale.clientId) {
+        @let c = customer();
+        <div class="client__head">
+          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+          <div>
+            <strong>{{ c?.displayName ?? sale.clientName }}</strong>
+            @if (c) { <small>{{ c.type === 'COMPANY' ? 'Empresa' : 'Persona' }}</small> }
+          </div>
+        </div>
+        <ul class="client__data">
+          @if (c?.documentNumber || sale.customerTaxId) {
+            <li><span class="material-icons" aria-hidden="true">badge</span>{{ c?.documentNumber ? (c?.documentType ?? 'Doc.') + ' ' + c?.documentNumber : 'RUC ' + sale.customerTaxId }}</li>
           }
-        </tbody>
-      </table>
-    </div>
-  </section>
+          @if (c?.phone) {
+            <li><span class="material-icons" aria-hidden="true">call</span><a [href]="'tel:' + c?.phone">{{ c?.phone }}</a></li>
+          }
+          @if (c?.email ?? sale.clientEmail; as email) {
+            <li><span class="material-icons" aria-hidden="true">mail</span><a [href]="'mailto:' + email">{{ email }}</a></li>
+          }
+          @if (c?.address ?? sale.customerAddress; as address) {
+            <li><span class="material-icons" aria-hidden="true">place</span>{{ address }}</li>
+          }
+          @if (c && !c.phone && !c.email && !c.address && !c.documentNumber) {
+            <li class="muted"><span class="material-icons" aria-hidden="true">info</span>Sin datos de contacto registrados</li>
+          }
+        </ul>
+        @if (canViewCustomer) {
+          <a class="ghost client__link" [routerLink]="['/app/customers', sale.clientId]"><span class="material-icons" aria-hidden="true">open_in_new</span>Ver ficha del cliente</a>
+        }
+      } @else {
+        <div class="client__empty">
+          <span class="material-icons" aria-hidden="true">person_outline</span>
+          <strong>Cliente general</strong>
+          <small>Esta venta no se registró a nombre de un cliente.</small>
+        </div>
+      }
+    </section>
+
+    <section class="surface-card items" aria-labelledby="sold-title">
+      <header class="items__head">
+        <h3 id="sold-title">Productos vendidos</h3>
+        <span class="pill">{{ sale.lines.length }} {{ sale.lines.length === 1 ? 'producto' : 'productos' }} · {{ units() }} {{ units() === 1 ? 'unidad' : 'unidades' }}</span>
+      </header>
+      <ul class="items__list">
+        @for (line of sale.lines; track line.productId) {
+          <li>
+            <span class="qty" [attr.aria-label]="line.quantity + ' unidades'">{{ line.quantity }}×</span>
+            <div class="items__info">
+              <strong>{{ line.productName }}</strong>
+              <small>{{ line.unitPrice | money }} c/u · {{ line.sku }}</small>
+              @if (line.discountAmount > 0) {
+                <small class="discount"><span class="material-icons" aria-hidden="true">sell</span>Descuento {{ line.discountAmount | money }}</small>
+              }
+            </div>
+            <strong class="items__amount">{{ line.subtotal | money }}</strong>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="surface-card pay" aria-labelledby="pay-title">
+      <h3 id="pay-title">Detalle del pago</h3>
+      <div class="pay__total">
+        <span>Total de la venta</span>
+        <strong>{{ sale.total | money }}</strong>
+        @if (sale.discountTotal > 0) {
+          <small>Antes {{ sale.subtotal | money }} · descuento <b class="discount">{{ sale.discountTotal | money }}</b></small>
+        }
+      </div>
+      <h4>Cómo pagó</h4>
+      <ul class="pay__methods">
+        @for (p of sale.payments ?? []; track $index) {
+          <li>
+            <div class="pay__method">
+              <span class="material-icons" aria-hidden="true">{{ p.kind === 'CASH' ? 'payments' : p.kind === 'CARD' ? 'credit_card' : 'smartphone' }}</span>
+              <strong>{{ p.methodName }}</strong>
+              @if ((sale.payments?.length ?? 0) > 1) { <span class="pay__amount">{{ p.amount | money }}</span> }
+            </div>
+            @if (p.amountReceived != null) {
+              @if ((p.changeAmount ?? 0) > 0) {
+                <div class="pay__row"><span>El cliente entregó</span><b>{{ p.amountReceived | money }}</b></div>
+                <div class="pay__row pay__row--change"><span>Se le dio de vuelto</span><b>{{ p.changeAmount | money }}</b></div>
+              } @else {
+                <div class="pay__row"><span>Pagó el monto exacto, sin vuelto</span></div>
+              }
+            }
+            @if (p.cardBrand) {
+              <div class="pay__row"><span>Tarjeta</span><b>{{ brandLabel(p.cardBrand) }}{{ p.cardLast4 ? ' •••• ' + p.cardLast4 : '' }}</b></div>
+            }
+            @if (p.reference) {
+              <div class="pay__row"><span>N.º de operación</span><b>{{ p.reference }}</b></div>
+            }
+            @if (p.authorizationCode) {
+              <div class="pay__row"><span>Código de autorización</span><b>{{ p.authorizationCode }}</b></div>
+            }
+          </li>
+        } @empty {
+          <li><div class="pay__method"><span class="material-icons" aria-hidden="true">payments</span><strong>{{ sale.paymentMethod }}</strong></div></li>
+        }
+      </ul>
+      <p class="pay__tax">Incluye {{ 'taxName' | regional }} referencial de {{ sale.tax | money }}</p>
+    </section>
+  </div>
 
   @if (credit()?.creditNotes?.length) {
     <section class="surface-card">
@@ -128,29 +211,14 @@
     </section>
   }
 
-  <div class="cards">
-    <section class="surface-card">
-      <h3>Resumen financiero</h3>
-      <dl>
-        <div><dt>Subtotal</dt><dd>{{ sale.subtotal | money }}</dd></div>
-        <div><dt>Descuento</dt><dd>{{ sale.discountTotal | money }}</dd></div>
-        <div><dt>{{ 'taxName' | regional }} (referencial)</dt><dd>{{ sale.tax | money }}</dd></div>
-        <div><dt>Total</dt><dd>{{ sale.total | money }}</dd></div>
-        <div><dt>Método de pago</dt><dd>{{ sale.paymentMethod }}</dd></div>
-        @for (detail of paymentDetails(); track $index) {
-          <div><dt>{{ $first ? 'Detalle del pago' : '' }}</dt><dd>{{ detail }}</dd></div>
-        }
-      </dl>
-    </section>
-    <section class="surface-card">
-      <h3>Historial de eventos</h3>
-      <ul class="timeline">
-        @for (event of sale.events; track event.time) {
-          <li><span>{{ event.time }}</span>{{ event.description }}</li>
-        }
-      </ul>
-    </section>
-  </div>
+  <section class="surface-card">
+    <h3>Historial de eventos</h3>
+    <ul class="timeline">
+      @for (event of sale.events; track event.time) {
+        <li><span>{{ event.time }}</span>{{ event.description }}</li>
+      }
+    </ul>
+  </section>
 } @else if (loading()) {
   <p class="muted">Cargando venta…</p>
 } @else {

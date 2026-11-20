@@ -37,14 +37,14 @@
 
 .health__card header h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .health__card header p,
 .health__muted {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .health__insights {
@@ -76,13 +76,13 @@
 
 .health__insights strong {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .health__insights p {
   margin: 4px 0 0;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .health__insights a,
@@ -94,7 +94,7 @@
   background: none;
   color: var(--color-primary);
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -125,7 +125,7 @@
 .health__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .health__table th,

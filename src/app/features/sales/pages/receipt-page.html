@@ -41,14 +41,13 @@
     <div class="table-scroll">
       <table class="receipt__lines">
         <thead>
-          <tr><th>Cant.</th><th>Descripción</th><th>P. unitario</th><th>Subtotal</th></tr>
+          <tr><th>Cant.</th><th>Producto</th><th>Total</th></tr>
         </thead>
         <tbody>
           @for (line of sale.lines; track line.productId) {
             <tr>
               <td>{{ line.quantity }}</td>
               <td>{{ line.productName }}</td>
-              <td>{{ line.unitPrice | money }}</td>
               <td>{{ line.subtotal | money }}</td>
             </tr>
           }
@@ -57,33 +56,37 @@
     </div>
 
     <section class="receipt__totals">
-      <div><span>Método:</span> {{ sale.paymentMethod }}</div>
-      @for (payment of sale.payments ?? []; track $index) {
-        <div><span>{{ payment.methodName }}:</span> {{ payment.amount | money }}</div>
-        @if (payment.amountReceived != null) {
-          <div><span>&nbsp;&nbsp;Recibido:</span> {{ payment.amountReceived | money }}</div>
-          <div><span>&nbsp;&nbsp;Vuelto:</span> {{ (payment.changeAmount ?? 0) | money }}</div>
-        }
-        @if (payment.cardBrand) {
-          <div><span>&nbsp;&nbsp;Tarjeta:</span> {{ payment.cardBrand }}@if (payment.cardLast4) { •••• {{ payment.cardLast4 }} }</div>
-        }
-        @if (payment.reference) {
-          <div><span>&nbsp;&nbsp;N.º operación:</span> {{ payment.reference }}</div>
-        }
-        @if (payment.authorizationCode) {
-          <div><span>&nbsp;&nbsp;Autorización:</span> {{ payment.authorizationCode }}</div>
-        }
-      }
-      <div class="sep"></div>
       <div><span>Subtotal:</span> {{ sale.subtotal | money }}</div>
-      <div><span>Descuento:</span> {{ sale.discountTotal | money }}</div>
+      @if (sale.discountTotal > 0) {
+        <div><span>Descuento:</span> -{{ sale.discountTotal | money }}</div>
+      }
       @if (isInvoice(sale)) {
         <div><span>Op. gravada:</span> {{ (sale.total - sale.tax) | money }}</div>
         <div><span>{{ 'taxName' | regional }}:</span> {{ sale.tax | money }}</div>
       } @else {
         <div><span>{{ 'taxName' | regional }} (referencial):</span> {{ sale.tax | money }}</div>
       }
-      <div class="grand"><span>TOTAL:</span> {{ sale.total | money }}</div>
+      <div class="grand"><span>TOTAL A PAGAR:</span> {{ sale.total | money }}</div>
+      <div class="sep"></div>
+      <div><span>Forma de pago:</span> {{ sale.paymentMethod }}</div>
+      @for (payment of sale.payments ?? []; track $index) {
+        @if ((sale.payments?.length ?? 0) > 1) {
+          <div><span>Pagó con {{ payment.methodName }}:</span> {{ payment.amount | money }}</div>
+        }
+        @if (payment.amountReceived != null) {
+          <div><span>El cliente entregó:</span> {{ payment.amountReceived | money }}</div>
+          <div class="change"><span>Su vuelto:</span> {{ (payment.changeAmount ?? 0) | money }}</div>
+        }
+        @if (payment.cardBrand) {
+          <div><span>Tarjeta:</span> {{ payment.cardBrand }}@if (payment.cardLast4) { •••• {{ payment.cardLast4 }} }</div>
+        }
+        @if (payment.reference) {
+          <div><span>N.º de operación:</span> {{ payment.reference }}</div>
+        }
+        @if (payment.authorizationCode) {
+          <div><span>Código de autorización:</span> {{ payment.authorizationCode }}</div>
+        }
+      }
     </section>
 
     <footer class="receipt__foot">

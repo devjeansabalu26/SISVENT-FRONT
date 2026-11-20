@@ -103,12 +103,12 @@ interface AnnulLine {
   `,
   styleUrls: ['../../../../shared/forms/dialog-form.scss', '../../../../shared/ui/review-dialog/review-dialog.scss'],
   styles: `
-    .banner, .refund p { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: var(--radius-md); font-size: 13px; }
+    .banner, .refund p { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: var(--radius-md); font-size: 15px; }
     .banner { color: var(--color-error-text, var(--color-error)); background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface)); }
     .refund { display: grid; gap: 10px; }
     .refund p { color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); }
-    .lines { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .lines th { padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); }
+    .lines { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .lines th { padding: 8px 10px; text-align: left; font-size: 13px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); }
     .lines td { padding: 8px 10px; border-top: 1px solid var(--color-border); }
     .lines td small { display: block; color: var(--color-text-muted); }
     .lines input { width: 80px; }

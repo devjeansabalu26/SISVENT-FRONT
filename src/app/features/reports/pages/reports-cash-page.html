@@ -55,7 +55,7 @@
         @if (report.byCashier.length) {
           <div class="table-scroll">
             <table class="cash-table">
-              <thead><tr><th>Cajero</th><th>Cajas</th><th>Con diferencia</th><th>Faltante</th><th>Sobrante</th><th>Neto</th><th>Forzados</th><th></th></tr></thead>
+              <thead><tr><th>Cajero</th><th>Cajas</th><th>Con diferencia</th><th>Faltante</th><th>Sobrante</th><th>Neto</th><th>Forzados</th><th>Aviso</th></tr></thead>
               <tbody>
                 @for (row of report.byCashier; track row.name) {
                   <tr>

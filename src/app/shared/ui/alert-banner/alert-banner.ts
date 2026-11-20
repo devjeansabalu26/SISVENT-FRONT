@@ -30,7 +30,7 @@ const DEFAULT_ICON: Readonly<Record<AlertBannerTone, string>> = {
       padding: 12px 14px;
       border: 1px solid;
       border-radius: var(--radius-md);
-      font-size: 13px;
+      font-size: 15px;
     }
     .banner .material-icons { font-size: 20px; }
     .banner strong { display: block; font-weight: 700; }

@@ -86,11 +86,12 @@
       @if (today().length && canManage) {
         <div class="today-table">
           <table class="sticky-actions">
-            <thead><tr><th>Persona</th><th>Usuario</th><th>Entrada</th><th>Salida</th><th>Tiempo</th><th></th></tr></thead>
+            <thead><tr><th>Persona</th><th>Rol</th><th>Usuario</th><th>Entrada</th><th>Salida</th><th>Tiempo</th><th>Acciones</th></tr></thead>
             <tbody>
               @for (row of today(); track row.id) {
                 <tr [class.done]="row.checkOutAt">
-                  <td><strong>{{ row.fullName }}</strong> <small class="muted">{{ roleLabel(row.role) }}</small></td>
+                  <td><strong>{{ row.fullName }}</strong></td>
+                  <td>{{ roleLabel(row.role) }}</td>
                   <td>{{ row.userCode ?? '—' }}</td>
                   <td>{{ hour(row.checkInAt) }}</td>
                   <td>
@@ -170,7 +171,7 @@
           <thead>
             <tr>
               <th>Fecha</th><th>Local</th><th>Persona</th><th>Rol</th><th>Entrada</th><th>Salida</th><th>Tiempo</th>
-              <th>Origen</th><th>Observaciones</th><th></th>
+              <th>Origen</th><th>Observaciones</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>

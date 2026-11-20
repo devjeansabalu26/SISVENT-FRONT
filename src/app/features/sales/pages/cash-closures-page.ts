@@ -61,7 +61,7 @@ import { formatMoney } from '../../../core/regional/regional-format';
   `,
   styles: `
     .filters { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: var(--space-md); }
-    .filters label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+    .filters label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
     @media (max-width: 600px) { .filters > * { flex: 1 1 140px; } .filters input { width: 100%; } }
     input { padding: 9px 11px; border: 1px solid var(--color-border); border-radius: var(--radius-md); font: inherit; }
     .ghost, .primary { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--radius-md); font-weight: 600; text-decoration: none; cursor: pointer; }
@@ -69,10 +69,10 @@ import { formatMoney } from '../../../core/regional/regional-format';
     .primary { border: 0; color: var(--color-on-primary, white); background: var(--color-primary); }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 12px; margin-bottom: var(--space-md); }
     .kpis article { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
-    .kpis span { color: var(--color-text-muted); font-size: 12px; }
+    .kpis span { color: var(--color-text-muted); font-size: 14px; }
     .kpis strong { font-size: 18px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th { padding: 10px 12px; text-align: left; font-size: 13px; text-transform: uppercase; color: var(--color-text-secondary); background: var(--color-surface-secondary); white-space: nowrap; }
     td { padding: 10px 12px; border-top: 1px solid var(--color-border); white-space: nowrap; }
     td small { color: var(--color-text-muted); }
     .ok { color: var(--color-success); font-weight: 600; }

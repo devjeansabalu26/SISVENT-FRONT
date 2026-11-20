@@ -45,10 +45,10 @@
 }
 .muted {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 .small {
-  font-size: 12px;
+  font-size: 14px;
 }
 .state {
   padding: 28px;
@@ -87,12 +87,12 @@
 }
 .card h3 {
   margin: 0 0 4px;
-  font-size: 15px;
+  font-size: 16px;
 }
 .card header p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 .card dl {
   display: grid;
@@ -106,7 +106,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .card dl .method {
   color: var(--color-text-muted);
@@ -136,7 +136,7 @@
   border-radius: var(--radius-md);
   color: var(--color-warning);
   background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
-  font-size: 13px;
+  font-size: 15px;
 }
 .pending .material-icons {
   font-size: 18px;
@@ -147,7 +147,7 @@
   border-radius: var(--radius-full, 999px);
   color: var(--color-text-secondary);
   background: var(--color-surface-secondary);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -171,18 +171,18 @@
   display: grid;
   gap: 4px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 15px;
 }
 th {
   padding: 10px 12px;
   text-align: left;
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   color: var(--color-text-secondary);
   background: var(--color-surface-secondary);

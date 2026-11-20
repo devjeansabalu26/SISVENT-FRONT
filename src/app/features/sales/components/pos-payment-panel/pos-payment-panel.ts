@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model } fr
 import { cashStep, moneyInput } from '../../../../core/regional/regional-format';
 import { RegionalService } from '../../../../core/regional/regional.service';
 import { CARD_BRANDS, MAX_PAYMENTS, PaymentDraftLine, PaymentKind, PaymentMethodOption, newPaymentLine } from '../../models/payment.model';
-import { breakdown, paymentsError, quickCashAmounts } from '../../utils/payment';
+import { breakdown, invalidPaymentFields, paymentsError, quickCashAmounts } from '../../utils/payment';
 import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -22,10 +22,10 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
               <em>{{ regional().currencySymbol }}</em>
               @if (kindOf(line.methodCode) === 'CASH') {
                 <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Escribe el monto"
-                  aria-label="Monto recibido en efectivo" [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
+                  aria-label="Monto recibido en efectivo" [class.invalid]="bad(line, 'amountReceived')" [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
               } @else {
                 <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Monto" aria-label="Monto del pago"
-                  [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
+                  [class.invalid]="bad(line, 'amount')" [value]="line.amount" (input)="patch(index, { amount: $any($event.target).value })" />
               }
             </span>
             <button type="button" class="remove" (click)="remove(index)" aria-label="Quitar pago">
@@ -34,7 +34,7 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
           </div>
           @if (kindOf(line.methodCode) !== 'CASH') {
             <input class="reference" maxlength="80" [placeholder]="kindOf(line.methodCode) === 'CARD' ? 'N.º de operación del POS *' : 'N.º de operación *'"
-              aria-label="Número de operación" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
+              aria-label="Número de operación" [class.invalid]="bad(line, 'reference')" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
           }
         } @else {
           @switch (kindOf(line.methodCode)) {
@@ -44,7 +44,7 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
                 <span class="money">
                   <em>{{ regional().currencySymbol }}</em>
                   <input type="number" inputmode="decimal" min="0" [step]="step()" placeholder="Escribe el monto"
-                    [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
+                    [class.invalid]="bad(line, 'amountReceived')" [value]="line.amountReceived" (input)="patch(index, { amountReceived: $any($event.target).value })" />
                 </span>
               </label>
               <div class="quick" role="group" aria-label="Montos rápidos">
@@ -57,13 +57,13 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
             }
             @default {
               <label class="field">{{ kindOf(line.methodCode) === 'CARD' ? 'N.º de operación del POS *' : 'N.º de operación *' }}
-                <input maxlength="80" [placeholder]="kindOf(line.methodCode) === 'CARD' ? 'Ej. 004512' : 'Ej. 98765432'" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
+                <input maxlength="80" [placeholder]="kindOf(line.methodCode) === 'CARD' ? 'Ej. 004512' : 'Ej. 98765432'" [class.invalid]="bad(line, 'reference')" [value]="line.reference" (input)="patch(index, { reference: $any($event.target).value })" />
               </label>
             }
           }
         }
         @if (kindOf(line.methodCode) === 'CARD') {
-          <details class="more">
+          <details class="more" [open]="bad(line, 'cardLast4')">
             <summary>Más datos de la tarjeta (opcional)</summary>
             <div class="grid">
               <label class="field">Marca
@@ -74,7 +74,7 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
                 </select>
               </label>
               <label class="field">Últimos 4 dígitos
-                <input maxlength="4" inputmode="numeric" placeholder="4242" [value]="line.cardLast4" (input)="patch(index, { cardLast4: $any($event.target).value })" />
+                <input maxlength="4" inputmode="numeric" placeholder="4242" [class.invalid]="bad(line, 'cardLast4')" [value]="line.cardLast4" (input)="patch(index, { cardLast4: $any($event.target).value })" />
               </label>
             </div>
             <label class="field">Código de autorización
@@ -112,12 +112,12 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
     .mixed-row { display: grid; grid-template-columns: 104px minmax(0, 1fr) 34px; gap: 6px; align-items: center; }
     .mixed-row select { padding: 8px; font-weight: 600; }
     .mixed-row .remove { height: 38px; }
-    .money.money--compact input { height: 38px; font-size: 15px; font-weight: 600; }
-    .money.money--compact em { font-size: 14px; }
-    .reference { padding: 7px 10px; font-size: 13px; }
-    .more summary { color: var(--color-primary); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .money.money--compact input { height: 38px; font-size: 16px; font-weight: 600; }
+    .money.money--compact em { font-size: 16px; }
+    .reference { padding: 7px 10px; font-size: 15px; }
+    .more summary { color: var(--color-primary); font-size: 14px; font-weight: 600; cursor: pointer; }
     .more[open] { display: grid; gap: 8px; }
-    .field { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+    .field { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
     input, select {
       width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--color-border);
       border-radius: var(--radius-md); font: inherit; background: var(--color-surface);
@@ -130,18 +130,18 @@ import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
     .money input { height: 52px; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .quick { display: flex; flex-wrap: wrap; gap: 6px; }
-    .quick button { padding: 7px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-full); background: var(--color-surface); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .quick button { padding: 7px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-full); background: var(--color-surface); font-size: 14px; font-weight: 600; cursor: pointer; }
     .quick button.active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); }
     .add { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); background: transparent; color: var(--color-primary); font-weight: 600; cursor: pointer; }
     .add .material-icons { font-size: 18px; }
     .totals { display: grid; gap: 4px; }
-    .totals__row { display: flex; justify-content: space-between; padding: 0 12px; color: var(--color-text-secondary); font-size: 13px; }
+    .totals__row { display: flex; justify-content: space-between; padding: 0 12px; color: var(--color-text-secondary); font-size: 15px; }
     .totals__row span:last-child { font-weight: 600; color: var(--color-text-primary); }
     .status { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-md); color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); }
     .status strong { font-size: 18px; }
     .status--pending { color: var(--color-warning-text); background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); }
-    .hint { color: var(--color-text-muted); font-size: 12px; }
-    .error { margin: 0; color: var(--color-danger); font-size: 12px; font-weight: 600; }
+    .hint { color: var(--color-text-muted); font-size: 14px; }
+    .error { margin: 0; color: var(--color-danger); font-size: 14px; font-weight: 600; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -159,6 +159,10 @@ export class PosPaymentPanel {
   readonly kindOf = (code: string): PaymentKind => this.methods().find((method) => method.code === code)?.kind ?? 'DIGITAL';
   readonly summary = computed(() => breakdown(this.lines(), this.kindOf, this.total()));
   readonly error = computed(() => paymentsError(this.lines(), this.kindOf, this.total()));
+  private readonly invalid = computed(() => (this.showErrors() ? invalidPaymentFields(this.lines(), this.kindOf, this.total()) : new Set<string>()));
+  protected bad(line: PaymentDraftLine, field: string): boolean {
+    return this.invalid().has(`${line.key}:${field}`);
+  }
   readonly quickAmounts = computed(() => quickCashAmounts(this.summary().due));
   readonly received = computed(() => {
     const summary = this.summary();

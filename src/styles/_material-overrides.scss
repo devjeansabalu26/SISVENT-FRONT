@@ -10,6 +10,8 @@
   --mat-sys-outline: var(--color-border-strong);
   --mat-sys-outline-variant: var(--color-border);
   --mat-dialog-container-color: var(--color-surface);
+  --mat-tooltip-supporting-text-size: var(--font-size-xs);
+  --mat-snack-bar-supporting-text-size: var(--font-size-sm);
   --mat-dialog-subhead-color: var(--color-text-primary);
   --mat-dialog-supporting-text-color: var(--color-text-secondary);
 }
@@ -116,7 +118,7 @@
 .status-chip-tooltip .mdc-tooltip__surface {
   max-width: 280px;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.45;
   text-align: left;
 }

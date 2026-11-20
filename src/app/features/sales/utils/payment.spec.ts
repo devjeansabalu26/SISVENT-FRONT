@@ -1,5 +1,5 @@
 import { PaymentDraftLine, PaymentKind, newPaymentLine } from '../models/payment.model';
-import { breakdown, paymentSummary, paymentsError, quickCashAmounts, toPaymentLines } from './payment';
+import { breakdown, invalidPaymentFields, paymentSummary, paymentsError, quickCashAmounts, toPaymentLines } from './payment';
 
 const KINDS: Record<string, PaymentKind> = { CASH: 'CASH', CARD: 'CARD', YAPE: 'DIGITAL' };
 const kindOf = (code: string): PaymentKind => KINDS[code] ?? 'DIGITAL';
@@ -79,5 +79,30 @@ describe('POS payments', () => {
     expect(paymentSummary({ methodName: 'Tarjeta', amount: 6000, cardBrand: 'VISA', cardLast4: '4242', reference: '004512', authorizationCode: 'A1' })).toBe(
       'Tarjeta S/ 6,000.00 · Visa •••• 4242 · Op. 004512 · Aut. A1',
     );
+  });
+
+  describe('campos en rojo', () => {
+    it('marca el monto recibido vacío o que no cubre el total', () => {
+      const cash = line('CASH');
+      expect(invalidPaymentFields([cash], kindOf, 86.4).has(`${cash.key}:amountReceived`)).toBeTrue();
+      const short = line('CASH', { amountReceived: '50' });
+      expect(invalidPaymentFields([short], kindOf, 86.4).has(`${short.key}:amountReceived`)).toBeTrue();
+      const ok = line('CASH', { amountReceived: '100' });
+      expect(invalidPaymentFields([ok], kindOf, 86.4).size).toBe(0);
+    });
+
+    it('marca el n.º de operación vacío y el monto faltante en pago mixto', () => {
+      const yape = line('YAPE');
+      const cash = line('CASH', { amountReceived: '100' });
+      const bad = invalidPaymentFields([yape, cash], kindOf, 86.4);
+      expect(bad.has(`${yape.key}:reference`)).toBeTrue();
+      expect(bad.has(`${yape.key}:amount`)).toBeTrue();
+      expect(bad.has(`${cash.key}:amountReceived`)).toBeFalse();
+    });
+
+    it('marca los últimos dígitos de tarjeta mal escritos', () => {
+      const card = line('CARD', { reference: '004512', cardLast4: '42' });
+      expect([...invalidPaymentFields([card], kindOf, 50)]).toEqual([`${card.key}:cardLast4`]);
+    });
   });
 });

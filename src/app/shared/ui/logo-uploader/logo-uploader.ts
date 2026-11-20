@@ -54,8 +54,8 @@ export function logoFileError(file: File): string | null {
     .logo-uploader__body { display: grid; gap: 6px; min-width: 0; }
     .logo-uploader__body small { color: var(--color-text-muted); }
     .logo-uploader__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-    .logo-uploader__status { margin: 0; color: var(--color-text-muted); font-size: 13px; }
-    .logo-uploader__error { margin: 0; color: var(--color-error-text); font-size: 13px; }
+    .logo-uploader__status { margin: 0; color: var(--color-text-muted); font-size: 15px; }
+    .logo-uploader__error { margin: 0; color: var(--color-error-text); font-size: 15px; }
     @media (max-width: 520px) { .logo-uploader { align-items: flex-start; } .logo-uploader__preview { width: 64px; height: 64px; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

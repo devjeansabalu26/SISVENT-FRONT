@@ -69,7 +69,7 @@ export interface PlanChangeResult {
     .summary.cash .material-icons { color: var(--color-warning-text); }
     .summary ul { margin: 4px 0 0; padding-left: 18px; }
     .cash-tag { display: inline-flex; align-items: center; gap: 4px; color: var(--color-warning-text); font-weight: 600; }
-    .cash-tag .material-icons { font-size: 14px; }
+    .cash-tag .material-icons { font-size: 16px; }
     @media (max-width: 720px) {
       .fields.two, .impact { grid-template-columns: minmax(0, 1fr); }
     }
