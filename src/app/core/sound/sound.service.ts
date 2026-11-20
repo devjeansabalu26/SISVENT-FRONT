@@ -28,7 +28,8 @@ export class SoundService {
     const doc = this.view?.document;
     if (!doc) return;
     const events = ['pointerdown', 'keydown', 'touchstart'] as const;
-    const unlock = (): void => {
+    const unlock = (event: Event): void => {
+      if (!event.isTrusted) return;
       const ctx = this.audio();
       if (!ctx) return;
       const done = (): void => events.forEach((name) => doc.removeEventListener(name, unlock, true));
@@ -93,6 +94,8 @@ export class SoundService {
 
   private audio(): AudioContext | null {
     if (this.context) return this.context;
+    const activation = (this.view?.navigator as (Navigator & { userActivation?: { hasBeenActive: boolean } }) | undefined)?.userActivation;
+    if (activation && !activation.hasBeenActive) return null;
     const Ctor = this.view?.AudioContext ?? (this.view as unknown as { webkitAudioContext?: typeof AudioContext } | null)?.webkitAudioContext;
     if (!Ctor) return null;
     try {

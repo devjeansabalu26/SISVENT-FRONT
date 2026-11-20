@@ -450,11 +450,6 @@ header {
       box-shadow: 0 0 0 1000px $surface inset;
       transition: background-color 9999s ease-out;
     }
-
-    &:-webkit-autofill::first-line {
-      font-family: inherit;
-      font-size: 16px;
-    }
   }
 }
 

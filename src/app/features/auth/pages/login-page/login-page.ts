@@ -25,6 +25,12 @@ export class LoginPage {
 
   readonly hidePassword = signal(true);
   readonly capsLock = signal(false);
+
+  trackCaps(event: Event): void {
+    if (event instanceof KeyboardEvent && typeof event.getModifierState === 'function') {
+      this.capsLock.set(event.getModifierState('CapsLock'));
+    }
+  }
   readonly tiltX = signal(0);
   readonly tiltY = signal(0);
   readonly glowX = signal(-999);

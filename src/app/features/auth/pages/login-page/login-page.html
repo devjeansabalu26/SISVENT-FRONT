@@ -66,8 +66,7 @@
             <span class="material-icons" aria-hidden="true">lock_outline</span>
             <input id="login-password" formControlName="password" [type]="hidePassword() ? 'password' : 'text'"
               autocomplete="current-password" placeholder="Tu contraseña"
-              (keydown)="capsLock.set($event.getModifierState('CapsLock'))"
-              (keyup)="capsLock.set($event.getModifierState('CapsLock'))" (blur)="capsLock.set(false)"
+              (keydown)="trackCaps($event)" (keyup)="trackCaps($event)" (blur)="capsLock.set(false)"
               [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
               aria-describedby="login-password-error login-caps" />
             <button type="button" class="eye" (click)="hidePassword.set(!hidePassword())"
