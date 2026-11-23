@@ -43,6 +43,7 @@ export class DashboardPage implements OnInit {
   readonly companyName = computed(() => this.companyContext.company()?.commercialName ?? 'tu empresa');
 
   readonly hasReports = computed(() => this.access.hasFeature('REPORTS'));
+  readonly hasSupplyAnalytics = computed(() => this.access.hasFeature('SUPPLY_ANALYTICS'));
   readonly loading = signal(true);
   readonly syncing = signal(false);
   readonly admin = signal<AdminDashboard | null>(null);

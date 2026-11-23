@@ -7,6 +7,7 @@ import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
+import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { SaleApiService } from '../data-access/sale-api.service';
 import { PosApiService } from '../data-access/pos-api.service';
 import { Sale, SalesTotals } from '../models/sale.model';
@@ -17,7 +18,7 @@ import { INVOICE_FEATURE } from '../utils/sale-document';
 
 @Component({
   selector: 'app-sale-list-page',
-  imports: [DataTable, EmptyState, PageHeader, FormsModule, RouterLink, MoneyPipe],
+  imports: [DataTable, EmptyState, PageHeader, FormsModule, RouterLink, MoneyPipe, StatusChip],
   templateUrl: './sale-list-page.html',
   styleUrl: './sale-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,8 +52,13 @@ export class SaleListPage implements OnInit {
   documentType = '';
   readonly paymentOptions = signal<readonly { value: string; label: string }[]>([]);
 
+  readonly dateTime = formatDateTime;
+  saleLabel(row: Sale): string {
+    return row.documentNumber ? `${row.documentNumber} (${row.saleNumber})` : row.saleNumber;
+  }
+
   readonly columns: readonly DataTableColumn<Sale>[] = [
-    { key: 'number', label: 'Nro venta', value: (row) => (row.documentNumber ? `${row.documentNumber} (${row.saleNumber})` : row.saleNumber) },
+    { key: 'number', label: 'Nro venta', value: (row) => this.saleLabel(row) },
     { key: 'date', label: 'Fecha', value: (row) => formatDateTime(row.saleDate) },
     { key: 'customer', label: 'Cliente', value: (row) => row.clientName ?? 'Cliente general' },
     { key: 'seller', label: 'Vendedor', value: (row) => row.sellerName },

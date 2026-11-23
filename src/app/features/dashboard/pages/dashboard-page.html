@@ -214,14 +214,28 @@
               </div>
               <span class="todo-card__cta">Ver inventario</span>
             </a>
-            <a routerLink="/app/goods-receipts" class="todo-card" [attr.data-tone]="actions.ordersInTransit > 0 ? 'info' : 'ok'">
-              <span class="material-icons" aria-hidden="true">local_shipping</span>
-              <div>
-                <strong>{{ actions.ordersInTransit > 0 ? plural(actions.ordersInTransit, 'pedido en camino', 'pedidos en camino') : 'Sin pedidos en camino' }}</strong>
-                <small>{{ actions.ordersInTransit > 0 ? 'Recíbelos al llegar para subir el stock' : 'Pedidos a proveedores pendientes' }}</small>
-              </div>
-              <span class="todo-card__cta">Ver ingresos</span>
-            </a>
+            @if (hasSupplyAnalytics()) {
+              <a routerLink="/app/replenishment/stagnant" [queryParams]="{ days: actions.stagnantDaysThreshold }" class="todo-card" [attr.data-tone]="actions.stagnantProducts > 0 ? 'warning' : 'ok'">
+                <span class="material-icons" aria-hidden="true">{{ actions.stagnantProducts > 0 ? 'hourglass_bottom' : 'autorenew' }}</span>
+                <div>
+                  <strong>{{ actions.stagnantProducts > 0 ? plural(actions.stagnantProducts, 'producto sin rotación', 'productos sin rotación') : 'Todo tu stock se está vendiendo' }}</strong>
+                  <small>Con stock y sin ventas en {{ actions.stagnantDaysThreshold }} días o más</small>
+                </div>
+                <span class="todo-card__cta">Ver productos</span>
+              </a>
+            } @else {
+              <a routerLink="/app/upgrade" [queryParams]="{ feature: 'SUPPLY_ANALYTICS', module: 'Sin movimiento y exceso' }" class="todo-card"
+                [attr.data-tone]="actions.stagnantProducts > 0 ? 'warning' : 'ok'"
+                data-locked="El detalle de productos sin rotación está en los planes con análisis de abastecimiento.">
+                <span class="material-icons" aria-hidden="true">{{ actions.stagnantProducts > 0 ? 'hourglass_bottom' : 'autorenew' }}</span>
+                <div>
+                  <strong>{{ actions.stagnantProducts > 0 ? plural(actions.stagnantProducts, 'producto sin rotación', 'productos sin rotación') : 'Todo tu stock se está vendiendo' }}</strong>
+                  <small>Con stock y sin ventas en {{ actions.stagnantDaysThreshold }} días o más</small>
+                  <small class="locked-note"><span class="material-icons" aria-hidden="true">lock</span>Ver cuáles son está en los planes con análisis de abastecimiento.</small>
+                </div>
+                <span class="todo-card__cta">Ver planes</span>
+              </a>
+            }
           </div>
         </section>
       }

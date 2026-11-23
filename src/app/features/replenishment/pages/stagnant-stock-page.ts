@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { StoreContextService } from '../../../core/context/store-context/store-context.service';
 import { DataTable } from '../../../shared/ui/data-table/data-table';
 import { DataTableColumn } from '../../../shared/ui/data-table/data-table.model';
@@ -13,6 +14,11 @@ import { stagnantHint } from '../utils/status-hints';
 
 const THRESHOLDS = [30, 60, 90, 120] as const;
 
+function initialThreshold(days: string | null): number {
+  const value = Number(days);
+  return THRESHOLDS.find((option) => option === value) ?? 60;
+}
+
 @Component({
   selector: 'app-stagnant-stock-page',
   imports: [DataTable, PageHeader, KpiCard, ReplenishmentLoadState],
@@ -25,7 +31,7 @@ export class StagnantStockPage implements OnInit {
 
   readonly state = signal<LoadState>('loading');
   readonly data = signal<StagnantAnalysis | null>(null);
-  readonly threshold = signal<number>(60);
+  readonly threshold = signal<number>(initialThreshold(inject(ActivatedRoute).snapshot.queryParamMap.get('days')));
   readonly thresholds = THRESHOLDS;
   readonly formatSoles = formatSoles;
 

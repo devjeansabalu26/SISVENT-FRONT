@@ -103,6 +103,8 @@ export interface DashboardActions {
   readonly reorderSoon: number | null;
   readonly outOfStock: number;
   readonly ordersInTransit: number;
+  readonly stagnantProducts: number;
+  readonly stagnantDaysThreshold: number;
 }
 
 export interface SellerDashboard {

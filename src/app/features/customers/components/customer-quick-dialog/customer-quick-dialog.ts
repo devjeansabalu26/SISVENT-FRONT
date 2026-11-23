@@ -23,13 +23,13 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
         <span class="material-icons">person_add</span>
         <div>
           <h2>Nuevo cliente</h2>
-          <p>Registro rápido para asociarlo a la venta en curso</p>
+          <p>Solo el nombre es obligatorio; el resto puedes completarlo después.</p>
         </div>
       </header>
 
       <div class="fields two">
         <label
-          >Tipo de documento *
+          >Tipo de documento
           <select formControlName="documentType">
             @for (type of documentTypes(); track type.code) {
               <option [value]="type.code" [title]="type.name">{{ type.code }}</option>
@@ -37,7 +37,7 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
           </select>
         </label>
         <label
-          >Número de documento *
+          ><span>Número de documento <span class="optional">(opcional)</span></span>
           <span class="ruc-search">
             <input formControlName="documentNumber" [placeholder]="selectedType()?.placeholder ?? ''" (keydown.enter)="onEnter($event)"
               [attr.maxlength]="lengthRule().max" [attr.inputmode]="lengthRule().digitsOnly ? 'numeric' : null" autocomplete="off" />
@@ -55,9 +55,9 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
           <small class="help" data-kind="error">{{ form.controls.displayName.touched && form.controls.displayName.invalid ? 'El nombre es obligatorio.' : '' }}</small>
         </label>
         <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null"
-          >Teléfono *
+          ><span>Teléfono <span class="optional">(opcional)</span></span>
           <input formControlName="phone" inputmode="tel" />
-          <small class="help" data-kind="error">{{ form.controls.phone.touched && form.controls.phone.invalid ? 'El teléfono es obligatorio.' : '' }}</small>
+          <small class="help"></small>
         </label>
         <label [attr.data-locked]="existing() ? 'Este cliente ya está registrado. Para cambiar sus datos, edítalo desde Clientes.' : null"
           >Correo
@@ -90,7 +90,14 @@ import { RUC_LOOKUP_FEATURE, isValidRuc } from '../../../sales/utils/sale-docume
     .help[data-kind='ok'] { color: var(--color-success); }
     .help[data-kind='warn'] { color: var(--color-warning); }
     .help[data-kind='error'] { color: var(--color-danger); }
-    label { align-content: start; }
+    .dialog { box-sizing: border-box; width: min(560px, calc(100vw - 32px)); max-width: 100%; }
+    label { align-content: start; min-width: 0; }
+    label input, label select { width: 100%; min-width: 0; box-sizing: border-box; }
+    .ruc-search { min-width: 0; }
+    .optional { color: var(--color-text-muted); font-weight: 400; }
+    @media (max-width: 520px) {
+      .fields.two { grid-template-columns: minmax(0, 1fr); }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -114,9 +121,9 @@ export class CustomerQuickDialog {
 
   readonly form = new FormGroup({
     documentType: new FormControl('DNI', { nonNullable: true, validators: [Validators.required] }),
-    documentNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    displayName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    documentNumber: new FormControl('', { nonNullable: true }),
+    displayName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(220)] }),
+    phone: new FormControl('', { nonNullable: true }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.email] }),
     address: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(350)] }),
   });
@@ -155,7 +162,7 @@ export class CustomerQuickDialog {
 
   constructor() {
     this.form.controls.documentType.valueChanges.subscribe(() => {
-      applyDocumentType(this.form.controls.documentNumber, this.selectedType());
+      this.applyOptionalDocument();
       this.clearLookup();
     });
     this.form.controls.documentNumber.valueChanges.subscribe((value) => {
@@ -172,8 +179,15 @@ export class CustomerQuickDialog {
     this.form.controls.documentNumber.statusChanges.subscribe(() => this.touchedTick.update((tick) => tick + 1));
     void this.regional.loadDocumentTypes().then((types) => {
       this.form.controls.documentType.setValue(defaultDocumentType(types));
-      applyDocumentType(this.form.controls.documentNumber, this.selectedType());
+      this.applyOptionalDocument();
     });
+  }
+
+  private applyOptionalDocument(): void {
+    const control = this.form.controls.documentNumber;
+    applyDocumentType(control, this.selectedType());
+    control.removeValidators(Validators.required);
+    control.updateValueAndValidity({ emitEvent: false });
   }
 
   cancel(): void {
@@ -312,6 +326,7 @@ export class CustomerQuickDialog {
       return;
     }
     const value = this.form.getRawValue();
+    const documentNumber = value.documentNumber.trim();
     this.saving.set(true);
     this.error.set(null);
     this.api
@@ -319,10 +334,10 @@ export class CustomerQuickDialog {
         displayName: value.displayName.trim(),
         firstName: null,
         lastName: null,
-        documentType: value.documentType,
-        documentNumber: value.documentNumber.trim(),
+        documentType: documentNumber ? value.documentType : null,
+        documentNumber: documentNumber || null,
         email: value.email.trim() || null,
-        phone: value.phone.trim(),
+        phone: value.phone.trim() || null,
         address: value.address.trim() || null,
         notes: null,
         isActive: true,

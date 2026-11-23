@@ -39,7 +39,29 @@
     <button type="button" (click)="load()">Filtrar</button>
   </div>
 </section>
-<app-data-table [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="true" editLabel="Ver detalle" editIcon="visibility" removeLabel="Ver comprobante" removeIcon="receipt_long" (edit)="open($event)" (remove)="receipt($event)" [customEmpty]="true">
+@if (!loading() && rows().length) {
+  <ul class="sale-cards" aria-label="Ventas">
+    @for (row of rows(); track row.id) {
+      <li class="sale-card">
+        <div class="sale-card__top">
+          <strong>{{ saleLabel(row) }}</strong>
+          <app-status-chip [value]="row.status" [label]="row.status === 'CANCELLED' ? 'Anulada' : 'Confirmada'" />
+        </div>
+        <p class="sale-card__meta">{{ dateTime(row.saleDate) }} · {{ row.storeName }}</p>
+        <p class="sale-card__client"><span class="material-icons" aria-hidden="true">person</span><span>{{ row.clientName ?? 'Cliente general' }}</span></p>
+        <div class="sale-card__bottom">
+          <span>{{ row.paymentMethod }} · {{ row.sellerName }}</span>
+          <strong>{{ row.total | money }}</strong>
+        </div>
+        <div class="sale-card__actions">
+          <button type="button" (click)="open(row)"><span class="material-icons" aria-hidden="true">visibility</span>Ver detalle</button>
+          <button type="button" (click)="receipt(row)"><span class="material-icons" aria-hidden="true">receipt_long</span>Comprobante</button>
+        </div>
+      </li>
+    }
+  </ul>
+}
+<app-data-table [class.has-cards]="!loading() && rows().length > 0" [columns]="columns" [rows]="rows()" [loading]="loading()" [showRemove]="true" editLabel="Ver detalle" editIcon="visibility" removeLabel="Ver comprobante" removeIcon="receipt_long" (edit)="open($event)" (remove)="receipt($event)" [customEmpty]="true">
   @if (hasFilters()) {
     <app-empty-state tableEmpty flush icon="search_off" title="Sin resultados de búsqueda"
       description="No pudimos encontrar nada que coincida con tus términos de filtro. Intenta con otra palabra clave o limpia los filtros."

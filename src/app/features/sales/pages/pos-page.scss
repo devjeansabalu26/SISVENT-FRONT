@@ -340,7 +340,29 @@
 
 @media (max-width: 650px) {
   .cart .row {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'n n n' 'q t x';
+    row-gap: 8px;
+    padding-inline: 4px;
+  }
+  .cart .row__name {
+    grid-area: n;
+    strong {
+      display: -webkit-box;
+      white-space: normal;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+  .cart .quantity {
+    grid-area: q;
+    justify-self: start;
+  }
+  .cart .row__total {
+    grid-area: t;
+  }
+  .cart .trash {
+    grid-area: x;
   }
 }
 
