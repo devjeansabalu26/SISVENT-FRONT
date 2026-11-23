@@ -167,11 +167,16 @@ export class PosPage implements OnInit {
       this.cashApi.status().subscribe({ next: (statuses) => this.cashStatuses.set(statuses), error: () => undefined });
     }
     if (this.isAdmin) {
+      const preferred = this.storeContext.selectedStoreId();
+      if (preferred) {
+        this.selectedStoreId.set(preferred);
+        this.loadCatalog();
+      }
       this.storeApi.list().subscribe((response) => {
         this.stores.set(response.items.filter((item) => !item.isWaste));
-        const preferred = this.storeContext.selectedStoreId();
         const initial = this.stores().find((item) => item.id === preferred) ?? this.stores()[0];
-        if (initial) this.selectedStoreId.set(initial.id);
+        if (initial?.id === this.selectedStoreId() && preferred) return;
+        this.selectedStoreId.set(initial?.id ?? null);
         this.loadCatalog();
       });
     } else {
