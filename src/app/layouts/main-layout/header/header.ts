@@ -14,6 +14,7 @@ import { SoundSettings } from '../../../shared/ui/sound-settings/sound-settings'
 import { NotificationMenu } from '../../../features/notifications/components/notification-menu/notification-menu';
 
 const BADGE_POLL_MS = 30_000;
+const BADGE_NAV_STALE_MS = 15_000;
 
 @Component({ selector: 'app-header', imports: [SoundSettings, NotificationMenu], templateUrl: './header.html', styleUrl: './header.scss', changeDetection: ChangeDetectionStrategy.OnPush })
 export class Header implements OnInit {
@@ -38,7 +39,7 @@ export class Header implements OnInit {
     this.badge.refresh();
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.badge.refresh());
+      .subscribe(() => this.badge.refreshIfStale(BADGE_NAV_STALE_MS));
     merge(
       interval(BADGE_POLL_MS),
       fromEvent(document, 'visibilitychange').pipe(filter(() => document.visibilityState === 'visible')),

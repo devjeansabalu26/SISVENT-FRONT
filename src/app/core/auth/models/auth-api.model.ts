@@ -1,4 +1,5 @@
 import { SessionModule } from '../constants/module-permissions.constant';
+import { CompanyRegional } from '../../regional/regional.model';
 
 export interface LoginCredentials {
   readonly username: string;
@@ -39,4 +40,5 @@ export interface LoginResult {
   readonly accessToken: string;
   readonly expiresAt: string | null;
   readonly user: SessionUser;
+  readonly regional?: CompanyRegional | null;
 }

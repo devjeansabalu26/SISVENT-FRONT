@@ -10,7 +10,14 @@ export class NotificationBadgeService {
   private loaded = false;
   readonly unread = this.count.asReadonly();
 
+  private lastRequestAt = 0;
+
+  refreshIfStale(maxAgeMs: number): void {
+    if (Date.now() - this.lastRequestAt >= maxAgeMs) this.refresh();
+  }
+
   refresh(): void {
+    this.lastRequestAt = Date.now();
     this.api.unreadCount().subscribe({
       next: (value) => {
         if (this.loaded && value > this.count()) this.sound.play('notification');

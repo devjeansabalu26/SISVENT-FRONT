@@ -60,6 +60,10 @@ export class AppSessionService {
       throw error;
     }
     this.auth.markAuthenticated();
+    if (result.regional && result.user.companyId && result.user.company) {
+      this.regional.apply(result.regional);
+      return Promise.resolve();
+    }
     return this.loadRegional(result.user);
   }
 
