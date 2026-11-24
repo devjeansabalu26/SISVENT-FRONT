@@ -55,6 +55,7 @@ export interface PlanChangeResult {
     .counter.ok { color: var(--color-primary); border-color: var(--color-primary); }
     .card p { margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
     .choices { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; }
+    @media (max-width: 900px) { .choices { max-height: none; overflow-y: visible; } }
     .choice { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm, 6px); background: var(--control-bg); font-weight: 500; color: var(--color-text-primary); cursor: pointer; }
     .choice.selected { outline: 1px solid var(--color-primary); }
     .choice.disabled { opacity: 0.55; cursor: not-allowed; }

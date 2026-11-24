@@ -1,0 +1,164 @@
+app-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  app-scroll-hint {
+    display: block;
+  }
+}
+
+.scroll-hint__arrow {
+  position: fixed;
+  left: 50%;
+  z-index: 15;
+  margin-left: -19px;
+}
+
+.scroll-hint__shade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 14;
+  height: 72px;
+  pointer-events: none;
+}
+
+.scroll-hint__shade--top {
+  top: 0;
+  background: linear-gradient(to bottom, rgb(15 23 42 / 0.82), transparent);
+}
+
+.scroll-hint__shade--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, rgb(15 23 42 / 0.82), transparent);
+}
+
+.scroll-hint__arrow--up {
+  top: calc(14px + env(safe-area-inset-top, 0px));
+}
+
+.scroll-hint__arrow--down {
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+.scroll-hint__arrow,
+.table-scroll-hint {
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: var(--color-on-primary, #fff);
+  background: var(--color-primary);
+  box-shadow: 0 4px 14px rgb(15 23 42 / 0.35);
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.scroll-hint__arrow:active,
+.table-scroll-hint--on:active {
+  filter: brightness(0.88);
+}
+
+.scroll-hint__arrow:focus-visible,
+.table-scroll-hint:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.scroll-hint__arrow {
+  width: 38px;
+  height: 38px;
+}
+
+.scroll-hint__arrow--down {
+  animation: scroll-hint-down 1.4s ease-in-out infinite;
+}
+
+.scroll-hint__arrow--up {
+  animation: scroll-hint-up 1.4s ease-in-out infinite;
+}
+
+.scroll-hint__arrow .material-icons {
+  font-size: 26px;
+}
+
+.table-scroll-shade {
+  position: absolute;
+  z-index: 2;
+  width: 44px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.table-scroll-shade--on {
+  opacity: 1;
+}
+
+.table-scroll-shade--back {
+  background: linear-gradient(to right, rgb(15 23 42 / 0.8), transparent);
+}
+
+.table-scroll-shade--forward {
+  background: linear-gradient(to left, rgb(15 23 42 / 0.8), transparent);
+}
+
+.table-scroll-hint {
+  position: absolute;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.table-scroll-hint--on {
+  opacity: 1;
+  visibility: visible;
+}
+
+.table-scroll-hint--on.table-scroll-hint--forward {
+  animation: scroll-hint-right 1.4s ease-in-out infinite;
+}
+
+.table-scroll-hint--on.table-scroll-hint--back {
+  animation: scroll-hint-left 1.4s ease-in-out infinite;
+}
+
+.table-scroll-hint .material-icons {
+  font-size: 24px;
+}
+
+@keyframes scroll-hint-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+@keyframes scroll-hint-up {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes scroll-hint-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+@keyframes scroll-hint-left {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint__arrow,
+  .table-scroll-hint--on {
+    animation: none !important;
+  }
+}

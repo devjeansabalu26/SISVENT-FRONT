@@ -344,3 +344,12 @@ tr.clickable:hover {
   background: var(--color-primary-soft);
   font-size: 20px;
 }
+
+@media (max-width: 900px) {
+  .items__list {
+    max-height: none;
+    margin-right: 0;
+    padding-right: 0;
+    overflow-y: visible;
+  }
+}

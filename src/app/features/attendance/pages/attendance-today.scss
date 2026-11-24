@@ -53,3 +53,10 @@
   padding: 8px 12px;
   font-size: 15px;
 }
+
+@media (max-width: 900px) {
+  .today-table {
+    max-height: none;
+    overflow-y: hidden;
+  }
+}

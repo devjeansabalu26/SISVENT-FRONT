@@ -345,3 +345,10 @@ button.big {
     justify-content: center;
   }
 }
+
+@media (max-width: 900px) {
+  .table-box {
+    max-height: none;
+    overflow-y: hidden;
+  }
+}

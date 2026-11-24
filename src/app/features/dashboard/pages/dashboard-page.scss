@@ -474,3 +474,11 @@ td small {
     }
   }
 }
+
+@media (max-width: 900px) {
+  .activity.scroll {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+}
