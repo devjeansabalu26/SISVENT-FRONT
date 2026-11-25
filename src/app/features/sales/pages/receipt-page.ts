@@ -1,3 +1,4 @@
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -31,6 +32,7 @@ export class ReceiptPage implements OnInit {
   readonly sending = this.mailer.sending;
   readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
   readonly sale = signal<SaleDetail | null>(null);
+  readonly demo = inject(AccessControlService).isDemoCompany();
   readonly receiptLogoUrl = computed(() => {
     const sale = this.sale();
     if (sale?.receipt?.showLogoOnReceipt !== true) return null;
@@ -62,6 +64,7 @@ export class ReceiptPage implements OnInit {
   }
 
   print(): void {
+    if (this.demo) return;
     window.print();
   }
 

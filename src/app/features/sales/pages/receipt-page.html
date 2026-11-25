@@ -3,9 +3,13 @@
     <button type="button" class="ghost" (click)="back()"><span class="material-icons">arrow_back</span>Volver a ventas</button>
     <span class="control-bar__title">Vista previa de comprobante</span>
     <div class="control-bar__actions">
-      <button type="button" class="ghost" [disabled]="sending()" (click)="sendEmail()"><span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar por correo' }}</button>
-      <button type="button" class="ghost" [disabled]="downloading()" (click)="downloadPdf()"><span class="material-icons">picture_as_pdf</span>{{ downloading() ? 'Generando…' : 'Descargar PDF' }}</button>
-      <button type="button" class="primary" (click)="print()"><span class="material-icons">print</span>Imprimir</button>
+      @if (demo) {
+        <small class="locked-note"><span class="material-icons" aria-hidden="true">lock</span>Cuenta de demostración: no se imprimen, descargan ni envían comprobantes.</small>
+      } @else {
+        <button type="button" class="ghost" [disabled]="sending()" (click)="sendEmail()"><span class="material-icons">mail</span>{{ sending() ? 'Enviando…' : 'Enviar por correo' }}</button>
+        <button type="button" class="ghost" [disabled]="downloading()" (click)="downloadPdf()"><span class="material-icons">picture_as_pdf</span>{{ downloading() ? 'Generando…' : 'Descargar PDF' }}</button>
+        <button type="button" class="primary" (click)="print()"><span class="material-icons">print</span>Imprimir</button>
+      }
     </div>
   </div>
 

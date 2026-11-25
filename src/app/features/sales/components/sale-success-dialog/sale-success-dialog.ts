@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MoneyPipe } from '../../../../shared/pipes/date-time.pipe';
+import { AccessControlService } from '../../../../core/auth/services/access-control.service';
 
 export interface SaleSuccessData {
   readonly saleNumber: string;
@@ -25,6 +26,7 @@ export type SaleSuccessAction = 'print' | 'detail' | 'email' | 'new';
 export class SaleSuccessDialog {
   readonly data = inject<SaleSuccessData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<SaleSuccessDialog, SaleSuccessAction>);
+  readonly demo = inject(AccessControlService).isDemoCompany();
 
   close(action: SaleSuccessAction): void {
     this.dialogRef.close(action);

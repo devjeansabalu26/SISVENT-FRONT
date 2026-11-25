@@ -26,6 +26,11 @@ export class AccessControlService {
     return true;
   }
 
+  isDemoCompany(): boolean {
+    if (this.users.user()?.role === 'SUPERADMIN') return false;
+    return this.companies.company()?.features.includes('DEMO_COMPANY') ?? false;
+  }
+
   hasFeature(feature: string): boolean {
     if (this.users.user()?.role === 'SUPERADMIN') return true;
     return this.companies.company()?.features.includes(feature) ?? false;

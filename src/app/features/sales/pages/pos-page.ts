@@ -703,6 +703,7 @@ export class PosPage implements OnInit {
   }
 
   private autoEmailReceipt(sale: SaleDetail): string | null {
+    if (this.access.isDemoCompany()) return null;
     const settings = this.posSettings();
     const email = sale.clientEmail?.trim();
     if (!settings.autoEmailReceipt || !email) return null;
