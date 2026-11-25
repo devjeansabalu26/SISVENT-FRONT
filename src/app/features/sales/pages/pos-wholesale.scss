@@ -105,23 +105,37 @@
   font-size: 13px;
 }
 
-.cart .price-edit {
-  display: flex;
-  flex-wrap: wrap;
-  grid-column: 1 / -1;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-text-secondary);
-  font-size: 13px;
+.cart .row.row--price {
+  grid-template-columns: minmax(0, 1fr) auto auto 110px 36px;
+}
+
+.cart .row__price {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: var(--color-text-muted);
+  font-size: 12px;
   font-weight: 600;
 
   input {
-    width: 110px;
+    width: 92px;
     height: 34px;
+    text-align: right;
+  }
+}
+
+.cart .price-changed {
+  color: var(--color-warning-text);
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  .cart .row.row--price {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: 'n n n n' 'p q t x';
   }
 
-  small {
-    color: var(--color-text-muted);
-    font-weight: 400;
+  .cart .row--price .row__price {
+    grid-area: p;
   }
 }

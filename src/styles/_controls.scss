@@ -270,3 +270,14 @@ input[type='date']:not([data-native-picker])::-webkit-calendar-picker-indicator 
 .app-picker-overlay {
   z-index: 1100;
 }
+
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}

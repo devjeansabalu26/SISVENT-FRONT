@@ -61,15 +61,29 @@
       } @else {
         <div class="rows">
           @for (item of cart(); track item.product.id) {
-            <div class="row" [class.row--new]="lastAdded() === item.product.id">
+            <div class="row" [class.row--new]="lastAdded() === item.product.id" [class.row--price]="canEditPrice">
               <div class="row__name">
                 <strong>{{ item.product.name }}</strong>
                 <small>{{ item.product.sku }} · {{ (item.wholesalePrice ?? retailPrice(item)) | money }} c/u</small>
+                @if (item.unitPrice != null) {
+                  <small class="price-changed">Precio cambiado solo en esta venta · el producto sigue en {{ item.product.salePrice | money }}</small>
+                }
                 <small class="stk" [class.stk--max]="item.quantity >= item.product.totalStock">
                   <span class="material-icons" aria-hidden="true">inventory_2</span>Stock: {{ item.product.totalStock }} u.
                   · {{ item.quantity >= item.product.totalStock ? 'llevas todo el stock' : 'quedan ' + (item.product.totalStock - item.quantity) }}
                 </small>
               </div>
+              @if (canEditPrice) {
+                @if (item.wholesalePrice == null) {
+                  <label class="row__price" title="Precio solo para esta venta; el precio del producto no cambia">
+                    <span>Precio c/u</span>
+                    <input #unit type="number" min="0" step="0.01" inputmode="decimal" [value]="retailPrice(item)"
+                      (change)="setUnitPrice(item.product.id, unit)" (keydown.enter)="unit.blur()" aria-label="Precio por unidad solo para esta venta" />
+                  </label>
+                } @else {
+                  <span class="row__price" aria-hidden="true"></span>
+                }
+              }
               <div class="quantity">
                 <button type="button" (click)="change(item.product.id, -1)" [disabled]="item.quantity <= 1 || quantityLocked(item)" aria-label="Quitar una unidad">−</button>
                 <b>{{ item.quantity }}</b>
@@ -77,15 +91,6 @@
               </div>
               <b class="row__total">{{ lineTotal(item) | money }}</b>
               <button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button>
-              @if (canEditPrice && item.wholesalePrice == null) {
-                <label class="price-edit">
-                  <span>Precio c/u solo para esta venta</span>
-                  <input #unit type="number" min="0" step="0.01" inputmode="decimal" [value]="retailPrice(item)" (change)="setUnitPrice(item.product.id, unit)" />
-                  @if (item.unitPrice != null) {
-                    <small>Precio del producto: {{ item.product.salePrice | money }} (no cambia)</small>
-                  }
-                </label>
-              }
               @if (wholesaleEnabled() && canChooseWholesale(item)) {
                 <div class="wholesale">
                   <div class="wholesale__mode" role="group" aria-label="Tipo de precio">
