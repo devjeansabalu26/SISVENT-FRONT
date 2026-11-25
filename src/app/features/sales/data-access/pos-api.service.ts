@@ -29,6 +29,7 @@ export interface PosSaleRequest {
   readonly lines: readonly PosSaleLineInput[];
   readonly payments: readonly PosPaymentLine[];
   readonly invoice?: PosInvoiceInput | null;
+  readonly expectedTotal?: number;
 }
 
 export interface RucLookupResult {

@@ -737,6 +737,7 @@ export class PosPage implements OnInit {
       invoice: invoiceCustomer
         ? { ruc: invoiceCustomer.documentNumber!, legalName: invoiceCustomer.displayName, address: null }
         : null,
+      expectedTotal: Math.round(total * 100) / 100,
     };
     const pending = pendingSaleFor(this.pendingSale, body, () => crypto.randomUUID());
     this.pendingSale = pending;
