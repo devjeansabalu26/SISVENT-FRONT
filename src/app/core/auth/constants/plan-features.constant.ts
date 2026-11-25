@@ -50,5 +50,5 @@ export const PLAN_FEATURE_LABELS: Readonly<Record<string, string>> = {
   E_INVOICING: 'Facturación electrónica',
   RUC_LOOKUP: 'Consulta de RUC en SUNAT',
   WHOLESALE: 'Venta por mayor y por menor',
-  DEMO_COMPANY: 'Empresa demo: sin impresión',
+  DEMO_COMPANY: 'Modo demo',
 };

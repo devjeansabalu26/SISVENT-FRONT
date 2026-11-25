@@ -1,3 +1,5 @@
+import { AccessControlService } from '../../core/auth/services/access-control.service';
+import { NotificationService } from '../../core/notifications/notification.service';
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import type { Cell, Workbook, Worksheet } from 'exceljs';
@@ -85,8 +87,14 @@ const MUTED = 'FF64748B';
 export class ExcelExportService {
   private readonly document = inject(DOCUMENT);
   private readonly company = inject(CompanyContextService);
+  private readonly access = inject(AccessControlService);
+  private readonly notifications = inject(NotificationService);
 
   async export(options: ExcelExportOptions, format: ExportFormat = 'xlsx'): Promise<void> {
+    if (this.access.isDemoCompany()) {
+      this.notifications.show('Modo demo: en esta cuenta de demostración no se exportan ni descargan archivos.', 'info');
+      return;
+    }
     if (format === 'pdf') {
       const accent = this.accentColor();
       const rgb = [1, 3, 5].map((start) => parseInt(accent.slice(start + 1, start + 3), 16)) as [number, number, number];

@@ -1,3 +1,4 @@
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { DOCUMENT } from '@angular/common';
 import { ExcelExportService, ExportFormat, excelTable } from '../../../shared/export/excel-export.service';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
@@ -41,6 +42,7 @@ export class OrderPlanPage implements OnInit {
   private readonly router = inject(Router);
   private readonly excel = inject(ExcelExportService);
   private readonly document = inject(DOCUMENT);
+  private readonly access = inject(AccessControlService);
 
   readonly views = VIEWS;
   readonly statusLabels = ORDER_STATUS_LABELS;
@@ -146,7 +148,7 @@ export class OrderPlanPage implements OnInit {
     const body = this.document.body;
     requestAnimationFrame(() => {
       body.classList.add('print-mode');
-      this.document.defaultView?.print();
+      if (!this.access.isDemoCompany()) this.document.defaultView?.print();
       body.classList.remove('print-mode');
     });
   }

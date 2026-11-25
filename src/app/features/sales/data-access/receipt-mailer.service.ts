@@ -1,3 +1,4 @@
+import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { filter } from 'rxjs';
@@ -15,13 +16,20 @@ export class ReceiptMailerService {
   private readonly dialog = inject(MatDialog);
   private readonly notifications = inject(NotificationService);
   private readonly company = inject(CompanyContextService).company;
+  private readonly access = inject(AccessControlService);
 
   private readonly sendingState = signal(false);
   readonly sending = this.sendingState.asReadonly();
   readonly companyName = computed(() => this.company()?.commercialName ?? 'SAVIX');
 
+  private demoBlocked(): boolean {
+    if (!this.access.isDemoCompany()) return false;
+    this.notifications.show('Modo demo: en esta cuenta de demostración no se envían comprobantes por correo.', 'info');
+    return true;
+  }
+
   send(sale: SaleDetail): void {
-    if (this.sendingState()) return;
+    if (this.sendingState() || this.demoBlocked()) return;
     this.dialog
       .open<SendReceiptDialog, SendReceiptData, string>(SendReceiptDialog, {
         data: { saleNumber: sale.saleNumber, clientName: sale.clientName, clientEmail: sale.clientEmail ?? null },
@@ -32,7 +40,7 @@ export class ReceiptMailerService {
   }
 
   sendTo(sale: SaleDetail, email: string): void {
-    if (this.sendingState()) return;
+    if (this.sendingState() || this.demoBlocked()) return;
     void this.deliver(sale, email);
   }
 
