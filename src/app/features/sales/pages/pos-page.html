@@ -77,8 +77,11 @@
                 @if (item.wholesalePrice == null) {
                   <label class="row__price" title="Precio solo para esta venta; el precio del producto no cambia">
                     <span>Precio c/u</span>
-                    <input #unit type="number" min="0" step="0.01" inputmode="decimal" [value]="retailPrice(item)"
-                      (change)="setUnitPrice(item.product.id, unit)" (keydown.enter)="unit.blur()" aria-label="Precio por unidad solo para esta venta" />
+                    <span class="row__price-box" [class.row__price-box--changed]="item.unitPrice != null">
+                      <small>S/</small>
+                      <input #unit type="number" min="0" step="0.01" inputmode="decimal" [value]="retailPrice(item).toFixed(2)"
+                        (change)="setUnitPrice(item.product.id, unit)" (keydown.enter)="unit.blur()" aria-label="Precio por unidad solo para esta venta" />
+                    </span>
                   </label>
                 } @else {
                   <span class="row__price" aria-hidden="true"></span>
