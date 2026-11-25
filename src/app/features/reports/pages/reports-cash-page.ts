@@ -136,7 +136,7 @@ export class ReportsCashPage {
     const report = this.report();
     if (!report) return;
     const summary = report.summary;
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-caja-y-pagos',
       title: 'Reporte de caja y pagos',
       subtitle: this.state.exportContext(),
@@ -188,6 +188,6 @@ export class ReportsCashPage {
         ] }),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

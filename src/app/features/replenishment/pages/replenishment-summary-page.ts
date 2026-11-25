@@ -106,7 +106,7 @@ export class ReplenishmentSummaryPage implements OnInit {
       this.notifications.show('No hay compras sugeridas por procesar.', 'info');
       return;
     }
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'orden-compra-sugerida',
       title: 'Orden de compra sugerida',
       subtitle: `Reabastecimiento · ${suggestions.length} productos`,
@@ -125,6 +125,6 @@ export class ReplenishmentSummaryPage implements OnInit {
         ] }),
       ],
     });
-    this.notifications.show(`Orden de compra sugerida descargada (${suggestions.length} productos).`, 'success');
+    if (exported) this.notifications.show(`Orden de compra sugerida descargada (${suggestions.length} productos).`, 'success');
   }
 }

@@ -109,7 +109,7 @@ export class ReportsProductsPage {
       ...matrix.groups.flatMap((group) => group.products.map((product) => ({ group: group.title, product }))),
       ...matrix.withoutCost.map((product) => ({ group: 'Sin costo', product })),
     ];
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-productos',
       title: 'Reporte de productos',
       subtitle: this.state.exportContext(),
@@ -141,6 +141,6 @@ export class ReportsProductsPage {
         ] }),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

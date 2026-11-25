@@ -145,7 +145,7 @@ export class ReportsSalesPage {
       if (size === 0) return 'Igual que el período anterior';
       return `${size.toLocaleString('es-PE')} ${size === 1 ? unit[0] : unit[1]} ${metric.deltaAmount > 0 ? 'más' : 'menos'} que el período anterior`;
     };
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-ventas',
       title: 'Reporte de ventas',
       subtitle: this.state.exportContext(),
@@ -180,6 +180,6 @@ export class ReportsSalesPage {
         ] })] : []),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

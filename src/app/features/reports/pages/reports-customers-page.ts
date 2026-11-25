@@ -126,7 +126,7 @@ export class ReportsCustomersPage {
       { header: 'Compra cada (días)', value: (row: CustomerRankRow) => row.averageDaysBetween, type: 'number' as const, total: false },
       { header: 'Última compra', value: (row: CustomerRankRow) => row.lastPurchaseAt, type: 'datetime' as const },
     ];
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-clientes',
       title: 'Reporte de clientes',
       subtitle: this.state.exportContext(),
@@ -158,6 +158,6 @@ export class ReportsCustomersPage {
         excelTable({ name: 'Clientes empresa', rows: report.business, totals: true, columns: rankColumns }),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

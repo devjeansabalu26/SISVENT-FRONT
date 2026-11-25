@@ -145,7 +145,7 @@ export class AttendanceReportPanel implements OnInit {
     const names = new Map(report.rows.map((row) => [row.profileId, row.fullName]));
     const totalMinutes = report.rows.reduce((sum, row) => sum + row.workedMinutes, 0);
     try {
-      await this.excel.export({
+      const exported = await this.excel.export({
         fileName: `asistencia-${report.from}-${report.to}`,
         title: 'Reporte de asistencia',
         subtitle: reportTitle(report, store),
@@ -181,7 +181,7 @@ export class AttendanceReportPanel implements OnInit {
           ] }),
         ],
       }, format);
-      this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+      if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
     } catch {
       this.notifications.show(format === 'pdf' ? 'No se pudo generar el PDF.' : 'No se pudo generar el Excel.', 'error');
     }

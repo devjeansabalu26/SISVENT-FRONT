@@ -67,7 +67,7 @@ export class ReportsPage {
       if (size === 0) return 'Igual que el período anterior';
       return `${size.toLocaleString('es-PE')} ${size === 1 ? unit[0] : unit[1]} ${metric.deltaAmount > 0 ? 'más' : 'menos'} que el período anterior`;
     };
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-resumen',
       title: 'Reporte de resumen',
       subtitle: this.state.exportContext(),
@@ -103,6 +103,6 @@ export class ReportsPage {
         ] }),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 }

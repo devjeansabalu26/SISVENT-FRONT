@@ -109,7 +109,7 @@ export class ReportsTeamPage {
     const report = this.report();
     if (!report) return;
     const summary = report.summary;
-    await this.excel.export({
+    const exported = await this.excel.export({
       fileName: 'reporte-equipo',
       title: 'Reporte de equipo',
       subtitle: this.state.exportContext(),
@@ -141,7 +141,7 @@ export class ReportsTeamPage {
         ] }),
       ],
     }, format);
-    this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
+    if (exported) this.notifications.show(format === 'pdf' ? 'Reporte exportado a PDF.' : 'Reporte exportado a Excel.', 'success');
   }
 
   money(value: number): string {

@@ -169,7 +169,7 @@ export class AuditPage implements OnInit {
         return;
       }
 
-      await this.excel.export({
+      const exported = await this.excel.export({
         fileName: 'auditoria',
         title: 'Historial de auditoría',
         subtitle: `${collected.length} registros con los filtros aplicados`,
@@ -186,7 +186,7 @@ export class AuditPage implements OnInit {
           ] }),
         ],
       });
-      this.notifications.show(`Historial exportado (${collected.length} registros).`, 'success');
+      if (exported) this.notifications.show(`Historial exportado (${collected.length} registros).`, 'success');
     } catch {
       this.notifications.show('No se pudo exportar el historial.', 'error');
     } finally {

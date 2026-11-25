@@ -180,7 +180,7 @@ export class CustomerDetailPage implements OnInit {
       const amount = confirmed.reduce((sum, sale) => sum + sale.total, 0);
       const period = HISTORY_PERIODS.find((item) => item.id === this.historyPeriod())?.label ?? '';
       const document = `${customer.documentType ?? ''} ${customer.documentNumber ?? ''}`.trim();
-      await this.excel.export({
+      const exported = await this.excel.export({
         fileName: `compras-${customer.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
         title: `Compras de ${customer.displayName}`,
         subtitle: [document, `Compras: ${period.toLowerCase()}`].filter(Boolean).join(' · '),
@@ -230,7 +230,7 @@ export class CustomerDetailPage implements OnInit {
           ] }),
         ],
       }, format);
-      this.notifications.show(format === 'pdf' ? 'Historial de compras exportado a PDF.' : 'Historial de compras exportado a Excel.', 'success');
+      if (exported) this.notifications.show(format === 'pdf' ? 'Historial de compras exportado a PDF.' : 'Historial de compras exportado a Excel.', 'success');
     } catch {
       this.notifications.show('No se pudo exportar el historial.', 'error');
     } finally {

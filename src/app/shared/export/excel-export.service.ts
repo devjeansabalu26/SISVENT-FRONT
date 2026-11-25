@@ -90,17 +90,17 @@ export class ExcelExportService {
   private readonly access = inject(AccessControlService);
   private readonly notifications = inject(NotificationService);
 
-  async export(options: ExcelExportOptions, format: ExportFormat = 'xlsx'): Promise<void> {
+  async export(options: ExcelExportOptions, format: ExportFormat = 'xlsx'): Promise<boolean> {
     if (this.access.isDemoCompany()) {
       this.notifications.show('Modo demo: en esta cuenta de demostración no se exportan ni descargan archivos.', 'info');
-      return;
+      return false;
     }
     if (format === 'pdf') {
       const accent = this.accentColor();
       const rgb = [1, 3, 5].map((start) => parseInt(accent.slice(start + 1, start + 3), 16)) as [number, number, number];
       const blob = await renderPdf(options, { companyName: this.company.company()?.commercialName ?? '', accent: rgb });
       this.download(blob, `${options.fileName}-${new Date().toISOString().slice(0, 10)}.pdf`);
-      return;
+      return true;
     }
     const { Workbook: WorkbookClass } = await import('exceljs');
     const workbook: Workbook = new WorkbookClass();
@@ -120,6 +120,7 @@ export class ExcelExportService {
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     this.download(blob, `${options.fileName}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    return true;
   }
 
   private download(blob: Blob, fileName: string): void {
