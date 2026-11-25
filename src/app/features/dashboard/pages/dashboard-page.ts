@@ -9,7 +9,6 @@ import { StatusChip } from '../../../shared/ui/status-chip/status-chip';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { DateRangePreset, DATE_RANGE_PRESET_LABEL, resolveDateRange } from '../../../shared/utils/date-range-presets';
 import { StoreApiService } from '../../locales/data-access/store-api.service';
-import { UserApiService } from '../../users/data-access/user-api.service';
 import { DashboardApiService } from '../data-access/dashboard-api.service';
 import { deltaTrend, signedCount, signedMoney } from '../../../core/regional/delta-format';
 import { formatQuantity } from '../../../core/regional/regional-format';
@@ -33,7 +32,6 @@ import { CompactMoneyPipe, DateTimePipe, LocalTimePipe, MoneyPipe, ShortDatePipe
 export class DashboardPage implements OnInit {
   private readonly api = inject(DashboardApiService);
   private readonly storeApi = inject(StoreApiService);
-  private readonly sellerApi = inject(UserApiService);
   private readonly userContext = inject(UserContextService);
   private readonly companyContext = inject(CompanyContextService);
   private readonly access = inject(AccessControlService);
@@ -115,9 +113,10 @@ export class DashboardPage implements OnInit {
   }
 
   private loadSellers(): void {
-    this.sellerApi.list({ role: 'VENDEDOR', storeId: this.storeId() || undefined, pageSize: 100 }).subscribe((result) =>
-      this.sellers.set(result.items.map((u) => ({ id: u.id, fullName: u.fullName }))),
-    );
+    this.api.sellers(this.storeId() || undefined).subscribe({
+      next: (sellers) => this.sellers.set(sellers.map((u) => ({ id: u.id, fullName: u.fullName }))),
+      error: () => this.sellers.set([]),
+    });
   }
 
   private load(syncOnly = false): void {

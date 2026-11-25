@@ -28,6 +28,11 @@ export class DashboardApiService {
     return this.http.get<DashboardResponse>(`${this.baseUrl}/api/v1/dashboard`, { params });
   }
 
+  sellers(storeId?: string): Observable<readonly { id: string; fullName: string }[]> {
+    const params: Record<string, string> = storeId ? { storeId } : {};
+    return this.http.get<readonly { id: string; fullName: string }[]>(`${this.baseUrl}/api/v1/dashboard/sellers`, { params, context: backgroundRequest() });
+  }
+
   storesToday(): Observable<StoresTodayResponse> {
     return this.http.get<StoresTodayResponse>(`${this.baseUrl}/api/v1/dashboard/stores-today`, { context: backgroundRequest() });
   }
