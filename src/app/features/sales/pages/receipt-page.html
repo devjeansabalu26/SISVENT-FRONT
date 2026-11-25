@@ -47,7 +47,7 @@
           @for (line of sale.lines; track line.productId) {
             <tr>
               <td>{{ line.quantity }}</td>
-              <td>{{ line.productName }}</td>
+              <td>{{ line.productName }}@if (line.wholesale) { <small> (por mayor)</small> }</td>
               <td>{{ line.subtotal | money }}</td>
             </tr>
           }

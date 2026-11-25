@@ -9,6 +9,7 @@ export interface SaleDetailLine {
   readonly unitPrice: number;
   readonly discountAmount: number;
   readonly subtotal: number;
+  readonly wholesale?: boolean;
 }
 
 export interface SaleEvent {

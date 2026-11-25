@@ -16,6 +16,7 @@ import { Product } from '../../products/models/product.model';
 import { ProductApiService } from '../../products/data-access/product-api.service';
 import { SaleConfirmData, SaleConfirmDialog, SaleConfirmResult, SaleConfirmSeller } from '../components/sale-confirm-dialog/sale-confirm-dialog';
 import { APP_PERMISSIONS } from '../../../core/auth/constants/app-permission.constant';
+import { PLAN_FEATURES } from '../../../core/auth/constants/plan-features.constant';
 import { AccessControlService } from '../../../core/auth/services/access-control.service';
 import { AttendanceApiService, attendanceErrorMessage } from '../../attendance/data-access/attendance-api.service';
 import { AttendanceMarkDialog, AttendanceMarkDialogData } from '../../attendance/components/attendance-mark-dialog/attendance-mark-dialog';
@@ -35,11 +36,13 @@ import { PendingSale, SALE_CONFIRM_TIMEOUT_MS, isUncertainSaleFailure, pendingSa
 import { MoneyPipe } from '../../../shared/pipes/date-time.pipe';
 import { INVOICE_FEATURE, documentNumber, isInvoice, isValidRuc } from '../utils/sale-document';
 import { SoundService } from '../../../core/sound/sound.service';
+import { WholesalePrice, WholesalePriceApiService, wholesaleTotal } from '../../products/data-access/wholesale-price-api.service';
 
 const QUICK_METHODS: readonly string[] = ['CASH', 'YAPE', 'CARD'];
 const SCAN_KEY_GAP_MS = 45;
 const SCAN_MIN_LENGTH = 4;
 const SCAN_IDLE_MS = 120;
+const ATTENDANCE_FRESH_MS = 60_000;
 
 function isEditable(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -51,7 +54,7 @@ function isEditable(target: EventTarget | null): boolean {
   host: { '(document:keydown)': 'onGlobalKey($event)' },
   imports: [PosPaymentPanel, RouterLink, MoneyPipe],
   templateUrl: './pos-page.html',
-  styleUrl: './pos-page.scss',
+  styleUrls: ['./pos-page.scss', './pos-wholesale.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PosPage implements OnInit {
@@ -93,6 +96,9 @@ export class PosPage implements OnInit {
   readonly saving = signal(false);
   private pendingSale: PendingSale | null = null;
   private readonly posSettings = signal<PosSettings>({ autoEmailReceipt: false, emailConfigured: false });
+  private readonly wholesaleApi = inject(WholesalePriceApiService);
+  readonly wholesaleEnabled = computed(() => this.access.hasFeature(PLAN_FEATURES.wholesale));
+  readonly offers = signal<readonly WholesalePrice[]>([]);
 
   readonly stores = signal<readonly { id: string; name: string }[]>([]);
   readonly selectedStoreId = signal<string | null>(null);
@@ -111,6 +117,8 @@ export class PosPage implements OnInit {
   readonly lastAdded = signal<string | null>(null);
   readonly cartUnits = computed(() => this.cart().reduce((sum, item) => sum + item.quantity, 0));
   readonly canEditCustomer = this.access.canAccess({ permissions: [APP_PERMISSIONS.customersManage] });
+  readonly canEditWholesale = this.access.canAccess({ permissions: [APP_PERMISSIONS.wholesaleManage] });
+  readonly canEditPrice = this.access.canAccess({ permissions: [APP_PERMISSIONS.salesPriceEdit] });
   private scanBuffer = '';
   private scanLastKey = 0;
   private scanFastKeys = 0;
@@ -120,6 +128,24 @@ export class PosPage implements OnInit {
     clearTimeout(this.scanTimer);
     clearTimeout(this.lastAddedTimer);
   });
+
+  private attendanceCache: { storeId: string | null; status: AttendanceStatus; at: number } | null = null;
+
+  private prefetchAttendance(): void {
+    if (!this.usesAttendance) return;
+    const storeId = this.saleStoreId();
+    if (this.isAdmin && !storeId) return;
+    this.attendanceApi.status(storeId).subscribe({
+      next: (status) => (this.attendanceCache = { storeId, status, at: Date.now() }),
+      error: () => (this.attendanceCache = null),
+    });
+  }
+
+  private freshAttendance(): AttendanceStatus | null {
+    const cache = this.attendanceCache;
+    if (!cache || cache.storeId !== this.saleStoreId() || Date.now() - cache.at > ATTENDANCE_FRESH_MS) return null;
+    return cache.status.enabled && !cache.status.present.length ? null : cache.status;
+  }
 
   private readonly cashApi = inject(CashSessionApiService);
   readonly canUseCash = canUseCash();
@@ -150,12 +176,149 @@ export class PosPage implements OnInit {
   });
 
   readonly subtotal = computed(() =>
-    this.cart().reduce((sum, item) => sum + item.product.salePrice * item.quantity, 0),
+    this.cart().reduce((sum, item) => sum + this.lineTotal(item), 0),
   );
+
+  lineTotal(item: CartItem): number {
+    return item.wholesalePrice != null
+      ? wholesaleTotal(item.quantity, item.wholesalePrice)
+      : wholesaleTotal(item.quantity, this.retailPrice(item));
+  }
+
+  retailPrice(item: CartItem): number {
+    return item.unitPrice ?? item.product.salePrice;
+  }
+
+  setUnitPrice(id: string, input: HTMLInputElement): void {
+    if (!this.canEditPrice) return;
+    const value = Number(input.value);
+    const item = this.cart().find((candidate) => candidate.product.id === id);
+    if (!item) return;
+    if (!Number.isFinite(value) || value < 0 || input.value.trim() === '') {
+      input.value = String(this.retailPrice(item));
+      this.notifications.show('Ingresa un precio válido.', 'warning');
+      return;
+    }
+    const price = Math.round(value * 100) / 100;
+    const unitPrice = Math.abs(price - item.product.salePrice) < 0.005 ? null : price;
+    this.cart.update((items) => items.map((candidate) => (candidate.product.id === id ? { ...candidate, unitPrice } : candidate)));
+  }
+
+  offersFor(productId: string): readonly WholesalePrice[] {
+    return this.offers().filter((offer) => offer.productId === productId);
+  }
+
+  isCurrentOffer(item: CartItem, offer: WholesalePrice): boolean {
+    if (item.wholesalePrice == null || Math.abs(offer.price - item.wholesalePrice) >= 0.005) return false;
+    return this.canEditWholesale || Math.abs(offer.quantity - item.quantity) < 0.0005;
+  }
+
+  canChooseWholesale(item: CartItem): boolean {
+    return this.canEditWholesale || this.offersFor(item.product.id).length > 0;
+  }
+
+  quantityLocked(item: CartItem): boolean {
+    return item.wholesalePrice != null && !this.canEditWholesale;
+  }
+
+  loadOffers(): void {
+    if (!this.wholesaleEnabled()) return;
+    this.wholesaleApi.list().subscribe({ next: (offers) => this.offers.set(offers), error: () => undefined });
+  }
+
+  setMode(id: string, wholesale: boolean): void {
+    this.cart.update((items) =>
+      items.map((item) => {
+        if (item.product.id !== id) return item;
+        if (!wholesale) return { ...item, wholesalePrice: null };
+        if (!this.canEditWholesale && !this.offersFor(id).length) return item;
+        const offer = this.offersFor(id).find((candidate) => candidate.quantity <= item.product.totalStock);
+        return offer
+          ? { ...item, quantity: offer.quantity, wholesalePrice: offer.price }
+          : this.canEditWholesale
+            ? { ...item, wholesalePrice: item.product.salePrice }
+            : item;
+      }),
+    );
+  }
+
+  applyOffer(id: string, offer: WholesalePrice): void {
+    const item = this.cart().find((candidate) => candidate.product.id === id);
+    if (item && offer.quantity > item.product.totalStock) {
+      this.notifications.show(`Solo hay ${item.product.totalStock} u. en stock para esta oferta.`, 'warning');
+      return;
+    }
+    this.cart.update((items) =>
+      items.map((candidate) =>
+        candidate.product.id === id ? { ...candidate, quantity: offer.quantity, wholesalePrice: offer.price } : candidate,
+      ),
+    );
+  }
+
+  setWholesaleQuantity(id: string, input: HTMLInputElement): void {
+    if (!this.canEditWholesale) return;
+    const value = Number(input.value);
+    const item = this.cart().find((candidate) => candidate.product.id === id);
+    if (!item) return;
+    if (!Number.isFinite(value) || value <= 0) {
+      input.value = String(item.quantity);
+      return;
+    }
+    const quantity = Math.min(Math.round(value * 1000) / 1000, item.product.totalStock);
+    if (quantity !== value) {
+      input.value = String(quantity);
+      this.notifications.show(`Solo hay ${item.product.totalStock} u. en stock.`, 'warning');
+    }
+    this.cart.update((items) => items.map((candidate) => (candidate.product.id === id ? { ...candidate, quantity } : candidate)));
+  }
+
+  setWholesalePrice(id: string, input: HTMLInputElement): void {
+    if (!this.canEditWholesale) return;
+    const value = Number(input.value);
+    const item = this.cart().find((candidate) => candidate.product.id === id);
+    if (!item) return;
+    if (!Number.isFinite(value) || value <= 0) {
+      input.value = String(item.wholesalePrice ?? '');
+      this.notifications.show('El precio por mayor debe ser mayor a cero.', 'warning');
+      return;
+    }
+    const price = Math.round(value * 100) / 100;
+    this.cart.update((items) => items.map((candidate) => (candidate.product.id === id ? { ...candidate, wholesalePrice: price } : candidate)));
+  }
+
+  deleteOffer(offer: WholesalePrice): void {
+    if (!this.canEditWholesale) return;
+    this.wholesaleApi.remove(offer.id).subscribe({
+      next: () => {
+        this.offers.update((offers) => offers.filter((candidate) => candidate.id !== offer.id));
+        this.notifications.show('Oferta por mayor eliminada del producto.', 'success');
+      },
+      error: () => this.notifications.show('No se pudo eliminar la oferta por mayor.', 'error'),
+    });
+  }
+
+  private saveNewOffers(items: readonly CartItem[]): void {
+    if (!this.canEditWholesale) return;
+    const fresh = items.filter(
+      (item) =>
+        item.wholesalePrice != null &&
+        !this.offersFor(item.product.id).some((offer) => Math.abs(offer.price - item.wholesalePrice!) < 0.005),
+    );
+    for (const item of fresh) {
+      this.wholesaleApi.add({ productId: item.product.id, quantity: item.quantity, price: item.wholesalePrice! }).subscribe({
+        next: (offer) => this.offers.update((offers) => (offers.some((candidate) => candidate.id === offer.id) ? offers : [...offers, offer])),
+        error: () => undefined,
+      });
+    }
+  }
 
   ngOnInit(): void {
     this.loadPaymentMethods();
-    this.posApi.settings().subscribe({ next: (settings) => this.posSettings.set(settings), error: () => undefined });
+    this.posApi.settings().subscribe({
+      next: (settings) => this.posSettings.set(settings),
+      error: () => undefined,
+    });
+    this.loadOffers();
     const clientId = this.route.snapshot.queryParamMap.get('clientId');
     if (clientId) {
       this.customerApi.get(clientId).subscribe({
@@ -201,15 +364,18 @@ export class PosPage implements OnInit {
     this.showPaymentErrors.set(false);
   }
 
-  loadCatalog(): void {
+  loadCatalog(silent = false): void {
     const requestId = ++this.catalogRequestId;
     const storeId = this.isAdmin ? this.selectedStoreId() : (this.userContext.user()?.branchId ?? null);
-    this.catalogError.set(false);
+    if (!silent) this.catalogError.set(false);
     if (this.isAdmin && !storeId) {
       this.catalog.set([]);
       return;
     }
-    this.loadingCatalog.set(true);
+    if (!silent) {
+      this.loadingCatalog.set(true);
+      this.prefetchAttendance();
+    }
     const collected: Product[] = [];
     const loadPage = (pageNumber: number): void => {
       this.productApi.list({ pageNumber, pageSize: 100, isActive: true, storeId }).subscribe({
@@ -228,6 +394,7 @@ export class PosPage implements OnInit {
         error: () => {
           if (requestId !== this.catalogRequestId) return;
           this.loadingCatalog.set(false);
+          if (silent) return;
           this.catalogError.set(true);
           this.notifications.show('No se pudieron cargar los productos del local.', 'error');
         },
@@ -368,6 +535,11 @@ export class PosPage implements OnInit {
   }
 
   add(product: Product): void {
+    const current = this.cart().find((item) => item.product.id === product.id);
+    if (current && this.quantityLocked(current)) {
+      this.notifications.show('Este producto está con precio por mayor: elige otra oferta o cámbialo a "Por menor".', 'info');
+      return;
+    }
     this.cart.update((items) => {
       const found = items.find((item) => item.product.id === product.id);
       return found
@@ -420,10 +592,17 @@ export class PosPage implements OnInit {
       this.openConfirm(total, null);
       return;
     }
+    const cached = this.freshAttendance();
+    if (cached) {
+      this.openConfirm(total, cached);
+      this.prefetchAttendance();
+      return;
+    }
     this.saving.set(true);
     this.attendanceApi.status(this.saleStoreId()).subscribe({
       next: (status) => {
         this.saving.set(false);
+        this.attendanceCache = { storeId: this.saleStoreId(), status, at: Date.now() };
         if (status.enabled && !status.present.length) this.askAttendance(status, total);
         else this.openConfirm(total, status);
       },
@@ -475,7 +654,16 @@ export class PosPage implements OnInit {
             : customer
               ? `${customer.displayName}${customer.documentNumber ? ` (${customer.documentType ?? 'Doc.'} ${customer.documentNumber})` : ''}`
               : 'Cliente general',
-          lines: this.cart().map((item) => ({ name: item.product.name, quantity: item.quantity, unitPrice: item.product.salePrice })),
+          lines: this.cart().map((item) =>
+            item.wholesalePrice != null
+              ? {
+                  name: `${item.product.name} (por mayor)`,
+                  quantity: item.quantity,
+                  unitPrice: item.wholesalePrice,
+                  total: wholesaleTotal(item.quantity, item.wholesalePrice),
+                }
+              : { name: item.product.name, quantity: item.quantity, unitPrice: this.retailPrice(item), total: this.lineTotal(item) },
+          ),
           discount: 0,
           paymentMethod: this.paymentLines().map((line) => this.methodName(line.methodCode)).join(' + '),
           paymentDetails: this.previewPayments(total),
@@ -505,6 +693,15 @@ export class PosPage implements OnInit {
     });
   }
 
+  private applySoldStock(items: readonly CartItem[]): void {
+    const sold = new Map(items.map((item) => [item.product.id, item.quantity]));
+    this.catalog.update((products) =>
+      products
+        .map((product) => (sold.has(product.id) ? { ...product, totalStock: product.totalStock - sold.get(product.id)! } : product))
+        .filter((product) => product.totalStock > 0),
+    );
+  }
+
   private autoEmailReceipt(sale: SaleDetail): string | null {
     const settings = this.posSettings();
     const email = sale.clientEmail?.trim();
@@ -529,7 +726,13 @@ export class PosPage implements OnInit {
       paymentMethod: payments[0].method,
       discountTotal: 0,
       notes: null,
-      lines: this.cart().map((item) => ({ productId: item.product.id, quantity: item.quantity, discountAmount: 0 })),
+      lines: this.cart().map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+        discountAmount: 0,
+        wholesalePrice: item.wholesalePrice ?? null,
+        unitPrice: item.wholesalePrice == null ? (item.unitPrice ?? null) : null,
+      })),
       payments,
       invoice: invoiceCustomer
         ? { ruc: invoiceCustomer.documentNumber!, legalName: invoiceCustomer.displayName, address: null }
@@ -545,6 +748,10 @@ export class PosPage implements OnInit {
         next: (sale) => {
           this.saving.set(false);
           this.pendingSale = null;
+          if (this.wholesaleEnabled()) this.saveNewOffers(this.cart());
+          this.applySoldStock(this.cart());
+          this.loadCatalog(true);
+          this.prefetchAttendance();
           this.sound.play('sale');
           const autoEmailedTo = this.autoEmailReceipt(sale);
           this.dialog
@@ -564,7 +771,6 @@ export class PosPage implements OnInit {
             .subscribe((action) => {
               this.cart.set([]);
               this.selectedCustomer.set(null);
-              this.loadCatalog();
               this.selectPayment(this.quickMethods()[0]?.code ?? '');
               this.focusScan();
               if (action === 'print') void this.router.navigate(['/app/sales', sale.id, 'comprobante']);

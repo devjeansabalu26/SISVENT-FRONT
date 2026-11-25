@@ -22,10 +22,11 @@ import { ProductApiService } from '../data-access/product-api.service';
 import { UnitApiService, UnitOption } from '../data-access/unit-api.service';
 import { ProductDetail, ProductStoreStock } from '../models/product.model';
 import { RegionalPipe } from '../../../shared/pipes/date-time.pipe';
+import { ProductWholesaleOffers } from '../components/product-wholesale-offers/product-wholesale-offers';
 
 @Component({
   selector: 'app-product-form-page',
-  imports: [ReactiveFormsModule, RouterLink, PageHeader, RegionalPipe],
+  imports: [ReactiveFormsModule, RouterLink, PageHeader, RegionalPipe, ProductWholesaleOffers],
   templateUrl: './product-form-page.html',
   styleUrls: ['../../../shared/forms/form-page.scss', './product-form-page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,7 @@ export class ProductFormPage implements OnInit {
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
 
   readonly isEdit = !!this.id;
+  readonly productId = this.id;
   readonly loading = signal(this.isEdit);
   readonly saving = signal(false);
 

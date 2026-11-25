@@ -10,6 +10,8 @@ export interface SessionModule {
 export const MODULE_PERMISSIONS: Readonly<Record<string, { readonly view: readonly AppPermission[]; readonly manage: readonly AppPermission[] }>> = {
   DASHBOARD: { view: [APP_PERMISSIONS.dashboardView], manage: [] },
   POS: { view: [APP_PERMISSIONS.salesCreate], manage: [] },
+  WHOLESALE_PRICES: { view: [APP_PERMISSIONS.wholesaleManage], manage: [] },
+  SALE_PRICE_EDIT: { view: [APP_PERMISSIONS.salesPriceEdit], manage: [] },
   SALES: { view: [APP_PERMISSIONS.salesView], manage: [APP_PERMISSIONS.salesManage] },
   CLIENTS: { view: [APP_PERMISSIONS.customersView], manage: [APP_PERMISSIONS.customersManage] },
   ATTENDANCE: { view: [APP_PERMISSIONS.attendanceView], manage: [APP_PERMISSIONS.attendanceManage] },

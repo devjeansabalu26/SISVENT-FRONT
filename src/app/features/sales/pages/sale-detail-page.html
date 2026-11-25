@@ -140,7 +140,7 @@
             <span class="qty" [attr.aria-label]="line.quantity + ' unidades'">{{ line.quantity }}×</span>
             <div class="items__info">
               <strong>{{ line.productName }}</strong>
-              <small>{{ line.unitPrice | money }} c/u · {{ line.sku }}</small>
+              <small>@if (line.wholesale) {Precio por mayor · }{{ line.unitPrice | money }} c/u · {{ line.sku }}</small>
               @if (line.discountAmount > 0) {
                 <small class="discount"><span class="material-icons" aria-hidden="true">sell</span>Descuento {{ line.discountAmount | money }}</small>
               }

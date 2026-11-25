@@ -15,6 +15,8 @@ export interface PosSaleLineInput {
   readonly productId: string;
   readonly quantity: number;
   readonly discountAmount: number;
+  readonly wholesalePrice?: number | null;
+  readonly unitPrice?: number | null;
 }
 
 export interface PosSaleRequest {

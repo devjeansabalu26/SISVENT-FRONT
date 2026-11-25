@@ -8,6 +8,7 @@ export interface SaleConfirmLine {
   readonly name: string;
   readonly quantity: number;
   readonly unitPrice: number;
+  readonly total?: number;
 }
 
 export interface SaleConfirmData {
@@ -61,7 +62,7 @@ export interface SaleConfirmResult {
                 <td>{{ line.name }}</td>
                 <td>{{ line.quantity }}</td>
                 <td>{{ soles(line.unitPrice) }}</td>
-                <td>{{ soles(line.unitPrice * line.quantity) }}</td>
+                <td>{{ soles(line.total ?? line.unitPrice * line.quantity) }}</td>
               </tr>
             }
           </tbody>
@@ -139,7 +140,7 @@ export class SaleConfirmDialog {
   readonly data = inject<SaleConfirmData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<SaleConfirmDialog, SaleConfirmResult | false>);
   readonly soles = formatAmount;
-  readonly subtotal = this.data.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
+  readonly subtotal = this.data.lines.reduce((sum, line) => sum + (line.total ?? line.unitPrice * line.quantity), 0);
 
   private readonly present = this.data.seller.attendanceEnabled ? this.data.seller.present : [];
   readonly selectedId = signal<string | null>(

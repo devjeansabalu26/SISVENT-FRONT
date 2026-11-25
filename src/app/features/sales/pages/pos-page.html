@@ -64,19 +64,63 @@
             <div class="row" [class.row--new]="lastAdded() === item.product.id">
               <div class="row__name">
                 <strong>{{ item.product.name }}</strong>
-                <small>{{ item.product.sku }} · {{ item.product.salePrice | money }} c/u</small>
+                <small>{{ item.product.sku }} · {{ (item.wholesalePrice ?? retailPrice(item)) | money }} c/u</small>
                 <small class="stk" [class.stk--max]="item.quantity >= item.product.totalStock">
                   <span class="material-icons" aria-hidden="true">inventory_2</span>Stock: {{ item.product.totalStock }} u.
                   · {{ item.quantity >= item.product.totalStock ? 'llevas todo el stock' : 'quedan ' + (item.product.totalStock - item.quantity) }}
                 </small>
               </div>
               <div class="quantity">
-                <button type="button" (click)="change(item.product.id, -1)" [disabled]="item.quantity <= 1" aria-label="Quitar una unidad">−</button>
+                <button type="button" (click)="change(item.product.id, -1)" [disabled]="item.quantity <= 1 || quantityLocked(item)" aria-label="Quitar una unidad">−</button>
                 <b>{{ item.quantity }}</b>
-                <button type="button" (click)="change(item.product.id, 1)" [disabled]="item.quantity >= item.product.totalStock" aria-label="Agregar una unidad">+</button>
+                <button type="button" (click)="change(item.product.id, 1)" [disabled]="item.quantity >= item.product.totalStock || quantityLocked(item)" aria-label="Agregar una unidad">+</button>
               </div>
-              <b class="row__total">{{ (item.product.salePrice * item.quantity) | money }}</b>
+              <b class="row__total">{{ lineTotal(item) | money }}</b>
               <button type="button" class="trash" (click)="remove(item.product.id)" aria-label="Quitar producto"><span class="material-icons">delete_outline</span></button>
+              @if (canEditPrice && item.wholesalePrice == null) {
+                <label class="price-edit">
+                  <span>Precio c/u solo para esta venta</span>
+                  <input #unit type="number" min="0" step="0.01" inputmode="decimal" [value]="retailPrice(item)" (change)="setUnitPrice(item.product.id, unit)" />
+                  @if (item.unitPrice != null) {
+                    <small>Precio del producto: {{ item.product.salePrice | money }} (no cambia)</small>
+                  }
+                </label>
+              }
+              @if (wholesaleEnabled() && canChooseWholesale(item)) {
+                <div class="wholesale">
+                  <div class="wholesale__mode" role="group" aria-label="Tipo de precio">
+                    <button type="button" [class.active]="item.wholesalePrice == null" (click)="setMode(item.product.id, false)">Por menor</button>
+                    <button type="button" [class.active]="item.wholesalePrice != null" (click)="setMode(item.product.id, true)">Por mayor</button>
+                  </div>
+                  @if (item.wholesalePrice != null) {
+                    @if (offersFor(item.product.id).length) {
+                      <div class="wholesale__offers">
+                        @for (offer of offersFor(item.product.id); track offer.id) {
+                          <span class="offer" [class.offer--on]="isCurrentOffer(item, offer)">
+                            <button type="button" (click)="applyOffer(item.product.id, offer)">{{ offer.quantity }} u. a {{ offer.price | money }} c/u</button>
+                            @if (canEditWholesale) {
+                              <button type="button" class="offer__del" (click)="deleteOffer(offer)" [attr.aria-label]="'Eliminar la oferta de ' + offer.quantity + ' unidades'" title="Eliminar esta oferta del producto"><span class="material-icons">close</span></button>
+                            }
+                          </span>
+                        }
+                      </div>
+                    }
+                    @if (canEditWholesale) {
+                    <div class="wholesale__fields">
+                      <label>Cantidad
+                        <input #qty type="number" min="0.001" step="any" inputmode="decimal" [value]="item.quantity" (change)="setWholesaleQuantity(item.product.id, qty)" />
+                      </label>
+                      <label>Precio por mayor (c/u)
+                        <input #price type="number" min="0.01" step="0.01" inputmode="decimal" [value]="item.wholesalePrice" (change)="setWholesalePrice(item.product.id, price)" />
+                      </label>
+                      <small><strong>Total: {{ lineTotal(item) | money }}</strong> · si es un precio nuevo, se guarda como oferta del producto al confirmar la venta</small>
+                    </div>
+                    } @else {
+                      <small class="wholesale__note"><strong>Total: {{ lineTotal(item) | money }}</strong> · elige una de las ofertas por mayor del producto</small>
+                    }
+                  }
+                </div>
+              }
             </div>
           }
         </div>
